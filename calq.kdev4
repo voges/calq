@@ -1,0 +1,4 @@
+[Project]
+Name=calq
+Manager=KDevCMakeManager
+VersionControl=kdevgit
