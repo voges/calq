@@ -4,4 +4,4 @@
 *.so
 ~$i* # temporary MS office files
 .directory # created by dolphin file manager
-libosro-1.1_install
+build/*
