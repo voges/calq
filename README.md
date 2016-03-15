@@ -1,35 +1,24 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+[Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### What is this repository for? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* Implementation of Coverage-Adaptive Lossy Quality score compression (CALQ)
+* Current version: 1.0.0
 
 ### Build ###
 
+<code>
 mkdir build
 cmake ..
 make
+</code>
 
 ### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
+* Please write code conforming to the used coding style
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+Jan Voges <voges@tnt.uni-hannover.de
