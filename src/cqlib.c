@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "cqlib.h"
 #include <stdarg.h>
 
@@ -24,21 +26,31 @@ void cq_error(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-void * cq_malloc(const size_t n)
+void * cq_malloc(const size_t size)
 {
-    void *p = malloc(n);
-    if (p == NULL) {
-        fprintf(stderr, "Could not allocate %zu bytes\n", n);
+    void *ptr = malloc(size);
+    if (ptr == NULL) {
+        fprintf(stderr, "Could not allocate %zu bytes\n", size);
         exit(EXIT_FAILURE);
     }
-    return p;
+    return ptr;
 }
 
-void * cq_realloc(void *ptr, const size_t n)
+void * cq_calloc(const size_t nmemb, const size_t size)
 {
-    void *p = realloc(ptr, n);
+    void *ptr = calloc(nmemb, size);
+    if (ptr == NULL) {
+        fprintf(stderr, "Could not allocate %zu bytes\n", nmemb*size);
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
+}
+
+void * cq_realloc(void *ptr, const size_t size)
+{
+    void *p = realloc(ptr, size);
     if (p == NULL) {
-        fprintf(stderr, "Could not allocate %zu bytes\n", n);
+        fprintf(stderr, "Could not allocate %zu bytes\n", size);
         exit(EXIT_FAILURE);
     }
     return p;

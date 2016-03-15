@@ -8,20 +8,25 @@
 #include <string.h>
 #include <unistd.h>
 
+typedef enum {
+    CQ_MODE_COMPRESS,
+    CQ_MODE_DECOMPRESS,
+    CQ_MODE_INFO
+} cq_mode_t;
+
 // global variables
 bool cq_stats = false;
+cq_mode_t cq_mode = CQ_MODE_COMPRESS;
 
 // local options/flags from getopt
 static const char *opt_fname_in = NULL;
 static const char *opt_fname_out = NULL;
 static size_t opt_blocksz = 0;
 static bool opt_force = false;
-static bool opt_stats = false;
-static bool opt_decompress = false;
 
 static void print_version(void)
 {
-    printf("calq %d.%d\n", CQ_VERSION_MAJOR, CQ_VERSION_MINOR);
+    printf("calq %d.%d.%d\n", CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
 }
 
 static void print_copyright(void)
@@ -36,16 +41,17 @@ static void print_help(void)
 {
     printf("\n");
     printf("Usage:\n");
-    printf("  Compress  : calq [-o FILE] [-b SIZE] [-fs] file.sam\n");
-    printf("  Decompress: calq -d [-o FILE] [-fs] file.cq\n");
+    printf("  Compress  : calq [-o FILE] [-b SIZE] [-f] file.sam\n");
+    printf("  Decompress: calq -d [-o FILE] [-f] file.cq\n");
+    printf("  Info      : calq -i file.cq\n");
     printf("\n");
     printf("Options:\n");
     printf("  -b  --blocksz=SIZE Specify block SIZE\n");
     printf("  -d  --decompress   Decompress\n");
     printf("  -f, --force        Force overwriting of output file(s)\n");
     printf("  -h, --help         Print this help\n");
+    printf("  -i, --info         Print information about CQ file\n");
     printf("  -o, --output=FILE  Specify output FILE\n");
-    printf("  -s, --stats        Print (de-)compression statistics\n");
     printf("  -v, --version      Display program version\n");
     printf("\n");
 }
@@ -59,13 +65,13 @@ static void parse_options(int argc, char *argv[])
         { "decompress", no_argument,       NULL, 'd'},
         { "force",      no_argument,       NULL, 'f'},
         { "help",       no_argument,       NULL, 'h'},
+        { "info",       no_argument,       NULL, 'i'},
         { "output",     required_argument, NULL, 'o'},
-        { "stats",      no_argument,       NULL, 's'},
         { "version",    no_argument,       NULL, 'v'},
         { NULL,         0,                 NULL,  0 }
     };
 
-    const char *short_options = "b:dfhio:sv";
+    const char *short_options = "b:dfhio:v";
 
     do {
         int opt_idx = 0;
@@ -75,10 +81,13 @@ static void parse_options(int argc, char *argv[])
             break;
         case 'b':
             if (atoi(optarg) <= 0) cq_error("Block size must be positive\n");
-            opt_blocksz = atoi(optarg);
+            else opt_blocksz = (size_t)atoi(optarg);
             break;
         case 'd':
-            opt_decompress = true;
+            if (cq_mode == CQ_MODE_INFO)
+                cq_error("Cannot decompress and get info at once\n");
+            else
+                cq_mode = CQ_MODE_DECOMPRESS;
             break;
         case 'f':
             opt_force = true;
@@ -89,11 +98,14 @@ static void parse_options(int argc, char *argv[])
             print_help();
             exit(EXIT_SUCCESS);
             break;
+        case 'i':
+            if (cq_mode == CQ_MODE_DECOMPRESS)
+                cq_error("Cannot decompress and get info at once\n");
+            else
+                cq_mode = CQ_MODE_INFO;
+            break;
         case 'o':
             opt_fname_out = optarg;
-            break;
-        case 's':
-            cq_stats = true;
             break;
         case 'v':
             print_version();
@@ -146,17 +158,20 @@ int main(int argc, char *argv[])
     // parse command line options and check them for sanity
     parse_options(argc, argv);
 
-    if (opt_decompress) {
-        // option -b is illegal in decompression mode
-        if (opt_blocksz) {
-            cq_error("Illegal option(s) detected\n");
-        }
-    } else {
+    if (cq_mode == CQ_MODE_COMPRESS) {
         // all possible options are legal in compression mode
         if (!opt_blocksz) {
             cq_log("Using default block size 10,000\n");
             opt_blocksz = 10000; // Default value
         }
+    } else if (cq_mode == CQ_MODE_DECOMPRESS){
+        // option -b is illegal in decompression mode
+        if (opt_blocksz)
+            cq_error("Illegal option(s) detected\n");
+    } else { // CQ_MODE_INFO
+        // options -bf are illegal in info mode
+        if (opt_blocksz || opt_force)
+            cq_error("Illegal option(s) detected\n");
     }
 
     // check if input file is accessible
@@ -164,7 +179,38 @@ int main(int argc, char *argv[])
     if (access(fname_in->s, F_OK | R_OK))
         cq_error("Cannot access input file: %s\n", fname_in->s);
 
-    if (opt_decompress) {
+    if (cq_mode == CQ_MODE_COMPRESS) {
+        // check correct file name extension of input file
+        if (strcmp(fname_extension(fname_in->s), "sam"))
+            cq_error("Input file extension must be 'sam'\n");
+
+        // create correct output file name
+        if (opt_fname_out == NULL) {
+            str_copy_str(fname_out, fname_in);
+            str_append_cstr(fname_out, ".cq");
+        } else {
+            str_copy_cstr(fname_out, opt_fname_out);
+        }
+
+        // check if output file is accessible
+        if (!access(fname_out->s, F_OK | W_OK) && opt_force == false) {
+            cq_log("Output file already exists: %s\n", fname_out->s);
+            cq_log("Do you want to overwrite %s? ", fname_out->s);
+            if (yesno()) ; // proceed
+            else exit(EXIT_SUCCESS);
+        }
+
+        // invoke compressor
+        FILE *fp_in = cq_fopen(fname_in->s, "r");
+        FILE *fp_out = cq_fopen(fname_out->s, "wb");
+        cq_log("Compressing: %s\n", fname_in->s);
+        cqcodec_t *cqcodec = cqcodec_new(fp_in, fp_out, opt_blocksz);
+        cqcodec_encode(cqcodec);
+        cqcodec_free(cqcodec);
+        cq_log("Finished: %s\n", fname_out->s);
+        cq_fclose(fp_in);
+        cq_fclose(fp_out);
+    } else if (cq_mode == CQ_MODE_DECOMPRESS) {
         // check correct file name extension of input file
         if (strcmp(fname_extension(fname_in->s), "cq"))
             cq_error("Input file extension must be 'cq'\n");
@@ -197,42 +243,23 @@ int main(int argc, char *argv[])
         cq_log("Finished: %s\n", fname_out->s);
         cq_fclose(fp_in);
         cq_fclose(fp_out);
-    } else {
+    } else { // CQ_MODE_INFO
         // check correct file name extension of input file
-        if (strcmp(fname_extension(fname_in->s), "sam"))
-            cq_error("Input file extension must be 'sam'\n");
-
-        // create correct output file name
-        if (opt_fname_out == NULL) {
-            str_copy_str(fname_out, fname_in);
-            str_append_cstr(fname_out, ".cq");
-        } else {
-            str_copy_cstr(fname_out, opt_fname_out);
-        }
-
-        // check if output file is accessible
-        if (!access(fname_out->s, F_OK | W_OK) && opt_force == false) {
-            cq_log("Output file already exists: %s\n", fname_out->s);
-            cq_log("Do you want to overwrite %s? ", fname_out->s);
-            if (yesno()) ; // proceed
-            else exit(EXIT_SUCCESS);
-        }
-
-        // invoke compressor
-        FILE *fp_in = cq_fopen(fname_in->s, "r");
-        FILE *fp_out = cq_fopen(fname_out->s, "wb");
-        cq_log("Compressing: %s\n", fname_in->s);
-        cqcodec_t *cqcodec = cqcodec_new(fp_in, fp_out, opt_blocksz);
-        cqcodec_encode(cqcodec);
+        if (strcmp(fname_extension(fname_in->s), "cq"))
+            cq_error("Input file extension must be 'cq'\n");
+        
+        // invoke information tool
+        FILE *fp_in = cq_fopen(fname_in->s, "rb");
+        cq_log("Reading information: %s\n", fname_in->s);
+        cqcodec_t *cqcodec = cqcodec_new(fp_in, NULL, 0);
+        cqcodec_info(cqcodec);
         cqcodec_free(cqcodec);
-        cq_log("Finished: %s\n", fname_out->s);
         cq_fclose(fp_in);
-        cq_fclose(fp_out);
     }
 
     str_free(fname_in);
     str_free(fname_out);
-    
+
     return EXIT_SUCCESS;
 }
 

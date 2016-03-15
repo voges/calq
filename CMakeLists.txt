@@ -26,8 +26,7 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunreachable-code")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wconversion")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wundef")
 
-
-add_definitions("-D DBG") # comment to disable debug output
+add_definitions("-DDBG") # comment to disable debug output
 
 include_directories(${PROJ_INCLUDES})
 add_executable(${PROJ_NAME} ${PROJ_SOURCES})

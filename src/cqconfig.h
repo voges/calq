@@ -3,6 +3,7 @@
 
 #define CQ_VERSION_MAJOR 1
 #define CQ_VERSION_MINOR 0
+#define CQ_VERSION_PATCH 0
 
 #endif // CQ_CQCONFIG_H
 

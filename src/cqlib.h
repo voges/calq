@@ -8,8 +8,9 @@
 void cq_log(const char *fmt, ...);
 void cq_error(const char *fmt, ...);
 
-void * cq_malloc(const size_t n);
-void * cq_realloc(void *ptr, const size_t n);
+void * cq_malloc(const size_t size);
+void * cq_calloc(const size_t nmemb, const size_t size);
+void * cq_realloc(void *ptr, const size_t size);
 void cq_free(void *ptr);
 
 FILE * cq_fopen(const char *fname, const char *mode);

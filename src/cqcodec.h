@@ -17,6 +17,7 @@ cqcodec_t * cqcodec_new(FILE *ifp, FILE *ofp, size_t blocksz);
 void cqcodec_free(cqcodec_t *cqcodec);
 void cqcodec_encode(cqcodec_t *cqcodec);
 void cqcodec_decode(cqcodec_t *cqcodec);
+void cqcodec_info(cqcodec_t *cqcodec);
 
 #endif // CQ_CQCODEC_H
 

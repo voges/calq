@@ -2,7 +2,7 @@
 #include "cqlib.h"
 #include <string.h>
 
-static void samparser_init(samparser_t *samparser, FILE *fp)
+static void init(samparser_t *samparser, FILE *fp)
 {
     samparser->fp = fp;
 }
@@ -11,7 +11,7 @@ samparser_t * samparser_new(FILE *fp)
 {
     samparser_t *samparser = (samparser_t *)cq_malloc(sizeof(samparser_t));
     samparser->head = str_new();
-    samparser_init(samparser, fp);
+    init(samparser, fp);
     return samparser;
 }
 
@@ -42,7 +42,7 @@ void samparser_head(samparser_t *samparser)
     }
 }
 
-static void samparser_parse(samparser_t *samparser)
+static void parse(samparser_t *samparser)
 {
     size_t l = strlen(samparser->curr.line) - 1;
 
@@ -82,7 +82,7 @@ bool samparser_next(samparser_t *samparser)
         if (*(samparser->curr.line) == '@')
             cq_error("Tried to read SAM record but found header line\n");
         else
-            samparser_parse(samparser);
+            parse(samparser);
     } else {
         return false;
     }
