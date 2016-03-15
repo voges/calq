@@ -4,7 +4,7 @@
 
 ### What is this repository for? ###
 
-* Implementation of Coverage-Adaptive Lossy Quality score compression (CALQ)
+* Implementation of "Coverage-Adaptive Lossy Compression of Genome Sequencing Quality Values" (CALQ)
 * Current version: 1.0.0
 
 ### Build ###
