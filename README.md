@@ -19,4 +19,4 @@
 
 ### Who do I talk to? ###
 
-Jan Voges <voges@tnt.uni-hannover.de
+Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
