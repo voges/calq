@@ -9,11 +9,9 @@
 
 ### Build ###
 
-<code>
-mkdir build
-cmake ..
-make
-</code>
+    mkdir build
+    cmake ..
+    make
 
 ### Contribution guidelines ###
 
