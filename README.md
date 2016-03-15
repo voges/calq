@@ -15,7 +15,7 @@
 
 ### Contribution guidelines ###
 
-* Please write code conforming to the used coding style
+Please write code conforming to the used coding style
 
 ### Who do I talk to? ###
 
