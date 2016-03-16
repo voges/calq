@@ -26,7 +26,8 @@ static bool opt_force = false;
 
 static void print_version(void)
 {
-    printf("calq %d.%d.%d\n", CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
+    printf("calq %d.%d.%d\n", 
+           CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
 }
 
 static void print_copyright(void)
@@ -192,7 +193,8 @@ int main(int argc, char *argv[])
             str_copy_cstr(fname_out, opt_fname_out);
         }
 
-        // check if output file is accessible
+        // check if output file is already there and if the user wants to
+        // overwrite it in this case
         if (!access(fname_out->s, F_OK | W_OK) && opt_force == false) {
             cq_log("Output file already exists: %s\n", fname_out->s);
             cq_log("Do you want to overwrite %s? ", fname_out->s);
@@ -247,7 +249,7 @@ int main(int argc, char *argv[])
         // check correct file name extension of input file
         if (strcmp(fname_extension(fname_in->s), "cq"))
             cq_error("Input file extension must be 'cq'\n");
-        
+
         // invoke information tool
         FILE *fp_in = cq_fopen(fname_in->s, "rb");
         cq_log("Reading information: %s\n", fname_in->s);

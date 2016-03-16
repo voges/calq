@@ -112,9 +112,9 @@ bool qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char
         if (pos_max_new > qualcodec->pos_max) {
             size_t pos_max_old = qualcodec->pos_max;
             qualcodec->pos_max = pos_max_new;
-            qualcodec->depths_len = qualcodec->pos_max-qualcodec->pos_min+1;
+            qualcodec->depths_len = qualcodec->pos_max - qualcodec->pos_min+1;
             qualcodec->depths = (size_t *)cq_realloc(qualcodec->depths, sizeof(size_t) * qualcodec->depths_len);
-            memset(&(qualcodec->depths[pos_max_old - qualcodec->pos_min + 1]), 0x00, sizeof((qualcodec->depths)) * (pos_max_new-pos_max_old));
+            memset(&(qualcodec->depths[pos_max_old - qualcodec->pos_min + 1]), 0x00, sizeof((qualcodec->depths)) * (pos_max_new - pos_max_old));
         }
     }
 
