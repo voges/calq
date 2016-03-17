@@ -1,4 +1,4 @@
-#include "qualcodec.h"
+#include "qualcodec/qualcodec.h"
 #include "common.h"
 #include "cqlib.h"
 #include <ctype.h>

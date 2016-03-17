@@ -1,4 +1,4 @@
-#include "predictor.h"
+#include "qualcodec/predictor.h"
 #include "cqlib.h"
 #include <string.h>
 

@@ -2,7 +2,7 @@
 #define CQ_CQCODEC_H
 
 #include "samparser.h"
-#include "qualcodec.h"
+#include "qualcodec/qualcodec.h"
 #include <stdio.h>
 
 typedef struct cqcodec_t_ {

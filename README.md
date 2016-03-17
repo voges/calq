@@ -15,7 +15,8 @@
 
 ### Contribution guidelines ###
 
-Please write code conforming to the used coding style
+* Please write code conforming to the used coding style
+* #include with full path to src/
 
 ### Who do I talk to? ###
 
