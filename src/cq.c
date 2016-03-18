@@ -24,22 +24,26 @@ static const char *opt_fname_out = NULL;
 static size_t opt_blocksz = 0;
 static bool opt_force = false;
 
-static void print_version(void)
-{
-    printf("calq %d.%d.%d\n", 
-           CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
-}
-
 static void print_copyright(void)
 {
-    printf("Copyright (c) 2016\n");
+    printf("Copyright (c) 2015-%d\n", CQ_BUILD_YEAR);
     printf("Leibniz Universitaet Hannover, Institut fuer "
            "Informationsverarbeitung (TNT)\n");
     printf("Contact: Jan Voges <voges@tnt.uni-hannover.de>\n");
 }
 
+static void print_version(void)
+{
+    printf("calq %d.%d.%d\n", CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
+    printf("Build time: %s\n", CQ_UTCTIMESTAMP);
+    printf("Git revision: %s\n", CQ_GITREVISION_LONG);
+    printf("\n");
+    print_copyright();
+}
+
 static void print_help(void)
 {
+    print_version();
     printf("\n");
     printf("Usage:\n");
     printf("  Compress  : calq [-o FILE] [-b SIZE] [-f] file.sam\n");
@@ -94,8 +98,6 @@ static void parse_options(int argc, char *argv[])
             opt_force = true;
             break;
         case 'h':
-            print_version();
-            print_copyright();
             print_help();
             exit(EXIT_SUCCESS);
             break;
@@ -110,7 +112,6 @@ static void parse_options(int argc, char *argv[])
             break;
         case 'v':
             print_version();
-            print_copyright();
             exit(EXIT_SUCCESS);
             break;
         default:
