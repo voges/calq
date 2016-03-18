@@ -16,9 +16,8 @@
 ### Contribution guidelines ###
 
 * Please write code conforming to the used coding style
-* #include with full path to src/
+* \#include with full path to src/
 
 ### Who do I talk to? ###
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
-
