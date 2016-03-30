@@ -17,7 +17,7 @@ qualcodec_t * qualcodec_new(void);
 void qualcodec_free(qualcodec_t *qualcodec);
 
 // encoder methods 
-bool qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char *cigar, const char *seq, const char *qual);
+int qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char *cigar, const char *seq, const char *qual);
 size_t qualcodec_finish_block(qualcodec_t *qualcodec, FILE *fp);
 
 // decoder methods

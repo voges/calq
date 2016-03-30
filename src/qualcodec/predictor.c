@@ -23,7 +23,8 @@ void predictor_free(predictor_t *predictor)
         free(predictor);
         predictor = NULL;
     } else {
-        cq_error("Tried to free null pointer\n");
+        cq_err("Tried to free null pointer\n");
+        exit(EXIT_FAILURE);
     }
 }
 

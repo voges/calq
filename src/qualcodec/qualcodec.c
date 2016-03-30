@@ -37,11 +37,12 @@ void qualcodec_free(qualcodec_t *qualcodec)
         free(qualcodec);
         qualcodec = NULL;
     } else {
-        cq_error("Tried to free null pointer\n");
+        cq_err("Tried to free null pointer\n");
+        exit(EXIT_FAILURE);
     }
 }
 
-static void expand(str_t *exp, const char *cigar, const char *seq)
+static int expand(str_t *exp, const char *cigar, const char *seq)
 {
     size_t cigar_idx = 0;
     size_t cigar_len = strlen(cigar);
@@ -75,14 +76,18 @@ static void expand(str_t *exp, const char *cigar, const char *seq)
         case 'H':
         case 'P':
             break; // these have been clipped
-        default: cq_error("Bad CIGAR string: %s\n", cigar);
+        default: 
+            cq_err("Bad CIGAR string: %s\n", cigar);
+            return CQ_FAILURE;
         }
 
         op_len = 0;
     }
+
+    return CQ_SUCCESS;
 }
 
-bool qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char *cigar, const char *seq, const char *qual)
+int qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char *cigar, const char *seq, const char *qual)
 {
     qualcodec->record_cnt++;
 
@@ -91,13 +96,16 @@ bool qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char
         || (strlen(cigar) == 0 || (cigar[0] == '*' && cigar[1] == '\0'))
         || (strlen(seq) == 0 || (seq[0] == '*' && seq[1] == '\0'))
         || (strlen(qual) == 0 || (qual[0] == '*' && qual[1] == '\0'))) {
-        cq_log("Alignment #%d is incomplete, skipping it\n", qualcodec->record_cnt);
+        cq_out("Alignment #%d is incomplete, skipping it\n", qualcodec->record_cnt);
         return false;
     }
 
     // expand current sequence
     str_t *exp = str_new();
-    expand(exp, cigar, seq);
+    if (CQ_SUCCESS != expand(exp, cigar, seq)) {
+        cq_out("Failed to expand read!\n");
+        return CQ_FAILURE;
+    }
 
     // if this is the first record in a new block, simply allocate depths
     // vector; otherwise reallocate depths vector to cover the new region
@@ -131,7 +139,7 @@ bool qualcodec_add_record(qualcodec_t *qualcodec, const uint32_t pos, const char
     // TODO: pass vector to arithmetic coder
 
     str_free(exp);
-    return true;
+    return CQ_SUCCESS;
 }
 
 size_t qualcodec_finish_block(qualcodec_t *qualcodec, FILE *fp)

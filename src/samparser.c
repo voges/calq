@@ -22,24 +22,31 @@ void samparser_free(samparser_t *samparser)
         free(samparser);
         samparser = NULL;
     } else {
-        cq_error("Tried to free null pointer\n");
+        cq_err("Tried to free null pointer\n");
+		exit(EXIT_FAILURE);
     }
 }
 
-void samparser_head(samparser_t *samparser)
+int samparser_head(samparser_t *samparser)
 {
     bool samheader = false;
+
     while (fgets(samparser->curr.line, sizeof(samparser->curr.line), samparser->fp)) {
         if (*(samparser->curr.line) == '@') {
             str_append_cstr(samparser->head, samparser->curr.line);
             samheader = true;
         } else {
-            if (!samheader) cq_error("SAM header missing\n");
+            if (!samheader) {
+                cq_err("SAM header missing\n");
+                return CQ_FAILURE;
+            }
             size_t offset = -strlen(samparser->curr.line);
             fseek(samparser->fp, (long)offset, SEEK_CUR);
             break;
         }
     }
+
+    return CQ_SUCCESS;
 }
 
 static void parse(samparser_t *samparser)
@@ -78,14 +85,10 @@ static void parse(samparser_t *samparser)
 bool samparser_next(samparser_t *samparser)
 {
     // try to read and parse next line
-    if (fgets(samparser->curr.line, sizeof(samparser->curr.line), samparser->fp)) {
-        if (*(samparser->curr.line) == '@')
-            cq_error("Tried to read SAM record but found header line\n");
-        else
-            parse(samparser);
-    } else {
+    if (fgets(samparser->curr.line, sizeof(samparser->curr.line), samparser->fp))
+        parse(samparser);
+    else
         return false;
-    }
     return true;
 }
 

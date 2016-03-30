@@ -3,7 +3,7 @@
 #include "cqlib.h"
 #include <stdarg.h>
 
-void cq_log(const char *fmt, ...)
+void cq_out(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -14,16 +14,15 @@ void cq_log(const char *fmt, ...)
     free(msg);
 }
 
-void cq_error(const char *fmt, ...)
+void cq_err(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     char *msg;
     vasprintf(&msg, fmt, args);
     va_end(args);
-    fprintf(stdout, "Error: %s", msg);
+    fprintf(stderr, "Error: %s", msg);
     free(msg);
-    exit(EXIT_FAILURE);
 }
 
 void * cq_malloc(const size_t size)

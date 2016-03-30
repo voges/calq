@@ -29,11 +29,12 @@ void cqcodec_free(cqcodec_t *cqcodec)
         free(cqcodec);
         cqcodec = NULL;
     } else {
-        cq_error("Tried to free null pointer\n");
+        cq_err("Tried to free null pointer\n");
+        exit(EXIT_FAILURE);
     }
 }
 
-void cqcodec_encode(cqcodec_t *cqcodec)
+int cqcodec_encode(cqcodec_t *cqcodec)
 {
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
@@ -60,7 +61,10 @@ void cqcodec_encode(cqcodec_t *cqcodec)
     fseek(cqcodec->ofp, sizeof(uint64_t), SEEK_CUR); // space for rec_n
 
     // parse (and seek past) SAM header
-    samparser_head(cqcodec->samparser);
+    if (CQ_SUCCESS != samparser_head(cqcodec->samparser)) {
+        cq_err("Failed to parse SAM header!\n");
+        return CQ_FAILURE;
+    }
 
     samrec_t *samrec = &(cqcodec->samparser->curr);
     while (samparser_next(cqcodec->samparser)) {
@@ -118,16 +122,18 @@ void cqcodec_encode(cqcodec_t *cqcodec)
 
     // print summary
     gettimeofday(&tv1, NULL);
-    cq_log("Took %ld us ~= %.2f s\n", tvdiff(tv0, tv1), (double)tvdiff(tv0, tv1)/1000000);
-    cq_log("Compressed %zu record(s)\n", rec_n);
-    cq_log("Wrote %zu block(s)\n", blk_n);
-    cq_log("Uncompressed QUAL size: %zu\n", qual_sz);
-    cq_log("Compressed CQ size: %zu\n", cq_sz);
-    cq_log("Compression Ratio (CR): %.2f%%\n", (double)qual_sz/(double)cq_sz*100);
-    cq_log("Compression Factor (CF): %.2f%%\n", (double)cq_sz/(double)qual_sz*100);
+    cq_out("Took %ld us ~= %.2f s\n", tvdiff(tv0, tv1), (double)tvdiff(tv0, tv1)/1000000);
+    cq_out("Compressed %zu record(s)\n", rec_n);
+    cq_out("Wrote %zu block(s)\n", blk_n);
+    cq_out("Uncompressed QUAL size: %zu\n", qual_sz);
+    cq_out("Compressed CQ size: %zu\n", cq_sz);
+    cq_out("Compression Ratio (CR): %.2f%%\n", (double)qual_sz/(double)cq_sz*100);
+    cq_out("Compression Factor (CF): %.2f%%\n", (double)cq_sz/(double)qual_sz*100);
+
+    return CQ_SUCCESS;
 }
 
-void cqcodec_decode(cqcodec_t *cqcodec)
+int cqcodec_decode(cqcodec_t *cqcodec)
 {
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
@@ -150,11 +156,12 @@ void cqcodec_decode(cqcodec_t *cqcodec)
     cq_fread_uint64(cqcodec->ifp, &rec_n);
 
     if (version_major-'0' != CQ_VERSION_MAJOR || version_minor-'0' != CQ_VERSION_MINOR) {
-        cq_log("Program version: %d.%d.%d\n", CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
-        cq_log("File version: %c.%c.%c\n", version_major, version_minor, version_patch);
-        cq_error("Program version does not match file version\n");
+        cq_err("Program version: %d.%d.%d\n", CQ_VERSION_MAJOR, CQ_VERSION_MINOR, CQ_VERSION_PATCH);
+        cq_err("File version: %c.%c.%c\n", version_major, version_minor, version_patch);
+        cq_err("Program version does not match file version\n");
+        return CQ_FAILURE;
     }
-    
+
     size_t b = 0, r = 0;
     for (b = 0; b < blk_n; b++) {
         // read number of records in current block
@@ -181,8 +188,10 @@ void cqcodec_decode(cqcodec_t *cqcodec)
 
     // print summary
     gettimeofday(&tv1, NULL);
-    cq_log("Took %ld us ~= %.2f s\n", tvdiff(tv0, tv1), (double)tvdiff(tv0, tv1)/1000000);
-    cq_log("Decoded %zu record(s) in %zu block(s)\n", rec_n, blk_n);
+    cq_out("Took %ld us ~= %.2f s\n", tvdiff(tv0, tv1), (double)tvdiff(tv0, tv1)/1000000);
+    cq_out("Decoded %zu record(s) in %zu block(s)\n", rec_n, blk_n);
+
+    return CQ_SUCCESS;
 }
 
 void cqcodec_info(cqcodec_t *cqcodec)
@@ -204,11 +213,11 @@ void cqcodec_info(cqcodec_t *cqcodec)
     cq_fread_uint64(cqcodec->ifp, &blk_n);
     cq_fread_uint64(cqcodec->ifp, &rec_n);
 
-    cq_log("magic: %s\n", magic);
-    cq_log("version: %c.%c.%c\n", version_major, version_minor, version_patch);
-    cq_log("block size: %"PRIu64"\n", rec_max);
-    cq_log("blocks: %"PRIu64"\n", blk_n);
-    cq_log("records: %"PRIu64"\n", rec_n);
+    cq_out("magic: %s\n", magic);
+    cq_out("version: %c.%c.%c\n", version_major, version_minor, version_patch);
+    cq_out("block size: %"PRIu64"\n", rec_max);
+    cq_out("blocks: %"PRIu64"\n", blk_n);
+    cq_out("records: %"PRIu64"\n", rec_n);
 
     // read and print block headers
     printf("\n        fpos     fpos_next       rec_cnt\n");

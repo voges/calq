@@ -14,7 +14,7 @@ typedef struct samparser_t_ {
 
 samparser_t * samparser_new(FILE *fp);
 void samparser_free(samparser_t *samparser);
-void samparser_head(samparser_t *samparser);
+int samparser_head(samparser_t *samparser);
 bool samparser_next(samparser_t *samparser);
 
 #endif // CQ_SAMPARSER_H

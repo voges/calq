@@ -30,7 +30,8 @@ void str_free(str_t *str)
         free(str);
         str = NULL;
     } else {
-        cq_error("Tried to free null pointer\n");
+        cq_err("Tried to free null pointer\n");
+	exit(EXIT_FAILURE);
     }
 }
 
@@ -81,7 +82,10 @@ void str_append_cstr(str_t *str, const char *cstr)
 
 void str_append_cstrn(str_t *str, const char *cstr, const size_t len)
 {
-    if (len > strlen(cstr)) cq_error("Failed to append C-string\n");
+    if (len > strlen(cstr)) {
+        cq_err("Failed to append C-string\n");
+        exit(EXIT_FAILURE);
+    }
     str_extend(str, len);
     memcpy(str->s + str->len, cstr, len);
     str->len += len;
