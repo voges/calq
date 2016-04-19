@@ -1,13 +1,13 @@
-#include "samparser.h"
+#include "sam/samparser.h"
 #include "cqlib.h"
 #include <string.h>
 
-static void init(samparser_t *samparser, FILE *fp)
+static void init(samparser_t * const samparser, FILE * const fp)
 {
     samparser->fp = fp;
 }
 
-samparser_t * samparser_new(FILE *fp)
+samparser_t * samparser_new(FILE * const fp)
 {
     samparser_t *samparser = (samparser_t *)cq_malloc(sizeof(samparser_t));
     samparser->head = str_new();
@@ -15,7 +15,7 @@ samparser_t * samparser_new(FILE *fp)
     return samparser;
 }
 
-void samparser_free(samparser_t *samparser)
+void samparser_delete(samparser_t *samparser)
 {
     if (samparser != NULL) {
         str_free(samparser->head);
@@ -27,7 +27,7 @@ void samparser_free(samparser_t *samparser)
     }
 }
 
-int samparser_head(samparser_t *samparser)
+int samparser_head(samparser_t * const samparser)
 {
     bool samheader = false;
 
@@ -49,7 +49,7 @@ int samparser_head(samparser_t *samparser)
     return CQ_SUCCESS;
 }
 
-static void parse(samparser_t *samparser)
+static void parse(samparser_t * const samparser)
 {
     size_t l = strlen(samparser->curr.line) - 1;
 
@@ -82,13 +82,15 @@ static void parse(samparser_t *samparser)
     if (f == 11) samparser->curr.opt = c;
 }
 
-bool samparser_next(samparser_t *samparser)
+bool samparser_next(samparser_t * const samparser)
 {
     // try to read and parse next line
-    if (fgets(samparser->curr.line, sizeof(samparser->curr.line), samparser->fp))
+    if (fgets(samparser->curr.line, sizeof(samparser->curr.line), samparser->fp)) {
         parse(samparser);
-    else
+    } else {
         return false;
+    }
+
     return true;
 }
 

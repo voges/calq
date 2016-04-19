@@ -1,7 +1,7 @@
 #ifndef CQ_SAMREC_H
 #define CQ_SAMREC_H
 
-#include "common.h"
+#include "misc/common.h"
 #include <stdint.h>
 
 //

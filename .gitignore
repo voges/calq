@@ -4,4 +4,4 @@
 *.so
 ~$i* # temporary MS office files
 .directory # created by dolphin file manager
-build/*
+build/* # cmake build dir

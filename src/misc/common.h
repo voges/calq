@@ -21,8 +21,8 @@
 #endif
 
 bool yesno(void);
-long tvdiff(struct timeval tv0, struct timeval tv1);
-size_t ndigits(int64_t x);
+long tvdiff(const struct timeval tv0, const struct timeval tv1);
+size_t ndigits(const int64_t x);
 
 #endif // CQ_COMMON_H
 

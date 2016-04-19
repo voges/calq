@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 
 #include "cqlib.h"
 #include <stdarg.h>
@@ -21,7 +21,7 @@ void cq_err(const char *fmt, ...)
     char *msg;
     vasprintf(&msg, fmt, args);
     va_end(args);
-    fprintf(stderr, "Error: %s", msg);
+    fprintf(stderr, CQ_COLOR_RED "%s" CQ_COLOR_RESET, msg);
     free(msg);
 }
 
@@ -29,7 +29,7 @@ void * cq_malloc(const size_t size)
 {
     void *ptr = malloc(size);
     if (ptr == NULL) {
-        fprintf(stderr, "Could not allocate %zu bytes\n", size);
+        cq_err("Could not allocate %zu bytes\n", size);
         exit(EXIT_FAILURE);
     }
     return ptr;
@@ -39,7 +39,7 @@ void * cq_calloc(const size_t nmemb, const size_t size)
 {
     void *ptr = calloc(nmemb, size);
     if (ptr == NULL) {
-        fprintf(stderr, "Could not allocate %zu bytes\n", nmemb*size);
+        cq_err("Could not allocate %zu bytes\n", nmemb*size);
         exit(EXIT_FAILURE);
     }
     return ptr;
@@ -49,7 +49,7 @@ void * cq_realloc(void *ptr, const size_t size)
 {
     void *p = realloc(ptr, size);
     if (p == NULL) {
-        fprintf(stderr, "Could not allocate %zu bytes\n", size);
+        cq_err("Could not allocate %zu bytes\n", size);
         exit(EXIT_FAILURE);
     }
     return p;
@@ -61,17 +61,17 @@ void cq_free(void *ptr)
         free(ptr);
         ptr = NULL;
     } else {
-        fprintf(stderr, "Tried to free null pointer\n");
+        cq_err("Tried to free null pointer\n");
         exit(EXIT_FAILURE);
     }
 }
 
-FILE * cq_fopen(const char *fname, const char *mode)
+FILE * cq_fopen(const char* fname, const char*const mode)
 {
     FILE *fp = fopen(fname, mode);
     if (fp == NULL) {
         fclose(fp);
-        fprintf(stderr, "Failed to open file: %s\n", fname);
+        cq_err("Failed to open file: %s\n", fname);
         exit(EXIT_FAILURE);
     }
     return fp;
@@ -83,7 +83,7 @@ void cq_fclose(FILE *fp)
         fclose(fp);
         fp = NULL;
     } else {
-        fprintf(stderr, "Failed to close file\n");
+        cq_err("Failed to close file\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -91,7 +91,7 @@ void cq_fclose(FILE *fp)
 size_t cq_fwrite_byte(FILE *fp, const unsigned char byte)
 {
     if (fwrite(&byte, 1, 1, fp) != 1) {
-        fprintf(stderr, "Error: Could not write byte\n");
+        cq_err("Could not write byte\n");
         exit(EXIT_FAILURE);
     }
     return 1;
@@ -100,7 +100,7 @@ size_t cq_fwrite_byte(FILE *fp, const unsigned char byte)
 size_t cq_fwrite_buf(FILE *fp, const unsigned char *buf, const size_t n)
 {
     if (fwrite(buf, 1, n, fp) != n) {
-        fprintf(stderr, "Error: Could not write %zu byte(s)\n", n);
+        cq_err("Could not write %zu byte(s)\n", n);
         exit(EXIT_FAILURE);
     }
     return n;

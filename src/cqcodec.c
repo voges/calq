@@ -1,31 +1,34 @@
 #include "cqcodec.h"
-#include "common.h"
 #include "cqconfig.h"
 #include "cqlib.h"
+#include "misc/common.h"
+#include "sam/samrec.h"
 #include <string.h>
 #include <sys/time.h>
 
-static void init(cqcodec_t *cqcodec, FILE *ifp, FILE *ofp, size_t blk_sz)
+static void init(cqcodec_t * cqcodec, FILE * const ifp, FILE * const ofp, const size_t block_size)
 {
     cqcodec->ifp = ifp;
     cqcodec->ofp = ofp;
-    cqcodec->blk_sz = blk_sz;
+    cqcodec->block_size = block_size;
 }
 
-cqcodec_t * cqcodec_new(FILE *ifp, FILE *ofp, size_t blk_sz)
+cqcodec_t * cqcodec_new(FILE *ifp, FILE *ofp, const size_t block_size)
 {
     cqcodec_t *cqcodec = (cqcodec_t *)cq_malloc(sizeof(cqcodec_t));
     cqcodec->samparser = samparser_new(ifp);
-    cqcodec->qualcodec = qualcodec_new();
-    init(cqcodec, ifp, ofp, blk_sz);
+    cqcodec->qualencoder = qualencoder_new();
+    cqcodec->qualdecoder = qualdecoder_new();
+    init(cqcodec, ifp, ofp, block_size);
     return cqcodec;
 }
 
-void cqcodec_free(cqcodec_t *cqcodec)
+void cqcodec_delete(cqcodec_t *cqcodec)
 {
     if (cqcodec != NULL) {
-        samparser_free(cqcodec->samparser);
-        qualcodec_free(cqcodec->qualcodec);
+        samparser_delete(cqcodec->samparser);
+        qualencoder_delete(cqcodec->qualencoder);
+        qualdecoder_delete(cqcodec->qualdecoder);
         free(cqcodec);
         cqcodec = NULL;
     } else {
@@ -34,7 +37,7 @@ void cqcodec_free(cqcodec_t *cqcodec)
     }
 }
 
-int cqcodec_encode(cqcodec_t *cqcodec)
+int cqcodec_encode(cqcodec_t * const cqcodec)
 {
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
@@ -45,13 +48,13 @@ int cqcodec_encode(cqcodec_t *cqcodec)
     size_t blk_n = 0; // block counter
     size_t rec_n = 0; // record counter
     size_t rec_cnt = 0; // record counter for current block
-    size_t rec_max = cqcodec->blk_sz; // number of records per block
+    size_t rec_max = cqcodec->block_size; // number of records per block
 
     // write calq file header, skip 2x8 bytes for block and record counters
-    unsigned char magic[5] = "calq";
-    unsigned char version_major = CQ_VERSION_MAJOR + '0';
-    unsigned char version_minor = CQ_VERSION_MINOR + '0';
-    unsigned char version_patch = CQ_VERSION_PATCH + '0';
+    const unsigned char magic[5] = "calq";
+    const unsigned char version_major = CQ_VERSION_MAJOR + '0';
+    const unsigned char version_minor = CQ_VERSION_MINOR + '0';
+    const unsigned char version_patch = CQ_VERSION_PATCH + '0';
     cq_sz += cq_fwrite_buf(cqcodec->ofp, magic, sizeof(magic));
     cq_sz += cq_fwrite_byte(cqcodec->ofp, version_major);
     cq_sz += cq_fwrite_byte(cqcodec->ofp, version_minor);
@@ -62,7 +65,7 @@ int cqcodec_encode(cqcodec_t *cqcodec)
 
     // parse (and seek past) SAM header
     if (CQ_SUCCESS != samparser_head(cqcodec->samparser)) {
-        cq_err("Failed to parse SAM header!\n");
+        cq_err("Failed to parse SAM header\n");
         return CQ_FAILURE;
     }
 
@@ -73,7 +76,7 @@ int cqcodec_encode(cqcodec_t *cqcodec)
 
             // store the file pointer offset of this block in the previous
             // block header
-            long fpos_curr = ftell(cqcodec->ofp);
+            const long fpos_curr = ftell(cqcodec->ofp);
             if (blk_n > 0) {
                 fseek(cqcodec->ofp, fpos_prev+(long)sizeof(uint64_t), SEEK_SET);
                 cq_sz += cq_fwrite_uint64(cqcodec->ofp, (uint64_t)fpos_curr);
@@ -85,12 +88,13 @@ int cqcodec_encode(cqcodec_t *cqcodec)
             cq_sz += cq_fwrite_uint64(cqcodec->ofp, (uint64_t)ftell(cqcodec->ofp));
             fseek(cqcodec->ofp, sizeof(uint64_t), SEEK_CUR); // space for fpos_next
             cq_sz += cq_fwrite_uint64(cqcodec->ofp, (uint64_t)rec_max);
-            cq_sz += qualcodec_finish_block(cqcodec->qualcodec, cqcodec->ofp);
+            cq_sz += qualencoder_finish_block(cqcodec->qualencoder, cqcodec->ofp);
             blk_n++;
         }
 
-        // add new record
-        qualcodec_add_record(cqcodec->qualcodec, samrec->pos, samrec->cigar, samrec->seq, samrec->qual);
+        // add new record to encoder
+        qualencoder_encode_record(cqcodec->qualencoder, samrec);
+
         qual_sz += strlen(samrec->qual);
         rec_cnt++;
         rec_n++;
@@ -98,7 +102,7 @@ int cqcodec_encode(cqcodec_t *cqcodec)
 
     // store the file pointer offset of this block in the previous
     // block header
-    long fpos_curr = ftell(cqcodec->ofp);
+    const long fpos_curr = ftell(cqcodec->ofp);
     if (blk_n > 0) {
         fseek(cqcodec->ofp, fpos_prev+(long)sizeof(uint64_t), SEEK_SET);
         cq_sz += cq_fwrite_uint64(cqcodec->ofp, (uint64_t)fpos_curr);
@@ -110,7 +114,7 @@ int cqcodec_encode(cqcodec_t *cqcodec)
     cq_sz += cq_fwrite_uint64(cqcodec->ofp, (uint64_t)ftell(cqcodec->ofp));
     cq_sz += cq_fwrite_uint64(cqcodec->ofp, 0); // last block header has a zero here
     cq_sz += cq_fwrite_uint64(cqcodec->ofp, (uint64_t)rec_cnt);
-    cq_sz += qualcodec_finish_block(cqcodec->qualcodec, cqcodec->ofp);
+    cq_sz += qualencoder_finish_block(cqcodec->qualencoder, cqcodec->ofp);
     blk_n++;
 
     // finish file header
@@ -133,7 +137,7 @@ int cqcodec_encode(cqcodec_t *cqcodec)
     return CQ_SUCCESS;
 }
 
-int cqcodec_decode(cqcodec_t *cqcodec)
+int cqcodec_decode(cqcodec_t * const cqcodec)
 {
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
@@ -170,19 +174,21 @@ int cqcodec_decode(cqcodec_t *cqcodec)
         cq_fread_uint64(cqcodec->ifp, &rec_cnt);
 
         // allocate memory for decoded quality scores
-        str_t **qual =(str_t **)cq_malloc(sizeof(str_t *) * rec_max);
-        for (r = 0; r < rec_max; r++) qual[r] = str_new();
+        str_t **qual =(str_t **)cq_malloc(sizeof(str_t *) * rec_cnt);
+        for (r = 0; r < rec_cnt; r++) { qual[r] = str_new(); }
 
         // decode block
-        qualcodec_decode_block(cqcodec->qualcodec, cqcodec->ifp, qual);
+        qualdecoder_decode_block(cqcodec->qualdecoder, cqcodec->ifp, qual, rec_cnt);
 
-        // write decoded quality score to output
+        // write decoded quality scores to output
         for (r = 0; r < rec_cnt; r++) {
             cq_fwrite_buf(cqcodec->ofp, (unsigned char *)qual[r]->s, qual[r]->len);
             cq_fwrite_byte(cqcodec->ofp, '\n');
             str_free(qual[r]);
         }
 
+        // deallocate memory for decoded quality scores
+        for (r = 0; r < rec_cnt; r++) { str_free(qual[r]); }
         free(qual);
     }
 
@@ -194,7 +200,7 @@ int cqcodec_decode(cqcodec_t *cqcodec)
     return CQ_SUCCESS;
 }
 
-void cqcodec_info(cqcodec_t *cqcodec)
+int cqcodec_info(cqcodec_t * const cqcodec)
 {
     // read and check file header
     unsigned char magic[5];
@@ -235,11 +241,14 @@ void cqcodec_info(cqcodec_t *cqcodec)
         printf("%12"PRIu64"  ", rec_cnt);
         printf("\n");
 
-        if (fpos_next)
+        if (fpos_next) {
             fseek(cqcodec->ifp, (long)fpos_next, SEEK_SET);
-        else
+        } else {
             break; // last block has zeros here
+        }
     }
     printf("\n");
+
+    return CQ_SUCCESS;
 }
 

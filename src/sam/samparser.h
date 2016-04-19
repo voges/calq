@@ -1,8 +1,8 @@
 #ifndef CQ_SAMPARSER_H
 #define CQ_SAMPARSER_H
 
-#include "samrec.h"
-#include "str.h"
+#include "misc/str.h"
+#include "sam/samrec.h"
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -12,10 +12,10 @@ typedef struct samparser_t_ {
     samrec_t curr;  // current SAM record
 } samparser_t;
 
-samparser_t * samparser_new(FILE *fp);
-void samparser_free(samparser_t *samparser);
-int samparser_head(samparser_t *samparser);
-bool samparser_next(samparser_t *samparser);
+samparser_t * samparser_new(FILE * const fp);
+void samparser_delete(samparser_t *samparser);
+int samparser_head(samparser_t * const samparser);
+bool samparser_next(samparser_t * const samparser);
 
 #endif // CQ_SAMPARSER_H
 
