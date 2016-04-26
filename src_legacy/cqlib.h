@@ -8,6 +8,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// constants
+
+
+// safe debug macro
+//#if DBG
+//    #define DEBUG(c,...)\
+//        do {\
+//            fprintf(stderr, "%s:%d: %s: "c, __FILE__, __LINE__, \
+//                    __FUNCTION__, ##__VA_ARGS__);\
+//        } while (false)
+//#else
+//    #define DEBUG(c,...) do { } while (false)
+//#endif
+
 #define CQ_SUCCESS 0
 #define CQ_FAILURE 1
 

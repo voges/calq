@@ -12,26 +12,26 @@ extern "C" {
 
 qualencoder_t * qualencoder_new(void) 
 {
-    cq::QualEncoder *qualEncoder = new cq::QualEncoder();
+    QualEncoder *qualEncoder = new QualEncoder();
     return (qualencoder_t *)qualEncoder;
 }
 
 void qualencoder_delete(qualencoder_t *qualencoder) 
 {
-    cq::QualEncoder *qualEncoder = (cq::QualEncoder *)qualencoder;
+    QualEncoder *qualEncoder = (QualEncoder *)qualencoder;
     delete qualEncoder;
     qualencoder = NULL;
 }
 
 void qualencoder_encode_record(qualencoder_t * const qualencoder, const samrec_t * const samrec)
 {
-    cq::QualEncoder *qualEncoder = (cq::QualEncoder *)qualencoder;
+    QualEncoder *qualEncoder = (QualEncoder *)qualencoder;
     qualEncoder->encodeRecord(samrec);
 }
 
 size_t qualencoder_finish_block(qualencoder_t * const qualencoder, FILE *fp)
 {
-    cq::QualEncoder *qualEncoder = (cq::QualEncoder *)qualencoder;
+    QualEncoder *qualEncoder = (QualEncoder *)qualencoder;
     return qualEncoder->finishBlock(fp);
 }
 

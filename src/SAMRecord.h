@@ -1,7 +1,7 @@
-#ifndef CQ_SAMREC_H
-#define CQ_SAMREC_H
+#ifndef SAMRECORD_H
+#define SAMRECORD_H
 
-#include "misc/common.h"
+#include "constants.h"
 #include <stdint.h>
 
 //
@@ -10,7 +10,7 @@
 // Data types have been selected according to the SAM format specification.
 //
 
-typedef struct samrec_t_ {
+typedef struct {
     char     line[8*MB];
 
     char     *qname; // Query template NAME
@@ -25,7 +25,7 @@ typedef struct samrec_t_ {
     char     *seq;   // segment SEQuence
     char     *qual;  // QUALity scores
     char     *opt;   // OPTional information
-} samrec_t;
+} SAMRecord;
 
-#endif // CQ_SAMREC_H
+#endif // SAMRECORD_H
 
