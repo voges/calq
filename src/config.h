@@ -1,3 +1,9 @@
+/** @file config.h
+ *  @brief This file contains a definitions interface to CMake.
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
 #ifndef CONFIG_H
 #define CONFIG_H
 

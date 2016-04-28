@@ -1,15 +1,21 @@
+/** @file SAMRecord.h
+ *  @brief This file constains the definition of the SAMRecord struct.
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
 #ifndef SAMRECORD_H
 #define SAMRECORD_H
 
 #include "constants.h"
 #include <stdint.h>
 
-//
-// Structure of a SAM alignment line: The 11 mandatory fields are
-// TAB-delimited. Optional information is stored as 12th field.
-// Data types have been selected according to the SAM format specification.
-//
-
+/** @brief Struct: SAMRecord
+ * 
+ *  Structure of a SAM alignment line: The 11 mandatory fields are
+ *  TAB-delimited. Optional information is stored as 12th field.
+ *  Data types have been selected according to the SAM format specification.
+ */
 typedef struct {
     char     line[8*MB];
 

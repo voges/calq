@@ -25,7 +25,11 @@ static inline void setNthBit(const int n, int &inByte)
     inByte |= (1 << n);
 }
 
-ibitstream::ibitstream(void): std::istream(NULL), lastTell(0), currByte(0), pos(NUM_BITS_IN_BYTE) 
+ibitstream::ibitstream(void)
+    : std::istream(NULL)
+    , lastTell(0)
+    , currByte(0)
+    , pos(NUM_BITS_IN_BYTE) 
 {
     ///
     /// Each ibitstream tracks 3 integers as private data.
@@ -42,8 +46,8 @@ int ibitstream::readBit(void)
 {
     ///
     /// If bits remain in currByte, retrieve next bit and increment pos.
-    /// Else if end of currByte (or some other read happened), then read next byte
-    /// and start reading from bit position 0 of that byte.
+    /// Else if end of currByte (or some other read happened), then read next
+    /// byte and start reading from bit position 0 of that byte.
     /// If read byte from file at EOF, return EOF.
     ///
 
@@ -65,6 +69,63 @@ int ibitstream::readBit(void)
     int result = getNthBit(pos, currByte);
     pos++; // advance bit position for next call to readBit
     return result;
+}
+
+int ibitstream::readByte(BYTE &byte)
+{
+    if (!is_open()) {
+        throwErrorException("Cannot read a byte from a stream that is not open");
+    }
+
+    if ((byte = (BYTE)get()) == EOF) {
+        return EOF;
+    }
+
+    //fprintf(stderr, "read 0x%x\n", byte);
+    return 0;
+}
+
+int ibitstream::readUint64(uint64_t &x)
+{
+    if (!is_open()) {
+        throwErrorException("Cannot read a uint64_t from a stream that is not open");
+    }
+
+    BYTE hh = 0x00;
+    BYTE h = 0x00;
+    BYTE l = 0x00;
+    BYTE ll = 0x00;
+
+    if (readByte(hh) == EOF) { return EOF; }
+    if (readByte(h) == EOF) { return EOF; }
+    if (readByte(l) == EOF) { return EOF; }
+    if (readByte(ll) == EOF) { return EOF; }
+
+    x ^= hh << 24;
+    x ^= h  << 16;
+    x ^= l  <<  8;
+    x ^= ll;
+
+    return 0;
+}
+
+int ibitstream::readBuffer(BYTE &buf, const size_t n)
+{
+    if (!is_open()) {
+        throwErrorException("Cannot read a byte buffer from a stream that is not open");
+    }
+
+    read((char*)&buf, n);
+
+    if (eof()) {
+        return EOF;
+    }
+
+    if (fail()) {
+        throwErrorException("Error on stream while reading buffer");
+    }
+
+    return 0;
 }
 
 void ibitstream::rewind(void)
@@ -113,7 +174,11 @@ bool ibitstream::is_open(void)
     return true;
 }
 
-obitstream::obitstream(): std::ostream(NULL), lastTell(0), currByte(0), pos(NUM_BITS_IN_BYTE) 
+obitstream::obitstream()
+    : std::ostream(NULL)
+    , lastTell(0)
+    , currByte(0)
+    , pos(NUM_BITS_IN_BYTE) 
 {
     ///
     /// Each obitstream tracks 3 integers as private data.
@@ -162,7 +227,7 @@ void obitstream::writeBit(const int bit)
     // only write if first bit in byte or changing 0 to 1
     if (pos == 0 || bit) {
         if (pos != 0) {
-            seekp(-1, std::ios::cur); // back up to overwite if pos > 0
+            seekp(-1, std::ios::cur); // back up to overwrite if pos > 0
         }
         put(currByte);
     }
@@ -170,6 +235,41 @@ void obitstream::writeBit(const int bit)
     pos++; // advance to next bit position for next write
     lastTell = tellp();
 
+}
+
+void obitstream::writeByte(const BYTE byte)
+{
+    if (!is_open()) {
+        throwErrorException("Stream is not open");
+    }
+
+    put((char)byte);
+    //fprintf(stderr, "write 0x%x\n", byte);
+}
+
+void obitstream::writeUint64(const uint64_t x)
+{
+    if (!is_open()) {
+        throwErrorException("Stream is not open");
+    }
+
+    writeByte((x >> 24) & 0xFF);
+    writeByte((x >> 16) & 0xFF);
+    writeByte((x >>  8) & 0xFF);
+    writeByte((x      ) & 0xFF);
+}
+
+void obitstream::writeBuffer(const BYTE &buf, const size_t n)
+{
+    if (!is_open()) {
+        throwErrorException("Stream is not open");
+    }
+
+    write((char*)&buf, n);
+
+    if (fail()) {
+        throwErrorException("Stream error while writing buffer");
+    }
 }
 
 long obitstream::size(void) 

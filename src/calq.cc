@@ -1,3 +1,15 @@
+/** @file calq.cc
+ *  @brief This file contains the main function of the calq compression tool.
+ *
+ *  This file contains the main function (and some static helpers) of the calq
+ *  compression tool. It furthermore defines the global object 'cliOptions'
+ *  which contains the command line options that are therefore accessible to
+ *  every linked module.
+ *
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
 #include "CalqCodec.h"
 #include "config.h"
 #include "Exceptions.h"
@@ -144,7 +156,7 @@ static void parseOptions(int argc, char *argv[])
         if (cliOptions.blockSize != 0) {
             throwUserException("Option -b is illegal in decompression mode");
         }
-    } else { // CLIOPTIONS_MODE_INFO
+    } else { // CLIOptions::MODE_INFO
         // options -bf are illegal in info mode
         if (cliOptions.blockSize != 0) {
             throwUserException("Option -b is illegal in info mode");

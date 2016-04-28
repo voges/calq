@@ -1,3 +1,9 @@
+/** @file SAMParser.cc
+ *  @brief This file contains the implementation of the SAMParser class.
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
 #include "SAMParser.h"
 #include "Exceptions.h"
 #include <iostream>
@@ -5,6 +11,8 @@
 #include <string.h>
 
 SAMParser::SAMParser(const std::string &filename)
+    : header()
+    , ifs()
 {
     ifs.open(filename.c_str(), std::ios::in);
     readSAMHeader();
@@ -71,11 +79,10 @@ void SAMParser::parse(void)
 
 void SAMParser::next(void)
 {
-    // try to read and parse next line
     if (ifs.getline(curr.line, sizeof(curr.line))) {
         parse();
     } else {
-        throwErrorException("Could not read next line (use hasNext to check before using next)");
+        throwErrorException("Tried to read record behind EOF");
     }
 }
 
@@ -84,10 +91,8 @@ bool SAMParser::hasNext(void)
     std::streampos current = ifs.tellg();
     ifs.seekg(0, ifs.end);
     std::streampos end = ifs.tellg();
-
     bool hasNext = current == end ? false : true;
     ifs.seekg(current, ifs.beg); //restore stream position
-
     return hasNext;
 }
 

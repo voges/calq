@@ -1,6 +1,13 @@
+/** @file Exceptions.cc
+ *  @brief This file contains the implementations of the exception classes
+ *         defined in Exceptions.h.
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
 #include "Exceptions.h"
 
-Exception::Exception(std::string msg)
+Exception::Exception(const std::string &msg)
 {
     this->msg = msg;
 }

@@ -25,6 +25,7 @@
 #ifndef BITSTREAM_H
 #define BITSTREAM_H
 
+#include "definitions.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -58,6 +59,40 @@ public:
      *          exhausted, EOF (-1) is returned.
      */
     int readBit(void);
+
+    /** @brief Member function: readByte
+     *
+     *  Reads a single byte. Raises an error if this ibitstream has not
+     *  been properly opened.
+     *
+     *  @param byte The byte to be read
+     *  @return Returns 0 if the read was successful. If the stream is
+     *          exhausted, EOF (-1) is returned.
+     */
+    int readByte(BYTE &byte);
+
+    /** @brief Member function: readUint64
+     *
+     *  Reads a uint64_t. Raises an error if this ibitstream has not
+     *  been properly opened.
+     *
+     *  @param x The uint64_t to be read
+     *  @return Returns 0 if the read was successful. If the stream is
+     *          exhausted, EOF (-1) is returned.
+     */
+    int readUint64(uint64_t &x);
+
+    /** @brief Member function: readBuffer
+     *
+     *  Reads a byte buffer of size n. Raises an error if this ibitstream has
+     *  not been properly opened or if the read failed.
+     *
+     *  @param buf Byte buffer to be read
+     *  @param n Size of byte buffer
+     *  @return Returns 0 if the read was successful. If the stream is
+     *          exhausted, EOF (-1) is returned.
+     */
+    int readBuffer(BYTE &buf, const size_t n);
 
     /** @brief Member function: rewind
      *
@@ -94,7 +129,6 @@ private:
     int pos;
 };
 
-
 /** @brief Class: obitstream
  *
  *  Defines a class for writing files with all the functionality of ostream
@@ -120,7 +154,39 @@ public:
      *  @param bit Bit to write
      *  @return Void.
      */
-    void writeBit(int bit);
+    void writeBit(const int bit);
+    
+    /** @brief Member function: writeByte
+     *
+     *  Writes a single byte to the obitstream.
+     *  Raises an error if this obitstream has not been properly opened.
+     *
+     *  @param bit Bit to write
+     *  @return Void.
+     */
+    void writeByte(const BYTE byte);
+
+    /** @brief Member function: writeUint64
+     *
+     *  Writes a uint64_t (8 bytes) to the obitstream.
+     *  Raises an error if this obitstream has not been properly opened.
+     *
+     *  @param x Number to write
+     *  @return Void.
+     */
+    void writeUint64(const uint64_t x);
+
+    /** @brief Member function: writeBuffer
+     *
+     *  Writes a byte buffer buf of size n to the obitstream.
+     *  Raises an error if this obitstream has not been properly opened of if
+     *  the write failed.
+     *
+     *  @param buf Byte buffer
+     *  @param n Size of byte buffer
+     *  @return Void.
+     */
+    void writeBuffer(const BYTE &buf, const size_t n);
 
     /** @brief Member function: size
      *
@@ -146,7 +212,6 @@ private:
     int currByte;
     int pos;
 };
-
 
 /** @brief Class: ifbitstream
  *
@@ -206,7 +271,6 @@ private:
     /* The actual file buffer which does reading and writing. */
     std::filebuf fileBuffer;
 };
-
 
 /** @brief Class: ofbitstream
  *
@@ -270,7 +334,6 @@ private:
     std::filebuf fileBuffer;
 };
 
-
 /** @brief Class: istringbitstream
  *
  *  A variant on C++'s istringstream class, which acts as a stream that reads
@@ -297,7 +360,6 @@ private:
     /// The actual string buffer that does character storage.
     std::stringbuf stringBuffer;
 };
-
 
 /** @brief Class: ostringbitstream
  *

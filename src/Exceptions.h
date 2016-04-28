@@ -1,3 +1,9 @@
+/** @file Exceptions.h
+ *  @brief This files contains the definitions of some custom exception classes.
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
@@ -11,7 +17,7 @@
  */
 class Exception : public std::exception {
 public:
-    Exception(std::string msg);
+    Exception(const std::string &msg);
     virtual ~Exception(void) throw();
     virtual std::string getMessage(void) const;
     virtual const char * what(void) const throw();
@@ -30,7 +36,7 @@ protected:
  */
 class UserException : public Exception {
 public:
-    UserException(std::string msg) : Exception(msg) {}
+    UserException(const std::string &msg) : Exception(msg) {}
 };
 
 /** @brief Global function: throwUserException
@@ -41,7 +47,7 @@ public:
  *  @param msg Error message
  *  @return Void.
  */
-inline void throwUserException(std::string msg)
+inline void throwUserException(const std::string &msg)
 {
     throw UserException(msg);
 }
@@ -56,7 +62,7 @@ inline void throwUserException(std::string msg)
  */
 class ErrorException : public Exception {
 public:
-    ErrorException(std::string msg): Exception(msg) {}
+    ErrorException(const std::string &msg): Exception(msg) {}
 };
 
 /** @brief Global function: throwErrorException
@@ -67,7 +73,7 @@ public:
  *  @param msg Error message
  *  @return Void.
  */
-inline void throwErrorException(std::string msg)
+inline void throwErrorException(const std::string &msg)
 {
     throw ErrorException(msg);
 }
@@ -78,13 +84,13 @@ inline void throwErrorException(std::string msg)
  */
 class ErrorExceptionReporter {
 public:
-    ErrorExceptionReporter(std::string pretty_function, std::string file, int line)
+    ErrorExceptionReporter(const std::string &pretty_function, const std::string &file, const int line)
         : pretty_function(pretty_function)
         , file(file)
         , line(line)
     {}
 
-    void operator()(std::string msg)
+    void operator()(const std::string &msg)
     {
         std::cerr << file << ":" << pretty_function << ":" << line << ": ";
         // can use the original name here, as it is still defined
@@ -96,12 +102,10 @@ private:
     int line;
 };
 
-
 // Remove the symbol for the function, then define a new version that instead
 // creates a stack temporary instance of Reporter initialized with the caller.
 #undef throwErrorException
 #define throwErrorException ErrorExceptionReporter(__PRETTY_FUNCTION__, __FILE__, __LINE__)
-
 
 #endif // EXCEPTIONS_H
 
