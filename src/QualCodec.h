@@ -33,9 +33,6 @@ public:
 private:
     ofbitstream &ofbs;
     size_t recordCnt; ///< number of records processed in the current block
-    size_t posMin;    ///< smallest mapping position encountered in block
-    size_t posMax;    ///< largest mapping position encountered in block
-    std::vector<size_t> depths;
 };
 
 /** @brief Class: QualDecoder

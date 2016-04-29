@@ -11,24 +11,21 @@ const char* SampleString = "this is an example for huffman encoding";
 typedef std::vector<bool> HuffCode;
 typedef std::map<char, HuffCode> HuffCodeMap;
  
-class INode
-{
+class INode {
 public:
     const int f;
- 
     virtual ~INode() {}
- 
+
 protected:
-    INode(int f) : f(f) {}
+    INode(int f): f(f) {}
 };
  
-class InternalNode : public INode
-{
+class InternalNode : public INode {
 public:
-    INode *const left;
-    INode *const right;
+    INode * const left;
+    INode * const right;
  
-    InternalNode(INode* c0, INode* c1) : INode(c0->f + c1->f), left(c0), right(c1) {}
+    InternalNode(INode *c0, INode *c1): INode(c0->f + c1->f), left(c0), right(c1) {}
     ~InternalNode()
     {
         delete left;
@@ -36,12 +33,10 @@ public:
     }
 };
  
-class LeafNode : public INode
-{
+class LeafNode : public INode {
 public:
     const char c;
- 
-    LeafNode(int f, char c) : INode(f), c(c) {}
+    LeafNode(int f, char c): INode(f), c(c) {}
 };
  
 struct NodeCmp
@@ -90,10 +85,17 @@ void GenerateCodes(const INode* node, const HuffCode& prefix, HuffCodeMap& outCo
     }
 }
  
-int main()
+void HuffmanEncoder::encode(const BYTE &buf, const size_t n)
 {
-    // Build frequency table
-    int frequencies[UniqueSymbols] = {0};
+    // build frequency table
+    for (size_t i = 0; i < n, ++i) {
+        frequencies[buf[i]]++;
+    }
+    
+    INode *root = buildTree(frequencies);
+    CodeMap codes;
+    generateCodes(root, 
+    
     const char* ptr = SampleString;
     while (*ptr != '\0')
         ++frequencies[*ptr++];
@@ -114,3 +116,12 @@ int main()
     return 0;
 }
 
+class HuffmanEncoder {
+public:
+    HuffmanEncoder(void);
+    ~HuffmanEncoder(void);
+
+private:
+    const int UniqueSymbols = 1 << CHAR_BIT;
+    size_t frequencies[uniqueSymbols];
+};

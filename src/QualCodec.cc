@@ -11,9 +11,6 @@
 QualEncoder::QualEncoder(ofbitstream &ofbs)
     : ofbs(ofbs)
     , recordCnt(0)
-    , posMin(1)
-    , posMax(1)
-    , depths()
 {
 
 }
@@ -23,13 +20,24 @@ QualEncoder::~QualEncoder(void)
     // Empty
 }
 
-static std::string expand(const std::string &seq, const std::string &cigar)
+static void extract(const std::string &seq,
+                    const std::string &qual,
+                    const std::string &cigar,
+                    std::string &matchedSeq,
+                    std::string &matchedQual,
+                    std::string &insertedSeq,
+                    std::string &insertedQual
+                   )
 {
+    matchedSeq.clear();
+    matchedQual.clear();
+    insertedSeq.clear();
+    insertedQual.clear();
+
     size_t cigarIdx = 0;
     size_t cigarLen = cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
-    size_t seqIdx = 0;
-    std::string expandedSeq("");
+    size_t idx = 0;
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
@@ -42,19 +50,28 @@ static std::string expand(const std::string &seq, const std::string &cigar)
         case 'M':
         case '=':
         case 'X':
-            // add matching part to expanded sequence
-            expandedSeq.append(seq, seqIdx, opLen);
-            seqIdx += opLen;
+            // add matching part to matchedSeq and matchedQual
+            matchedSeq.append(seq, idx, opLen);
+            matchedQual.append(qual, idx, opLen);
+            idx += opLen;
             break;
         case 'I':
         case 'S':
-            seqIdx += opLen; // skip inserted part
+            // add inserted bases and quality scores to insertedSeq and
+            // insertedQual, respectively
+            insertedSeq.append(seq, idx, opLen);
+            insertedQual.append(qual, idx, opLen);
+            idx += opLen; // skip inserted part
             break;
         case 'D':
-        case 'N':
-            // inflate expanded sequence
-            for (i = 0; i < opLen; i++) { expandedSeq += "D"; }
+        case 'N': {
+            // inflate sequence and quality scores
+            for (i = 0; i < opLen; i++) { 
+                matchedSeq += "d";
+                matchedQual += "d";
+            }
             break;
+        }
         case 'H':
         case 'P':
             break; // these have been clipped
@@ -64,18 +81,16 @@ static std::string expand(const std::string &seq, const std::string &cigar)
 
         opLen = 0;
     }
-
-    return expandedSeq;
 }
 
 void QualEncoder::encodeRecord(const SAMRecord &samRecord)
 {
+    recordCnt++;
+
     const uint32_t pos = samRecord.pos;
     const std::string cigar(samRecord.cigar);
     const std::string seq(samRecord.seq);
     const std::string qual(samRecord.qual);
-
-    recordCnt++;
 
     // check if this alignment is complete
     if (   (pos == 0)
@@ -86,34 +101,46 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     }
 
     // expand current sequence
-    std::string exp = expand(seq, cigar);
+    std::string matchedSeq("");
+    std::string matchedQual("");
+    std::string insertedSeq("");
+    std::string insertedQual("");
+    extract(seq, qual, cigar, matchedSeq, matchedQual, insertedSeq, insertedQual);
+    //std::cout << "matchedSeq: " << matchedSeq << std::endl;
+    //std::cout << "matchedQual: " << matchedQual << std::endl;
+    //std::cout << "insertedSeq: " << insertedSeq << std::endl;
+    //std::cout << "insertedQual: " << insertedQual << std::endl;
 
     // TODO: if this is the first record in a new block, simply allocate depths
     // vector; otherwise reallocate depths vector to cover the new region
 
     // TODO: accumulate depths
 
-    // TODO: design/update quantizers for genomic columns
+    // TODO: design/update nested quantizers for genomic columns
 
     // TODO: quantize the added quality score vector
 
-    // BEGIN meholli
+    // TODO: apply and update quality score mask for current vector
+
     // TODO: perform Markov-chain prediction on current vector
     /*
     size_t alphabetSize = 40;
     size_t memorySize = 1;
-    cq::Predictor predictor = new Predictor(alphabetSize, memorySize);
+    Predictor predictor(alphabetSize, memorySize);
     foreach (char q in qual) {
         ret = predictor.predict(std::string memory, std::string &predictedValue);
         if (ret == -1) std::cout << "cannot predict beginning of QS vector" << std::endl;
         predictor.update(std::string memory, std::string q);
         e = q - predictedValue;
     }
-    delete predictor;
     */
-    // END meholli
+
+    // TODO: adaptive clustering of QS vectors
 
     // TODO: pass QS vector to arithmetic or Huffman coder
+
+    // ALTERNATIVE: try to predict quality score at a certain position and
+    // then quantize the prediction error
 }
 
 size_t QualEncoder::finishBlock(void)
@@ -122,8 +149,7 @@ size_t QualEncoder::finishBlock(void)
     return ret;
 }
 
-QualDecoder::QualDecoder(ifbitstream &ifbs)
-    : ifbs(ifbs)
+QualDecoder::QualDecoder(ifbitstream &ifbs): ifbs(ifbs)
 {
 
 }
@@ -135,6 +161,6 @@ QualDecoder::~QualDecoder(void)
 
 void QualDecoder::decodeBlock(std::vector<std::string> &qual)
 {
-    qual.push_back("qual record 0");
+    qual.push_back("*");
 }
 
