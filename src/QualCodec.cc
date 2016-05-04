@@ -91,17 +91,18 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     const std::string cigar(samRecord.cigar);
     const std::string seq(samRecord.seq);
     const std::string qual(samRecord.qual);
+    std::cout << recordCnt << ": " << qual << std::endl;
 
     // check if this alignment is complete
-    if (   (pos == 0)
+    /*if (   (pos == 0)
         || (cigar.length() == 0 || cigar.compare("*") == 0)
         || (seq.length() == 0 || seq.compare("*") == 0)
         || (qual.length() == 0 || qual.compare("*") == 0)) {
         throwErrorException("Incomplete alignment");
-    }
+    }*/
 
     // expand current sequence
-    std::string matchedSeq("");
+    /*std::string matchedSeq("");
     std::string matchedQual("");
     std::string insertedSeq("");
     std::string insertedQual("");
@@ -109,7 +110,7 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     //std::cout << "matchedSeq: " << matchedSeq << std::endl;
     //std::cout << "matchedQual: " << matchedQual << std::endl;
     //std::cout << "insertedSeq: " << insertedSeq << std::endl;
-    //std::cout << "insertedQual: " << insertedQual << std::endl;
+    //std::cout << "insertedQual: " << insertedQual << std::endl;*/
 
     // TODO: if this is the first record in a new block, simply allocate depths
     // vector; otherwise reallocate depths vector to cover the new region
@@ -128,8 +129,8 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     size_t memorySize = 1;
     Predictor predictor(alphabetSize, memorySize);
     foreach (char q in qual) {
-        ret = predictor.predict(std::string memory, std::string &predictedValue);
-        if (ret == -1) std::cout << "cannot predict beginning of QS vector" << std::endl;
+        std::vector<char> &memory
+        predictor.predict(std::string &memory, std::string &predictedValue);
         predictor.update(std::string memory, std::string q);
         e = q - predictedValue;
     }
