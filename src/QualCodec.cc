@@ -7,17 +7,22 @@
 
 #include "QualCodec.h"
 #include "Exceptions.h"
+#include "Predictor.h"
+
+static const int ALPHABET_SIZE = 50;
+static const int MEMORY_SIZE = 2;
 
 QualEncoder::QualEncoder(ofbitstream &ofbs)
     : ofbs(ofbs)
     , recordCnt(0)
+    , predictor(ALPHABET_SIZE, MEMORY_SIZE)
 {
 
 }
 
 QualEncoder::~QualEncoder(void)
 {
-    // Empty
+    // empty
 }
 
 static void extract(const std::string &seq,
@@ -123,18 +128,30 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
 
     // TODO: apply and update quality score mask for current vector
 
-    // TODO: perform Markov-chain prediction on current vector
-    /*
-    size_t alphabetSize = 40;
-    size_t memorySize = 1;
-    Predictor predictor(alphabetSize, memorySize);
-    foreach (char q in qual) {
-        std::vector<char> &memory
-        predictor.predict(std::string &memory, std::string &predictedValue);
-        predictor.update(std::string memory, std::string q);
-        e = q - predictedValue;
+    // Markov-chain prediction for current current qual vector
+    std::vector<int> qualPredictionErrors;
+    std::vector<int> memory(MEMORY_SIZE, -1);
+
+    for(std::string::size_type i = 0; i < qual.size(); ++i) {
+        int q = (int)qual[i];
+
+        // fill memory
+        if (i < MEMORY_SIZE) {
+            std::fill(memory.begin(), memory.end(), -1);
+        } else {
+            for (size_t m = 0; m < MEMORY_SIZE; m++) {
+                memory[m] = ((int)qual[i-1-m]);
+            }
+        }
+
+        // predict current q value, update predictor, and compute prediction
+        // error
+        int qHat = predictor.predict(memory);
+        predictor.update(memory, q);
+        int e = q - qHat;
+        qualPredictionErrors.push_back(e);
+        //memory.clear();
     }
-    */
 
     // TODO: adaptive clustering of QS vectors
 
@@ -163,5 +180,10 @@ QualDecoder::~QualDecoder(void)
 void QualDecoder::decodeBlock(std::vector<std::string> &qual)
 {
     qual.push_back("*");
+}
+
+void QualEncoder::createCSV()
+{
+    predictor.createCSVFile();
 }
 

@@ -2,15 +2,14 @@
  *  @brief This file contains the main function of the calq compression tool.
  *
  *  This file contains the main function (and some static helpers) of the calq
- *  compression tool. It furthermore defines the global object 'cliOptions'
- *  which contains the command line options that are therefore accessible to
- *  every linked module.
+ *  compression tool.
  *
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
 
 #include "CalqCodec.h"
+#include "common.h"
 #include "config.h"
 #include "Exceptions.h"
 #include <getopt.h>
@@ -19,19 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-
-typedef struct {
-    size_t blockSize;
-    bool force;
-    std::string infileName;
-    enum {
-        MODE_COMPRESS,
-        MODE_DECOMPRESS,
-        MODE_INFO 
-    } mode;
-    std::string outfileName;
-} CLIOptions;
 
 CLIOptions cliOptions;
 
@@ -165,28 +151,6 @@ static void parseOptions(int argc, char *argv[])
             throwUserException("Option -f is illegal in info mode");
         }
     }
-}
-
-static const char * filenameExtension(const std::string &filename)
-{
-    const char *dot = strrchr(filename.c_str(), '.');
-    if (!dot || dot == filename.c_str()) { return ""; }
-    return (dot + 1);
-}
-
-static bool fileExists(const std::string &filename)
-{
-    return !access(filename.c_str(), F_OK | R_OK);
-}
-
-static bool yesno(void)
-{
-    int c = getchar();
-    bool yes = c == 'y' || c == 'Y';
-    while (c != '\n' && c != EOF) {
-        c = getchar();
-    }
-    return yes;
 }
 
 static void handleSignal(const int sig)

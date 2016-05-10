@@ -79,6 +79,9 @@ void CalqEncoder::encode(void)
         }
     }
 
+    // TODO: make this optional?
+    qualEncoder.createCSV();
+
     // complete file header
     //std::streampos blockPositionListPos = ofbs.tellp();
     ofbs.seekp(fileHeaderPos, std::ios::beg);

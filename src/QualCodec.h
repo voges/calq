@@ -9,6 +9,7 @@
 #define QUALCODEC_H
 
 #include "bitstream.h"
+#include "Predictor.h"
 #include "SAMRecord.h"
 #include <vector>
 
@@ -29,10 +30,12 @@ public:
     ~QualEncoder(void);
     void encodeRecord(const SAMRecord &samRecord);
     size_t finishBlock(void);
+    void createCSV(void);
 
 private:
     ofbitstream &ofbs;
     size_t recordCnt; ///< number of records processed in the current block
+    Predictor predictor;
 };
 
 /** @brief Class: QualDecoder

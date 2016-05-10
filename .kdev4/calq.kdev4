@@ -45,7 +45,7 @@ Remote GDB Run Script=
 Remote GDB Shell Script=
 Start With=ApplicationOutput
 Use External Terminal=false
-Working Directory=file:///project/dna/git/calq/tmp/
+Working Directory=file:///project/dna/git/calq/test_files/
 isExecutable=false
 
 [Project]
