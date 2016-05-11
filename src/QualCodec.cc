@@ -1,6 +1,6 @@
 /** @file QualCodec.cc
  *  @brief This file contains the implementations of the QualEncoder and
- *         QualDecoder classes, respectively.
+ *         QualDecoder classes.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -11,13 +11,17 @@
 
 static const int ALPHABET_SIZE = 50;
 static const int MEMORY_SIZE = 2;
+static const int OFFSET = 33;
+static const int QMAX = 83;
+static const int QMIN = OFFSET;
 
 QualEncoder::QualEncoder(ofbitstream &ofbs)
-    : ofbs(ofbs)
-    , recordCnt(0)
-    , predictor(ALPHABET_SIZE, MEMORY_SIZE)
+    : numEncodedRecords(0)
+    , numInputRecords(0)
+    , ofbs(ofbs)
+    , predictor(ALPHABET_SIZE, MEMORY_SIZE, OFFSET)
 {
-
+    // empty
 }
 
 QualEncoder::~QualEncoder(void)
@@ -90,32 +94,29 @@ static void extract(const std::string &seq,
 
 void QualEncoder::encodeRecord(const SAMRecord &samRecord)
 {
-    recordCnt++;
+    numInputRecords++;
 
     const uint32_t pos = samRecord.pos;
     const std::string cigar(samRecord.cigar);
     const std::string seq(samRecord.seq);
     const std::string qual(samRecord.qual);
-    std::cout << recordCnt << ": " << qual << std::endl;
+    std::cout << "record " << numInputRecords << ": " << pos << " " << cigar << " " << seq << " " << qual << std::endl;
 
     // check if this alignment is complete
-    /*if (   (pos == 0)
+    if (   (pos == 0)
         || (cigar.length() == 0 || cigar.compare("*") == 0)
         || (seq.length() == 0 || seq.compare("*") == 0)
         || (qual.length() == 0 || qual.compare("*") == 0)) {
-        throwErrorException("Incomplete alignment");
-    }*/
+        std::cout << "Warning: Incomplete alignment; skipping record " << numInputRecords << std::endl;
+        return;
+    }
 
     // expand current sequence
-    /*std::string matchedSeq("");
+    std::string matchedSeq("");
     std::string matchedQual("");
     std::string insertedSeq("");
     std::string insertedQual("");
     extract(seq, qual, cigar, matchedSeq, matchedQual, insertedSeq, insertedQual);
-    //std::cout << "matchedSeq: " << matchedSeq << std::endl;
-    //std::cout << "matchedQual: " << matchedQual << std::endl;
-    //std::cout << "insertedSeq: " << insertedSeq << std::endl;
-    //std::cout << "insertedQual: " << insertedQual << std::endl;*/
 
     // TODO: if this is the first record in a new block, simply allocate depths
     // vector; otherwise reallocate depths vector to cover the new region
@@ -135,35 +136,41 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     for(std::string::size_type i = 0; i < qual.size(); ++i) {
         int q = (int)qual[i];
 
-        // fill memory
         if (i < MEMORY_SIZE) {
-            std::fill(memory.begin(), memory.end(), -1);
+            std::fill(memory.begin(), memory.end(), -1); // this is not necessary
+            qualPredictionErrors.push_back(q);
         } else {
+            // fill memory
             for (size_t m = 0; m < MEMORY_SIZE; m++) {
                 memory[m] = ((int)qual[i-1-m]);
             }
-        }
 
-        // predict current q value, update predictor, and compute prediction
-        // error
-        int qHat = predictor.predict(memory);
-        predictor.update(memory, q);
-        int e = q - qHat;
-        qualPredictionErrors.push_back(e);
-        //memory.clear();
+            // predict current q value, update predictor, and compute prediction
+            // error
+            int qHat = predictor.predict(memory);
+            predictor.update(memory, q);
+            int e = q - qHat;
+            qualPredictionErrors.push_back(e);
+        }
     }
 
     // TODO: adaptive clustering of QS vectors
+
+    // TODO: run-length encoding?
 
     // TODO: pass QS vector to arithmetic or Huffman coder
 
     // ALTERNATIVE: try to predict quality score at a certain position and
     // then quantize the prediction error
+
+    numEncodedRecords++;
 }
 
 size_t QualEncoder::finishBlock(void)
 {
     size_t ret = 0;
+    predictor.createCSVFile();
+    predictor.reset();
     return ret;
 }
 
@@ -180,10 +187,5 @@ QualDecoder::~QualDecoder(void)
 void QualDecoder::decodeBlock(std::vector<std::string> &qual)
 {
     qual.push_back("*");
-}
-
-void QualEncoder::createCSV()
-{
-    predictor.createCSVFile();
 }
 

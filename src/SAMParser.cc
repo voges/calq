@@ -77,15 +77,6 @@ void SAMParser::parse(void)
     if (f == 11) curr.opt = c;
 }
 
-void SAMParser::next(void)
-{
-    if (ifs.getline(curr.line, sizeof(curr.line))) {
-        parse();
-    } else {
-        throwErrorException("Tried to read record behind EOF");
-    }
-}
-
 bool SAMParser::hasNext(void)
 {
     std::streampos current = ifs.tellg();
@@ -94,5 +85,14 @@ bool SAMParser::hasNext(void)
     bool hasNext = current == end ? false : true;
     ifs.seekg(current, ifs.beg); //restore stream position
     return hasNext;
+}
+
+void SAMParser::next(void)
+{
+    if (ifs.getline(curr.line, sizeof(curr.line))) {
+        parse();
+    } else {
+        throwErrorException("Tried to read record behind EOF");
+    }
 }
 

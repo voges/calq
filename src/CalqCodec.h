@@ -25,16 +25,17 @@ class CalqEncoder {
 public:
     CalqEncoder(const std::string &infileName, const std::string &outfileName, const size_t &blockSize);
     ~CalqEncoder(void);
+
     void encode(void);
 
 private:
-    std::string infileName;
-    std::string outfileName;
-    SAMParser samParser;
-    ofbitstream ofbs;
-    size_t blockSize;
-    QualEncoder qualEncoder;
     std::vector<std::streampos> blockPositionList;
+    const size_t blockSize;
+    const std::string infileName;
+    ofbitstream ofbs;
+    const std::string outfileName;
+    QualEncoder qualEncoder;
+    SAMParser samParser;
 };
 
 /** @brief Class: CalqDecoder
@@ -47,13 +48,14 @@ class CalqDecoder {
 public:
     CalqDecoder(const std::string &infileName, const std::string &outfileName);
     ~CalqDecoder(void);
+
     void decode(void);
 
 private:
-    std::string infileName;
-    std::string outfileName;
     ifbitstream ifbs;
+    const std::string infileName;
     std::ofstream ofs;
+    const std::string outfileName;
     QualDecoder qualDecoder;
 };
 
@@ -70,8 +72,8 @@ public:
     void extractInfo(void);
 
 private:
-    std::string infileName;
     ifbitstream ifbs;
+    const std::string infileName;
 };
 
 #endif // CALQCODEC_H

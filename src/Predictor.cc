@@ -9,6 +9,8 @@
  *  Changelog
  *  2016-05-10: edited coding style; added const specifiers; CSV filename is
  *              now generated from SAM input filename (voges)
+ *  2016-05-11: fixed update() and predict() functions to work with arbitrary
+ *              memory sizes; added public method writeFrequencyTable() (voges)
  */
 
 #include "Predictor.h"
@@ -17,80 +19,113 @@
 #include <climits>
 #include <math.h>
 
-static const int OFFSET = 33;
-
-Predictor::Predictor(const size_t &alphabetSize, const size_t &memorySize)
+Predictor::Predictor(const size_t &alphabetSize, const size_t &memorySize, const size_t &offset)
     : alphabetSize(alphabetSize)
-    , frequencies(pow(alphabetSize, memorySize), std::vector<int>(alphabetSize, 0))
+    , alphabetMax(offset+alphabetSize)
+    , alphabetMin(offset)
+    , frequencyTable()
     , memorySize(memorySize)
     , numCols(0)
     , numRows(0)
-    , offset(OFFSET)
+    , offset(offset)
 {
     numCols = alphabetSize;
     numRows = (size_t)pow(alphabetSize, memorySize);
-
-    for (size_t i = 0; i < numRows; ++i) {
-        frequencies[i][i%alphabetSize] = 1;
-    }
+    initFrequencyTable();
 }
 
 Predictor::~Predictor(void) 
 {
-    // empty
+    //writeFrequencyTable(std::cout);
 }
 
-int Predictor::predict(const std::vector<int> &memory)
+int Predictor::predict(const std::vector<int> &memory) const
 {
     if (memory.size() != memorySize) {
         throwErrorException("Memory sizes do not match");
     }
 
-    //std::cout << "memory: " << std::endl;
-    //for (int i = 0; i < memorySize; i++)
-    //    std::cout << (char)memory[i] << " ";
-    //std::cout << std::endl;
+    if (memory[0] == -1) {
+        throwErrorException("Memory is not initialized");
+    }
 
-    // check wether memory is initialized (otherwise it is filled with '-1')
-    if (memory[0] != -1) {
-        // TODO!!
-        int val1 = memory[0];
-        val1 -= offset;
-        val1 *= alphabetSize - 1;
-        int val2 = memory[1];
-        val2 -= offset;
+    int row = computeState(memory);
 
-        int row = val1 + val2;
-        return (int)findMax(frequencies[row]) + offset;
-    } else {
-        return memory[0];
+    return findMax(frequencyTable[row]) + offset;
+}
+
+void Predictor::update(const std::vector<int> &memory, const int &x)
+{
+    if (x < alphabetMin || x > alphabetMax) {
+        throwErrorException("Symbol out of range");
+    }
+
+    if (memory.size() != memorySize) {
+        throwErrorException("Memory sizes do not match");
+    }
+
+    if (memory[0] == -1) {
+        throwErrorException("Memory is not initialized");
+    }
+
+    int row = computeState(memory);
+    frequencyTable[row][x-offset]++;
+}
+
+void Predictor::reset(void)
+{
+    initFrequencyTable();
+}
+
+void Predictor::writeFrequencyTable(std::ostream &os)
+{
+    for (size_t i = 0; i < numRows; ++i) {
+        for (size_t j = 0; j < numCols; ++j) {
+            if (j == (alphabetSize - 1)) {
+                os << frequencyTable[i][j]<<"\n";
+            } else {
+                os << frequencyTable[i][j]<< ", ";
+            }
+        }
     }
 }
 
-void Predictor::update(const std::vector<int> &memory, const int &q)
+void Predictor::createCSVFile(void)
+{
+    std::string filename = cliOptions.infileName + ".csv";
+    std::ofstream ofs;
+
+    if (fileExists(filename) && cliOptions.force == false) {
+        std::cout << "CSV file already exists: " << filename << std::endl;
+        std::cout << "Do you want to overwrite it? ";
+        if (!yesno()) {
+            throwUserException("Exited because we do not overwrite output files (add '-f' to force overwriting)");
+        }
+    }
+
+    ofs.open(filename);
+    writeFrequencyTable(ofs);
+    ofs.close();
+
+    std::cout << "Wrote prediction table to: " << filename << std::endl;
+}
+
+int Predictor::computeState(const std::vector<int> &memory) const
 {
     if (memory.size() != memorySize) {
         throwErrorException("Memory sizes do not match");
     }
 
-    // TODO only update frequency table if memory is initialized
-    if (memory[0] != -1) {
-        int row = ((int)memory[0]-offset)*40 + (int)memory[1];
-        frequencies[row][(int)q-offset] = frequencies[row][(int)q-offset] + 1;
+    // compute state (i.e. row) from memory values
+    int state = memory[0] - offset;
+    for (size_t i = 1; i < memorySize; ++i) {
+        state += (memory[i] - offset) * alphabetSize * i;
     }
+
+    return state;
 }
 
-unsigned int Predictor::getOffset(void) const
-{
-    return offset;
-}
-
-void Predictor::setOffset(const unsigned int &offset)
-{
-    this->offset = offset;
-}
-
-int Predictor::findMax(const std::vector<int> &array)
+int Predictor::findMax(const std::vector<int> &array) const
 {
     int max = INT_MIN;
     int pos = 0;
@@ -105,31 +140,14 @@ int Predictor::findMax(const std::vector<int> &array)
     return pos;
 }
 
-void Predictor::createCSVFile(void)
+void Predictor::initFrequencyTable(void) 
 {
-    std::string filename = cliOptions.infileName + ".csv";
-    std::ofstream ofs;
+    // resize frequency table and init it with zeros
+    frequencyTable.resize(numRows, std::vector<int>(numCols, 0));
 
-    if (fileExists(filename) && cliOptions.force == false) {
-        std::cout << "CSV file already exists: " << filename << std::endl;
-        std::cout << "Do you want to overwrite it? ";
-        if (!yesno()) {
-            throwUserException("Exited because we do not overwrite the output file");
-        }
-    }
-
-    ofs.open(filename);
-
+    // construct unity matrices
     for (size_t i = 0; i < numRows; ++i) {
-        for (size_t j = 0; j < numCols; ++j) {
-            if (j == (alphabetSize-1)) {
-                ofs << frequencies[i][j]<<"\n";
-            } else {
-                ofs << frequencies[i][j]<< ", ";
-            }
-        }
+        frequencyTable[i][i%alphabetSize] = 1;
     }
-
-    ofs.close();
 }
 

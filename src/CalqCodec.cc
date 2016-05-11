@@ -16,13 +16,13 @@
 CalqEncoder::CalqEncoder(const std::string &infileName, 
                          const std::string &outfileName, 
                          const size_t &blockSize)
-    : infileName(infileName)
-    , outfileName(outfileName)
-    , samParser(infileName)
-    , ofbs()
+    : blockPositionList()
     , blockSize(blockSize)
+    , infileName(infileName)
+    , ofbs()
+    , outfileName(outfileName)
     , qualEncoder(ofbs)
-    , blockPositionList()
+    , samParser(infileName)
 {
     ofbs.open(outfileName);
 }
@@ -79,9 +79,6 @@ void CalqEncoder::encode(void)
         }
     }
 
-    // TODO: make this optional?
-    qualEncoder.createCSV();
-
     // complete file header
     //std::streampos blockPositionListPos = ofbs.tellp();
     ofbs.seekp(fileHeaderPos, std::ios::beg);
@@ -110,10 +107,10 @@ void CalqEncoder::encode(void)
 }
 
 CalqDecoder::CalqDecoder(const std::string &infileName, const std::string &outfileName)
-    : infileName(infileName)
-    , outfileName(outfileName)
-    , ifbs()
+    : ifbs()
+    , infileName(infileName)
     , ofs()
+    , outfileName(outfileName)
     , qualDecoder(ifbs)
 {
     ifbs.open(infileName);
@@ -132,8 +129,9 @@ void CalqDecoder::decode(void)
 }
 
 CalqInfoTool::CalqInfoTool(const std::string& infileName)
-    : infileName(infileName)
-    , ifbs()
+    : ifbs()
+    , infileName(infileName)
+    
 {
     ifbs.open(infileName);
 }

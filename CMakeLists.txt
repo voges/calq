@@ -45,8 +45,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 
-# generate version.h file
-message(STATUS "Creating file ${PROJECT_BUILD_DIR}/version.h")
+# generate version.h
+message(STATUS "Creating ${PROJECT_BUILD_DIR}/version.h")
 file(WRITE ${PROJECT_BUILD_DIR}/version.cmake "file(WRITE version.h \"#ifndef CMAKE_VERSION_H\\n\")\n")
 file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define CMAKE_VERSION_H\\n\\n\")\n")
 file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define _CMAKE_VERSION_MAJOR_ ${PROJECT_VERSION_MAJOR}\\n\")\n")
@@ -59,7 +59,7 @@ add_custom_target(version
 )
 
 # write build time in UTC ISO 8601 to timestamp.h
-message(STATUS "Creating file ${PROJECT_BUILD_DIR}/timestamp.h")
+message(STATUS "Creating ${PROJECT_BUILD_DIR}/timestamp.h")
 file(WRITE ${PROJECT_BUILD_DIR}/timestamp.cmake "STRING(TIMESTAMP UTCTIME UTC)\n")
 file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(WRITE timestamp.h \"#ifndef CMAKE_TIMESTAMP_H\\n\")\n")
 file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#define CMAKE_TIMESTAMP_H\\n\\n\")\n")
@@ -76,8 +76,8 @@ mark_as_advanced(GIT_SCM)
 find_file(GIT_DIR NAMES .git PATHS ${PROJECT_ROOT_DIR} NO_DEFAULT_PATH)
 if (GIT_SCM AND GIT_DIR)
     # create gitrevision.h that depends on the Git HEAD log
-    message(STATUS "Git is available and found .git/ directory")
-    message(STATUS "Creating file ${PROJECT_BUILD_DIR}/gitrevision.h")
+    message(STATUS "Git is available and .git/ directory is present")
+    message(STATUS "Creating ${PROJECT_BUILD_DIR}/gitrevision.h")
 
     add_custom_command(
         OUTPUT ${PROJECT_BUILD_DIR}/gitrevision.h

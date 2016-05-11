@@ -18,26 +18,38 @@
 #include <string>
 #include <vector>
 
+/** @brief Class: Predictor
+ *
+ *  The Predictor class provides two methods as main interface:
+ *  - predict: Memory is used to predict the next value in a sequence.
+ *  - update: The current symbol x is used to update the predictor.
+ */
 class Predictor {
 public:
-    Predictor(const size_t &alphabetSize, const size_t &memorySize);
+    Predictor(const size_t &alphabetSize, const size_t &memorySize, const size_t &offset);
     ~Predictor(void);
 
-    int predict(const std::vector<int> &memory);
-    void update(const std::vector<int> &memory, const int &q);
-    unsigned int getOffset(void) const;
-    void setOffset(const unsigned int &offset);
+    int predict(const std::vector<int> &memory) const;
+    void update(const std::vector<int> &memory, const int &x);
+
+    void reset(void);
+
+    void writeFrequencyTable(std::ostream &os);
     void createCSVFile(void);
 
 private:
-    size_t alphabetSize;
-    std::vector<std::vector<int>> frequencies;
-    size_t memorySize;
+    const size_t alphabetSize;
+    const int alphabetMax;
+    const int alphabetMin;
+    std::vector<std::vector<int>> frequencyTable;
+    const size_t memorySize;
     size_t numCols;
     size_t numRows;
-    unsigned int offset;
+    const unsigned int offset;
 
-    int findMax(const std::vector<int> &array);
+    int computeState(const std::vector<int> &memory) const;
+    int findMax(const std::vector<int> &array) const;
+    void initFrequencyTable(void);
 };
 
 #endif // PREDICTOR_H

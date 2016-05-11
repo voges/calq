@@ -1,6 +1,6 @@
 /** @file QualCodec.h
  *  @brief This file contains the definitions of the QualEncoder and
- *         QualDecoder classes, respectively.
+ *         QualDecoder classes.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -28,13 +28,14 @@ class QualEncoder {
 public:
     QualEncoder(ofbitstream &ofbs);
     ~QualEncoder(void);
+
     void encodeRecord(const SAMRecord &samRecord);
     size_t finishBlock(void);
-    void createCSV(void);
 
 private:
+    size_t numEncodedRecords;
+    size_t numInputRecords;
     ofbitstream &ofbs;
-    size_t recordCnt; ///< number of records processed in the current block
     Predictor predictor;
 };
 
@@ -48,6 +49,7 @@ class QualDecoder {
 public:
     QualDecoder(ifbitstream &ifbs);
     ~QualDecoder(void);
+
     void decodeBlock(std::vector<std::string> &qual);
 
 private:

@@ -25,8 +25,8 @@ public:
     std::string header; ///< SAM header
     SAMRecord curr;     ///< current SAM record
 
-    void next(void);
     bool hasNext(void);
+    void next(void);
 
 private:
     std::ifstream ifs;
