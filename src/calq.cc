@@ -21,32 +21,34 @@
 
 CLIOptions cliOptions;
 
-static void printCopyright(void)
-{
-    std::cout << "Copyright (c) 2015-" << BUILD_YEAR << std::endl;
-    std::cout << "Leibniz Universitaet Hannover, Institut fuer ";
-    std::cout << "Informationsverarbeitung (TNT)" << std::endl;
-    std::cout << "Contact: Jan Voges <voges@tnt.uni-hannover.de>" << std::endl;
-}
-
 static void printVersion(void)
 {
     std::cout << "calq " << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_PATCH << std::endl;
     std::cout << "Build time: " << UTCTIMESTAMP << std::endl;
     std::cout << "Git revision: " << GITREVISION_LONG << std::endl;
     std::cout << std::endl;
-    printCopyright();
 }
 
-static void printHelp(void)
+static void printCopyright(void)
 {
-    printVersion();
+    std::cout << "Copyright (c) 2015-" << BUILD_YEAR << std::endl;
+    std::cout << "Leibniz Universitaet Hannover, Institut fuer ";
+    std::cout << "Informationsverarbeitung (TNT)" << std::endl;
+    std::cout << "Contact: Jan Voges <voges@tnt.uni-hannover.de>" << std::endl;
     std::cout << std::endl;
+}
+
+static void printUsage(void)
+{
     std::cout << "Usage:" << std::endl;
     std::cout << "  Compress  : calq [-o FILE] [-b SIZE] [-f] file.sam" << std::endl;
     std::cout << "  Decompress: calq -d [-o FILE] [-f] file.cq" << std::endl;
     std::cout << "  Info      : calq -i file.cq" << std::endl;
     std::cout << std::endl;
+}
+
+static void printOptions(void)
+{
     std::cout << "Options:" << std::endl;
     std::cout << "  -b  --blocksz=SIZE Specify block SIZE" << std::endl;
     std::cout << "  -d  --decompress   Decompress" << std::endl;
@@ -54,8 +56,17 @@ static void printHelp(void)
     std::cout << "  -h, --help         Print this help" << std::endl;
     std::cout << "  -i, --info         Print information about CQ file" << std::endl;
     std::cout << "  -o, --output=FILE  Specify output FILE" << std::endl;
+    std::cout << "  -u, --usage        Show usage" << std::endl;
     std::cout << "  -v, --version      Display program version" << std::endl;
     std::cout << std::endl;
+}
+
+static void printHelp(void)
+{
+    printVersion();
+    printCopyright();
+    printUsage();
+    printOptions();
 }
 
 static void parseOptions(int argc, char *argv[])
@@ -69,11 +80,12 @@ static void parseOptions(int argc, char *argv[])
         { "help",       no_argument,       NULL, 'h'},
         { "info",       no_argument,       NULL, 'i'},
         { "output",     required_argument, NULL, 'o'},
+        { "usage",      no_argument,       NULL, 'u'},
         { "version",    no_argument,       NULL, 'v'},
         { NULL,         0,                 NULL,  0 }
     };
 
-    const char *shortOptions = "b:dfhio:v";
+    const char *shortOptions = "b:dfhio:uv";
 
     do {
         int optIdx = 0;
@@ -89,10 +101,10 @@ static void parseOptions(int argc, char *argv[])
             }
             break;
         case 'd':
-            if (cliOptions.mode == CLIOptions::MODE_INFO) {
+            if (cliOptions.mode == CLIOptions::Mode::INFO) {
                 throwUserException("Cannot decompress and get info at once");
             } else {
-                cliOptions.mode = CLIOptions::MODE_DECOMPRESS;
+                cliOptions.mode = CLIOptions::Mode::DECOMPRESS;
             }
             break;
         case 'f':
@@ -103,14 +115,18 @@ static void parseOptions(int argc, char *argv[])
             exit(EXIT_SUCCESS);
             break;
         case 'i':
-            if (cliOptions.mode == CLIOptions::MODE_DECOMPRESS) {
+            if (cliOptions.mode == CLIOptions::Mode::DECOMPRESS) {
                 throwUserException("Cannot decompress and get info at once");
             } else {
-                cliOptions.mode = CLIOptions::MODE_INFO;
+                cliOptions.mode = CLIOptions::Mode::INFO;
             }
             break;
         case 'o':
             cliOptions.outfileName = optarg;
+            break;
+        case 'u':
+            printUsage();
+            exit(EXIT_SUCCESS);
             break;
         case 'v':
             printVersion();
@@ -131,18 +147,18 @@ static void parseOptions(int argc, char *argv[])
     }
 
     // sanity checks
-    if (cliOptions.mode == CLIOptions::MODE_COMPRESS) {
+    if (cliOptions.mode == CLIOptions::Mode::COMPRESS) {
         // all possible options are legal in compression mode
         if (cliOptions.blockSize == 0) {
             std::cout << "Using default block size 10,000" << std::endl;
             cliOptions.blockSize = 10000; // default value
         }
-    } else if (cliOptions.mode == CLIOptions::MODE_DECOMPRESS) {
+    } else if (cliOptions.mode == CLIOptions::Mode::DECOMPRESS) {
         // option -b is illegal in decompression mode
         if (cliOptions.blockSize != 0) {
             throwUserException("Option -b is illegal in decompression mode");
         }
-    } else { // CLIOptions::MODE_INFO
+    } else { // CLIOptions::Mode::INFO
         // options -bf are illegal in info mode
         if (cliOptions.blockSize != 0) {
             throwUserException("Option -b is illegal in info mode");
@@ -168,7 +184,7 @@ int main(int argc, char *argv[])
     cliOptions.infileName = "";
     cliOptions.outfileName = "";
     cliOptions.force = false;
-    cliOptions.mode = CLIOptions::MODE_COMPRESS;
+    cliOptions.mode = CLIOptions::Mode::COMPRESS;
 
     // register custom signal handler(s)
     signal(SIGHUP,  handleSignal);
@@ -187,7 +203,7 @@ int main(int argc, char *argv[])
         }
 
         switch (cliOptions.mode) {
-        case CLIOptions::MODE_COMPRESS: {
+        case CLIOptions::Mode::COMPRESS: {
             // check for correct infile extension
             if (filenameExtension(cliOptions.infileName) != std::string("sam")) {
                 throwUserException("Input file extension must be 'sam'");
@@ -217,7 +233,7 @@ int main(int argc, char *argv[])
 
             break;
         }
-        case CLIOptions::MODE_DECOMPRESS: {
+        case CLIOptions::Mode::DECOMPRESS: {
             // check for correct infile extension
             if (filenameExtension(cliOptions.infileName) != std::string("cq")) {
                 throwUserException("Input file extension must be 'cq'");
@@ -247,7 +263,7 @@ int main(int argc, char *argv[])
 
             break;
         }
-        case CLIOptions::MODE_INFO: {
+        case CLIOptions::Mode::INFO: {
             // check for correct infile extension
             if (filenameExtension(cliOptions.infileName) != std::string("cq")) {
                 throwUserException("Input file extension must be 'cq'");
@@ -264,6 +280,13 @@ int main(int argc, char *argv[])
         default:
             throwErrorException("Unknown mode");
         }
+    } catch (const UserException &userException) {
+        std::cerr << userException.what() << std::endl << std::endl;
+        printUsage();
+        return EXIT_FAILURE;
+    } catch (const ErrorException &errorException) {
+        std::cerr << "Error: " << errorException.what() << std::endl;
+        return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
         // this also catches ErrorExceptions and UserExceptions
         std::cerr << "Fatal error: " << stdException.what() << std::endl;

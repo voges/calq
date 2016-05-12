@@ -30,10 +30,10 @@ struct CLIOptions {
     size_t blockSize;
     bool force;
     std::string infileName;
-    enum {
-        MODE_COMPRESS,
-        MODE_DECOMPRESS,
-        MODE_INFO 
+    enum Mode {
+        COMPRESS,
+        DECOMPRESS,
+        INFO 
     } mode;
     std::string outfileName;
 };
