@@ -161,6 +161,17 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
         }
     }
 
+    // TODO: DPCM loop
+    /*for(std::string::size_type i = 0; i < qual.size(); ++i) {
+        int q = (int)qual[i];
+        int qHat = predictor.predict();
+        int e = q - qHat;
+        eQuant = maxLloyd.quantize(e);
+        int qQuant = qHat + e;
+        maxLloyd.updateModel(e);
+        predictor.update(qQuant);
+    }*/
+
     // TODO: adaptive clustering of QS vectors
 
     // TODO: run-length encoding?
