@@ -36,7 +36,7 @@ protected:
  */
 class UserException : public Exception {
 public:
-    UserException(const std::string &msg) : Exception(msg) {}
+    UserException(const std::string &msg): Exception(msg) {}
 };
 
 /** @brief Global function: throwUserException
@@ -103,7 +103,8 @@ private:
 };
 
 // Remove the symbol for the function, then define a new version that instead
-// creates a stack temporary instance of Reporter initialized with the caller.
+// creates a stack temporary instance of ErrorExceptionReporterReporter
+// initialized with the caller.
 #undef throwErrorException
 #define throwErrorException ErrorExceptionReporter(__PRETTY_FUNCTION__, __FILE__, __LINE__)
 

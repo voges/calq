@@ -264,10 +264,10 @@ int main(int argc, char *argv[])
         default:
             throwErrorException("Unknown mode");
         }
-    } catch (ErrorException &errorException) {
-        std::cerr << "Error: " << errorException.what() << std::endl;
-    } catch (UserException &userException) {
-        std::cerr << userException.what() << std::endl;
+    } catch (const std::exception &stdException) {
+        // this also catches ErrorExceptions and UserExceptions
+        std::cerr << "Fatal error: " << stdException.what() << std::endl;
+        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;

@@ -118,19 +118,26 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     std::string insertedQual("");
     extract(seq, qual, cigar, matchedSeq, matchedQual, insertedSeq, insertedQual);
 
-    // TODO: if this is the first record in a new block, simply allocate depths
-    // vector; otherwise reallocate depths vector to cover the new region
-
     // TODO: accumulate depths
-
-    // TODO: design/update nested quantizers for genomic columns
+    //quantizer1.updateDepths(pos, cigar);
 
     // TODO: quantize the added quality score vector
+    // TODO: design/update nested quantizers for genomic columns
+    /*for(std::string::size_type i = 0; i < qual.size(); ++i) {
+        int q = (int)qual[i];
+        int qTilde1 = quantizer1.quantize(q, pos+i);
+        qualTilde1.push_back(qTilde1);
+    }*/
 
     // TODO: apply and update quality score mask for current vector
+    /*for(size_t i = 0; i < qualTilde1.size(); ++i) {
+        int qTilde1 = (int)qual[i];
+        int qTilde1Bar = mask.apply(qTilde1);
+        qualTilde1Bar.push_back(qTilde1Bar);
+    }*/
 
     // Markov-chain prediction for current current qual vector
-    std::vector<int> qualPredictionErrors;
+    std::vector<int> err;
     std::vector<int> memory(MEMORY_SIZE, -1);
 
     for(std::string::size_type i = 0; i < qual.size(); ++i) {
@@ -138,7 +145,7 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
 
         if (i < MEMORY_SIZE) {
             std::fill(memory.begin(), memory.end(), -1); // this is not necessary
-            qualPredictionErrors.push_back(q);
+            err.push_back(q);
         } else {
             // fill memory
             for (size_t m = 0; m < MEMORY_SIZE; m++) {
@@ -150,7 +157,7 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
             int qHat = predictor.predict(memory);
             predictor.update(memory, q);
             int e = q - qHat;
-            qualPredictionErrors.push_back(e);
+            err.push_back(e);
         }
     }
 
@@ -159,6 +166,10 @@ void QualEncoder::encodeRecord(const SAMRecord &samRecord)
     // TODO: run-length encoding?
 
     // TODO: pass QS vector to arithmetic or Huffman coder
+    /*for(size_t i = 0; i < tmp.size(); ++i) {
+        int q = (int)tmp[i];
+        compress();
+    }*/
 
     // ALTERNATIVE: try to predict quality score at a certain position and
     // then quantize the prediction error
