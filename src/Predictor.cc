@@ -82,9 +82,9 @@ void Predictor::writeFrequencyTable(std::ostream &os)
     for (size_t i = 0; i < numRows; ++i) {
         for (size_t j = 0; j < numCols; ++j) {
             if (j == (alphabetSize - 1)) {
-                os << frequencyTable[i][j]<<"\n";
+                os << frequencyTable[i][j] << "\n";
             } else {
-                os << frequencyTable[i][j]<< ", ";
+                os << frequencyTable[i][j] << ", ";
             }
         }
     }
