@@ -288,7 +288,6 @@ int main(int argc, char *argv[])
         std::cerr << "Error: " << errorException.what() << std::endl;
         return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
-        // this also catches ErrorExceptions and UserExceptions
         std::cerr << "Fatal error: " << stdException.what() << std::endl;
         return EXIT_FAILURE;
     }
