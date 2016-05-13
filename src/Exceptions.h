@@ -103,7 +103,7 @@ private:
 };
 
 // Remove the symbol for the function, then define a new version that instead
-// creates a stack temporary instance of ErrorExceptionReporterReporter
+// creates a stack temporary instance of ErrorExceptionReporter
 // initialized with the caller.
 #undef throwErrorException
 #define throwErrorException ErrorExceptionReporter(__PRETTY_FUNCTION__, __FILE__, __LINE__)
