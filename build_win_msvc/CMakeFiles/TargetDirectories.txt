@@ -1,0 +1,6 @@
+C:/Users/Jan Voges/Git/calq/build/CMakeFiles/version.dir
+C:/Users/Jan Voges/Git/calq/build/CMakeFiles/timestamp.dir
+C:/Users/Jan Voges/Git/calq/build/CMakeFiles/calq.dir
+C:/Users/Jan Voges/Git/calq/build/CMakeFiles/gitrevision.dir
+C:/Users/Jan Voges/Git/calq/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Jan Voges/Git/calq/build/CMakeFiles/ZERO_CHECK.dir

@@ -1,0 +1,9 @@
+#ifndef CMAKE_VERSION_H
+#define CMAKE_VERSION_H
+
+#define _CMAKE_VERSION_MAJOR_ 1
+#define _CMAKE_VERSION_MINOR_ 0
+#define _CMAKE_VERSION_PATCH_ 0
+
+#endif // CMAKE_VERSION_H
+

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Jan Voges\Git\calq\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\Jan Voges\Git\calq\build\CMakeFiles\6cc48fdaf8bf1b72c7b452f4cbf69c1f\timestamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Jan Voges\Git\calq\build\CMakeFiles\timestamp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{DBC8DF06-089F-3942-B953-5789A5C8D53A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
