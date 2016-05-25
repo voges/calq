@@ -1,0 +1,5 @@
+/project/dna/git/calq/build/CMakeFiles/calq.dir
+/project/dna/git/calq/build/CMakeFiles/doc.dir
+/project/dna/git/calq/build/CMakeFiles/gitrevision.dir
+/project/dna/git/calq/build/CMakeFiles/timestamp.dir
+/project/dna/git/calq/build/CMakeFiles/version.dir
