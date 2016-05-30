@@ -92,7 +92,7 @@ void Predictor::writeFrequencyTable(std::ostream &os)
 
 void Predictor::createCSVFile(void)
 {
-    std::string filename = cliOptions.infileName + ".csv";
+    std::string filename = cliOptions.inFileName + ".csv";
     std::ofstream ofs;
 
     if (fileExists(filename) && cliOptions.force == false) {

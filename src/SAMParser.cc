@@ -36,7 +36,7 @@ void SAMParser::readSAMHeader(void)
             if (foundHeader == false) {
                 throwErrorException("SAM header is missing");
             }
-            size_t offset = -strlen(curr.line);
+            int offset = -((int)strlen(curr.line));
             ifs.seekg(offset, std::ios::cur);
             break;
         }

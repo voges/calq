@@ -4,9 +4,16 @@
  *  @bug No known bugs
  */
 
+ /*
+  *  Changelog
+  *  2016-05-29: Moved the fileExists function from access() (which
+  *              is defined in unistd.h, which is Linux-specific) to
+  *              std::ifstream (which is portable). (voges)
+  */
+
 #include "common.h"
+#include <fstream>
 #include <string.h>
-#include <unistd.h>
 
 const char * filenameExtension(const std::string &filename)
 {
@@ -17,7 +24,8 @@ const char * filenameExtension(const std::string &filename)
 
 bool fileExists(const std::string &filename)
 {
-    return !access(filename.c_str(), F_OK | R_OK);
+    std::ifstream ifs(filename.c_str());
+    return ifs.good();
 }
 
 bool yesno(void)

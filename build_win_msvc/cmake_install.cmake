@@ -35,5 +35,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/Jan Voges/Git/calq/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Jan Voges/Git/calq/build_win_msvc/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

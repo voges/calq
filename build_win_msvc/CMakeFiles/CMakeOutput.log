@@ -1,7 +1,7 @@
 The system is: Windows - 10.0.10586 - AMD64
 Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
 Compiler:  
-Build flags: 
+Build flags: ;/DWIN32;/D_WINDOWS;/W3
 Id flags: 
 
 The output was:
@@ -9,13 +9,13 @@ The output was:
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:36 PM.
+Build started 5/30/2016 9:37:54 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\3.5.2\CompilerIdC\CompilerIdC.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\3.5.2\CompilerIdC\CompilerIdC.vcxproj" on node 1 (default targets).
 PrepareForBuild:
   Creating directory "Debug\".
   Creating directory "Debug\CompilerIdC.tlog\".
@@ -26,7 +26,7 @@ ClCompile:
   CMakeCCompilerId.c
 Link:
   C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdC.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCCompilerId.obj
-  CompilerIdC.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\3.5.2\CompilerIdC\.\CompilerIdC.exe
+  CompilerIdC.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\3.5.2\CompilerIdC\.\CompilerIdC.exe
 PostBuildEvent:
   for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
   :VCEnd
@@ -34,24 +34,24 @@ PostBuildEvent:
 FinalizeBuildStatus:
   Deleting file "Debug\CompilerIdC.tlog\unsuccessfulbuild".
   Touching "Debug\CompilerIdC.tlog\CompilerIdC.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\3.5.2\CompilerIdC\CompilerIdC.vcxproj" (default targets).
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\3.5.2\CompilerIdC\CompilerIdC.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:01.73
+Time Elapsed 00:00:00.57
 
 
 Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
 
 Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
 
-The C compiler identification is MSVC, found in "C:/Users/Jan Voges/Git/calq/build/CMakeFiles/3.5.2/CompilerIdC/CompilerIdC.exe"
+The C compiler identification is MSVC, found in "C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/3.5.2/CompilerIdC/CompilerIdC.exe"
 
 Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
 Compiler:  
-Build flags: 
+Build flags: ;/DWIN32;/D_WINDOWS;/W3;/GR;/EHsc
 Id flags: 
 
 The output was:
@@ -59,13 +59,13 @@ The output was:
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:37 PM.
+Build started 5/30/2016 9:37:54 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\3.5.2\CompilerIdCXX\CompilerIdCXX.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\3.5.2\CompilerIdCXX\CompilerIdCXX.vcxproj" on node 1 (default targets).
 PrepareForBuild:
   Creating directory "Debug\".
   Creating directory "Debug\CompilerIdCXX.tlog\".
@@ -76,7 +76,7 @@ ClCompile:
   CMakeCXXCompilerId.cpp
 Link:
   C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdCXX.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCXXCompilerId.obj
-  CompilerIdCXX.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\3.5.2\CompilerIdCXX\.\CompilerIdCXX.exe
+  CompilerIdCXX.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\3.5.2\CompilerIdCXX\.\CompilerIdCXX.exe
 PostBuildEvent:
   for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
   :VCEnd
@@ -84,241 +84,241 @@ PostBuildEvent:
 FinalizeBuildStatus:
   Deleting file "Debug\CompilerIdCXX.tlog\unsuccessfulbuild".
   Touching "Debug\CompilerIdCXX.tlog\CompilerIdCXX.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\3.5.2\CompilerIdCXX\CompilerIdCXX.vcxproj" (default targets).
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\3.5.2\CompilerIdCXX\CompilerIdCXX.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.61
+Time Elapsed 00:00:00.56
 
 
 Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
 
 Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
 
-The CXX compiler identification is MSVC, found in "C:/Users/Jan Voges/Git/calq/build/CMakeFiles/3.5.2/CompilerIdCXX/CompilerIdCXX.exe"
+The CXX compiler identification is MSVC, found in "C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/3.5.2/CompilerIdCXX/CompilerIdCXX.exe"
 
 Determining if the C compiler works passed with the following output:
-Change Dir: C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp
+Change Dir: C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_d0d39.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_97306.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:38 PM.
+Build started 5/30/2016 9:37:55 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_d0d39.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_97306.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_d0d39.dir\Debug\".
-  Creating directory "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_d0d39.dir\Debug\cmTC_d0d39.tlog\".
+  Creating directory "cmTC_97306.dir\Debug\".
+  Creating directory "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_97306.dir\Debug\cmTC_97306.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_d0d39.dir\Debug\cmTC_d0d39.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_97306.dir\Debug\cmTC_97306.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_d0d39.dir\Debug\\" /Fd"cmTC_d0d39.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\testCCompiler.c"
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_97306.dir\Debug\\" /Fd"cmTC_97306.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\testCCompiler.c"
   Microsoft (R) C/C++ Optimizing Compiler Version 19.00.23506 for x86
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_d0d39.dir\Debug\\" /Fd"cmTC_d0d39.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\testCCompiler.c"
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_97306.dir\Debug\\" /Fd"cmTC_97306.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\testCCompiler.c"
   
   testCCompiler.c
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_d0d39.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_d0d39.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_d0d39.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_d0d39.dir\Debug\testCCompiler.obj
-  cmTC_d0d39.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_d0d39.exe
-  cmTC_d0d39.vcxproj -> C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_d0d39.pdb (Full PDB)
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_97306.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_97306.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_97306.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_97306.dir\Debug\testCCompiler.obj
+  cmTC_97306.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_97306.exe
+  cmTC_97306.vcxproj -> C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_97306.pdb (Full PDB)
 FinalizeBuildStatus:
-  Deleting file "cmTC_d0d39.dir\Debug\cmTC_d0d39.tlog\unsuccessfulbuild".
-  Touching "cmTC_d0d39.dir\Debug\cmTC_d0d39.tlog\cmTC_d0d39.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_d0d39.vcxproj" (default targets).
+  Deleting file "cmTC_97306.dir\Debug\cmTC_97306.tlog\unsuccessfulbuild".
+  Touching "cmTC_97306.dir\Debug\cmTC_97306.tlog\cmTC_97306.lastbuildstate".
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_97306.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.94
+Time Elapsed 00:00:01.14
 
 
 Detecting C compiler ABI info compiled with the following output:
-Change Dir: C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp
+Change Dir: C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_13075.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_ba6e9.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:39 PM.
+Build started 5/30/2016 9:37:56 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_13075.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_ba6e9.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_13075.dir\Debug\".
-  Creating directory "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_13075.dir\Debug\cmTC_13075.tlog\".
+  Creating directory "cmTC_ba6e9.dir\Debug\".
+  Creating directory "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_ba6e9.dir\Debug\cmTC_ba6e9.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_13075.dir\Debug\cmTC_13075.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_ba6e9.dir\Debug\cmTC_ba6e9.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_13075.dir\Debug\\" /Fd"cmTC_13075.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCCompilerABI.c"
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ba6e9.dir\Debug\\" /Fd"cmTC_ba6e9.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCCompilerABI.c"
   Microsoft (R) C/C++ Optimizing Compiler Version 19.00.23506 for x86
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_13075.dir\Debug\\" /Fd"cmTC_13075.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCCompilerABI.c"
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ba6e9.dir\Debug\\" /Fd"cmTC_ba6e9.dir\Debug\vc140.pdb" /Gd /TC /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCCompilerABI.c"
   
   CMakeCCompilerABI.c
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_13075.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_13075.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_13075.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_13075.dir\Debug\CMakeCCompilerABI.obj
-  cmTC_13075.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_13075.exe
-  cmTC_13075.vcxproj -> C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_13075.pdb (Full PDB)
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_ba6e9.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_ba6e9.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_ba6e9.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_ba6e9.dir\Debug\CMakeCCompilerABI.obj
+  cmTC_ba6e9.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_ba6e9.exe
+  cmTC_ba6e9.vcxproj -> C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_ba6e9.pdb (Full PDB)
 FinalizeBuildStatus:
-  Deleting file "cmTC_13075.dir\Debug\cmTC_13075.tlog\unsuccessfulbuild".
-  Touching "cmTC_13075.dir\Debug\cmTC_13075.tlog\cmTC_13075.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_13075.vcxproj" (default targets).
+  Deleting file "cmTC_ba6e9.dir\Debug\cmTC_ba6e9.tlog\unsuccessfulbuild".
+  Touching "cmTC_ba6e9.dir\Debug\cmTC_ba6e9.tlog\cmTC_ba6e9.lastbuildstate".
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_ba6e9.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.66
+Time Elapsed 00:00:00.78
 
 
 Determining if the CXX compiler works passed with the following output:
-Change Dir: C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp
+Change Dir: C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_974e9.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_a97e5.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:40 PM.
+Build started 5/30/2016 9:37:57 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_974e9.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_a97e5.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_974e9.dir\Debug\".
-  Creating directory "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_974e9.dir\Debug\cmTC_974e9.tlog\".
+  Creating directory "cmTC_a97e5.dir\Debug\".
+  Creating directory "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_a97e5.dir\Debug\cmTC_a97e5.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_974e9.dir\Debug\cmTC_974e9.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_a97e5.dir\Debug\cmTC_a97e5.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_974e9.dir\Debug\\" /Fd"cmTC_974e9.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_a97e5.dir\Debug\\" /Fd"cmTC_a97e5.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
   Microsoft (R) C/C++ Optimizing Compiler Version 19.00.23506 for x86
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_974e9.dir\Debug\\" /Fd"cmTC_974e9.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_a97e5.dir\Debug\\" /Fd"cmTC_a97e5.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\testCXXCompiler.cxx"
   
   testCXXCompiler.cxx
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_974e9.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_974e9.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_974e9.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_974e9.dir\Debug\testCXXCompiler.obj
-  cmTC_974e9.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_974e9.exe
-  cmTC_974e9.vcxproj -> C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_974e9.pdb (Full PDB)
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_a97e5.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_a97e5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_a97e5.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_a97e5.dir\Debug\testCXXCompiler.obj
+  cmTC_a97e5.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_a97e5.exe
+  cmTC_a97e5.vcxproj -> C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_a97e5.pdb (Full PDB)
 FinalizeBuildStatus:
-  Deleting file "cmTC_974e9.dir\Debug\cmTC_974e9.tlog\unsuccessfulbuild".
-  Touching "cmTC_974e9.dir\Debug\cmTC_974e9.tlog\cmTC_974e9.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_974e9.vcxproj" (default targets).
+  Deleting file "cmTC_a97e5.dir\Debug\cmTC_a97e5.tlog\unsuccessfulbuild".
+  Touching "cmTC_a97e5.dir\Debug\cmTC_a97e5.tlog\cmTC_a97e5.lastbuildstate".
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_a97e5.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.59
+Time Elapsed 00:00:00.76
 
 
 Detecting CXX compiler ABI info compiled with the following output:
-Change Dir: C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp
+Change Dir: C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_ba7c5.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_a8f94.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:41 PM.
+Build started 5/30/2016 9:37:58 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_ba7c5.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_a8f94.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_ba7c5.dir\Debug\".
-  Creating directory "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_ba7c5.dir\Debug\cmTC_ba7c5.tlog\".
+  Creating directory "cmTC_a8f94.dir\Debug\".
+  Creating directory "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_a8f94.dir\Debug\cmTC_a8f94.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_ba7c5.dir\Debug\cmTC_ba7c5.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_a8f94.dir\Debug\cmTC_a8f94.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_ba7c5.dir\Debug\\" /Fd"cmTC_ba7c5.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCXXCompilerABI.cpp"
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_a8f94.dir\Debug\\" /Fd"cmTC_a8f94.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCXXCompilerABI.cpp"
   Microsoft (R) C/C++ Optimizing Compiler Version 19.00.23506 for x86
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_ba7c5.dir\Debug\\" /Fd"cmTC_ba7c5.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCXXCompilerABI.cpp"
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_a8f94.dir\Debug\\" /Fd"cmTC_a8f94.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Program Files (x86)\CMake\share\cmake-3.5\Modules\CMakeCXXCompilerABI.cpp"
   
   CMakeCXXCompilerABI.cpp
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_ba7c5.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_ba7c5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_ba7c5.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_ba7c5.dir\Debug\CMakeCXXCompilerABI.obj
-  cmTC_ba7c5.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_ba7c5.exe
-  cmTC_ba7c5.vcxproj -> C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_ba7c5.pdb (Full PDB)
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_a8f94.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_a8f94.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_a8f94.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_a8f94.dir\Debug\CMakeCXXCompilerABI.obj
+  cmTC_a8f94.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_a8f94.exe
+  cmTC_a8f94.vcxproj -> C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_a8f94.pdb (Full PDB)
 FinalizeBuildStatus:
-  Deleting file "cmTC_ba7c5.dir\Debug\cmTC_ba7c5.tlog\unsuccessfulbuild".
-  Touching "cmTC_ba7c5.dir\Debug\cmTC_ba7c5.tlog\cmTC_ba7c5.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_ba7c5.vcxproj" (default targets).
+  Deleting file "cmTC_a8f94.dir\Debug\cmTC_a8f94.tlog\unsuccessfulbuild".
+  Touching "cmTC_a8f94.dir\Debug\cmTC_a8f94.tlog\cmTC_a8f94.lastbuildstate".
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_a8f94.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.57
+Time Elapsed 00:00:00.80
 
 
 
 
 Detecting CXX [] compiler features compiled with the following output:
-Change Dir: C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp
+Change Dir: C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_0387d.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_6eed5.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
 Microsoft (R) Build Engine version 14.0.24730.2
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 5/24/2016 7:21:42 PM.
+Build started 5/30/2016 9:37:59 AM.
 The target "BeforeGenerateProjectPriFile" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\Microsoft\NuGet\Microsoft.NuGet.targets (186,61)" does not exist in the project, and will be ignored.
 The target "_ConvertPdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,37)" does not exist in the project, and will be ignored.
 The target "_CollectPdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (34,70)" does not exist in the project, and will be ignored.
 The target "_CollectMdbFiles" listed in a BeforeTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,38)" does not exist in the project, and will be ignored.
 The target "_CopyMdbFiles" listed in an AfterTargets attribute at "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets (40,71)" does not exist in the project, and will be ignored.
-Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_0387d.vcxproj" on node 1 (default targets).
+Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_6eed5.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_0387d.dir\Debug\".
-  Creating directory "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_0387d.dir\Debug\cmTC_0387d.tlog\".
+  Creating directory "cmTC_6eed5.dir\Debug\".
+  Creating directory "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_6eed5.dir\Debug\cmTC_6eed5.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_0387d.dir\Debug\cmTC_0387d.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_6eed5.dir\Debug\cmTC_6eed5.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_0387d.dir\Debug\\" /Fd"cmTC_0387d.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\feature_tests.cxx"
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_6eed5.dir\Debug\\" /Fd"cmTC_6eed5.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\feature_tests.cxx"
   Microsoft (R) C/C++ Optimizing Compiler Version 19.00.23506 for x86
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_0387d.dir\Debug\\" /Fd"cmTC_0387d.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\feature_tests.cxx"
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_6eed5.dir\Debug\\" /Fd"cmTC_6eed5.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\feature_tests.cxx"
   
   feature_tests.cxx
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_0387d.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_0387d.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_0387d.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_0387d.dir\Debug\feature_tests.obj
-  cmTC_0387d.vcxproj -> C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\Debug\cmTC_0387d.exe
-  cmTC_0387d.vcxproj -> C:/Users/Jan Voges/Git/calq/build/CMakeFiles/CMakeTmp/Debug/cmTC_0387d.pdb (Full PDB)
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_6eed5.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_6eed5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_6eed5.lib" /MACHINE:X86 /SAFESEH  /machine:X86 cmTC_6eed5.dir\Debug\feature_tests.obj
+  cmTC_6eed5.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\Debug\cmTC_6eed5.exe
+  cmTC_6eed5.vcxproj -> C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/CMakeTmp/Debug/cmTC_6eed5.pdb (Full PDB)
 FinalizeBuildStatus:
-  Deleting file "cmTC_0387d.dir\Debug\cmTC_0387d.tlog\unsuccessfulbuild".
-  Touching "cmTC_0387d.dir\Debug\cmTC_0387d.tlog\cmTC_0387d.lastbuildstate".
-Done Building Project "C:\Users\Jan Voges\Git\calq\build\CMakeFiles\CMakeTmp\cmTC_0387d.vcxproj" (default targets).
+  Deleting file "cmTC_6eed5.dir\Debug\cmTC_6eed5.tlog\unsuccessfulbuild".
+  Touching "cmTC_6eed5.dir\Debug\cmTC_6eed5.tlog\cmTC_6eed5.lastbuildstate".
+Done Building Project "C:\Users\Jan Voges\Git\calq\build_win_msvc\CMakeFiles\CMakeTmp\cmTC_6eed5.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.57
+Time Elapsed 00:00:00.80
 
 
     Feature record: CXX_FEATURE:1cxx_alias_templates

@@ -4,20 +4,22 @@
 
 ### What is this repository for? ###
 
-* Implementation of "Coverage-Adaptive Lossy Compression of Genome Sequencing Quality Values" (CALQ)
+* Implementation of "Coverage-adaptive lossy compression of next-generation sequencing quality values"
 * Current version: 1.0.0
 
-### Build ###
+### Build on Linux with GCC ###
 
-    mkdir build
+    mkdir build_linux_gcc
+    cd build_linux_gcc
     cmake ..
     make
 
 ### Contribution guidelines ###
 
 * Please write code conforming to the used coding style
-* \#include with full path to src/
+* \#include with full path to include/
 
 ### Who do I talk to? ###
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
+

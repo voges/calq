@@ -5,6 +5,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (wo)
+ */
+ 
 #include "Exceptions.h"
 
 Exception::Exception(const std::string &msg)

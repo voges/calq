@@ -1,6 +1,6 @@
-C:/Users/Jan Voges/Git/calq/build/CMakeFiles/version.dir
-C:/Users/Jan Voges/Git/calq/build/CMakeFiles/timestamp.dir
-C:/Users/Jan Voges/Git/calq/build/CMakeFiles/calq.dir
-C:/Users/Jan Voges/Git/calq/build/CMakeFiles/gitrevision.dir
-C:/Users/Jan Voges/Git/calq/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/Jan Voges/Git/calq/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/version.dir
+C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/git.dir
+C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/timestamp.dir
+C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/calq.dir
+C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/ALL_BUILD.dir
+C:/Users/Jan Voges/Git/calq/build_win_msvc/CMakeFiles/ZERO_CHECK.dir

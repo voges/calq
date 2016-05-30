@@ -13,18 +13,22 @@
 #include <iostream>
 #include <string.h>
 
-CalqEncoder::CalqEncoder(const std::string &infileName, 
-                         const std::string &outfileName, 
-                         const size_t &blockSize)
+static const int BLOCK_SIZE = 10000;
+
+CalqEncoder::CalqEncoder(const std::string &inFileName,
+                         const std::string &outFileName,
+                         const std::string &referenceFileName)
     : blockPositionList()
-    , blockSize(blockSize)
-    , infileName(infileName)
+    , blockSize(BLOCK_SIZE)
+    //, fastaParser(referenceFileName)
+    , inFileName(inFileName)
     , ofbs()
-    , outfileName(outfileName)
+    , outFileName(outFileName)
     , qualEncoder(ofbs)
-    , samParser(infileName)
+    , referenceFileName(referenceFileName)
+    , samParser(inFileName)
 {
-    ofbs.open(outfileName);
+    ofbs.open(outFileName);
 }
 
 CalqEncoder::~CalqEncoder(void)
@@ -106,15 +110,19 @@ void CalqEncoder::encode(void)
     std::cout << "Compression Factor (CF): " << (double)compressedSize/(double)uncompressedSize*100 << std::endl;
 }
 
-CalqDecoder::CalqDecoder(const std::string &infileName, const std::string &outfileName)
+CalqDecoder::CalqDecoder(const std::string &inFileName,
+                         const std::string &outfileName,
+                         const std::string &referenceFileName)
+    //: fastaParser(referenceFileName)
     : ifbs()
-    , infileName(infileName)
+    , inFileName(inFileName)
     , ofs()
-    , outfileName(outfileName)
+    , outFileName(outFileName)
     , qualDecoder(ifbs)
+    , referenceFileName(referenceFileName)
 {
-    ifbs.open(infileName);
-    ofs.open(outfileName);
+    ifbs.open(inFileName);
+    ofs.open(outFileName);
 }
 
 CalqDecoder::~CalqDecoder(void)
@@ -124,24 +132,6 @@ CalqDecoder::~CalqDecoder(void)
 }
 
 void CalqDecoder::decode(void)
-{
-    throwErrorException("Not yet implemented");
-}
-
-CalqInfoTool::CalqInfoTool(const std::string& infileName)
-    : ifbs()
-    , infileName(infileName)
-    
-{
-    ifbs.open(infileName);
-}
-
-CalqInfoTool::~CalqInfoTool(void)
-{
-    ifbs.close();
-}
-
-void CalqInfoTool::extractInfo(void)
 {
     // read file header
     BYTE fileHeaderMagicOne = 0x00;
