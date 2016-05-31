@@ -26,7 +26,7 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
 {
     ofbs.open(cqFileName);
 
-    // get references sequences
+    // get reference sequences
     for (auto const &fastaFileName : fastaFileNames) {
         std::cout << "Parsing FASTA file: " << fastaFileName << std::endl;
         fastaParser.parseFile(fastaFileName, fastaReferences);
@@ -35,8 +35,7 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
     // print info about found reference sequences
     std::cout << "Found the following reference sequences: " << std::endl;
     for (auto const &fastaReference : fastaReferences) {
-        std::cout << "header: " << fastaReference.header << std::endl;
-        std::cout << "sequence: " << fastaReference.sequence << std::endl;
+        std::cout << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
     }
 }
 

@@ -5,9 +5,10 @@
  */
 
 #include "FASTAParser.h"
+#include <fstream>
 #include <iostream>
 
-FASTAParser::FASTAParser(void) : ifs()
+FASTAParser::FASTAParser(void)
 {
     // empty
 }
@@ -19,10 +20,12 @@ FASTAParser::~FASTAParser(void)
 
 void FASTAParser::parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences)
 {
+    std::ifstream ifs;
     ifs.open(filename.c_str(), std::ios::in);
 
     FASTAReference fastaReference;
     bool first = true;
+
     while (ifs.getline(line, sizeof(line))) {
         if (line[0] == '>') {
             if (first) {

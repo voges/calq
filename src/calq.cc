@@ -22,12 +22,12 @@
     #define TCLAP_NAMESTARTSTRING "~~"
     #define TCLAP_FLAGSTARTSTRING "/"
 #else
-    //#define TCLAP_NAMESTARTSTRING "--"
-    //#define TCLAP_FLAGSTARTSTRING "-"
+    #define TCLAP_NAMESTARTSTRING "--"
+    #define TCLAP_FLAGSTARTSTRING "-"
 #endif
 
-#include "Codecs/CalqCodec.h"
 #include "CLIOptions.h"
+#include "Codecs/CalqCodec.h"
 #include "common.h"
 #include "cmake_config.h"
 #include "Exceptions.h"
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         cliOptions.inFileName = infileArg.getValue();
         cliOptions.outFileName = outfileArg.getValue();
         cliOptions.decompress = decompressSwitch.getValue();
-        cliOptions.referenceFileNames = referenceArg.getValue();
+        cliOptions.refFileNames = referenceArg.getValue();
 
         // check if the input file exists
         if (!fileExists(cliOptions.inFileName)) {
@@ -85,18 +85,18 @@ int main(int argc, char *argv[])
         }
 
         // check if the reference file(s) exist and check for FASTA file(s)
-        for (auto const &referenceFileName : cliOptions.referenceFileNames) {
-            if (   filenameExtension(referenceFileName) != std::string("fa")
-                && filenameExtension(referenceFileName) != std::string("fasta")) {
+        for (auto const &refFileName : cliOptions.refFileNames) {
+            if (   filenameExtension(refFileName) != std::string("fa")
+                && filenameExtension(refFileName) != std::string("fasta")) {
                 throwUserException("Reference file extension must be 'fa' or 'fasta'");
             }
-            if (!fileExists(referenceFileName)) {
+            if (!fileExists(refFileName)) {
                 throwUserException("Cannot access reference file");
             }
-            std::cout << "Using reference file: " << referenceFileName << std::endl;
+            std::cout << "Using reference file: " << refFileName << std::endl;
         }
 
-        if (!cliOptions.decompress) {
+        if (cliOptions.decompress == false) {
             // check for correct infile extension
             if (filenameExtension(cliOptions.inFileName) != std::string("sam")) {
                 throwUserException("Input file extension must be 'sam'");
@@ -112,16 +112,14 @@ int main(int argc, char *argv[])
             // check if output file is already there and if the user wants to
             // overwrite it in this case
             if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                std::cout << "Output file already exists: " << cliOptions.outFileName << std::endl;
-                std::cout << "Do you want to overwrite it? ";
-                if (!yesno()) {
-                    throwUserException("Exited because we do not overwrite the output file");
-                }
+                throwUserException("Output file already exists (use option f to force overwriting)");
             }
 
             // invoke compressor
-            std::cout << "Compressing: " << cliOptions.inFileName << " > " << cliOptions.outFileName << std::endl;
-            CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.referenceFileNames);
+            std::cout << "Input file: " << cliOptions.inFileName << std::endl;
+            std::cout << "Output file: " << cliOptions.outFileName << std::endl;
+            std::cout << "Compressing ..." << std::endl;
+            CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqEncoder.encode();
             std::cout << "Finished compression" << std::endl;
         } else {
@@ -144,8 +142,10 @@ int main(int argc, char *argv[])
             }
 
             // invoke decompressor
-            std::cout << "Decompressing: " << cliOptions.inFileName << " > " << cliOptions.outFileName << std::endl;
-            CalqDecoder calqDecoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.referenceFileNames);
+            std::cout << "Input file: " << cliOptions.inFileName << std::endl;
+            std::cout << "Output file: " << cliOptions.outFileName << std::endl;
+            std::cout << "Decompressing ..." << std::endl;
+            CalqDecoder calqDecoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqDecoder.decode();
             std::cout << "Finished decompression" << std::endl;
         }
