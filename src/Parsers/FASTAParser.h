@@ -4,6 +4,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef FASTAPARSER_H
 #define FASTAPARSER_H
 
@@ -23,7 +28,6 @@ public:
     ~FASTAParser(void);
 
     void parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences);
-
 private:
     char line[4 * KB]; // usually, lines are limited to 80 chars, so 4 KB
                        // should be enough space

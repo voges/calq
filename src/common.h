@@ -13,7 +13,6 @@
 #define COMMON_H
 
 #include <string>
-#include <vector>
 
 // safe debug macro
 #define DBG

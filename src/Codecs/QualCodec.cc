@@ -5,29 +5,20 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #include "QualCodec.h"
 #include "Exceptions.h"
 #include "Predictor.h"
 
-static const int ALPHABET_SIZE = 50;
-static const int MEMORY_SIZE = 2;
-static const int OFFSET = 33;
-static const int QMAX = 83;
-static const int QMIN = OFFSET;
-
-QualEncoder::QualEncoder(ofbitstream &ofbs)
-    : numEncodedRecords(0)
-    , numInputRecords(0)
-    , ofbs(ofbs)
-    , predictor(ALPHABET_SIZE, MEMORY_SIZE, OFFSET)
-{
-    // empty
-}
-
-QualEncoder::~QualEncoder(void)
-{
-    // empty
-}
+static const int PREDICTOR_MEMORY_SIZE = 2;
+static const int Q_ALPHABET_SIZE = 50;
+static const int Q_OFFSET = 33;
+static const int Q_MAX = 83;
+static const int Q_MIN = Q_OFFSET;
 
 static void extract(const std::string &seq,
                     const std::string &qual,
@@ -92,6 +83,20 @@ static void extract(const std::string &seq,
     }
 }
 
+QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences)
+    : fastaReferences(fastaReferences)
+    , numEncodedRecords(0)
+    , ofbs(ofbs)
+    , predictor(Q_ALPHABET_SIZE, PREDICTOR_MEMORY_SIZE, Q_OFFSET)
+{
+    // empty
+}
+
+QualEncoder::~QualEncoder(void)
+{
+    // empty
+}
+
 void QualEncoder::startBlock(void)
 {
 
@@ -99,21 +104,25 @@ void QualEncoder::startBlock(void)
 
 void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
 {
-    numInputRecords++;
-
+    const uint16_t flag = samRecord.flag;
+    const std::string rname(samRecord.rname);
     const uint32_t pos = samRecord.pos;
     const std::string cigar(samRecord.cigar);
     const std::string seq(samRecord.seq);
     const std::string qual(samRecord.qual);
-    std::cout << "record " << numInputRecords << ": " << pos << " " << cigar << " " << seq << " " << qual << std::endl;
+    std::cout << "record " << numEncodedRecords << ": " << std::endl;
+    std::cout << "  rname: " << rname << std::endl;
+    std::cout << "  pos:   " << pos << std::endl;
+    std::cout << "  cigar: " << cigar << std::endl;
+    std::cout << "  seq:   " << seq << std::endl;
+    std::cout << "  qual:  " << qual << std::endl;
 
     // check if this alignment is complete
     if (   (pos == 0)
         || (cigar.length() == 0 || cigar.compare("*") == 0)
         || (seq.length() == 0 || seq.compare("*") == 0)
         || (qual.length() == 0 || qual.compare("*") == 0)) {
-        std::cout << "Warning: Incomplete alignment; skipping record " << numInputRecords << std::endl;
-        return;
+        std::cout << "Warning: Incomplete alignment" << std::endl;
     }
 
     // expand current sequence
@@ -143,17 +152,17 @@ void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
 
     // Markov-chain prediction for current current qual vector
     std::vector<int> err;
-    std::vector<int> memory(MEMORY_SIZE, -1);
+    std::vector<int> memory(PREDICTOR_MEMORY_SIZE, -1);
 
     for(std::string::size_type i = 0; i < qual.size(); ++i) {
         int q = (int)qual[i];
 
-        if (i < MEMORY_SIZE) {
+        if (i < PREDICTOR_MEMORY_SIZE) {
             std::fill(memory.begin(), memory.end(), -1); // this is not necessary
             err.push_back(q);
         } else {
             // fill memory
-            for (size_t m = 0; m < MEMORY_SIZE; m++) {
+            for (size_t m = 0; m < PREDICTOR_MEMORY_SIZE; m++) {
                 memory[m] = ((int)qual[i-1-m]);
             }
 
@@ -201,8 +210,9 @@ size_t QualEncoder::finishBlock(void)
     return ret;
 }
 
-QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs)
-    : ifbs(ifbs)
+QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vector<FASTAReference> &fastaReferences)
+    : fastaReferences(fastaReferences)
+    , ifbs(ifbs)
     , ofs(ofs)
 {
 
@@ -211,10 +221,5 @@ QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs)
 QualDecoder::~QualDecoder(void)
 {
 
-}
-
-void QualDecoder::decode(std::vector<std::string> &qual)
-{
-    qual.push_back("*");
 }
 

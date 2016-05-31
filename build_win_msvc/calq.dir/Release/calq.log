@@ -1,4 +1,5 @@
 ﻿  calq.cc
   CalqCodec.cc
+  QualCodec.cc
   Generating Code...
   calq.vcxproj -> C:\Users\Jan Voges\Git\calq\build_win_msvc\Release\calq.exe

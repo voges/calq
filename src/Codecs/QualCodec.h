@@ -5,29 +5,28 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef QUALCODEC_H
 #define QUALCODEC_H
 
 #include "bitstream.h"
-#include "Predictor.h"
+#include "Codecs/Predictor.h"
+#include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
 #include <fstream>
 #include <vector>
 
 /** @brief Class: QualEncoder
  *
- *  The QualEncoder class provides two methods as interface:
- *  - encodeRecord: This function is used to encode the quality scores in a
- *                  given SAM record.
- *  - finishBlock:  Upon having processed some number of SAM records, this
- *                  function can be triggered to finish a block. Some metadata
- *                  is written to the given stream and the QualEncoder instance
- *                  is reset. A new block can be triggered with another call
- *                  to encodeRecord.
+ *  The QualEncoder class encodes the quality scores.
  */
 class QualEncoder {
 public:
-    QualEncoder(ofbitstream &ofbs);
+    QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
     ~QualEncoder(void);
 
     void startBlock(void);
@@ -35,26 +34,23 @@ public:
     size_t finishBlock(void);
 
 private:
+    std::vector<FASTAReference> fastaReferences;
     size_t numEncodedRecords;
-    size_t numInputRecords;
     ofbitstream &ofbs;
     Predictor predictor;
 };
 
 /** @brief Class: QualDecoder
  *
- *  The QualDecoder class provides one method:
- *  - decodeBlock: Read and decode a block of quality score from ifbs; the
- *                 decoded quality score are stored in qual.
+ *  The QualDecoder class decodes the encoded bitstream.
  */
 class QualDecoder {
 public:
-    QualDecoder(ifbitstream &ifbs, std::ofstream &ofs);
+    QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vector<FASTAReference> &fastaReferences);
     ~QualDecoder(void);
 
-    void decode(std::vector<std::string> &qual);
-
 private:
+    std::vector<FASTAReference> fastaReferences;
     ifbitstream &ifbs;
     std::ofstream &ofs;
 };

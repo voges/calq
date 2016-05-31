@@ -3,6 +3,11 @@
  *
  *  This file contains the main function (and some help functions) of the calq
  *  compression tool.
+ *  Encoding: The program takes a SAM file as input and encodes the quality
+ *            values. The encoded bitstream is written to a CQ file.
+ *  Decoding: The program reads in the compressed CQ file and reconstructs
+ *            the quality scores. The quality scores are written to a QUAL
+ *            file. The SAM file is -not- reconstructed.
  *
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -13,7 +18,7 @@
  *  2016-05-30: added reference file(s) (voges)
  *  2016-05-29: added TCLAP for command line argument parsing; this btw
  *              is then compatible with Windows, too (as there is no
- *              getopt.h) (voges)
+ *              getopt.h on Windows systems) (voges)
  */
 
 #include "os_config.h"
@@ -61,15 +66,17 @@ int main(int argc, char *argv[])
     printCopyright();
 
     try {
-        // TCLAP arguments definition and parsing
+        // TCLAP class
         TCLAP::CmdLine cmd("calq - Lossy compression of next-generation sequencing quality values", ' ', VERSION);
 
+        // TCLAP arguments
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
         TCLAP::SwitchArg forceSwitch("f", "force", "Forces overwriting of output files", cmd, false);
         TCLAP::UnlabeledValueArg<std::string> infileArg("infile", "Input file", true, "", "string", cmd);
         TCLAP::ValueArg<std::string> outfileArg("o", "outfile", "Output file", false, "", "string", cmd);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", true, "string", cmd);
 
+        // let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
 
         // get the value parsed by each arg
@@ -84,7 +91,8 @@ int main(int argc, char *argv[])
             throwUserException("Cannot access input file");
         }
 
-        // check if the reference file(s) exist and check for FASTA file(s)
+        // check if the reference file(s) exist and check for FASTA file
+        // ending(s)
         for (auto const &refFileName : cliOptions.refFileNames) {
             if (   filenameExtension(refFileName) != std::string("fa")
                 && filenameExtension(refFileName) != std::string("fasta")) {
@@ -112,7 +120,7 @@ int main(int argc, char *argv[])
             // check if output file is already there and if the user wants to
             // overwrite it in this case
             if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                throwUserException("Output file already exists (use option f to force overwriting)");
+                throwUserException("Output file already exists (use option 'f'' to force overwriting)");
             }
 
             // invoke compressor
@@ -132,7 +140,7 @@ int main(int argc, char *argv[])
             // command line options
             if (cliOptions.outFileName.empty()) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
-                cliOptions.outFileName.append(".sam");
+                cliOptions.outFileName.append(".qual");
             }
 
             // check if output file is already there and if the user wants to

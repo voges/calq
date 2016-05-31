@@ -4,6 +4,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef FASTAREFERENCE_H
 #define FASTAREFERENCE_H
 
@@ -16,7 +21,10 @@
  */
 class FASTAReference {
 public:
-    FASTAReference(void) : header(""), sequence("") {}
+    FASTAReference(void) 
+        : header("")
+        , sequence("")
+    {}
     ~FASTAReference(void) {}
 
     std::string header;

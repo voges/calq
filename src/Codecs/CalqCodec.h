@@ -5,16 +5,44 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef CALQCODEC_H
 #define CALQCODEC_H
 
 #include "bitstream.h"
+#include "Codecs/QualCodec.h"
 #include "Parsers/FASTAParser.h"
 #include "Parsers/SAMParser.h"
-#include "QualCodec.h"
 #include <fstream>
 #include <string>
 #include <vector>
+
+/** @brief Class: CalqCodec
+*
+*  The CalqEncoder and the CalqDecoder inherit common methods from this class.
+*/
+class CalqCodec {
+public:
+    CalqCodec(const std::string &inFileName,
+              const std::string &outFileName,
+              const std::vector<std::string> &fastaFileNames);
+    virtual ~CalqCodec(void);
+
+    void readFastaReferences(void);
+
+protected:
+    const std::vector<std::string> fastaFileNames;
+    std::vector<FASTAReference> fastaReferences;
+    const std::string inFileName;
+    const std::string outFileName;
+
+private:
+    FASTAParser fastaParser;
+};
 
 /** @brief Class: CalqEncoder
 *
@@ -23,23 +51,18 @@
 *  with the specified blockSize and writes the encoded bitstream to the CQ
 *  file with the name outfileName.
 */
-class CalqEncoder {
+class CalqEncoder: public CalqCodec {
 public:
-    CalqEncoder(const std::string &inFileName,
-                const std::string &outFileName,
-                const std::vector<std::string> &referenceFileNames);
+    CalqEncoder(const std::string &samFileName,
+                const std::string &cqFileName,
+                const std::vector<std::string> &fastaFileNames);
     ~CalqEncoder(void);
 
     void encode(void);
 
 private:
-    FASTAParser fastaParser;
-    const std::string samFileName;
     ofbitstream ofbs;
-    const std::string cqFileName;
     QualEncoder qualEncoder;
-    const std::vector<std::string> fastaFileNames;
-    std::vector<FASTAReference> fastaReferences;
     SAMParser samParser;
 };
 
@@ -49,23 +72,19 @@ private:
  *  member function decode; it decodes the CQ file with the name infileName
  *  and writes the decoded quality scores to the file with the name outfileName.
  */
-class CalqDecoder {
+class CalqDecoder: public CalqCodec {
 public:
-    CalqDecoder(const std::string &inFileName,
-                const std::string &outFileName,
-                const std::vector<std::string> &referenceFileNames);
+    CalqDecoder(const std::string &cqFileName,
+                const std::string &qualFileName,
+                const std::vector<std::string> &fastaFileNames);
     ~CalqDecoder(void);
 
     void decode(void);
-
+ 
 private:
-    //FASTAParser fastaParser;
     ifbitstream ifbs;
-    const std::string inFileName;
     std::ofstream ofs;
-    const std::string outFileName;
     QualDecoder qualDecoder;
-    const std::vector<std::string> referenceFileNames;
 };
 
 #endif // CALQCODEC_H

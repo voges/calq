@@ -7,7 +7,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (wo)
+ *  YYYY-MM-DD: what (who)
  */
  
 #ifndef EXCEPTIONS_H
@@ -34,11 +34,10 @@ protected:
 
 /** @brief Class: UserException
  *
- *  This exception is thrown by calls to the <code>throwUserException</code>
- *  function.
- *  If a <code>UserException</code> is thrown at any point in the range of the
- *  <code>try</code> (including in functions called from that code), control
- *  will jump immediately to the error handler.
+ *  This exception is thrown by calls to the throwUserException function.
+ *  If a UserException is thrown at any point in the range of the try block
+ *  (including in functions called from that code), control will jump
+ *  immediately to the error handler.
  */
 class UserException : public Exception {
 public:
@@ -48,7 +47,7 @@ public:
 /** @brief Global function: throwUserException
  *
  *  Signals an error condition in a program by throwing a
- *  <code>UserException</code> with the specified message.
+ *  UserException with the specified message.
  *
  *  @param msg Error message
  *  @return Void.
@@ -60,11 +59,10 @@ inline void throwUserException(const std::string &msg)
 
 /** @brief Class: ErrorException
  *
- *  This exception is thrown by calls to the <code>throwErrorException</code>
- *  function.
- *  If an <code>ErrorException</code> is thrown at any point in the range of the
- *  <code>try</code> (including in functions called from that code), control
- *  will jump immediately to the error handler.
+ *  This exception is thrown by calls to the >throwErrorException function.
+ *  If an ErrorException is thrown at any point in the range of the try block
+ *  (including in functions called from that code), control will jump
+ *  immediately to the error handler.
  */
 class ErrorException : public Exception {
 public:
@@ -73,8 +71,8 @@ public:
 
 /** @brief Global function: throwErrorException
  *
- *  Signals an error condition in a program by throwing an
- *  <code>ErrorException</code> with the specified message.
+ *  Signals an error condition in a program by throwing an ErrorException
+ *  with the specified message.
  *
  *  @param msg Error message
  *  @return Void.
@@ -90,7 +88,9 @@ inline void throwErrorException(const std::string &msg)
  */
 class ErrorExceptionReporter {
 public:
-    ErrorExceptionReporter(const std::string &function, const std::string &file, const int line)
+    ErrorExceptionReporter(const std::string &function, 
+                           const std::string &file,
+                           const int line)
         : function(function)
         , file(file)
         , line(line)
@@ -109,8 +109,8 @@ private:
 };
 
 // Remove the symbol for the function, then define a new version that instead
-// creates a stack temporary instance of ErrorExceptionReporter
-// initialized with the caller.
+// creates a stack temporary instance of ErrorExceptionReporter initialized
+// with the caller.
 #undef throwErrorException
 #define throwErrorException ErrorExceptionReporter(__FUNCTION__, __FILE__, __LINE__)
 

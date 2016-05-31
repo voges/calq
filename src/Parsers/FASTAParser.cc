@@ -4,7 +4,12 @@
  *  @bug No known bugs
  */
 
-#include "FASTAParser.h"
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
+#include "Parsers/FASTAParser.h"
 #include <fstream>
 #include <iostream>
 
@@ -18,7 +23,8 @@ FASTAParser::~FASTAParser(void)
     // empty
 }
 
-void FASTAParser::parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences)
+void FASTAParser::parseFile(const std::string &filename, 
+                            std::vector<FASTAReference> &fastaReferences)
 {
     std::ifstream ifs;
     ifs.open(filename.c_str(), std::ios::in);

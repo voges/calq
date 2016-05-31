@@ -10,6 +10,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #include "bitstream.h"
 #include "Exceptions.h"
 

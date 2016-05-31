@@ -4,6 +4,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef SAMPARSER_H
 #define SAMPARSER_H
 
@@ -26,7 +31,6 @@ public:
     SAMRecord curr;     // current SAM record
 
     bool next(void);
-
 private:
     std::ifstream ifs;
 

@@ -22,6 +22,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef BITSTREAM_H
 #define BITSTREAM_H
 

@@ -13,9 +13,9 @@
  *              memory sizes; added public method writeFrequencyTable() (voges)
  */
 
+#include "Predictor.h"
 #include "CLIOptions.h"
 #include "common.h"
-#include "Predictor.h"
 #include "Exceptions.h"
 #include <climits>
 #include <math.h>
@@ -93,7 +93,7 @@ void Predictor::writeFrequencyTable(std::ostream &os)
 
 void Predictor::createCSVFile(void)
 {
-    std::string filename = "Predictor.csv";
+    std::string filename = cliOptions.inFileName + ".Predictor.csv";
     std::ofstream ofs;
 
     if (fileExists(filename) && cliOptions.force == false) {

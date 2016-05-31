@@ -4,7 +4,12 @@
  *  @bug No known bugs
  */
 
-#include "SAMParser.h"
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
+#include "Parsers/SAMParser.h"
 #include "Exceptions.h"
 #include <iostream>
 #include <stdlib.h>

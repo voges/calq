@@ -4,6 +4,11 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef CLIOPTIONS_H
 #define CLIOPTIONS_H
 

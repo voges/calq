@@ -4,12 +4,18 @@
  *  @bug No known bugs
  */
 
+/*
+ *  Changelog
+ *  YYYY-MM-DD: what (who)
+ */
+
 #ifndef SAMRECORD_H
 #define SAMRECORD_H
 
 #include "constants.h"
 #include <stdint.h>
 
+// 1 million chars per SAM record should be enough
 static const size_t LINE_SIZE = 1 * MB;
 
 /** @brief Class: SAMRecord
@@ -18,7 +24,8 @@ static const size_t LINE_SIZE = 1 * MB;
 *  TAB-delimited. Optional information is stored as 12th field.
 *  Data types have been selected according to the SAM format specification.
 */
-struct SAMRecord {
+class SAMRecord {
+public:
     char     line[LINE_SIZE]; // buffer for current line
 
     char     *qname; // Query template NAME

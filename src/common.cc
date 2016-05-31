@@ -4,12 +4,12 @@
  *  @bug No known bugs
  */
 
- /*
-  *  Changelog
-  *  2016-05-29: Moved the fileExists function from access() (which
-  *              is defined in unistd.h, which is Linux-specific) to
-  *              std::ifstream (which is portable). (voges)
-  */
+/*
+ *  Changelog
+ *  2016-05-29: Moved the fileExists function from access() (which
+ *              is defined in unistd.h, which is Linux-specific) to
+ *              std::ifstream (which is portable). (voges)
+ */
 
 #include "common.h"
 #include <fstream>
