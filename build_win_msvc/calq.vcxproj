@@ -86,7 +86,7 @@
     </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -103,10 +103,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -130,7 +130,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -146,10 +146,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -173,7 +173,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>MinSizeRel/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -189,10 +189,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -216,7 +216,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>RelWithDebInfo/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -232,10 +232,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\include;C:\Users\Jan Voges\Git\calq\include\tclap\tclap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jan Voges\Git\calq\build_win_msvc;C:\Users\Jan Voges\Git\calq\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -316,12 +316,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   <ItemGroup>
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\bitstream.cc"  />
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\calq.cc"  />
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\CalqCodec.cc"  />
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Codecs\CalqCodec.cc"  />
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Codecs\Predictor.cc"  />
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Codecs\QualCodec.cc"  />
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\common.cc"  />
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Exceptions.cc"  />
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Predictor.cc"  />
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\QualCodec.cc"  />
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\SAMParser.cc"  />
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Parsers\FASTAParser.cc"  />
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Parsers\SAMParser.cc"  />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:/Users/Jan Voges/Git/calq/build_win_msvc/ZERO_CHECK.vcxproj">

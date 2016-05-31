@@ -1,0 +1,63 @@
+/** @file QualCodec.h
+ *  @brief This file contains the definitions of the QualEncoder and
+ *         QualDecoder classes.
+ *  @author Jan Voges (voges)
+ *  @bug No known bugs
+ */
+
+#ifndef QUALCODEC_H
+#define QUALCODEC_H
+
+#include "bitstream.h"
+#include "Predictor.h"
+#include "Parsers/SAMRecord.h"
+#include <fstream>
+#include <vector>
+
+/** @brief Class: QualEncoder
+ *
+ *  The QualEncoder class provides two methods as interface:
+ *  - encodeRecord: This function is used to encode the quality scores in a
+ *                  given SAM record.
+ *  - finishBlock:  Upon having processed some number of SAM records, this
+ *                  function can be triggered to finish a block. Some metadata
+ *                  is written to the given stream and the QualEncoder instance
+ *                  is reset. A new block can be triggered with another call
+ *                  to encodeRecord.
+ */
+class QualEncoder {
+public:
+    QualEncoder(ofbitstream &ofbs);
+    ~QualEncoder(void);
+
+    void startBlock(void);
+    void addRecordToBlock(const SAMRecord &samRecord);
+    size_t finishBlock(void);
+
+private:
+    size_t numEncodedRecords;
+    size_t numInputRecords;
+    ofbitstream &ofbs;
+    Predictor predictor;
+};
+
+/** @brief Class: QualDecoder
+ *
+ *  The QualDecoder class provides one method:
+ *  - decodeBlock: Read and decode a block of quality score from ifbs; the
+ *                 decoded quality score are stored in qual.
+ */
+class QualDecoder {
+public:
+    QualDecoder(ifbitstream &ifbs, std::ofstream &ofs);
+    ~QualDecoder(void);
+
+    void decode(std::vector<std::string> &qual);
+
+private:
+    ifbitstream &ifbs;
+    std::ofstream &ofs;
+};
+
+#endif // QUALCODEC_H
+

@@ -7,7 +7,13 @@
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\calq.cc">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\CalqCodec.cc">
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Codecs\CalqCodec.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Codecs\Predictor.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Codecs\QualCodec.cc">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\common.cc">
@@ -16,13 +22,10 @@
     <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Exceptions.cc">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Predictor.cc">
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Parsers\FASTAParser.cc">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\QualCodec.cc">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\SAMParser.cc">
+    <ClCompile Include="C:\Users\Jan Voges\Git\calq\src\Parsers\SAMParser.cc">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
