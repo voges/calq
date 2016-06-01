@@ -88,6 +88,8 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
     , numEncodedRecords(0)
     , ofbs(ofbs)
     , predictor(Q_ALPHABET_SIZE, PREDICTOR_MEMORY_SIZE, Q_OFFSET)
+    , rnamePrev("")
+    , currFastaReference()
 {
     // empty
 }
@@ -97,9 +99,42 @@ QualEncoder::~QualEncoder(void)
     // empty
 }
 
-void QualEncoder::startBlock(void)
+bool QualEncoder::checkRecord(const SAMRecord &samRecord)
 {
+    const std::string rname(samRecord.rname);
 
+    // check if the RNAME field changed
+    if (rname != rnamePrev) {
+        return false;
+    }
+
+    rnamePrev = rname;
+    return true;
+}
+
+void QualEncoder::startBlock(const SAMRecord &samRecord)
+{
+    const std::string rname(samRecord.rname);
+    rnamePrev = rname;
+
+    // find FASTA reference for this RNAME
+    bool foundFastaReference = false;
+
+    for (auto const &fastaReference : fastaReferences) {
+        if (fastaReference.header.find(rname) != std::string::npos) {
+            if (foundFastaReference == true) {
+                throwErrorException("Found multiple FASTA references");
+            }
+            foundFastaReference = true;
+            currFastaReference = fastaReference;
+        }
+    }
+
+    if (foundFastaReference == true) {
+        std::cout << "Started new block with FASTA reference: " << currFastaReference.header << std::endl;
+    } else {
+        throwErrorException("Could not find FASTA reference");
+    }
 }
 
 void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
@@ -110,12 +145,16 @@ void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
     const std::string cigar(samRecord.cigar);
     const std::string seq(samRecord.seq);
     const std::string qual(samRecord.qual);
-    std::cout << "record " << numEncodedRecords << ": " << std::endl;
+    std::cout << "Adding record " << numEncodedRecords << " to block: " << std::endl;
+    std::cout << "  flag:  " << flag << std::endl;
     std::cout << "  rname: " << rname << std::endl;
     std::cout << "  pos:   " << pos << std::endl;
     std::cout << "  cigar: " << cigar << std::endl;
     std::cout << "  seq:   " << seq << std::endl;
     std::cout << "  qual:  " << qual << std::endl;
+
+    const std::string ref(currFastaReference.sequence);
+    std::cout << "  ref:   " << ref << std::endl;
 
     // check if this alignment is complete
     if (   (pos == 0)
@@ -205,8 +244,9 @@ void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
 size_t QualEncoder::finishBlock(void)
 {
     size_t ret = 0;
-    predictor.createCSVFile();
+    //predictor.createCSVFile();
     predictor.reset();
+    std::cout << "Finished block" << std::endl;
     return ret;
 }
 

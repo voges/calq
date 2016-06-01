@@ -76,14 +76,21 @@ void CalqEncoder::encode(void)
     size_t numRecords = 0;
 
     // send all records to the QualEncoder
-    qualEncoder.startBlock();
-    SAMRecord *currentRecord = &(samParser.curr);
+    qualEncoder.startBlock(samParser.curr);
     do {
         uncompressedSize += strlen(samParser.curr.qual);
-        qualEncoder.addRecordToBlock(samParser.curr);
         numRecords++;
+
+        if (qualEncoder.checkRecord(samParser.curr) == false) {
+            // start a new block
+            compressedSize += qualEncoder.finishBlock();
+            qualEncoder.startBlock(samParser.curr);
+        }
+
+        // add this record to the current block
+        qualEncoder.addRecordToBlock(samParser.curr);
     } while (samParser.next());
-    compressedSize = qualEncoder.finishBlock();
+    compressedSize += qualEncoder.finishBlock();
 
     // print summary
     auto stopTime = std::chrono::steady_clock::now();

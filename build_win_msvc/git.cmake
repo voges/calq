@@ -1,6 +1,6 @@
 file(WRITE git.h "#ifndef GIT_H\n")
 file(APPEND git.h "#define GIT_H\n\n")
 file(APPEND git.h "#define GIT_BRANCH \"devel\"\n")
-file(APPEND git.h "#define GIT_COMMIT_HASH_SHORT \"e970055\"\n")
-file(APPEND git.h "#define GIT_COMMIT_HASH_LONG \"e970055e2509a760290ae88c1f9a06d431b1fe15\"\n\n")
+file(APPEND git.h "#define GIT_COMMIT_HASH_SHORT \"c9770a1\"\n")
+file(APPEND git.h "#define GIT_COMMIT_HASH_LONG \"c9770a1727e81207098ece73656fd1b549a355d7\"\n\n")
 file(APPEND git.h "#endif // GIT_H\n\n")

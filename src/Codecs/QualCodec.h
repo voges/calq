@@ -29,7 +29,8 @@ public:
     QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
     ~QualEncoder(void);
 
-    void startBlock(void);
+    bool checkRecord(const SAMRecord &samRecord);
+    void startBlock(const SAMRecord &samRecord);
     void addRecordToBlock(const SAMRecord &samRecord);
     size_t finishBlock(void);
 
@@ -38,6 +39,9 @@ private:
     size_t numEncodedRecords;
     ofbitstream &ofbs;
     Predictor predictor;
+
+    std::string rnamePrev;
+    FASTAReference currFastaReference;
 };
 
 /** @brief Class: QualDecoder
