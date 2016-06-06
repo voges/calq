@@ -112,7 +112,7 @@ public:
     ~CalqDecoder(void);
 
     void decode(void);
- 
+
 private:
     ifbitstream ifbs;
     std::ofstream ofs;

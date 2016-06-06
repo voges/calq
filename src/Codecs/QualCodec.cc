@@ -11,7 +11,7 @@
  */
 
 #include "QualCodec.h"
-#include "Exceptions.h"
+#include "ErrorException.h"
 #include "Predictor.h"
 
 static const int PREDICTOR_MEMORY_SIZE = 2;
@@ -76,7 +76,7 @@ static void extract(const std::string &seq,
         case 'P':
             break; // these have been clipped
         default: 
-            throwErrorException("Bad CIGAR string");
+            throw ErrorException() << "Bad CIGAR string: " << cigar;
         }
 
         opLen = 0;
@@ -107,7 +107,7 @@ void QualEncoder::startBlock(const std::string &rname)
     for (auto const &fastaReference : fastaReferences) {
         if (fastaReference.header.find(rname) != std::string::npos) {
             if (foundFastaReference == true) {
-                throwErrorException("Found multiple FASTA references");
+                throw ErrorException() << "Found multiple FASTA references";
             }
             foundFastaReference = true;
             currFastaReference = fastaReference;
@@ -117,13 +117,13 @@ void QualEncoder::startBlock(const std::string &rname)
     if (foundFastaReference == true) {
         std::cout << "Started new block with FASTA reference: " << currFastaReference.header << std::endl;
     } else {
-        throwErrorException("Could not find FASTA reference");
+        throw ErrorException() << "Could not find FASTA reference";
     }
 }
 
 void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
 {
-    // empty
+    std::cout << "Unmapped read" << std::endl;
 }
 
 void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
@@ -150,7 +150,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
         || (cigar.length() == 0 || cigar.compare("*") == 0)
         || (seq.length() == 0 || seq.compare("*") == 0)
         || (qual.length() == 0 || qual.compare("*") == 0)) {
-        std::cout << "Warning: Incomplete alignment" << std::endl;
+        throw ErrorException() << "Incomplete alignment";
     }
 
     // expand current sequence
@@ -160,14 +160,14 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     std::string insertedQual("");
     extract(seq, qual, cigar, matchedSeq, matchedQual, insertedSeq, insertedQual);
 
-    recordBuffer.push(samRecord);
+    //recordBuffer.push(samRecord);
     
     // check which genomic positions are ready for processing
     
     // check which records in 'recordBuffer' are ready for processing
     
     // remove the processed record from the queue
-    recordBuffer.pop();
+    //recordBuffer.pop();
     
     // TODO: accumulate depths
     //quantizer1.updateDepths(pos, cigar);

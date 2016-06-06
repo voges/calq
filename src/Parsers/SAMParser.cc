@@ -10,7 +10,8 @@
  */
 
 #include "Parsers/SAMParser.h"
-#include "Exceptions.h"
+#include "common.h"
+#include "ErrorException.h"
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -21,11 +22,11 @@ SAMParser::SAMParser(const std::string &filename)
     , ifs()
 {
     if (   filenameExtension(filename) != std::string("sam")) {
-        throwErrorException("SAM file extension must be 'sam'");
+        throw ErrorException() << "SAM file extension must be 'sam': " << filename;
     }
 
     if (!fileExists(filename)) {
-        throwErrorException("Cannot access SAM file");
+        throw ErrorException() << "Cannot access SAM file: " << filename;
     }
     
     ifs.open(filename.c_str(), std::ios::in);
@@ -92,7 +93,7 @@ void SAMParser::readSAMHeader(void)
             foundHeader = true;
         } else {
             if (foundHeader == false) {
-                throwErrorException("SAM header is missing");
+                throw ErrorException() << "SAM header is missing";
             }
             parse();
             break;

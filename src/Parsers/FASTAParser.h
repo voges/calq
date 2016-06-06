@@ -17,9 +17,6 @@
 #include <string>
 #include <vector>
 
-// usually, lines are limited to 80 chars, so 4 KB should be enough
-static const size_t LINE_SIZE = 4 * KB;
-
 /** @brief Class: FASTAParser
  *
  *  This class can parse FASTA files with the public member function
@@ -51,10 +48,9 @@ public:
      *         FASTAReference.
      *  @return Void.
      */
-    void parseFile(const std::string &filename
-                   std::vector<FASTAReference> &fastaReferences);
+    void parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences);
 private:
-    char line[LINE_SIZE];
+    char line[4 * KB]; // usually, lines are limited to 80 chars, so 4 KB should be enough
 };
 
 #endif // FASTAPARSER_H

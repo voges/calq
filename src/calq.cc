@@ -35,7 +35,7 @@
 #include "Codecs/CalqCodec.h"
 #include "common.h"
 #include "cmake_config.h"
-#include "Exceptions.h"
+#include "ErrorException.h"
 #include <iostream>
 #include <tclap/CmdLine.h>
 
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
         // check if the input file exists
         if (!fileExists(cliOptions.inFileName)) {
-            throwUserException("Cannot access input file");
+            throw ErrorException() << "Cannot access input file: " << cliOptions.inFileName;
         }
 
         // check if the reference file(s) exist and check for FASTA file
@@ -96,10 +96,10 @@ int main(int argc, char *argv[])
         for (auto const &refFileName : cliOptions.refFileNames) {
             if (   filenameExtension(refFileName) != std::string("fa")
                 && filenameExtension(refFileName) != std::string("fasta")) {
-                throwUserException("Reference file extension must be 'fa' or 'fasta'");
+                throw ErrorException() << "Reference file extension must be 'fa' or 'fasta': " << refFileName;
             }
             if (!fileExists(refFileName)) {
-                throwUserException("Cannot access reference file");
+                throw ErrorException() << "Cannot access reference file: " << refFileName;
             }
             std::cout << "Using reference file: " << refFileName << std::endl;
         }
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
         if (cliOptions.decompress == false) {
             // check for correct infile extension
             if (filenameExtension(cliOptions.inFileName) != std::string("sam")) {
-                throwUserException("Input file extension must be 'sam'");
+                throw ErrorException() << "Input file extension must be 'sam': " << cliOptions.inFileName;
             }
 
             // create correct output file name if it was not provided via the
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
             // check if output file is already there and if the user wants to
             // overwrite it in this case
             if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                throwUserException("Output file already exists (use option 'f' to force overwriting)");
+                throw ErrorException() << "Output file already exists (use option 'f' to force overwriting): " << cliOptions.outFileName;
             }
 
             // invoke compressor
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
         } else {
             // check for correct infile extension
             if (filenameExtension(cliOptions.inFileName) != std::string("cq")) {
-                throwUserException("Input file extension must be 'cq'");
+                throw ErrorException() << "Input file extension must be 'cq': " << cliOptions.inFileName;
             }
 
             // create correct output file name if it was not provided via the
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
             // check if output file is already there and if the user wants to
             // overwrite it in this case
             if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                throwUserException("Output file already exists (use option f to force overwriting)");
+                throw ErrorException() << "Output file already exists (use option f to force overwriting): " << cliOptions.outFileName;
             }
 
             // invoke decompressor
@@ -158,16 +158,16 @@ int main(int argc, char *argv[])
             std::cout << "Finished decompression" << std::endl;
         }
     } catch (TCLAP::ArgException &tclapException) {
-        std::cerr << "Error: " << tclapException.error() << " for argument " << tclapException.argId() << std::endl;
-        return EXIT_FAILURE;
-    } catch (const UserException &userException) {
-        std::cerr << userException.what() << std::endl << std::endl;
+        std::cerr << "Argument error: " << tclapException.error() << " (argument: " << tclapException.argId() << ")" << std::endl;
         return EXIT_FAILURE;
     } catch (const ErrorException &errorException) {
         std::cerr << "Error: " << errorException.what() << std::endl;
         return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
         std::cerr << "Fatal error: " << stdException.what() << std::endl;
+        return EXIT_FAILURE;
+    } catch (...) {
+        std::cerr << "Unkown error occured" << std::endl;
         return EXIT_FAILURE;
     }
 

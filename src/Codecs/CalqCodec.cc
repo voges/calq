@@ -1,6 +1,6 @@
 /** @file CalqCodec.cc
- *  @brief This file contains the implementations of the CalqEncoder,
- *         CalqDecoder, and CalqInfoTool classes.
+ *  @brief This file contains the implementations of the CalqEncoder and
+ *         CalqDecoder class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -13,7 +13,7 @@
 #include "Codecs/CalqCodec.h"
 #include "cmake_config.h"
 #include "definitions.h"
-#include "Exceptions.h"
+#include "ErrorException.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>
@@ -45,11 +45,6 @@ CalqCodec::~CalqCodec(void)
     // empty
 }
 
-void CalqCodec::readFastaReferences(void)
-{
-    
-}
-
 CalqEncoder::CalqEncoder(const std::string &samFileName,
                          const std::string &cqFileName,
                          const std::vector<std::string> &fastaFileNames)
@@ -58,14 +53,6 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
     , qualEncoder(ofbs, fastaReferences)
     , samParser(samFileName)
 {
-    if (filenameExtension(cliOptions.outFileName) != std::string("cq")) {
-        throwUserException("Output file extension must be 'cq'");
-    }
-    
-    if (fileExists(cliOptions.outFileName)) {
-        throwUserException("output file already exists (use option 'f' to force overwriting)");
-    }
-
     // associate the outfile bitstream with the CQ file
     ofbs.open(cqFileName);
 }
@@ -82,8 +69,6 @@ void CalqEncoder::encode(void)
     size_t uncompressedSize = 0;
     size_t compressedSize = 0;
     size_t numRecords = 0;
-    
-    std::string rnamePrev
 
     // send all records to the QualEncoder
     qualEncoder.startBlock(samParser.curr.rname);
@@ -92,7 +77,7 @@ void CalqEncoder::encode(void)
         uncompressedSize += strlen(samParser.curr.qual);
         numRecords++;
 
-        if (samParser.curr.flag & 0x4 == 0) {
+        if ((samParser.curr.flag & 0x4) == 1) {
             // this read is unmapped
             qualEncoder.addUnmappedRecordToBlock(samParser.curr);
         } else {
@@ -102,7 +87,7 @@ void CalqEncoder::encode(void)
                 qualEncoder.startBlock(samParser.curr.rname);
             }
             rnamePrev = samParser.curr.rname;
-            qualEncoder.addRecordToBlock(samParser.curr);
+            qualEncoder.addMappedRecordToBlock(samParser.curr);
         }
         
     } while (samParser.next());

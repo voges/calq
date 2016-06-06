@@ -14,7 +14,7 @@
 
 #include <string>
 
-// safe debug macro
+// safe debug macro, usage example: DEBUG("status: %d\n", s);
 #define DBG
 #ifdef DBG
     #define DEBUG(c,...)\

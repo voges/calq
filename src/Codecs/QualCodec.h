@@ -32,7 +32,8 @@ public:
     ~QualEncoder(void);
 
     void startBlock(const std::string &rname);
-    void addRecordToBlock(const SAMRecord &samRecord);
+    void addUnmappedRecordToBlock(const SAMRecord &samRecord);
+    void addMappedRecordToBlock(const SAMRecord &samRecord);
     size_t finishBlock(void);
 
 private:
@@ -45,6 +46,7 @@ private:
     Predictor predictor;
     std::string rnamePrev;
     FASTAReference currFastaReference;
+    size_t nextRefPos;
     std::map<size_t, uint8_t> quantizers;
     std::queue<SAMRecord> recordBuffer;
 

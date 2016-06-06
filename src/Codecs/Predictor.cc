@@ -16,7 +16,7 @@
 #include "Predictor.h"
 #include "CLIOptions.h"
 #include "common.h"
-#include "Exceptions.h"
+#include "ErrorException.h"
 #include <climits>
 #include <math.h>
 
@@ -43,11 +43,11 @@ Predictor::~Predictor(void)
 int Predictor::predict(const std::vector<int> &memory) const
 {
     if (memory.size() != memorySize) {
-        throwErrorException("Memory sizes do not match");
+        throw ErrorException() << "Memory sizes do not match";
     }
 
     if (memory[0] == -1) {
-        throwErrorException("Memory is not initialized");
+        throw ErrorException() << "Memory is not initialized";
     }
 
     int row = computeState(memory);
@@ -58,15 +58,15 @@ int Predictor::predict(const std::vector<int> &memory) const
 void Predictor::update(const std::vector<int> &memory, const int &x)
 {
     if (x < alphabetMin || x > alphabetMax) {
-        throwErrorException("Symbol out of range");
+        throw ErrorException() <<"Symbol out of range";
     }
 
     if (memory.size() != memorySize) {
-        throwErrorException("Memory sizes do not match");
+        throw ErrorException() << "Memory sizes do not match";
     }
 
     if (memory[0] == -1) {
-        throwErrorException("Memory is not initialized");
+        throw ErrorException() << "Memory is not initialized";
     }
 
     int row = computeState(memory);
@@ -100,7 +100,7 @@ void Predictor::createCSVFile(void)
         std::cout << "CSV file already exists: " << filename << std::endl;
         std::cout << "Do you want to overwrite it? ";
         if (!yesno()) {
-            throwUserException("Exited because we do not overwrite output files (add '-f' to force overwriting)");
+            throw ErrorException() << "Exited because we do not overwrite output files (add '-f' to force overwriting)";
         }
     }
 
@@ -114,7 +114,7 @@ void Predictor::createCSVFile(void)
 int Predictor::computeState(const std::vector<int> &memory) const
 {
     if (memory.size() != memorySize) {
-        throwErrorException("Memory sizes do not match");
+        throw ErrorException() << "Memory sizes do not match";
     }
 
     // compute state (i.e. row) from memory values

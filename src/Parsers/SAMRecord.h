@@ -15,9 +15,6 @@
 #include "constants.h"
 #include <stdint.h>
 
-// 1 million chars per SAM record should be enough
-static const size_t LINE_SIZE = 1 * MB;
-
 /** @brief Class: SAMRecord
 *
 *  Structure of a SAM alignment line: The 11 mandatory fields are
@@ -26,7 +23,7 @@ static const size_t LINE_SIZE = 1 * MB;
 */
 class SAMRecord {
 public:
-    char     line[LINE_SIZE]; // buffer for current line
+    char     line[1 * MB]; // buffer for current line (1 million chars should be enough)
 
     char     *qname; // Query template NAME
     uint16_t flag;   // bitwise FLAG (uint16_t)
