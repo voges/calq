@@ -27,7 +27,17 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     , inFileName(inFileName)
     , outFileName(outFileName)
 {
-    readFastaReferences();
+    // get reference sequences
+    for (auto const &fastaFileName : fastaFileNames) {
+        std::cout << "Parsing FASTA file: " << fastaFileName << std::endl;
+        fastaParser.parseFile(fastaFileName, fastaReferences);
+    }
+
+    // print info about found reference sequences
+    std::cout << "Found the following reference sequence(s): " << std::endl;
+    for (auto const &fastaReference : fastaReferences) {
+        std::cout << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
+    }
 }
 
 CalqCodec::~CalqCodec(void)
@@ -37,17 +47,7 @@ CalqCodec::~CalqCodec(void)
 
 void CalqCodec::readFastaReferences(void)
 {
-    // get reference sequences
-    for (auto const &fastaFileName : fastaFileNames) {
-        std::cout << "Parsing FASTA file: " << fastaFileName << std::endl;
-        fastaParser.parseFile(fastaFileName, fastaReferences);
-    }
-
-    // print info about found reference sequences
-    std::cout << "Found the following reference sequences: " << std::endl;
-    for (auto const &fastaReference : fastaReferences) {
-        std::cout << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
-    }
+    
 }
 
 CalqEncoder::CalqEncoder(const std::string &samFileName,
@@ -58,6 +58,14 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
     , qualEncoder(ofbs, fastaReferences)
     , samParser(samFileName)
 {
+    if (filenameExtension(cliOptions.outFileName) != std::string("cq")) {
+        throwUserException("Output file extension must be 'cq'");
+    }
+    
+    if (fileExists(cliOptions.outFileName)) {
+        throwUserException("output file already exists (use option 'f' to force overwriting)");
+    }
+
     // associate the outfile bitstream with the CQ file
     ofbs.open(cqFileName);
 }
@@ -74,21 +82,29 @@ void CalqEncoder::encode(void)
     size_t uncompressedSize = 0;
     size_t compressedSize = 0;
     size_t numRecords = 0;
+    
+    std::string rnamePrev
 
     // send all records to the QualEncoder
-    qualEncoder.startBlock(samParser.curr);
+    qualEncoder.startBlock(samParser.curr.rname);
+    std::string rnamePrev(samParser.curr.rname);
     do {
         uncompressedSize += strlen(samParser.curr.qual);
         numRecords++;
 
-        if (qualEncoder.checkRecord(samParser.curr) == false) {
-            // start a new block
-            compressedSize += qualEncoder.finishBlock();
-            qualEncoder.startBlock(samParser.curr);
+        if (samParser.curr.flag & 0x4 == 0) {
+            // this read is unmapped
+            qualEncoder.addUnmappedRecordToBlock(samParser.curr);
+        } else {
+            if (samParser.curr.rname != rnamePrev) {
+                // start a new block
+                compressedSize += qualEncoder.finishBlock();
+                qualEncoder.startBlock(samParser.curr.rname);
+            }
+            rnamePrev = samParser.curr.rname;
+            qualEncoder.addRecordToBlock(samParser.curr);
         }
-
-        // add this record to the current block
-        qualEncoder.addRecordToBlock(samParser.curr);
+        
     } while (samParser.next());
     compressedSize += qualEncoder.finishBlock();
 

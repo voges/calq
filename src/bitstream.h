@@ -47,7 +47,6 @@
  */
 class ibitstream: public std::istream {
 public:
-
     /** @brief Constructor: ibitstream
      *
      *  Initializes a new ibitstream that is not attached to any source.
@@ -273,7 +272,7 @@ public:
     void close(void);
 
 private:
-    /* The actual file buffer which does reading and writing. */
+    /// the actual file buffer which does reading and writing
     std::filebuf fileBuffer;
 };
 
@@ -335,7 +334,7 @@ public:
     void close(void);
 
 private:
-    /* The actual file buffer which does reading and writing. */
+    /// the actual file buffer which does reading and writing
     std::filebuf fileBuffer;
 };
 
@@ -361,8 +360,9 @@ public:
      *  @return Void.
      */
     void str(const std::string &s);
+
 private:
-    /// The actual string buffer that does character storage.
+    /// the actual string buffer that does character storage
     std::stringbuf stringBuffer;
 };
 
@@ -388,7 +388,7 @@ public:
     std::string str(void);
 
 private:
-    /// The actual string buffer that does character storage.
+    /// The actual string buffer that does character storage
     std::stringbuf stringBuffer;
 };
 

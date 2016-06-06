@@ -17,6 +17,7 @@
 #include "timestamp.h"
 #include "version.h"
 
+// we compute the build year for convenience
 #define BUILD_YEAR \
     ( \
         (TIMESTAMP_UTC[ 0] - '0') * 1000 +\

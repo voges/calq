@@ -1,6 +1,6 @@
 /** @file os_config.h
  *  @brief This file detects the operation system we are working on and
- *         does the necessary (re-)defines.
+ *         does the necessary defines.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -9,7 +9,7 @@
  *  Changelog
  *  YYYY-MM-DD: what (who)
  */
- 
+
 #ifndef OS_CONFIG_H
 #define OS_CONFIG_H
 

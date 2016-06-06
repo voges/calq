@@ -1,5 +1,0 @@
-STRING(TIMESTAMP TIMESTAMP_UTC UTC)
-file(WRITE timestamp.h "#ifndef TIMESTAMP_H\n")
-file(APPEND timestamp.h "#define TIMESTAMP_H\n\n")
-file(APPEND timestamp.h "#define TIMESTAMP_UTC \"${TIMESTAMP_UTC}\"\n\n")
-file(APPEND timestamp.h "#endif // TIMESTAMP_H\n\n")

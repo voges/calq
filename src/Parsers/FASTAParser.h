@@ -17,6 +17,9 @@
 #include <string>
 #include <vector>
 
+// usually, lines are limited to 80 chars, so 4 KB should be enough
+static const size_t LINE_SIZE = 4 * KB;
+
 /** @brief Class: FASTAParser
  *
  *  This class can parse FASTA files with the public member function
@@ -24,13 +27,34 @@
  */
 class FASTAParser {
 public:
+    /** @brief Constructor: FASTAParser
+     *
+     *  Initializes a new FASTAParser instance.
+     */
     FASTAParser(void);
+
+    /** @brief Destructor: FASTAParser
+     *
+     *  Destructs a FASTAParser instance.
+     */
     ~FASTAParser(void);
 
-    void parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences);
+    /** @brief Member function: parseFile
+     *
+     *  Parses a FASTA file with name 'filename' and appends the found
+     *  sequences and the associated headers to the vector 'fastaReferences'.
+     *  Checks if 'filename' has the correct filename extension and also
+     *  checks if the file is accessible.
+     *
+     *  @param filename FASTA file name
+     *  @param fastaReferences A vector containing elements of type
+     *         FASTAReference.
+     *  @return Void.
+     */
+    void parseFile(const std::string &filename
+                   std::vector<FASTAReference> &fastaReferences);
 private:
-    char line[4 * KB]; // usually, lines are limited to 80 chars, so 4 KB
-                       // should be enough space
+    char line[LINE_SIZE];
 };
 
 #endif // FASTAPARSER_H

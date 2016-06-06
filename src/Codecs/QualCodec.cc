@@ -99,24 +99,8 @@ QualEncoder::~QualEncoder(void)
     // empty
 }
 
-bool QualEncoder::checkRecord(const SAMRecord &samRecord)
+void QualEncoder::startBlock(const std::string &rname)
 {
-    const std::string rname(samRecord.rname);
-
-    // check if the RNAME field changed
-    if (rname != rnamePrev) {
-        return false;
-    }
-
-    rnamePrev = rname;
-    return true;
-}
-
-void QualEncoder::startBlock(const SAMRecord &samRecord)
-{
-    const std::string rname(samRecord.rname);
-    rnamePrev = rname;
-
     // find FASTA reference for this RNAME
     bool foundFastaReference = false;
 
@@ -137,7 +121,12 @@ void QualEncoder::startBlock(const SAMRecord &samRecord)
     }
 }
 
-void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
+void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
+{
+    // empty
+}
+
+void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 {
     const uint16_t flag = samRecord.flag;
     const std::string rname(samRecord.rname);
@@ -171,6 +160,15 @@ void QualEncoder::addRecordToBlock(const SAMRecord &samRecord)
     std::string insertedQual("");
     extract(seq, qual, cigar, matchedSeq, matchedQual, insertedSeq, insertedQual);
 
+    recordBuffer.push(samRecord);
+    
+    // check which genomic positions are ready for processing
+    
+    // check which records in 'recordBuffer' are ready for processing
+    
+    // remove the processed record from the queue
+    recordBuffer.pop();
+    
     // TODO: accumulate depths
     //quantizer1.updateDepths(pos, cigar);
 

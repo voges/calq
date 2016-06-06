@@ -22,17 +22,33 @@
 #include <vector>
 
 /** @brief Class: CalqCodec
-*
-*  The CalqEncoder and the CalqDecoder inherit common methods from this class.
-*/
+ *
+ *  The CalqEncoder and the CalqDecoder classes inherit common methods from
+ *  this class.
+ */
 class CalqCodec {
 public:
+    /** @brief Constructor: CalqCodec
+     *
+     *  Initializes a new CalqCodec instance and reads the reference
+     *  sequence(s) from all provided FASTA files. The reference
+     *  sequence(s) are stored in 'fastaReferences'.
+     *
+     *  @param inFileName File name of the input file to be en- or decoded
+     *  @param outfileName File name of the output file
+     *  @param fastaFileNames Vector containing the file names of the FASTA
+     *         which contain the reference sequence(s) used during en- or
+     *         decoding
+     */
     CalqCodec(const std::string &inFileName,
               const std::string &outFileName,
               const std::vector<std::string> &fastaFileNames);
+              
+    /** @brief Destructor: CalqCodec
+     *
+     *  Destructs a CalqCodec instance.
+     */
     virtual ~CalqCodec(void);
-
-    void readFastaReferences(void);
 
 protected:
     const std::vector<std::string> fastaFileNames;
@@ -53,6 +69,22 @@ private:
 */
 class CalqEncoder: public CalqCodec {
 public:
+
+    /** @brief Constructor: CalqEncoder
+     *
+     *  Initializes a new CalqEncoder instance with a SAM file to be encoded,
+     *  a CQ file to write the bitstream to and a set of FASTA files to read
+     *  the reference sequence(s) from.
+     *
+     *  @param samFileName The name of the SAM file to be encoded. The file has
+     *         to exist and  has to be readable.
+     *  @param cqFileName The name of the CQ file to write the encoded
+     *         bitstream to. The file may not exist already.
+     *  @param fastaFileNames A vector containing the names of all FASTA
+     *         files which contents shall be used as reference sequence(s).
+     *         The FASTA files have to exists and have to be readable.
+     *  @return Void
+     */
     CalqEncoder(const std::string &samFileName,
                 const std::string &cqFileName,
                 const std::vector<std::string> &fastaFileNames);

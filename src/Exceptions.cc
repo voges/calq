@@ -9,7 +9,7 @@
  *  Changelog
  *  YYYY-MM-DD: what (who)
  */
- 
+
 #include "Exceptions.h"
 
 Exception::Exception(const std::string &msg)

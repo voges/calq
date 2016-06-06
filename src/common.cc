@@ -1,14 +1,16 @@
 /** @file common.cc
- *  @brief This file contains the implementations of common functions.
+ *  @brief This file contains the implementations of the functions definded
+ *         in common.h.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
 
 /*
  *  Changelog
- *  2016-05-29: Moved the fileExists function from access() (which
- *              is defined in unistd.h, which is Linux-specific) to
- *              std::ifstream (which is portable). (voges)
+ *  2016-05-29: Moved the implementation of the fileExists function from
+ *              access() (which is defined in unistd.h, which is
+ *              Linux-specific) to std::ifstream (which is portable).
+ *             (voges)
  */
 
 #include "common.h"

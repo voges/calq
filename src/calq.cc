@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
             // check if output file is already there and if the user wants to
             // overwrite it in this case
             if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                throwUserException("Output file already exists (use option 'f'' to force overwriting)");
+                throwUserException("Output file already exists (use option 'f' to force overwriting)");
             }
 
             // invoke compressor

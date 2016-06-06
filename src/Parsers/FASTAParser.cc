@@ -10,6 +10,7 @@
  */
 
 #include "Parsers/FASTAParser.h"
+#include "common.h"
 #include <fstream>
 #include <iostream>
 
@@ -26,6 +27,15 @@ FASTAParser::~FASTAParser(void)
 void FASTAParser::parseFile(const std::string &filename, 
                             std::vector<FASTAReference> &fastaReferences)
 {
+    if (   filenameExtension(filename) != std::string("fa")
+        && filenameExtension(filename) != std::string("fasta")) {
+        throwErrorException("Reference file extension must be 'fa' or 'fasta'");
+    }
+
+    if (!fileExists(filename)) {
+        throwErrorException("Cannot access reference file");
+    }
+
     std::ifstream ifs;
     ifs.open(filename.c_str(), std::ios::in);
 

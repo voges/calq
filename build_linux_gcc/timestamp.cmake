@@ -1,5 +1,0 @@
-STRING(TIMESTAMP UTCTIME UTC)
-file(WRITE timestamp.h "#ifndef CMAKE_TIMESTAMP_H\n")
-file(APPEND timestamp.h "#define CMAKE_TIMESTAMP_H\n\n")
-file(APPEND timestamp.h "#define _CMAKE_UTCTIME_ \"${UTCTIME}\"\n\n")
-file(APPEND timestamp.h "#endif // CMAKE_TIMESTAMP_H\n\n")

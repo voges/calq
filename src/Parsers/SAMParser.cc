@@ -20,6 +20,14 @@ SAMParser::SAMParser(const std::string &filename)
     , curr()
     , ifs()
 {
+    if (   filenameExtension(filename) != std::string("sam")) {
+        throwErrorException("SAM file extension must be 'sam'");
+    }
+
+    if (!fileExists(filename)) {
+        throwErrorException("Cannot access SAM file");
+    }
+    
     ifs.open(filename.c_str(), std::ios::in);
     readSAMHeader();
 }
@@ -29,25 +37,15 @@ SAMParser::~SAMParser (void)
     ifs.close();
 }
 
-void SAMParser::readSAMHeader(void)
+bool SAMParser::next(void)
 {
-    bool foundHeader = false;
-    std::streampos pos = ifs.tellg();
-
-    while (ifs.getline(curr.line, sizeof(curr.line))) {
-        if (curr.line[0] == '@') {
-            header += curr.line;
-            header += "\n";
-            foundHeader = true;
-        } else {
-            if (foundHeader == false) {
-                throwErrorException("SAM header is missing");
-            }
-            parse();
-            break;
-        }
+    if (ifs.getline(curr.line, sizeof(curr.line))) {
+        parse();
+        return true;
     }
+    return false;
 }
+
 void SAMParser::parse(void)
 {
     size_t l = strlen(curr.line) - 1;
@@ -82,12 +80,23 @@ void SAMParser::parse(void)
     if (f == 11) curr.opt = c;
 }
 
-bool SAMParser::next(void)
+void SAMParser::readSAMHeader(void)
 {
-    if (ifs.getline(curr.line, sizeof(curr.line))) {
-        parse();
-        return true;
+    bool foundHeader = false;
+    std::streampos pos = ifs.tellg();
+
+    while (ifs.getline(curr.line, sizeof(curr.line))) {
+        if (curr.line[0] == '@') {
+            header += curr.line;
+            header += "\n";
+            foundHeader = true;
+        } else {
+            if (foundHeader == false) {
+                throwErrorException("SAM header is missing");
+            }
+            parse();
+            break;
+        }
     }
-    return false;
 }
 

@@ -18,6 +18,8 @@
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
 #include <fstream>
+#include <map>
+#include <queue>
 #include <vector>
 
 /** @brief Class: QualEncoder
@@ -29,19 +31,23 @@ public:
     QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
     ~QualEncoder(void);
 
-    bool checkRecord(const SAMRecord &samRecord);
-    void startBlock(const SAMRecord &samRecord);
+    void startBlock(const std::string &rname);
     void addRecordToBlock(const SAMRecord &samRecord);
     size_t finishBlock(void);
 
 private:
+    // these member variables are used throughout coding multiple blocks
     std::vector<FASTAReference> fastaReferences;
     size_t numEncodedRecords;
     ofbitstream &ofbs;
-    Predictor predictor;
 
+    // these member variables are used per block
+    Predictor predictor;
     std::string rnamePrev;
     FASTAReference currFastaReference;
+    std::map<size_t, uint8_t> quantizers;
+    std::queue<SAMRecord> recordBuffer;
+
 };
 
 /** @brief Class: QualDecoder

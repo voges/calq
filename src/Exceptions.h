@@ -9,7 +9,7 @@
  *  Changelog
  *  YYYY-MM-DD: what (who)
  */
- 
+
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
@@ -50,7 +50,7 @@ public:
  *  UserException with the specified message.
  *
  *  @param msg Error message
- *  @return Void.
+ *  @return Void
  */
 inline void throwUserException(const std::string &msg)
 {
@@ -75,7 +75,7 @@ public:
  *  with the specified message.
  *
  *  @param msg Error message
- *  @return Void.
+ *  @return Void
  */
 inline void throwErrorException(const std::string &msg)
 {
