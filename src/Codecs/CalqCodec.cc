@@ -13,7 +13,7 @@
 #include "Codecs/CalqCodec.h"
 #include "cmake_config.h"
 #include "definitions.h"
-#include "ErrorException.h"
+#include "Exceptions.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>
@@ -21,13 +21,12 @@
 CalqCodec::CalqCodec(const std::string &inFileName,
                      const std::string &outFileName,
                      const std::vector<std::string> &fastaFileNames)
-    : fastaFileNames(fastaFileNames)
-    , fastaParser()
-    , fastaReferences()
+    : fastaReferences()
     , inFileName(inFileName)
     , outFileName(outFileName)
 {
     // get reference sequences
+    FASTAParser fastaParser;
     for (auto const &fastaFileName : fastaFileNames) {
         std::cout << "Parsing FASTA file: " << fastaFileName << std::endl;
         fastaParser.parseFile(fastaFileName, fastaReferences);
@@ -78,7 +77,7 @@ void CalqEncoder::encode(void)
         numRecords++;
 
         if ((samParser.curr.flag & 0x4) == 1) {
-            // this read is unmapped
+            // this read has not been mapped/aligned
             qualEncoder.addUnmappedRecordToBlock(samParser.curr);
         } else {
             if (samParser.curr.rname != rnamePrev) {
@@ -89,7 +88,6 @@ void CalqEncoder::encode(void)
             rnamePrev = samParser.curr.rname;
             qualEncoder.addMappedRecordToBlock(samParser.curr);
         }
-        
     } while (samParser.next());
     compressedSize += qualEncoder.finishBlock();
 
@@ -100,8 +98,6 @@ void CalqEncoder::encode(void)
     std::cout << "Compressed " << numRecords << " record(s)" << std::endl;
     std::cout << "Uncompressed size: " << uncompressedSize << std::endl;
     std::cout << "Compressed size: " << compressedSize << std::endl;
-    std::cout << "Compression Ratio (CR): " << (double)uncompressedSize/(double)compressedSize*100 << std::endl;
-    std::cout << "Compression Factor (CF): " << (double)compressedSize/(double)uncompressedSize*100 << std::endl;
 }
 
 CalqDecoder::CalqDecoder(const std::string &cqFileName,

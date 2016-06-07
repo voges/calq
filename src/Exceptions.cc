@@ -19,7 +19,7 @@ Exception::Exception(const std::string &msg)
 
 Exception::~Exception(void) throw () 
 {
-    // Empty
+    // empty
 }
 
 std::string Exception::getMessage(void) const 

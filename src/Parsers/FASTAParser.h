@@ -38,17 +38,17 @@ public:
 
     /** @brief Member function: parseFile
      *
-     *  Parses a FASTA file with name 'filename' and appends the found
+     *  Parses a FASTA file with name 'fileName' and appends the found
      *  sequences and the associated headers to the vector 'fastaReferences'.
-     *  Checks if 'filename' has the correct filename extension and also
+     *  Checks if 'fileName' has the correct file name extension and also
      *  checks if the file is accessible.
      *
-     *  @param filename FASTA file name
+     *  @param fileName FASTA file name
      *  @param fastaReferences A vector containing elements of type
      *         FASTAReference.
      *  @return Void.
      */
-    void parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences);
+    void parseFile(const std::string &fileName, std::vector<FASTAReference> &fastaReferences);
 private:
     char line[4 * KB]; // usually, lines are limited to 80 chars, so 4 KB should be enough
 };

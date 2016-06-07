@@ -11,25 +11,25 @@
 
 #include "Parsers/SAMParser.h"
 #include "common.h"
-#include "ErrorException.h"
+#include "Exceptions.h"
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
 
-SAMParser::SAMParser(const std::string &filename)
+SAMParser::SAMParser(const std::string &fileName)
     : header()
     , curr()
     , ifs()
 {
-    if (   filenameExtension(filename) != std::string("sam")) {
-        throw ErrorException() << "SAM file extension must be 'sam': " << filename;
+    if (fileNameExtension(fileName) != std::string("sam")) {
+        throwErrorException("SAM file extension must be 'sam'");
     }
 
-    if (!fileExists(filename)) {
-        throw ErrorException() << "Cannot access SAM file: " << filename;
+    if (!fileExists(fileName)) {
+        throwErrorException("Cannot access SAM file");
     }
-    
-    ifs.open(filename.c_str(), std::ios::in);
+
+    ifs.open(fileName.c_str(), std::ios::in);
     readSAMHeader();
 }
 
@@ -84,7 +84,6 @@ void SAMParser::parse(void)
 void SAMParser::readSAMHeader(void)
 {
     bool foundHeader = false;
-    std::streampos pos = ifs.tellg();
 
     while (ifs.getline(curr.line, sizeof(curr.line))) {
         if (curr.line[0] == '@') {
@@ -93,7 +92,7 @@ void SAMParser::readSAMHeader(void)
             foundHeader = true;
         } else {
             if (foundHeader == false) {
-                throw ErrorException() << "SAM header is missing";
+                throwErrorException("SAM header is missing");
             }
             parse();
             break;

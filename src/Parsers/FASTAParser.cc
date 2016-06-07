@@ -11,7 +11,7 @@
 
 #include "Parsers/FASTAParser.h"
 #include "common.h"
-#include "ErrorException.h"
+#include "Exceptions.h"
 #include <fstream>
 #include <iostream>
 
@@ -25,19 +25,19 @@ FASTAParser::~FASTAParser(void)
     // empty
 }
 
-void FASTAParser::parseFile(const std::string &filename, std::vector<FASTAReference> &fastaReferences)
+void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTAReference> &fastaReferences)
 {
-    if (   filenameExtension(filename) != std::string("fa")
-        && filenameExtension(filename) != std::string("fasta")) {
-        throw ErrorException() << "Reference file extension must be 'fa' or 'fasta': " << filename;
+    if (   fileNameExtension(fileName) != std::string("fa")
+        && fileNameExtension(fileName) != std::string("fasta")) {
+        throwErrorException("Reference file extension must be 'fa' or 'fasta'");
     }
 
-    if (!fileExists(filename)) {
-        throw ErrorException() << "Cannot access reference file: " << filename;
+    if (!fileExists(fileName)) {
+        throwErrorException("Cannot access reference file");
     }
 
     std::ifstream ifs;
-    ifs.open(filename.c_str(), std::ios::in);
+    ifs.open(fileName.c_str(), std::ios::in);
 
     FASTAReference fastaReference;
     bool first = true;

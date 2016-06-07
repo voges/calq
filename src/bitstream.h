@@ -1,5 +1,5 @@
 /** @file bitstream.h
- *  @brief This file defines the ibitstream and obitstream classes.
+ *  @brief This file defines the i...bitstream and o...bitstream classes.
  *
  *  This file defines the ibitstream and obitstream classes which are basically
  *  the same as the ordinary istream and ostream classes, but add the
@@ -388,7 +388,7 @@ public:
     std::string str(void);
 
 private:
-    /// The actual string buffer that does character storage
+    /// the actual string buffer that does character storage
     std::stringbuf stringBuffer;
 };
 

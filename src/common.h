@@ -26,8 +26,8 @@
     #define DEBUG(c,...) do { } while (false)
 #endif
 
-const char * filenameExtension(const std::string &filename);
-bool fileExists(const std::string &filename);
+const char * fileNameExtension(const std::string &fileName);
+bool fileExists(const std::string &fileName);
 bool yesno(void);
 
 #endif // COMMON_H

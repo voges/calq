@@ -1,10 +1,10 @@
 /** @file bitstream.cc
  *  @brief Implementation of i...bitstream and o...bitstream  classes.
  *
- *  This file contains the implementation of ibitstream and obitstream classes.
- *  These classes are patterned after (and, in fact, inherit from) the standard
- *  ifstream and ofstream classes. Please see bitstream.hpp for information
- *  about how a client properly uses these classes.
+ *  This file contains the implementation of i...bitstream and o...bitstream
+ *  classes. These classes are patterned after (and, in fact, inherit from) the
+ *  standard ifstream and ofstream classes. Please see bitstream.h for
+ *  information about how a client properly uses these classes.
  *
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -16,7 +16,7 @@
  */
 
 #include "bitstream.h"
-#include "ErrorException.h"
+#include "Exceptions.h"
 
 static const int NUM_BITS_IN_BYTE = 8;
 
@@ -57,7 +57,7 @@ int ibitstream::readBit(void)
     ///
 
     if (!is_open()) {
-        throw ErrorException() << "Cannot read a bit from a stream that is not open";
+        throwErrorException("Cannot read a bit from a stream that is not open");
     }
 
     // if just finished bits from currByte or if data read from stream after 
@@ -79,7 +79,7 @@ int ibitstream::readBit(void)
 int ibitstream::readByte(BYTE &byte)
 {
     if (!is_open()) {
-        throw ErrorException() << "Cannot read a byte from a stream that is not open";
+        throwErrorException("Cannot read a byte from a stream that is not open");
     }
 
     if ((byte = (BYTE)get()) == EOF) {
@@ -93,7 +93,7 @@ int ibitstream::readByte(BYTE &byte)
 int ibitstream::readUint64(uint64_t &x)
 {
     if (!is_open()) {
-        throw ErrorException() << "Cannot read a uint64_t from a stream that is not open";
+        throwErrorException("Cannot read a uint64_t from a stream that is not open");
     }
 
     BYTE hh = 0x00;
@@ -117,7 +117,7 @@ int ibitstream::readUint64(uint64_t &x)
 int ibitstream::readBuffer(BYTE &buf, const size_t n)
 {
     if (!is_open()) {
-        throw ErrorException() << "Cannot read a byte buffer from a stream that is not open";
+        throwErrorException("Cannot read a byte buffer from a stream that is not open");
     }
 
     read((char*)&buf, n);
@@ -127,7 +127,7 @@ int ibitstream::readBuffer(BYTE &buf, const size_t n)
     }
 
     if (fail()) {
-        throw ErrorException() << "Error on stream while reading buffer";
+        throwErrorException("Error on stream while reading buffer");
     }
 
     return 0;
@@ -141,7 +141,7 @@ void ibitstream::rewind(void)
     ///
 
     if (!is_open()) {
-        throw ErrorException() << "Cannot rewind a stream that is not open";
+        throwErrorException("Cannot rewind a stream that is not open");
     }
 
     clear();
@@ -157,7 +157,7 @@ long ibitstream::size(void)
     ///
 
     if (!is_open()) {
-        throw ErrorException() << "Cannot get size of stream which is not open";
+        throwErrorException("Cannot get size of stream which is not open");
     }
 
     clear();                  // clear any error state
@@ -210,11 +210,11 @@ void obitstream::writeBit(const int bit)
     ///
 
     if (bit != 0 && bit != 1) {
-        throw ErrorException() << "Must pass an integer argument of 0 or 1";
+        throwErrorException("Must pass an integer argument of 0 or 1");
     }
 
     if (!is_open()) {
-        throw ErrorException() << "Stream is not open";
+        throwErrorException("Stream is not open");
     }
 
     // if just filled currByte or if data written to stream after last 
@@ -245,7 +245,7 @@ void obitstream::writeBit(const int bit)
 void obitstream::writeByte(const BYTE byte)
 {
     if (!is_open()) {
-        throw ErrorException() << "Stream is not open";
+        throwErrorException("Stream is not open");
     }
 
     put((char)byte);
@@ -255,7 +255,7 @@ void obitstream::writeByte(const BYTE byte)
 void obitstream::writeUint64(const uint64_t x)
 {
     if (!is_open()) {
-        throw ErrorException() << "Stream is not open";
+        throwErrorException("Stream is not open");
     }
 
     writeByte((x >> 24) & 0xFF);
@@ -267,13 +267,13 @@ void obitstream::writeUint64(const uint64_t x)
 void obitstream::writeBuffer(const BYTE &buf, const size_t n)
 {
     if (!is_open()) {
-        throw ErrorException() << "Stream is not open";
+        throwErrorException("Stream is not open");
     }
 
     write((char*)&buf, n);
 
     if (fail()) {
-        throw ErrorException() << "Stream error while writing buffer";
+        throwErrorException("Stream error while writing buffer");
     }
 }
 
@@ -286,7 +286,7 @@ long obitstream::size(void)
     ///
 
     if (!is_open()) {
-        throw ErrorException() << "Stream is not open";
+        throwErrorException("Stream is not open");
     }
 
     clear();                  // clear any error state

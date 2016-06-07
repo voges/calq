@@ -32,31 +32,6 @@ protected:
     std::string msg;
 };
 
-/** @brief Class: UserException
- *
- *  This exception is thrown by calls to the throwUserException function.
- *  If a UserException is thrown at any point in the range of the try block
- *  (including in functions called from that code), control will jump
- *  immediately to the error handler.
- */
-class UserException : public Exception {
-public:
-    UserException(const std::string &msg): Exception(msg) {}
-};
-
-/** @brief Global function: throwUserException
- *
- *  Signals an error condition in a program by throwing a
- *  UserException with the specified message.
- *
- *  @param msg Error message
- *  @return Void
- */
-inline void throwUserException(const std::string &msg)
-{
-    throw UserException(msg);
-}
-
 /** @brief Class: ErrorException
  *
  *  This exception is thrown by calls to the >throwErrorException function.
@@ -98,10 +73,12 @@ public:
 
     void operator()(const std::string &msg)
     {
-        std::cerr << file << ":" << function << ":" << line << ": ";
+        //std::cerr << file << ":" << function << ":" << line << ": ";
+        std::string tmp = file + ":" + function + ":" + std::to_string(line) + ": " + msg;
         // can use the original name here, as it is still defined
-        throwErrorException(msg);
+        throwErrorException(tmp);
     }
+
 private:
     std::string function;
     std::string file;

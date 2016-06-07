@@ -43,7 +43,7 @@ public:
     CalqCodec(const std::string &inFileName,
               const std::string &outFileName,
               const std::vector<std::string> &fastaFileNames);
-              
+
     /** @brief Destructor: CalqCodec
      *
      *  Destructs a CalqCodec instance.
@@ -51,13 +51,9 @@ public:
     virtual ~CalqCodec(void);
 
 protected:
-    const std::vector<std::string> fastaFileNames;
     std::vector<FASTAReference> fastaReferences;
     const std::string inFileName;
     const std::string outFileName;
-
-private:
-    FASTAParser fastaParser;
 };
 
 /** @brief Class: CalqEncoder

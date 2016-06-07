@@ -27,12 +27,12 @@ public:
     /** @brief Constructor: SAMParser
      *
      *  Initializes a new SAMParser instance with a SAM file with the name
-     *  'filename'. Checks if 'filename' has the correct filename extension
+     *  'fileName'. Checks if 'fileName' has the correct file name extension
      *  and checks if the file is accessible. Reads the SAM header by calling
      *  'readSAMheader'. The SAM header is stored in 'header'. Reads the first
      *  record and stores it in 'curr'.
      */
-    SAMParser(const std::string &filename);
+    SAMParser(const std::string &fileName);
 
     /** @brief Destructor: SAMParser
      *

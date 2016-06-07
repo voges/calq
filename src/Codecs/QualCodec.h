@@ -14,7 +14,7 @@
 #define QUALCODEC_H
 
 #include "bitstream.h"
-#include "Codecs/Predictor.h"
+#include "Codecs/MappedRecord.h"
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
 #include <fstream>
@@ -28,7 +28,7 @@
  */
 class QualEncoder {
 public:
-    QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
+    QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
     ~QualEncoder(void);
 
     void startBlock(const std::string &rname);
@@ -38,18 +38,25 @@ public:
 
 private:
     // these member variables are used throughout coding multiple blocks
-    std::vector<FASTAReference> fastaReferences;
-    size_t numEncodedRecords;
-    ofbitstream &ofbs;
+    std::vector<FASTAReference> g_fastaReferences;
+    size_t g_numBlocks;
+    size_t g_numMappedRecords;
+    size_t g_numUnmappedRecords;
+    ofbitstream &g_ofbs;
 
     // these member variables are used per block
-    Predictor predictor;
-    std::string rnamePrev;
-    FASTAReference currFastaReference;
-    size_t nextRefPos;
-    std::map<size_t, uint8_t> quantizers;
-    std::queue<SAMRecord> recordBuffer;
+    size_t numMappedRecords;
+    size_t numUnmappedRecords;
+    std::string reference;
+    std::queue<MappedRecord> mappedRecordQueue;
+    size_t nextReferencePos;
+    std::vector<std::string> observedNucleotides;
+    std::vector<std::string> observedQualityValues;
+    std::vector<int> quantizerIndices;
 
+private:
+    void encodeMappedRecord(const MappedRecord &mappedRecord);
+    void encodeUnmappedRecord(const std::string &qual);
 };
 
 /** @brief Class: QualDecoder

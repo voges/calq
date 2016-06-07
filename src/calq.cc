@@ -35,7 +35,7 @@
 #include "Codecs/CalqCodec.h"
 #include "common.h"
 #include "cmake_config.h"
-#include "ErrorException.h"
+#include "Exceptions.h"
 #include <iostream>
 #include <tclap/CmdLine.h>
 
@@ -86,72 +86,66 @@ int main(int argc, char *argv[])
         cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.refFileNames = referenceArg.getValue();
 
-        // check if the input file exists
+        // check if the input file exists and if it has the correct extension
+        std::cout << "Checking input file: " << cliOptions.inFileName << std::endl;
         if (!fileExists(cliOptions.inFileName)) {
-            throw ErrorException() << "Cannot access input file: " << cliOptions.inFileName;
+            throwErrorException("Cannot access input file");
         }
-
-        // check if the reference file(s) exist and check for FASTA file
-        // ending(s)
-        for (auto const &refFileName : cliOptions.refFileNames) {
-            if (   filenameExtension(refFileName) != std::string("fa")
-                && filenameExtension(refFileName) != std::string("fasta")) {
-                throw ErrorException() << "Reference file extension must be 'fa' or 'fasta': " << refFileName;
-            }
-            if (!fileExists(refFileName)) {
-                throw ErrorException() << "Cannot access reference file: " << refFileName;
-            }
-            std::cout << "Using reference file: " << refFileName << std::endl;
-        }
-
         if (cliOptions.decompress == false) {
-            // check for correct infile extension
-            if (filenameExtension(cliOptions.inFileName) != std::string("sam")) {
-                throw ErrorException() << "Input file extension must be 'sam': " << cliOptions.inFileName;
+            if (fileNameExtension(cliOptions.inFileName) != std::string("sam")) {
+                throwErrorException("Input file extension must be 'sam'");
             }
+        } else {
+            if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
+                throwErrorException("Input file extension must be 'cq'");
+            }
+        }
+        std::cout << "OK" << std::endl;
 
-            // create correct output file name if it was not provided via the
-            // command line options
+        // create correct output file name if it was not provided via the
+        // command line options and check if output file is already there and
+        // if the user wants to overwrite it in this case
+        std::cout << "Checking output file: ";
+        if (cliOptions.decompress == false) {
             if (cliOptions.outFileName.empty()) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".cq");
             }
-
-            // check if output file is already there and if the user wants to
-            // overwrite it in this case
-            if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                throw ErrorException() << "Output file already exists (use option 'f' to force overwriting): " << cliOptions.outFileName;
+        } else {
+            if (cliOptions.outFileName.empty()) {
+                cliOptions.outFileName.append(cliOptions.inFileName);
+                cliOptions.outFileName.append(".qual");
             }
+        }
+        std::cout << cliOptions.outFileName << std::endl;
+        if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
+            throwErrorException("Output file already exists (use option 'f' to force overwriting)");
+        }
+        std::cout << "OK" << std::endl;
 
+        // check if the reference file(s) exist and check for FASTA file
+        // ending(s)
+        for (auto const &refFileName : cliOptions.refFileNames) {
+            std::cout << "Checking reference file: " << refFileName << std::endl;
+            if (   fileNameExtension(refFileName) != std::string("fa")
+                && fileNameExtension(refFileName) != std::string("fasta")) {
+                throwErrorException("Reference file extension must be 'fa' or 'fasta'");
+            }
+            if (!fileExists(refFileName)) {
+                throwErrorException("Cannot access reference file");
+            }
+            std::cout << "OK" << std::endl;
+        }
+
+        // compress or decompress
+        if (cliOptions.decompress == false) {
             // invoke compressor
-            std::cout << "Input file: " << cliOptions.inFileName << std::endl;
-            std::cout << "Output file: " << cliOptions.outFileName << std::endl;
             std::cout << "Compressing ..." << std::endl;
             CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqEncoder.encode();
             std::cout << "Finished compression" << std::endl;
         } else {
-            // check for correct infile extension
-            if (filenameExtension(cliOptions.inFileName) != std::string("cq")) {
-                throw ErrorException() << "Input file extension must be 'cq': " << cliOptions.inFileName;
-            }
-
-            // create correct output file name if it was not provided via the
-            // command line options
-            if (cliOptions.outFileName.empty()) {
-                cliOptions.outFileName.append(cliOptions.inFileName);
-                cliOptions.outFileName.append(".qual");
-            }
-
-            // check if output file is already there and if the user wants to
-            // overwrite it in this case
-            if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-                throw ErrorException() << "Output file already exists (use option f to force overwriting): " << cliOptions.outFileName;
-            }
-
             // invoke decompressor
-            std::cout << "Input file: " << cliOptions.inFileName << std::endl;
-            std::cout << "Output file: " << cliOptions.outFileName << std::endl;
             std::cout << "Decompressing ..." << std::endl;
             CalqDecoder calqDecoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqDecoder.decode();

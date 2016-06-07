@@ -1,5 +1,5 @@
 /** @file common.cc
- *  @brief This file contains the implementations of the functions definded
+ *  @brief This file contains the implementations of the functions defined
  *         in common.h.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -17,16 +17,16 @@
 #include <fstream>
 #include <string.h>
 
-const char * filenameExtension(const std::string &filename)
+const char * fileNameExtension(const std::string &fileName)
 {
-    const char *dot = strrchr(filename.c_str(), '.');
-    if (!dot || dot == filename.c_str()) { return ""; }
+    const char *dot = strrchr(fileName.c_str(), '.');
+    if (!dot || dot == fileName.c_str()) { return ""; }
     return (dot + 1);
 }
 
-bool fileExists(const std::string &filename)
+bool fileExists(const std::string &fileName)
 {
-    std::ifstream ifs(filename.c_str());
+    std::ifstream ifs(fileName.c_str());
     return ifs.good();
 }
 
