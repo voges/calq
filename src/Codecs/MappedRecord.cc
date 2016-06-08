@@ -34,14 +34,14 @@ MappedRecord::MappedRecord(const SAMRecord &samRecord, const uint32_t &positionO
         case 'M':
         case '=':
         case 'X':
-            lastPosition += opLen;
+            lastPosition += (uint32_t)opLen;
             break;
         case 'I':
         case 'S':
             break;
         case 'D':
         case 'N':
-            lastPosition += opLen;
+            lastPosition += (uint32_t)opLen;
             break;
         case 'H':
         case 'P':
