@@ -18,6 +18,20 @@
 #include <iostream>
 #include <string.h>
 
+static bool samRecordIsMapped(SAMRecord &samRecord)
+{
+    if (   ((samRecord.flag & 0x4) == 1)
+        || (strlen(samRecord.rname) == 0 || samRecord.rname[0] == '*')
+        || (samRecord.pos == 0)
+        || (strlen(samRecord.cigar) == 0 || samRecord.cigar[0] == '*')
+        || (strlen(samRecord.seq) == 0 || samRecord.seq[0] == '*')
+        || (strlen(samRecord.qual) == 0 || samRecord.qual[0] == '*')) {
+        return false;
+    }
+
+    return true;
+}
+
 CalqCodec::CalqCodec(const std::string &inFileName,
                      const std::string &outFileName,
                      const std::vector<std::string> &fastaFileNames)
@@ -30,10 +44,11 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     for (auto const &fastaFileName : fastaFileNames) {
         std::cout << "Parsing FASTA file: " << fastaFileName << std::endl;
         fastaParser.parseFile(fastaFileName, fastaReferences);
+        std::cout << "OK" << std::endl;
     }
 
     // print info about found reference sequences
-    std::cout << "Found the following reference sequence(s): " << std::endl;
+    std::cout << "Found the following reference sequence(s):" << std::endl;
     for (auto const &fastaReference : fastaReferences) {
         std::cout << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
     }
@@ -70,31 +85,34 @@ void CalqEncoder::encode(void)
     size_t numRecords = 0;
 
     // send all records to the QualEncoder
-    qualEncoder.startBlock(samParser.curr.rname);
-    std::string rnamePrev(samParser.curr.rname);
+    std::string rnamePrev("");
+    bool first = true;
+    qualEncoder.startBlock();
+
     do {
         uncompressedSize += strlen(samParser.curr.qual);
         numRecords++;
-
-        if ((samParser.curr.flag & 0x4) == 1) {
-            // this read has not been mapped/aligned
-            qualEncoder.addUnmappedRecordToBlock(samParser.curr);
-        } else {
-            if (samParser.curr.rname != rnamePrev) {
+        if (samRecordIsMapped(samParser.curr) == true) {
+            if (samParser.curr.rname != rnamePrev && first == false) {
                 // start a new block
                 compressedSize += qualEncoder.finishBlock();
-                qualEncoder.startBlock(samParser.curr.rname);
+                qualEncoder.startBlock();
             }
             rnamePrev = samParser.curr.rname;
             qualEncoder.addMappedRecordToBlock(samParser.curr);
+            first = false;
+        } else {
+            qualEncoder.addUnmappedRecordToBlock(samParser.curr);
         }
     } while (samParser.next());
+
     compressedSize += qualEncoder.finishBlock();
 
     // print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
-    std::cout << "Took " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
+    std::cout << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
+              << " ~= " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
     std::cout << "Compressed " << numRecords << " record(s)" << std::endl;
     std::cout << "Uncompressed size: " << uncompressedSize << std::endl;
     std::cout << "Compressed size: " << compressedSize << std::endl;

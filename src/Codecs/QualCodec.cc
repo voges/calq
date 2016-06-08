@@ -19,18 +19,19 @@ static const int Q_MAX = 83;
 static const int Q_MIN = Q_OFFSET;
 
 QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences)
-    : g_fastaReferences(fastaReferences)
-    , g_numBlocks(0)
-    , g_numMappedRecords(0)
-    , g_numUnmappedRecords(0)
-    , g_ofbs(ofbs)
+    : fastaReferences(fastaReferences)
+    , numBlocks(0)
     , numMappedRecords(0)
     , numUnmappedRecords(0)
+    , ofbs(ofbs)
     , reference("")
     , mappedRecordQueue()
-    , nextReferencePos(0)
+    , maxPosition(0)
+    , minPosition(0)
+    , nextPosition(0)
     , observedNucleotides()
     , observedQualityValues()
+    , observedSize(0)
     , quantizerIndices()
 {
     // empty
@@ -38,29 +39,128 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
 
 QualEncoder::~QualEncoder(void)
 {
-    std::cout << "Encoded " << g_numMappedRecords << " mapped records";
-    std::cout << " and " << g_numUnmappedRecords << " unmapped records";
-    std::cout << " in " << g_numBlocks << " block(s)" << std::endl;
+    std::cout << "Encoded " << numMappedRecords << " mapped records"
+              << " and " << numUnmappedRecords << " unmapped records"
+              << " in " << numBlocks << " block(s)" << std::endl;
 }
 
-void QualEncoder::startBlock(const std::string &rname)
+void QualEncoder::startBlock(void)
 {
-    // reset member variables that are used per block
-    numMappedRecords = 0;
-    numUnmappedRecords = 0;
     reference = "";
     mappedRecordQueue = std::queue<MappedRecord>();
-    nextReferencePos = 0;
+    maxPosition = 0;
+    minPosition = 0;
+    nextPosition = 0;
     observedNucleotides.clear();
     observedQualityValues.clear();
+    observedSize = 0;
     quantizerIndices.clear();
 
+    std::cout << "Starting block " << numBlocks << std::endl;
+}
+
+void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
+{
+    //std::cout << "Adding unmapped record to block " << numBlocks << std::endl;
+    encodeUnmappedRecord(std::string(samRecord.qual));
+    numUnmappedRecords++;
+}
+
+void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
+{
+    // debug output
+    //std::cout << "Adding mapped record to block " << numBlocks << std::endl;
+    //std::cout << "  rname: " << samRecord.rname << std::endl;
+    //std::cout << "  pos:   " << samRecord.pos-1 << std::endl;
+    //std::cout << "  cigar: " << samRecord.cigar << std::endl;
+    //std::cout << "  seq:   " << samRecord.seq << std::endl;
+    //std::cout << "  qual:  " << samRecord.qual << std::endl;
+
+    // If the reference is empty, then this is the first mapped record being
+    // added to the current block. If so, we load the corresponding reference
+    // and set the position offset.
+    if (reference.empty()) {
+        loadFastaReference(std::string(samRecord.rname));
+        minPosition = samRecord.pos - 1; // SAM format counts from 1
+        nextPosition = minPosition;
+    }
+
+    // construct mapped record
+    MappedRecord mappedRecord(samRecord, minPosition);
+
+    // Check if we need to update the max mapping position for records in this
+    // block. If so, we also need to update the size of our observation vectors.
+    if (mappedRecord.lastPosition > maxPosition) {
+        maxPosition = mappedRecord.lastPosition;
+        observedSize = maxPosition - minPosition + 1;
+        observedNucleotides.resize(observedSize);
+        observedQualityValues.resize(observedSize);
+    }
+
+    // Parse CIGAR string and assign nucleotides and QVs from the record to
+    // their positions within the reference; then push the current record to
+    // the queue.
+    //std::cout << "Extracting observations from mapped record" << std::endl;
+    mappedRecord.extractObservations(observedNucleotides, observedQualityValues);
+    mappedRecordQueue.push(mappedRecord);
+    //std::cout << "Observations: " << std::endl;
+    //for (auto const &observedColumn : observedNucleotides) {
+    //    std::cout << observedColumn << std::endl;
+    //}
+
+    // check which genomic positions are ready for processing
+    while (nextPosition < mappedRecord.firstPosition) {
+        //std::cout << "Computing quantizer index for position " << nextPosition << std::endl;
+        //quantizerIndices.push_back(computeQuantizerIndex(nextPosition, reference, observedNucleotides, observedQualityValues));
+        nextPosition++;
+    }
+
+    // check which records from the queue are ready for processing
+    while (mappedRecordQueue.front().lastPosition < nextPosition) {
+        //std::cout << "Encoding mapped record" << std::endl;
+        encodeMappedRecord(mappedRecordQueue.front());
+        mappedRecordQueue.pop();
+    }
+
+    numMappedRecords++;
+}
+
+size_t QualEncoder::finishBlock(void)
+{
+    size_t ret = 0;
+
+    std::cout << "Finishing block " << numBlocks << std::endl;
+
+    // compute all remaining quantizers
+    //std::cout << "Computing remaining quantizers for position(s) " << nextPosition << "-" << maxPosition << std::endl;
+    while (nextPosition <= maxPosition) {
+        //std::cout << "Computing quantizer index for position " << nextPosition << std::endl;
+        //quantizerIndices.push_back(computeQuantizerIndex(nextPosition, reference, observedNucleotides, observedQualityValues));
+        nextPosition++;
+    }
+
+    // process all remaining records
+    //std::cout << "Encoding " << mappedRecordQueue.size() << " remaining mapped records from queue" << std::endl;
+    while (mappedRecordQueue.empty() == false) {
+        //std::cout << "Encoding mapped record" << std::endl;
+        encodeMappedRecord(mappedRecordQueue.front());
+        mappedRecordQueue.pop();
+    }
+
+    numBlocks++;
+
+    return ret;
+}
+
+void QualEncoder::loadFastaReference(const std::string &rname)
+{
     // find FASTA reference for this RNAME
     std::cout << "Searching FASTA reference for: " << rname << std::endl;
     bool foundFastaReference = false;
 
-    for (auto const &fastaReference : g_fastaReferences) {
-        if (fastaReference.header.find(rname) != std::string::npos) {
+    for (auto const &fastaReference : fastaReferences) {
+        //if (fastaReference.header.find(rname) != std::string::npos) {
+        if (fastaReference.header == rname) {
             if (foundFastaReference == true) {
                 throwErrorException("Found multiple FASTA references");
             }
@@ -70,101 +170,14 @@ void QualEncoder::startBlock(const std::string &rname)
     }
 
     if (foundFastaReference == true) {
-        std::cout << "Started new block with FASTA reference: " << reference << std::endl;
+        std::cout << "Found FASTA reference" << std::endl;
     } else {
         throwErrorException("Could not find FASTA reference");
     }
 }
 
-void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
-{
-    // deconstruct SAM record
-    const std::string rname(samRecord.rname);
-    const uint32_t pos = samRecord.pos;
-    const std::string cigar(samRecord.cigar);
-    const std::string seq(samRecord.seq);
-    const std::string qual(samRecord.qual);
-
-    // debug output
-    std::cout << "Adding unmapped record to block: " << g_numBlocks << std::endl;
-    std::cout << "  rname: " << rname << std::endl;
-    std::cout << "  pos:   " << pos << std::endl;
-    std::cout << "  cigar: " << cigar << std::endl;
-    std::cout << "  seq:   " << seq << std::endl;
-    std::cout << "  qual:  " << qual << std::endl;
-
-    numMappedRecords++;
-    numUnmappedRecords++;
-}
-
-void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
-{
-    // deconstruct SAM record
-    const std::string rname(samRecord.rname);
-    const long pos = samRecord.pos - 1; // SAM format counts from 1
-    const std::string cigar(samRecord.cigar);
-    const std::string seq(samRecord.seq);
-    const std::string qual(samRecord.qual);
-
-    // debug output
-    std::cout << "Adding mapped record to block: " << g_numBlocks << std::endl;
-    std::cout << "  rname: " << rname << std::endl;
-    std::cout << "  pos:   " << pos << std::endl;
-    std::cout << "  cigar: " << cigar << std::endl;
-    std::cout << "  seq:   " << seq << std::endl;
-    std::cout << "  qual:  " << qual << std::endl;
-
-    // check if this alignment is complete
-//     if (   (pos == 1)
-//         || (cigar.length() == 0 || cigar.compare("*") == 0)
-//         || (seq.length() == 0 || seq.compare("*") == 0)
-//         || (qual.length() == 0 || qual.compare("*") == 0)) {
-//         throwErrorException("Incomplete alignment");
-//     }
-
-    // parse CIGAR string and assign nucleotides and QVs to their positions
-    // within the reference
-    MappedRecord mappedRecord(pos, cigar, seq, qual);
-    //assignObservationsToReference(mappedRecord, observedNucleotides, observedQualityValues);
-    mappedRecordQueue.push(mappedRecord);
-
-    // check which genomic positions are ready for processing
-    while (nextReferencePos < pos) {
-        std::cout << "Computing quantizer for position " << nextReferencePos << std::endl;
-        //quantizerIndices[nextReferencePos] = computeQuantizerIndex(nextReferencePos);
-        nextReferencePos++;
-    }
-
-    // check which records in 'recordBuffer' are ready for processing
-    while (mappedRecordQueue.front().lastPos < nextReferencePos) {
-        encodeMappedRecord(mappedRecordQueue.front());
-        mappedRecordQueue.pop();
-    }
-
-    numUnmappedRecords++;
-    numMappedRecords++;
-}
-
 void QualEncoder::encodeMappedRecord(const MappedRecord &mappedRecord)
 {
-    // TODO: accumulate depths
-    //quantizer1.updateDepths(pos, cigar);
-
-    // TODO: quantize the added quality score vector
-    // TODO: design/update nested quantizers for genomic columns
-    /*for(std::string::size_type i = 0; i < qual.size(); ++i) {
-        int q = (int)qual[i];
-        int qTilde1 = quantizer1.quantize(q, pos+i);
-        qualTilde1.push_back(qTilde1);
-    }*/
-
-    // TODO: apply and update quality score mask for current vector
-    /*for(size_t i = 0; i < qualTilde1.size(); ++i) {
-        int qTilde1 = (int)qual[i];
-        int qTilde1Bar = mask.apply(qTilde1);
-        qualTilde1Bar.push_back(qTilde1Bar);
-    }*/
-
     // Markov-chain prediction for current current qual vector
 //     std::vector<int> err;
 //     std::vector<int> memory(PREDICTOR_MEMORY_SIZE, -1);
@@ -191,46 +204,20 @@ void QualEncoder::encodeMappedRecord(const MappedRecord &mappedRecord)
 //     }
 
     // TODO: DPCM loop
-    /*for(std::string::size_type i = 0; i < qual.size(); ++i) {
-        int q = (int)qual[i];
-        int qHat = predictor.predict();
-        int e = q - qHat;
-        eQuant = maxLloyd.quantize(e);
-        int qQuant = qHat + e;
-        maxLloyd.updateModel(e);
-        predictor.update(qQuant);
-    }*/
-
-    // TODO: adaptive clustering of QS vectors
-
-    // TODO: run-length encoding?
-
-    // TODO: pass QS vector to arithmetic or Huffman coder
-    /*for(size_t i = 0; i < tmp.size(); ++i) {
-        int q = (int)tmp[i];
-        compress();
-    }*/
-
-    // ALTERNATIVE: try to predict quality score at a certain position and
-    // then quantize the prediction error
+//     for(std::string::size_type i = 0; i < qual.size(); ++i) {
+//         int q = (int)qual[i];
+//         int qHat = predictor.predict();
+//         int e = q - qHat;
+//         eQuant = maxLloyd.quantize(e);
+//         int qQuant = qHat + e;
+//         maxLloyd.updateModel(e);
+//         predictor.update(qQuant);
+//     }
 }
 
 void QualEncoder::encodeUnmappedRecord(const std::string &qual)
 {
     // empty
-}
-
-size_t QualEncoder::finishBlock(void)
-{
-    size_t ret = 0;
-
-    std::cout << "Finished block " << g_numBlocks << std::endl;
-
-    g_numBlocks++;
-    g_numMappedRecords += numMappedRecords;
-    g_numUnmappedRecords += numUnmappedRecords;
-
-    return ret;
 }
 
 QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vector<FASTAReference> &fastaReferences)

@@ -12,22 +12,64 @@
 #include "MappedRecord.h"
 #include "Exceptions.h"
 
-MappedRecord::MappedRecord(const uint32_t &pos,
-                           const std::string &cigar,
-                           const std::string &seq,
-                           const std::string &qual)
-    : firstPos(pos)
-    , lastPos(pos)
-    , alignedNucleotides("")
-    , insertedNucleotides("")
-    , alignedQualityValues("")
-    , insertedQualityValues("")
-    , cigar(cigar)
+MappedRecord::MappedRecord(const SAMRecord &samRecord, const uint32_t &positionOffset)
+    : firstPosition(samRecord.pos - 1) // SAM format counts from 1
+    , lastPosition(samRecord.pos - 1)  // SAM format counts from 1
+    , positionOffset(positionOffset)
+    , nucleotides(samRecord.seq)
+    , qualityValues(samRecord.qual)
+    , cigar(samRecord.cigar)
+{
+    // compute last position on the reference this record is mapping to
+    size_t cigarIdx = 0;
+    size_t cigarLen = cigar.length();
+    size_t opLen = 0; // length of current CIGAR operation
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
+            opLen = opLen * 10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+            continue;
+        }
+        switch (cigar[cigarIdx]) {
+        case 'M':
+        case '=':
+        case 'X':
+            lastPosition += opLen;
+            break;
+        case 'I':
+        case 'S':
+            break;
+        case 'D':
+        case 'N':
+            lastPosition += opLen;
+            break;
+        case 'H':
+        case 'P':
+            break; // these have been clipped
+        default: 
+            throwErrorException("Bad CIGAR string");
+        }
+        opLen = 0;
+    }
+
+    lastPosition -= 1;
+    //std::cout << "Last mapping position: " << lastPosition << std::endl;
+}
+
+MappedRecord::~MappedRecord(void)
+{
+    // empty
+}
+
+void MappedRecord::extractObservations(std::vector<std::string> &observedNucleotides,
+                                       std::vector<std::string> &observedQualityValues)
 {
     size_t cigarIdx = 0;
     size_t cigarLen = cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
+
     size_t idx = 0;
+    size_t observedIdx = firstPosition - positionOffset;
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
@@ -35,34 +77,26 @@ MappedRecord::MappedRecord(const uint32_t &pos,
             continue;
         }
 
-        size_t i = 0;
         switch (cigar[cigarIdx]) {
         case 'M':
         case '=':
         case 'X':
             // add matching parts
-            alignedNucleotides.append(seq, idx, opLen);
-            alignedQualityValues.append(qual, idx, opLen);
-            idx += opLen;
-            lastPos += opLen;
+            for (size_t i = 0; i < opLen; i++) {
+                observedNucleotides[observedIdx] += nucleotides[idx];
+                observedQualityValues[observedIdx] += qualityValues[idx];
+                idx++;
+                observedIdx++;
+            }
             break;
         case 'I':
         case 'S':
-            // add inserted bases and quality values
-            insertedNucleotides.append(seq, idx, opLen);
-            insertedQualityValues.append(qual, idx, opLen);
-            idx += opLen; // skip inserted part
+            idx += opLen;
             break;
         case 'D':
-        case 'N': {
-            // inflate sequence and quality scores
-            for (i = 0; i < opLen; i++) { 
-                alignedNucleotides += "_";
-                alignedQualityValues += "_";
-            }
-            lastPos += opLen;
+        case 'N':
+            observedIdx += opLen;
             break;
-        }
         case 'H':
         case 'P':
             break; // these have been clipped
@@ -72,10 +106,5 @@ MappedRecord::MappedRecord(const uint32_t &pos,
 
         opLen = 0;
     }
-}
-
-MappedRecord::~MappedRecord(void)
-{
-    // empty
 }
 

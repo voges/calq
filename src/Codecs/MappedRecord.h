@@ -12,7 +12,9 @@
 #ifndef MAPPEDRECORD_H
 #define MAPPEDRECORD_H
 
+#include "Parsers/SAMRecord.h"
 #include <string>
+#include <vector>
 
 /** @brief Class: MappedRecord
  *
@@ -21,19 +23,18 @@
  */
 class MappedRecord {
 public:
-    MappedRecord(const uint32_t &pos,
-                 const std::string &cigar,
-                 const std::string &seq,
-                 const std::string &qual);
+    MappedRecord(const SAMRecord &samRecord, const uint32_t &positionOffset);
     ~MappedRecord(void);
 
-    uint32_t firstPos;
-    uint32_t lastPos;
-    std::string alignedNucleotides;
-    std::string insertedNucleotides;
-    std::string alignedQualityValues;
-    std::string insertedQualityValues;
+    uint32_t firstPosition;
+    uint32_t lastPosition;
+    uint32_t positionOffset;
+    std::string nucleotides;
+    std::string qualityValues;
     std::string cigar;
+
+    void extractObservations(std::vector<std::string> &observedNucleotides,
+                             std::vector<std::string> &observedQualityValues);
 };
 
 #endif // MAPPEDRECORD_H

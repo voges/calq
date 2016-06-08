@@ -140,16 +140,12 @@ int main(int argc, char *argv[])
         // compress or decompress
         if (cliOptions.decompress == false) {
             // invoke compressor
-            std::cout << "Compressing ..." << std::endl;
             CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqEncoder.encode();
-            std::cout << "Finished compression" << std::endl;
         } else {
             // invoke decompressor
-            std::cout << "Decompressing ..." << std::endl;
             CalqDecoder calqDecoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqDecoder.decode();
-            std::cout << "Finished decompression" << std::endl;
         }
     } catch (TCLAP::ArgException &tclapException) {
         std::cerr << "Argument error: " << tclapException.error() << " (argument: " << tclapException.argId() << ")" << std::endl;

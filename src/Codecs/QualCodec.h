@@ -31,30 +31,32 @@ public:
     QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
     ~QualEncoder(void);
 
-    void startBlock(const std::string &rname);
+    void startBlock(void);
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
     size_t finishBlock(void);
 
 private:
     // these member variables are used throughout coding multiple blocks
-    std::vector<FASTAReference> g_fastaReferences;
-    size_t g_numBlocks;
-    size_t g_numMappedRecords;
-    size_t g_numUnmappedRecords;
-    ofbitstream &g_ofbs;
-
-    // these member variables are used per block
+    std::vector<FASTAReference> fastaReferences;
+    size_t numBlocks;
     size_t numMappedRecords;
     size_t numUnmappedRecords;
+    ofbitstream &ofbs;
+
+    // these member variables are used per block
     std::string reference;
     std::queue<MappedRecord> mappedRecordQueue;
-    size_t nextReferencePos;
+    uint32_t maxPosition;
+    uint32_t minPosition;
+    uint32_t nextPosition;
     std::vector<std::string> observedNucleotides;
     std::vector<std::string> observedQualityValues;
+    size_t observedSize;
     std::vector<int> quantizerIndices;
 
 private:
+    void loadFastaReference(const std::string &rname);
     void encodeMappedRecord(const MappedRecord &mappedRecord);
     void encodeUnmappedRecord(const std::string &qual);
 };

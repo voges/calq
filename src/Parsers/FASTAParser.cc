@@ -45,11 +45,11 @@ void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTARefere
     while (ifs.getline(line, sizeof(line))) {
         if (line[0] == '>') {
             if (first) {
-                fastaReference.header = line;
+                fastaReference.header = line+1; // do not take the '>'
                 first = false;
             } else {
                 fastaReferences.push_back(fastaReference);
-                fastaReference.header = line;
+                fastaReference.header = line+1; // do not take the '>'
                 fastaReference.sequence = "";
             }
         } else {
