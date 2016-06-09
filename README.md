@@ -14,12 +14,15 @@
     cmake ..
     make
 
+### Build on Windows with MSVC ###
+
+    TBD
+
 ### Contribution guidelines ###
 
 * Please write code conforming to the used coding style
-* \#include with full path to include/
+* \#include relative to src/
 
 ### Who do I talk to? ###
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
-
