@@ -49,7 +49,6 @@ private:
     std::queue<MappedRecord> mappedRecordQueue;
     uint32_t maxPosition;
     uint32_t minPosition;
-    uint32_t nextPosition;
     std::vector<std::string> observedNucleotides;
     std::vector<std::string> observedQualityValues;
     size_t observedSize;

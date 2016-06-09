@@ -12,6 +12,7 @@
 
 #include "QualCodec.h"
 #include "Exceptions.h"
+#include <limits>
 
 static const int Q_ALPHABET_SIZE = 50;
 static const int Q_OFFSET = 33;
@@ -26,9 +27,8 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
     , ofbs(ofbs)
     , reference("")
     , mappedRecordQueue()
-    , maxPosition(0)
-    , minPosition(0)
-    , nextPosition(0)
+    , maxPosition(std::numeric_limits<uint32_t>::min())
+    , minPosition(std::numeric_limits<uint32_t>::max())
     , observedNucleotides()
     , observedQualityValues()
     , observedSize(0)
@@ -48,9 +48,8 @@ void QualEncoder::startBlock(void)
 {
     reference = "";
     mappedRecordQueue = std::queue<MappedRecord>();
-    maxPosition = 0;
-    minPosition = 0;
-    nextPosition = 0;
+    maxPosition = std::numeric_limits<uint32_t>::min();
+    minPosition = std::numeric_limits<uint32_t>::max();
     observedNucleotides.clear();
     observedQualityValues.clear();
     observedSize = 0;
@@ -61,28 +60,18 @@ void QualEncoder::startBlock(void)
 
 void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
 {
-    //std::cout << "Adding unmapped record to block " << numBlocks << std::endl;
     encodeUnmappedRecord(std::string(samRecord.qual));
     numUnmappedRecords++;
 }
 
 void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 {
-    // debug output
-    //std::cout << "Adding mapped record to block " << numBlocks << std::endl;
-    //std::cout << "  rname: " << samRecord.rname << std::endl;
-    //std::cout << "  pos:   " << samRecord.pos-1 << std::endl;
-    //std::cout << "  cigar: " << samRecord.cigar << std::endl;
-    //std::cout << "  seq:   " << samRecord.seq << std::endl;
-    //std::cout << "  qual:  " << samRecord.qual << std::endl;
-
     // If the reference is empty, then this is the first mapped record being
     // added to the current block. If so, we load the corresponding reference
-    // and set the position offset.
+    // and set the position offset (a.k.a. 'minPosition').
     if (reference.empty()) {
         loadFastaReference(std::string(samRecord.rname));
         minPosition = samRecord.pos - 1; // SAM format counts from 1
-        nextPosition = minPosition;
     }
 
     // construct mapped record
@@ -100,24 +89,28 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // Parse CIGAR string and assign nucleotides and QVs from the record to
     // their positions within the reference; then push the current record to
     // the queue.
-    //std::cout << "Extracting observations from mapped record" << std::endl;
     mappedRecord.extractObservations(observedNucleotides, observedQualityValues);
     mappedRecordQueue.push(mappedRecord);
+    //uint32_t pos = minPosition;
     //std::cout << "Observations: " << std::endl;
     //for (auto const &observedColumn : observedNucleotides) {
-    //    std::cout << observedColumn << std::endl;
+    //    std::cout << pos << ": " << observedColumn << std::endl;
+    //    pos++;
     //}
 
-    // check which genomic positions are ready for processing
-    while (nextPosition < mappedRecord.firstPosition) {
-        //std::cout << "Computing quantizer index for position " << nextPosition << std::endl;
-        //quantizerIndices.push_back(computeQuantizerIndex(nextPosition, reference, observedNucleotides, observedQualityValues));
-        nextPosition++;
+    // Check which genomic positions are ready for processing. Then compute
+    // the quantizer indices for these positions and shrink the observation
+    // vectors
+    while (minPosition < mappedRecord.firstPosition) {
+        //int k = computeQuantizerIndex(reference[minPosition], observedNucleotides[minPosition], observedQualityValues[minPosition]);
+        //quantizerIndices.push_back(k);
+        observedNucleotides.erase(observedNucleotides.begin());
+        observedQualityValues.erase(observedQualityValues.begin());
+        minPosition++;
     }
 
     // check which records from the queue are ready for processing
-    while (mappedRecordQueue.front().lastPosition < nextPosition) {
-        //std::cout << "Encoding mapped record" << std::endl;
+    while (mappedRecordQueue.front().lastPosition < minPosition) {
         encodeMappedRecord(mappedRecordQueue.front());
         mappedRecordQueue.pop();
     }
@@ -131,18 +124,17 @@ size_t QualEncoder::finishBlock(void)
 
     std::cout << "Finishing block " << numBlocks << std::endl;
 
-    // compute all remaining quantizers
-    //std::cout << "Computing remaining quantizers for position(s) " << nextPosition << "-" << maxPosition << std::endl;
-    while (nextPosition <= maxPosition) {
-        //std::cout << "Computing quantizer index for position " << nextPosition << std::endl;
-        //quantizerIndices.push_back(computeQuantizerIndex(nextPosition, reference, observedNucleotides, observedQualityValues));
-        nextPosition++;
+    // compute all remaining quantizers for position(s) minPosition-maxPosition
+    while (minPosition <= maxPosition) {
+        //int k = computeQuantizerIndex(reference[minPosition], observedNucleotides[minPosition], observedQualityValues[minPosition])
+        //quantizerIndices.push_back(k);
+        observedNucleotides.erase(observedNucleotides.begin());
+        observedQualityValues.erase(observedQualityValues.begin());
+        minPosition++;
     }
 
-    // process all remaining records
-    //std::cout << "Encoding " << mappedRecordQueue.size() << " remaining mapped records from queue" << std::endl;
+    // process all remaining records from queue
     while (mappedRecordQueue.empty() == false) {
-        //std::cout << "Encoding mapped record" << std::endl;
         encodeMappedRecord(mappedRecordQueue.front());
         mappedRecordQueue.pop();
     }
@@ -159,7 +151,6 @@ void QualEncoder::loadFastaReference(const std::string &rname)
     bool foundFastaReference = false;
 
     for (auto const &fastaReference : fastaReferences) {
-        //if (fastaReference.header.find(rname) != std::string::npos) {
         if (fastaReference.header == rname) {
             if (foundFastaReference == true) {
                 throwErrorException("Found multiple FASTA references");
