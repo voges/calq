@@ -39,8 +39,8 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
 
 QualEncoder::~QualEncoder(void)
 {
-    std::cout << "Encoded " << numMappedRecords << " mapped records"
-              << " and " << numUnmappedRecords << " unmapped records"
+    std::cout << "Encoded " << numMappedRecords << " mapped record(s)"
+              << " and " << numUnmappedRecords << " unmapped record(s)"
               << " in " << numBlocks << " block(s)" << std::endl;
 }
 
