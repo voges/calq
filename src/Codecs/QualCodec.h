@@ -73,6 +73,19 @@ private:
     int computeQuantizerIndex(const char &genotype,
                               const std::string &observedNucleotides,
                               const std::string &observedQualityValues);
+    //******************************************************************
+    //******************************************************************
+    void computeQuantizerIndex(uint32_t nextPosition, 
+                               char reference, 
+                               std::string &observedNucleotides, 
+                               std::string &observedQualityValues, 
+                               double K);
+                               
+    void allel2genotype(std::map<std::string,double> *genotype_likelihoods, 
+                        std::map<char,double> base_likelihoods, 
+                        int depth, 
+                        int offset);
+    //****************************************************************
     void encodeMappedQualityValues(const MappedRecord &mappedRecord);
     void encodeUnmappedQualityValues(const std::string &qualityValues);
 };
