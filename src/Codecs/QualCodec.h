@@ -17,6 +17,7 @@
 #include "Codecs/MappedRecord.h"
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
+#include <math.h>
 #include <fstream>
 #include <map>
 #include <queue>
