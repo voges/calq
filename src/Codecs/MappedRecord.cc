@@ -12,10 +12,9 @@
 #include "MappedRecord.h"
 #include "Exceptions.h"
 
-MappedRecord::MappedRecord(const SAMRecord &samRecord, const uint32_t &positionOffset)
-    : firstPosition(samRecord.pos - 1) // SAM format counts from 1
-    , lastPosition(samRecord.pos - 1)  // SAM format counts from 1
-    , positionOffset(positionOffset)
+MappedRecord::MappedRecord(const SAMRecord &samRecord)
+    : posMin(samRecord.pos - 1) // SAM format counts from 1
+    , posMax(samRecord.pos - 1)  // SAM format counts from 1
     , nucleotides(samRecord.seq)
     , qualityValues(samRecord.qual)
     , cigar(samRecord.cigar)
@@ -34,14 +33,14 @@ MappedRecord::MappedRecord(const SAMRecord &samRecord, const uint32_t &positionO
         case 'M':
         case '=':
         case 'X':
-            lastPosition += (uint32_t)opLen;
+            posMax += (uint32_t)opLen;
             break;
         case 'I':
         case 'S':
             break;
         case 'D':
         case 'N':
-            lastPosition += (uint32_t)opLen;
+            posMax += (uint32_t)opLen;
             break;
         case 'H':
         case 'P':
@@ -52,8 +51,7 @@ MappedRecord::MappedRecord(const SAMRecord &samRecord, const uint32_t &positionO
         opLen = 0;
     }
 
-    lastPosition -= 1;
-    //std::cout << "Last mapping position: " << lastPosition << std::endl;
+    posMax -= 1;
 }
 
 MappedRecord::~MappedRecord(void)
@@ -61,15 +59,15 @@ MappedRecord::~MappedRecord(void)
     // empty
 }
 
-void MappedRecord::extractObservations(std::vector<std::string> &observedNucleotides,
+void MappedRecord::extractObservations(const uint32_t &observedPosMin,
+                                       std::vector<std::string> &observedNucleotides,
                                        std::vector<std::string> &observedQualityValues)
 {
     size_t cigarIdx = 0;
     size_t cigarLen = cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
-
     size_t idx = 0;
-    size_t observedIdx = firstPosition - positionOffset;
+    size_t observedIdx = posMin - observedPosMin;
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
