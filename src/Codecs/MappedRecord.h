@@ -23,17 +23,17 @@
  */
 class MappedRecord {
 public:
-    MappedRecord(const SAMRecord &samRecord, const uint32_t &positionOffset);
+    MappedRecord(const SAMRecord &samRecord);
     ~MappedRecord(void);
 
-    uint32_t firstPosition;
-    uint32_t lastPosition;
-    uint32_t positionOffset;
+    uint32_t posMin;
+    uint32_t posMax;
     std::string nucleotides;
     std::string qualityValues;
     std::string cigar;
 
-    void extractObservations(std::vector<std::string> &observedNucleotides,
+    void extractObservations(const uint32_t &observedPosMin,
+                             std::vector<std::string> &observedNucleotides,
                              std::vector<std::string> &observedQualityValues);
 };
 

@@ -45,19 +45,36 @@ private:
     ofbitstream &ofbs;
 
     // these member variables are used per block
+
+    // reference loaded for the current block
     std::string reference;
+    uint32_t referencePosMin;
+    uint32_t referencePosMax;
+
+    // queue holding the mapped records; records get popped when they are
+    // finally encoded
     std::queue<MappedRecord> mappedRecordQueue;
-    uint32_t maxPosition;
-    uint32_t minPosition;
+
+    // current observed nucleotides and quality values; when a quantizer index
+    // is computed for a certain position, the vectors are shrinked
     std::vector<std::string> observedNucleotides;
     std::vector<std::string> observedQualityValues;
-    size_t observedSize;
+    uint32_t observedPosMin;
+    uint32_t observedPosMax;
+
+    // computed quantizer indices; when the indices are not needed anymore; the
+    // vector is shrinked
     std::vector<int> quantizerIndices;
+    uint32_t quantizerIndicesPosMin;
+    uint32_t quantizerIndicesPosMax;
 
 private:
     void loadFastaReference(const std::string &rname);
-    void encodeMappedRecord(const MappedRecord &mappedRecord);
-    void encodeUnmappedRecord(const std::string &qual);
+    int computeQuantizerIndex(const char &genotype,
+                              const std::string &observedNucleotides,
+                              const std::string &observedQualityValues);
+    void encodeMappedQualityValues(const MappedRecord &mappedRecord);
+    void encodeUnmappedQualityValues(const std::string &qualityValues);
 };
 
 /** @brief Class: QualDecoder
