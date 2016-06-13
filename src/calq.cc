@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     try {
         // TCLAP class
-        TCLAP::CmdLine cmd("calq - Lossy compression of next-generation sequencing quality values", ' ', VERSION);
+        TCLAP::CmdLine cmd("calq - Coverage-adaptive lossy compression of next-generation sequencing quality values", ' ', VERSION);
 
         // TCLAP arguments
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);

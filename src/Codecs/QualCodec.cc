@@ -19,6 +19,85 @@ static const int Q_OFFSET = 33;
 static const int Q_MAX = 83;
 static const int Q_MIN = Q_OFFSET;
 
+static const char alleleAlphabet[] = {'A','C','G','T','N'};
+static const unsigned int alleleAlphabetLen = 5;
+// TODO: what about polyploidy?
+
+static void allele2genotype(std::map<std::string, double> &genotypeLikelihoods,
+                            std::map<char, double> baseLikelihoods,
+                            const unsigned int &depth,
+                            const unsigned int &offset)
+{
+    static std::vector<char> genotype;
+    double p = 0.0;
+    std::string s("");
+
+    if (depth == 0 ) {
+        // we are using the log likelihood to avoid numerical problems
+        // TODO: replace w/ std::log1p (more accurate)
+        p = log((baseLikelihoods[genotype[0]] + baseLikelihoods[genotype[1]]) / 2.0);
+        s = std::string() + genotype[0]+genotype[1];
+        genotypeLikelihoods[s] += p;
+        return;
+    }
+
+    for (unsigned int i = offset; i <= (alleleAlphabetLen - depth); i++) {
+        genotype.push_back(alleleAlphabet[i]);
+        allele2genotype(genotypeLikelihoods, baseLikelihoods, depth-1, i);
+        genotype.pop_back();
+    }
+}
+
+static int computeQuantizerIndex(const char &reference,
+                                 const std::string &observedNucleotides,
+                                 const std::string &observedQualityValues)
+{
+    // a map containing the likelihood of each of the possible alleles
+    // NOTE: can we work with integers (counts) instead??
+    std::map<char, double> baseLikelihoods;
+
+    // a map containing the likelihood of each of the possible genotypes
+    // NOTE: can we work with integers (counts) instead??
+    std::map<std::string, double> genotypeLikelihoods;
+
+    for (size_t i = 0; i < observedNucleotides.length(); i++) {
+        char base = (char)observedNucleotides[i];
+        double qualityValue = (double)(observedQualityValues[i]) - Q_OFFSET;
+
+        double p = pow(10.0, -qualityValue/10.0);
+
+        for(unsigned int a = 0; a < alleleAlphabetLen; a++) {
+            if (alleleAlphabet[a] == base) {
+                baseLikelihoods.insert(std::pair<char, double>(alleleAlphabet[a], 1-p));
+            } else {
+                baseLikelihoods.insert(std::pair<char, double>(alleleAlphabet[a], p));
+            }
+        }
+
+        allele2genotype(genotypeLikelihoods, baseLikelihoods, 2, 0);
+    }
+
+    // normalize the genotype likelihoods applying the softmax
+    double cum = 0.0;
+    for (auto &genotypeLikelihood : genotypeLikelihoods) {
+        // TODO: replace with std::expm1 (more accurate)
+        genotypeLikelihood.second = exp(genotypeLikelihood.second);
+        cum += genotypeLikelihood.second;
+    }
+    for (auto &genotypeLikelihood : genotypeLikelihoods) {
+        genotypeLikelihood.second /= cum;
+    }
+
+    // compute the entropy
+    double entropy = 0.0;
+    for (auto &genotypeLikelihood: genotypeLikelihoods) {
+        if (genotypeLikelihood.second != 0)
+            entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
+    }
+
+    return 0;
+}
+
 QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences)
     : fastaReferences(fastaReferences)
     , numBlocks(0)
@@ -168,92 +247,6 @@ size_t QualEncoder::finishBlock(void)
     return ret;
 }
 
-//**************************************************************************
-//**************************************************************************
-//                NEW CODE FROM MIKEL
-
-char allel_alphabet[]= {'A','C','G','T','N'};
-int allel_alphabet_len = 5;
-
-void QualEncoder::allel2genotype(std::map<std::string,double> *genotype_likelihoods, std::map<char,double> base_likelihoods, int depth, int offset){
-    static std::vector<char> genotype;
-    double p;
-    std::string s;
-    if (depth == 0){
-        // We are using the log likelihood to avoid numerical problems
-        p = log( (base_likelihoods[genotype[0]]+base_likelihoods[genotype[1]])/2.0 );
-        s = std::string() + genotype[0]+genotype[1];
-        (*genotype_likelihoods)[s] += p;
-        return;
-    }
-    
-    for(int i = offset;i<= allel_alphabet_len - depth;i++){
-        genotype.push_back(allel_alphabet[i]);
-        allel2genotype(genotype_likelihoods, base_likelihoods, depth-1, i);
-        genotype.pop_back();
-    }
-}
-
-void QualEncoder::computeQuantizerIndex(uint32_t nextPosition, char reference, std::string &observedNucleotides, std::string &observedQualityValues, double K)
-{
-    
-    int i, idx;
-    double p,qv;
-    char base;
-    double entropy = 0.0, norm_cte = 0.0;
-    uint64_t N = observedNucleotides.length();
-    
-    // a map containing the likelihood of each of the possible allels
-    // NOTE: can we work with integers (counts) instead??
-    std::map<char,double> base_likelihoods;
-    
-    // a map containing the likelihood of each of the possible genotypes
-    // NOTE: can we work with integers (counts) instead??
-    std::map<std::string,double> genotype_likelihoods;
-    
-    
-    for (i = 0;i<N;i++)
-    {
-        base = (char)observedNucleotides[i];
-        qv = (double)(observedQualityValues[i]) - 33.0;
-        
-        p = pow(10.0,-qv/10.0);
-        //p = 0;
-        for(idx = 0;idx<allel_alphabet_len;idx++)
-            if(allel_alphabet[idx] == base)
-                base_likelihoods.insert( std::pair<char,double>(allel_alphabet[idx],1-p) );
-            else
-                base_likelihoods.insert( std::pair<char,double>(allel_alphabet[idx],p) );
-        
-        allel2genotype(&genotype_likelihoods, base_likelihoods, 2, 0);
-        
-    }
-    
-    
-    // Normalize the ll applying the softmax
-    norm_cte = 0.0;
-    for (std::map<std::string,double>::iterator it=genotype_likelihoods.begin(); it!=genotype_likelihoods.end(); ++it)
-    {
-        it->second = exp(it->second);
-        norm_cte += it->second;
-    }
-    
-    // finish normalizing and compute the entropy
-    entropy = 0.0;
-    for (std::map<std::string,double>::iterator it=genotype_likelihoods.begin(); it!=genotype_likelihoods.end(); ++it)
-    {
-        it->second /= norm_cte;
-        entropy += it->second*log(it->second);
-    }
-    entropy = -entropy;
-    
-    // 
-
-}
-
-//**************************************************************************
-//**************************************************************************
-
 void QualEncoder::loadFastaReference(const std::string &rname)
 {
     // find FASTA reference for this RNAME
@@ -277,14 +270,6 @@ void QualEncoder::loadFastaReference(const std::string &rname)
     } else {
         throwErrorException("Could not find FASTA reference");
     }
-}
-
-int QualEncoder::computeQuantizerIndex(const char &genotype,
-                                       const std::string &observedNucleotides,
-                                       const std::string &observedQualityValues)
-{
-    // TODO
-    return 0;
 }
 
 void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
