@@ -24,7 +24,7 @@ static const unsigned int alleleAlphabetLen = 5;
 // TODO: what about polyploidy?
 
 static void allele2genotype(std::map<std::string, double> &genotypeLikelihoods,
-                            std::map<char, double> baseLikelihoods,
+                            std::map<char, double> &baseLikelihoods,
                             const unsigned int &depth,
                             const unsigned int &offset)
 {
