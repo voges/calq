@@ -261,7 +261,7 @@ void QualEncoder::loadFastaReference(const std::string &rname)
             foundFastaReference = true;
             reference = fastaReference.sequence;
             referencePosMin = 0;
-            referencePosMax = reference.size() - 1;
+            referencePosMax = (uint32_t)reference.size() - 1;
         }
     }
 
