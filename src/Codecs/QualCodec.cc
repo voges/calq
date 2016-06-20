@@ -10,7 +10,7 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "QualCodec.h"
+#include "Codecs/QualCodec.h"
 #include "Exceptions.h"
 #include <limits>
 
@@ -19,84 +19,10 @@ static const int Q_OFFSET = 33;
 static const int Q_MAX = 83;
 static const int Q_MIN = Q_OFFSET;
 
-static const char alleleAlphabet[] = {'A','C','G','T','N'};
-static const unsigned int alleleAlphabetLen = 5;
 // TODO: what about polyploidy?
+static const unsigned int POLYPLOIDY = 2;
 
-static void allele2genotype(std::map<std::string, double> &genotypeLikelihoods,
-                            std::map<char, double> &baseLikelihoods,
-                            const unsigned int &depth,
-                            const unsigned int &offset)
-{
-    static std::vector<char> genotype;
-    double p = 0.0;
-    std::string s("");
-
-    if (depth == 0 ) {
-        // we are using the log likelihood to avoid numerical problems
-        // TODO: replace w/ std::log1p (more accurate)
-        p = log((baseLikelihoods[genotype[0]] + baseLikelihoods[genotype[1]]) / 2.0);
-        s = std::string() + genotype[0]+genotype[1];
-        genotypeLikelihoods[s] += p;
-        return;
-    }
-
-    for (unsigned int i = offset; i <= (alleleAlphabetLen - depth); i++) {
-        genotype.push_back(alleleAlphabet[i]);
-        allele2genotype(genotypeLikelihoods, baseLikelihoods, depth-1, i);
-        genotype.pop_back();
-    }
-}
-
-static int computeQuantizerIndex(const char &reference,
-                                 const std::string &observedNucleotides,
-                                 const std::string &observedQualityValues)
-{
-    // a map containing the likelihood of each of the possible alleles
-    // NOTE: can we work with integers (counts) instead??
-    std::map<char, double> baseLikelihoods;
-
-    // a map containing the likelihood of each of the possible genotypes
-    // NOTE: can we work with integers (counts) instead??
-    std::map<std::string, double> genotypeLikelihoods;
-
-    for (size_t i = 0; i < observedNucleotides.length(); i++) {
-        char base = (char)observedNucleotides[i];
-        double qualityValue = (double)(observedQualityValues[i]) - Q_OFFSET;
-
-        double p = pow(10.0, -qualityValue/10.0);
-
-        for(unsigned int a = 0; a < alleleAlphabetLen; a++) {
-            if (alleleAlphabet[a] == base) {
-                baseLikelihoods.insert(std::pair<char, double>(alleleAlphabet[a], 1-p));
-            } else {
-                baseLikelihoods.insert(std::pair<char, double>(alleleAlphabet[a], p));
-            }
-        }
-
-        allele2genotype(genotypeLikelihoods, baseLikelihoods, 2, 0);
-    }
-
-    // normalize the genotype likelihoods applying the softmax
-    double cum = 0.0;
-    for (auto &genotypeLikelihood : genotypeLikelihoods) {
-        // TODO: replace with std::expm1 (more accurate)
-        genotypeLikelihood.second = exp(genotypeLikelihood.second);
-        cum += genotypeLikelihood.second;
-    }
-    for (auto &genotypeLikelihood : genotypeLikelihoods) {
-        genotypeLikelihood.second /= cum;
-    }
-
-    // compute the entropy
-    double entropy = 0.0;
-    for (auto &genotypeLikelihood: genotypeLikelihoods) {
-        if (genotypeLikelihood.second != 0)
-            entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
-    }
-
-    return 0;
-}
+static const unsigned int NUM_QUANTIZERS = 7; // 2-8 steps
 
 QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences)
     : fastaReferences(fastaReferences)
@@ -112,11 +38,19 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
     , observedQualityValues()
     , observedPosMin(std::numeric_limits<uint32_t>::max())
     , observedPosMax(std::numeric_limits<uint32_t>::min())
+    , genotyper(POLYPLOIDY)
+    , genotyper2()
+    , uniformQuantizers()
     , quantizerIndices()
     , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
-    // empty
+    // init uniform quantizers
+    for (unsigned int i = 0; i < NUM_QUANTIZERS; i++) {
+        unsigned int numberOfSteps = i + 2;
+        UniformQuantizer uniformQuantizer(Q_MIN, Q_MAX, numberOfSteps);
+        uniformQuantizers.insert(std::pair<int,UniformQuantizer>(i, uniformQuantizer));
+    }
 }
 
 QualEncoder::~QualEncoder(void)
@@ -183,7 +117,11 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // vectors
     // TODO: this loop consumes 99% of the time of this function
     while (observedPosMin < mappedRecord.posMin) {
-        int k = computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << observedNucleotides[0].length() << ",";
+        int k = genotyper.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << ",";
+        int k2= genotyper2.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << std::endl;
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -218,7 +156,11 @@ size_t QualEncoder::finishBlock(void)
 
     // compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        int k = computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << observedNucleotides[0].length() << ",";
+        int k = genotyper.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
+         std::cerr << ",";
+        int k2= genotyper2.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << std::endl;
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -274,13 +216,10 @@ void QualEncoder::loadFastaReference(const std::string &rname)
 
 void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
 {
-    //std::cout << "Encoding mapped QV vector ranging from " << mappedRecord.posMin << "-" << mappedRecord.posMax << ":" << std::endl;
-    //std::cout << mappedRecord.qualityValues << std::endl;
-    //std::cout << "Quantizer indices ranging from " << quantizerIndicesPosMin << "-" << quantizerIndicesPosMax << ":" << std::endl;
-    //for (auto const &quantizerIndex : quantizerIndices) {
-    //     std::cout << quantizerIndex;
-    //}
-    //std::cout << std::endl;
+    for (auto const &qualityValue : mappedRecord.qualityValues) {
+        int qualityValueQuantized = uniformQuantizers.at(4).getRepresentativeValue(qualityValue);
+    }
+
     // DPCM loop
 //     for(std::string::size_type i = 0; i < qual.size(); ++i) {
 //         int q = (int)qualityValues[i];

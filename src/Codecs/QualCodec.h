@@ -14,7 +14,10 @@
 #define QUALCODEC_H
 
 #include "bitstream.h"
+#include "Codecs/Genotyper.h"
+#include "Codecs/Genotyper2.h"
 #include "Codecs/MappedRecord.h"
+#include "Codecs/UniformQuantizer.h"
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
 #include <math.h>
@@ -62,6 +65,13 @@ private:
     std::vector<std::string> observedQualityValues;
     uint32_t observedPosMin;
     uint32_t observedPosMax;
+
+    // class to perform the magic
+    Genotyper genotyper;
+    Genotyper2 genotyper2;
+
+    // quantizers
+    std::map<int,UniformQuantizer> uniformQuantizers;
 
     // computed quantizer indices; when the indices are not needed anymore; the
     // vector is shrinked

@@ -86,6 +86,7 @@ void CalqEncoder::encode(void)
 
     // send all records to the QualEncoder
     std::string rnamePrev("");
+    uint32_t posPrev = 0;
     bool first = true;
     qualEncoder.startBlock();
 
@@ -93,11 +94,18 @@ void CalqEncoder::encode(void)
         uncompressedSize += strlen(samParser.curr.qual);
         numRecords++;
         if (samRecordIsMapped(samParser.curr) == true) {
-            if (samParser.curr.rname != rnamePrev && first == false) {
-                // start a new block
-                compressedSize += qualEncoder.finishBlock();
-                qualEncoder.startBlock();
+            if (first == false) {
+                if (samParser.curr.rname != rnamePrev) {
+                    // start a new block
+                    compressedSize += qualEncoder.finishBlock();
+                    qualEncoder.startBlock();
+                } else {
+                    if (samParser.curr.pos < posPrev) {
+                        throwErrorException("SAM file is not sorted");
+                    }
+                }
             }
+            posPrev = samParser.curr.pos;
             rnamePrev = samParser.curr.rname;
             qualEncoder.addMappedRecordToBlock(samParser.curr);
             first = false;

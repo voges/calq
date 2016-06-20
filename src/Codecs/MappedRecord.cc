@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "MappedRecord.h"
+#include "Codecs/MappedRecord.h"
 #include "Exceptions.h"
 
 MappedRecord::MappedRecord(const SAMRecord &samRecord)
