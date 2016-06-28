@@ -148,6 +148,13 @@ CalqDecoder::~CalqDecoder(void)
 
 void CalqDecoder::decode(void)
 {
-    std::cout << "CalqDecoder::decode() not yet implemented!" << std::endl;
+    size_t numBlocks = 0;
+
+    while (ifbs.eof() == false) {
+        qualDecoder.decodeBlock();
+        numBlocks++;
+    }
+
+    std::cout << "Decoded " << numBlocks << " block(s)" << std::endl;
 }
 

@@ -107,7 +107,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     }
 
     // Parse CIGAR string and assign nucleotides and QVs from the record 
-    // (we name then 'observations') to their positions within the reference;
+    // (we name them 'observations') to their positions within the reference;
     // then push the current record to the queue.
     mappedRecord.extractObservations(observedPosMin, observedNucleotides, observedQualityValues);
     mappedRecordQueue.push(mappedRecord);
@@ -218,6 +218,9 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
 {
     for (auto const &qualityValue : mappedRecord.qualityValues) {
         int qualityValueQuantized = uniformQuantizers.at(4).getRepresentativeValue(qualityValue);
+        //int qualityValueQuantizerIndex = uniformQuantizers.at(4).getIndex(qualityValue);
+        //caac.encodeSymbol(qualityValueQuantized);
+        //caac.updateModel(qualityValueQuantized);
     }
 
     // DPCM loop
@@ -249,6 +252,16 @@ QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vecto
 
 QualDecoder::~QualDecoder(void)
 {
+    // empty
+}
 
+void QualDecoder::decodeBlock(void)
+{
+    // DUMMY
+    BYTE byte;
+    ifbs.readByte(byte);
+    // DUMMY
+
+    // caac.decodeBlock();
 }
 

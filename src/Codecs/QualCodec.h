@@ -94,6 +94,8 @@ public:
     QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vector<FASTAReference> &fastaReferences);
     ~QualDecoder(void);
 
+    void decodeBlock(void);
+
 private:
     std::vector<FASTAReference> fastaReferences;
     ifbitstream &ifbs;

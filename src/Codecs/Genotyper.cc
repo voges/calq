@@ -37,7 +37,7 @@ static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &gen
 
     for (i = at; i < max_types; i++) {
         if (got) { got[n_chosen] = i; }
-        count += combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, got, n_chosen + 1, len, i, max_types);
+        count += combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, got, n_chosen+1, len, i, max_types);
     }
     return count;
 }
@@ -82,7 +82,7 @@ int Genotyper::computeQuantizerIndex(const char &reference,
         throwErrorException("Observation lengths do not match");
     }
     if (depth == 0) { return -1; }
-    if (depth == 1) { std::cerr << "0"; return 0; } // should return min index
+    if (depth == 1) { /*std::cerr << "0"*/; return 0; } // should return min index
 
     // a map containing the likelihood of each of the possible alleles
     std::map<char,double> alleleLikelihoods;
@@ -132,7 +132,9 @@ int Genotyper::computeQuantizerIndex(const char &reference,
     }
 
     // debug output
-    std::cerr << entropy;
+    //std::cerr << entropy;
+
+    // TODO: compute index from entropy
 
     reset();
 

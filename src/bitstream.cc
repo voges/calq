@@ -96,20 +96,32 @@ int ibitstream::readUint64(uint64_t &x)
         throwErrorException("Cannot read a uint64_t from a stream that is not open");
     }
 
+    BYTE hhhh = 0x00;
+    BYTE hhh = 0x00;
     BYTE hh = 0x00;
     BYTE h = 0x00;
     BYTE l = 0x00;
     BYTE ll = 0x00;
+    BYTE lll = 0x00;
+    BYTE llll = 0x00;
 
+    if (readByte(hhhh) == EOF) { return EOF; }
+    if (readByte(hhh) == EOF) { return EOF; }
     if (readByte(hh) == EOF) { return EOF; }
     if (readByte(h) == EOF) { return EOF; }
     if (readByte(l) == EOF) { return EOF; }
     if (readByte(ll) == EOF) { return EOF; }
+    if (readByte(lll) == EOF) { return EOF; }
+    if (readByte(llll) == EOF) { return EOF; }
 
-    x ^= hh << 24;
-    x ^= h  << 16;
-    x ^= l  <<  8;
-    x ^= ll;
+    x ^= (uint64_t)hhhh << 56;
+    x ^= (uint64_t)hhh  << 48;
+    x ^= (uint64_t)hh   << 40;
+    x ^= (uint64_t)h    << 32;
+    x ^= (uint64_t)l    << 24;
+    x ^= (uint64_t)ll   << 16;
+    x ^= (uint64_t)lll  <<  8;
+    x ^= (uint64_t)llll;
 
     return 0;
 }
@@ -258,6 +270,10 @@ void obitstream::writeUint64(const uint64_t x)
         throwErrorException("Stream is not open");
     }
 
+    writeByte((x >> 56) & 0xFF);
+    writeByte((x >> 48) & 0xFF);
+    writeByte((x >> 40) & 0xFF);
+    writeByte((x >> 32) & 0xFF);
     writeByte((x >> 24) & 0xFF);
     writeByte((x >> 16) & 0xFF);
     writeByte((x >>  8) & 0xFF);
