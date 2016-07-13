@@ -27,12 +27,15 @@ public:
                      const unsigned int &numberOfSteps);
     ~UniformQuantizer(void);
 
-    int getIndex(const int &value);
-    int getRepresentativeValue(const int &value);
+    int valueToIndex(const int &value);
+    int indexToReconstructionValue(const int &index);
+    int valueToReconstructionValue(const int &value);
+
     void print(void);
 
 private:
-    std::map<int,std::pair<int,int>> lut;
+    std::map<int,std::pair<int,int>> lut; // value -> (index,reconstructionValue)
+    std::map<int,int> inverseLut; // index -> reconstructionValue
 };
 
 #endif // UNIFORMQUANTIZER_H

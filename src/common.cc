@@ -17,17 +17,30 @@
 #include <fstream>
 #include <string.h>
 
-const char * fileNameExtension(const std::string &fileName)
-{
-    const char *dot = strrchr(fileName.c_str(), '.');
-    if (!dot || dot == fileName.c_str()) { return ""; }
-    return (dot + 1);
-}
-
 bool fileExists(const std::string &fileName)
 {
     std::ifstream ifs(fileName.c_str());
     return ifs.good();
+}
+
+std::string fileBaseName(const std::string &path)
+{
+    std::string const &delims = "/\\";
+  return path.substr(path.find_last_of(delims) + 1);
+}
+
+std::string fileNameExtension(const std::string &fileName)
+{
+    if (fileName.find_last_of(".") != std::string::npos) {
+        return fileName.substr(fileName.find_last_of(".")+1);
+    }
+    return "";
+}
+
+std::string removeFileNameExtension(const std::string &fileName)
+{
+  std::string::size_type const p(fileName.find_last_of('.'));
+  return p > 0 && p != std::string::npos ? fileName.substr(0, p) : fileName;
 }
 
 bool yesno(void)

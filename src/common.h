@@ -26,8 +26,14 @@
     #define DEBUG(c,...) do { } while (false)
 #endif
 
-const char * fileNameExtension(const std::string &fileName);
+#define MODULE_NAME removeFileNameExtension(fileBaseName(std::string(__FILE__)))
+#define COUT_PREFIX std::string("[" + MODULE_NAME + "] ")
+#define ME COUT_PREFIX // for brevity
+
 bool fileExists(const std::string &fileName);
+std::string fileBaseName(const std::string &path);
+std::string fileNameExtension(const std::string &fileName);
+std::string removeFileNameExtension(const std::string &fileName);
 bool yesno(void);
 
 #endif // COMMON_H

@@ -83,7 +83,8 @@ public:
      */
     CalqEncoder(const std::string &samFileName,
                 const std::string &cqFileName,
-                const std::vector<std::string> &fastaFileNames);
+                const std::vector<std::string> &fastaFileNames,
+                const int &polyploidy);
     ~CalqEncoder(void);
 
     void encode(void);

@@ -14,10 +14,10 @@
 #define QUALCODEC_H
 
 #include "bitstream.h"
-#include "Codecs/Genotyper.h"
-#include "Codecs/Genotyper2.h"
-#include "Codecs/MappedRecord.h"
-#include "Codecs/UniformQuantizer.h"
+#include "Helpers/Genotyper.h"
+#include "Helpers/Genotyper2.h"
+#include "Helpers/MappedRecord.h"
+#include "Quantizers/UniformQuantizer.h"
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
 #include <math.h>
@@ -32,7 +32,9 @@
  */
 class QualEncoder {
 public:
-    QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences);
+    QualEncoder(ofbitstream &ofbs, 
+                const std::vector<FASTAReference> &fastaReferences,
+                const int &polyploidy);
     ~QualEncoder(void);
 
     void startBlock(void);

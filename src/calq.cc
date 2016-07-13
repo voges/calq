@@ -67,45 +67,53 @@ int main(int argc, char *argv[])
 
     try {
         // TCLAP class
-        TCLAP::CmdLine cmd("calq - Coverage-adaptive lossy compression of next-generation sequencing quality values", ' ', VERSION);
+        TCLAP::CmdLine cmd("calq - Adaptive lossy compression of next-generation sequencing quality values", ' ', VERSION);
 
         // TCLAP arguments
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
-        TCLAP::SwitchArg forceSwitch("f", "force", "Forces overwriting of output files", cmd, false);
+        TCLAP::SwitchArg forceSwitch("f", "force", "Force overwriting of output files", cmd, false);
         TCLAP::UnlabeledValueArg<std::string> infileArg("infile", "Input file", true, "", "string", cmd);
         TCLAP::ValueArg<std::string> outfileArg("o", "outfile", "Output file", false, "", "string", cmd);
+        TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "unsigned int", cmd);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", true, "string", cmd);
 
         // let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
 
         // get the value parsed by each arg
+        cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.force = forceSwitch.getValue();
         cliOptions.inFileName = infileArg.getValue();
         cliOptions.outFileName = outfileArg.getValue();
-        cliOptions.decompress = decompressSwitch.getValue();
+        cliOptions.polyploidy = polyploidyArg.getValue();
         cliOptions.refFileNames = referenceArg.getValue();
 
+        // check polyploidy
+        if (cliOptions.polyploidy < 1) {
+            throwErrorException("Polyploidy must be greater than 0");
+        }
+        std::cout << ME << "Using polyploidy: " << cliOptions.polyploidy << std::endl;
+
         // check if the input file exists and if it has the correct extension
-        std::cout << "Checking input file: " << cliOptions.inFileName << std::endl;
+        std::cout << ME << "Checking input file: " << cliOptions.inFileName << std::endl;
         if (!fileExists(cliOptions.inFileName)) {
             throwErrorException("Cannot access input file");
         }
         if (cliOptions.decompress == false) {
             if (fileNameExtension(cliOptions.inFileName) != std::string("sam")) {
-                throwErrorException("Input file extension must be 'sam'");
+                throwErrorException("Input file fileNameExtension must be 'sam'");
             }
         } else {
             if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
-                throwErrorException("Input file extension must be 'cq'");
+                throwErrorException("Input file fileNameExtension must be 'cq'");
             }
         }
-        std::cout << "OK" << std::endl;
+        std::cout << ME << "OK" << std::endl;
 
         // create correct output file name if it was not provided via the
         // command line options and check if output file is already there and
         // if the user wants to overwrite it in this case
-        std::cout << "Checking output file: ";
+        std::cout << ME << "Checking output file: ";
         if (cliOptions.decompress == false) {
             if (cliOptions.outFileName.empty()) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
@@ -121,32 +129,33 @@ int main(int argc, char *argv[])
         if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
             throwErrorException("Output file already exists (use option 'f' to force overwriting)");
         }
-        std::cout << "OK" << std::endl;
+        std::cout << ME << "OK" << std::endl;
 
         // check if the reference file(s) exist and check for FASTA file
         // ending(s)
         for (auto const &refFileName : cliOptions.refFileNames) {
-            std::cout << "Checking reference file: " << refFileName << std::endl;
+            std::cout << ME << "Checking reference file: " << refFileName << std::endl;
             if (   fileNameExtension(refFileName) != std::string("fa")
                 && fileNameExtension(refFileName) != std::string("fasta")) {
-                throwErrorException("Reference file extension must be 'fa' or 'fasta'");
+                throwErrorException("Reference file fileNameExtension must be 'fa' or 'fasta'");
             }
             if (!fileExists(refFileName)) {
                 throwErrorException("Cannot access reference file");
             }
-            std::cout << "OK" << std::endl;
+            std::cout << ME << "OK" << std::endl;
         }
 
         // compress or decompress
         if (cliOptions.decompress == false) {
             // invoke compressor
-            CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
+            CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames, cliOptions.polyploidy);
             calqEncoder.encode();
         } else {
             // invoke decompressor
             CalqDecoder calqDecoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);
             calqDecoder.decode();
         }
+    std::cout << ME << "Finished" << std::endl;
     } catch (TCLAP::ArgException &tclapException) {
         std::cerr << "Argument error: " << tclapException.error() << " (argument: " << tclapException.argId() << ")" << std::endl;
         return EXIT_FAILURE;

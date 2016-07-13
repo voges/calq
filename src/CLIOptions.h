@@ -27,6 +27,7 @@ public:
         , force(false)
         , inFileName("")
         , outFileName("")
+        , polyploidy(2)
         , refFileNames()
     {}
     ~CLIOptions(void) {}
@@ -36,6 +37,7 @@ public:
     bool force;
     std::string inFileName;
     std::string outFileName;
+    int polyploidy;
     std::vector<std::string> refFileNames;
 };
 

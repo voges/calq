@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Codecs/Genotyper2.h"
+#include "Helpers/Genotyper2.h"
 #include "Exceptions.h"
 #include <math.h>
 
@@ -42,8 +42,7 @@ static void allele2genotype(std::map<std::string, double> &genotypeLikelihoods,
     }
 }
 
-int Genotyper2::computeQuantizerIndex(const char &reference,
-                                      const std::string &observedNucleotides,
+int Genotyper2::computeQuantizerIndex(const std::string &observedNucleotides,
                                       const std::string &observedQualityValues)
 {
     // sequencing depth at this position

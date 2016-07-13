@@ -11,6 +11,7 @@
  */
 
 #include "Codecs/QualCodec.h"
+#include "common.h"
 #include "Exceptions.h"
 #include <limits>
 
@@ -19,12 +20,11 @@ static const int Q_OFFSET = 33;
 static const int Q_MAX = 83;
 static const int Q_MIN = Q_OFFSET;
 
-// TODO: what about polyploidy?
-static const unsigned int POLYPLOIDY = 2;
-
 static const unsigned int NUM_QUANTIZERS = 7; // 2-8 steps
 
-QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &fastaReferences)
+QualEncoder::QualEncoder(ofbitstream &ofbs,
+                         const std::vector<FASTAReference> &fastaReferences,
+                         const int &polyploidy)
     : fastaReferences(fastaReferences)
     , numBlocks(0)
     , numMappedRecords(0)
@@ -38,7 +38,7 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
     , observedQualityValues()
     , observedPosMin(std::numeric_limits<uint32_t>::max())
     , observedPosMax(std::numeric_limits<uint32_t>::min())
-    , genotyper(POLYPLOIDY)
+    , genotyper(polyploidy, NUM_QUANTIZERS)
     , genotyper2()
     , uniformQuantizers()
     , quantizerIndices()
@@ -46,16 +46,18 @@ QualEncoder::QualEncoder(ofbitstream &ofbs, const std::vector<FASTAReference> &f
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
     // init uniform quantizers
+    std::cout << ME << "Initializing " << NUM_QUANTIZERS << " uniform quantizers" << std::endl;
     for (unsigned int i = 0; i < NUM_QUANTIZERS; i++) {
         unsigned int numberOfSteps = i + 2;
         UniformQuantizer uniformQuantizer(Q_MIN, Q_MAX, numberOfSteps);
+        //uniformQuantizer.print();
         uniformQuantizers.insert(std::pair<int,UniformQuantizer>(i, uniformQuantizer));
     }
 }
 
 QualEncoder::~QualEncoder(void)
 {
-    std::cout << "Encoded " << numMappedRecords << " mapped record(s)"
+    std::cout << ME << "Encoded " << numMappedRecords << " mapped record(s)"
               << " and " << numUnmappedRecords << " unmapped record(s)"
               << " in " << numBlocks << " block(s)" << std::endl;
 }
@@ -74,7 +76,7 @@ void QualEncoder::startBlock(void)
     quantizerIndicesPosMin = std::numeric_limits<uint32_t>::max();
     quantizerIndicesPosMax = std::numeric_limits<uint32_t>::min();
 
-    std::cout << "Starting block " << numBlocks << std::endl;
+    std::cout << ME << "Starting block " << numBlocks << std::endl;
 }
 
 void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
@@ -117,11 +119,8 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // vectors
     // TODO: this loop consumes 99% of the time of this function
     while (observedPosMin < mappedRecord.posMin) {
-        std::cerr << observedNucleotides[0].length() << ",";
-        int k = genotyper.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << ",";
-        int k2= genotyper2.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << std::endl;
+        std::cout << ME << "Processing locus: " << observedPosMin << std::endl;
+        int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -152,15 +151,12 @@ size_t QualEncoder::finishBlock(void)
 {
     size_t ret = 0;
 
-    std::cout << "Finishing block " << numBlocks << std::endl;
+    std::cout << ME << "Finishing block " << numBlocks << std::endl;
 
     // compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        std::cerr << observedNucleotides[0].length() << ",";
-        int k = genotyper.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
-         std::cerr << ",";
-        int k2= genotyper2.computeQuantizerIndex(reference[observedPosMin], observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << std::endl;
+        std::cout << ME << "Processing locus: " << observedPosMin << std::endl;
+        int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -192,7 +188,7 @@ size_t QualEncoder::finishBlock(void)
 void QualEncoder::loadFastaReference(const std::string &rname)
 {
     // find FASTA reference for this RNAME
-    std::cout << "Searching FASTA reference for: " << rname << std::endl;
+    std::cout << ME << "Searching FASTA reference for: " << rname << std::endl;
     bool foundFastaReference = false;
 
     for (auto const &fastaReference : fastaReferences) {
@@ -208,7 +204,7 @@ void QualEncoder::loadFastaReference(const std::string &rname)
     }
 
     if (foundFastaReference == true) {
-        std::cout << "Found FASTA reference" << std::endl;
+        std::cout << ME << "Found FASTA reference" << std::endl;
     } else {
         throwErrorException("Could not find FASTA reference");
     }
@@ -217,7 +213,7 @@ void QualEncoder::loadFastaReference(const std::string &rname)
 void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
 {
     for (auto const &qualityValue : mappedRecord.qualityValues) {
-        int qualityValueQuantized = uniformQuantizers.at(4).getRepresentativeValue(qualityValue);
+        int qualityValueQuantized = uniformQuantizers.at(4).valueToIndex(qualityValue);
         //int qualityValueQuantizerIndex = uniformQuantizers.at(4).getIndex(qualityValue);
         //caac.encodeSymbol(qualityValueQuantized);
         //caac.updateModel(qualityValueQuantized);

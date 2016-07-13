@@ -9,7 +9,8 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Codecs/UniformQuantizer.h"
+#include "Quantizers/UniformQuantizer.h"
+#include "common.h"
 #include "Exceptions.h"
 #include <cmath>
 #include <queue>
@@ -18,6 +19,8 @@
 UniformQuantizer::UniformQuantizer(const int &minimumValue, 
                                    const int &maximumValue, 
                                    const unsigned int &numberOfSteps)
+    : lut()
+    , inverseLut()
 {
     // sanity checks
     if ((minimumValue >= maximumValue) || (numberOfSteps <= 1)) {
@@ -29,33 +32,34 @@ UniformQuantizer::UniformQuantizer(const int &minimumValue,
 
     // compute the borders and the representative values
     std::queue<double> borders;
-    std::queue<int> representativeValues;
+    std::queue<int> reconstructionValues;
     double newBorder = minimumValue;
 
     borders.push(minimumValue);
-    representativeValues.push(minimumValue + round(stepSize/2));
+    reconstructionValues.push(minimumValue + round(stepSize/2));
     for (unsigned i = 0; i < numberOfSteps-1; i++) {
         newBorder += stepSize;
         borders.push(newBorder);
-        representativeValues.push(newBorder + round(stepSize/2));
+        reconstructionValues.push(newBorder + round(stepSize/2));
     }
     borders.push(maximumValue);
 
     // fill the quantization table
     borders.pop();
     int currentIndex = 0;
-    int currentRepresentativeValue = representativeValues.front();
+    int currentReconstructionValue = reconstructionValues.front();
     double currentBorder = borders.front();
     for (int value = minimumValue; value <= maximumValue; value++) {
         if (value > currentBorder) {
             currentIndex++;
-            representativeValues.pop();
+            reconstructionValues.pop();
             borders.pop();
-            currentRepresentativeValue = representativeValues.front();
+            currentReconstructionValue = reconstructionValues.front();
             currentBorder = borders.front();
         }
-        std::pair<int,int> curr(currentIndex, currentRepresentativeValue);
+        std::pair<int,int> curr(currentIndex, currentReconstructionValue);
         lut.insert(std::pair<int,std::pair<int,int>>(value, curr));
+        inverseLut.insert(curr);
     }
 }
 
@@ -64,7 +68,7 @@ UniformQuantizer::~UniformQuantizer(void)
     // empty
 }
 
-int UniformQuantizer::getIndex(const int &value)
+int UniformQuantizer::valueToIndex(const int &value)
 {
     if (lut.find(value) == lut.end()) {
         throwErrorException("Value out of range for quantizer");
@@ -73,7 +77,16 @@ int UniformQuantizer::getIndex(const int &value)
     return lut[value].first;
 }
 
-int UniformQuantizer::getRepresentativeValue(const int &value)
+int UniformQuantizer::indexToReconstructionValue(const int &index)
+{
+    if (inverseLut.find(index) == inverseLut.end()) {
+        throwErrorException("Quantization index not found");
+    }
+
+    return inverseLut[index];
+}
+
+int UniformQuantizer::valueToReconstructionValue(const int &value)
 {
     if (lut.find(value) == lut.end()) {
         throwErrorException("Value out of range for quantizer");
@@ -84,10 +97,17 @@ int UniformQuantizer::getRepresentativeValue(const int &value)
 
 void UniformQuantizer::print(void)
 {
+    std::cout << ME << "LUT:" << std::endl;
     for (auto const &lutEntry : lut) {
-        std::cout << lutEntry.first << ": ";
+        std::cout << "  " << lutEntry.first << ": ";
         std::cout << lutEntry.second.first << ",";
         std::cout << lutEntry.second.second << std::endl;
+    }
+
+    std::cout << ME << "Inverse LUT:" << std::endl;
+    for (auto const &inverseLutEntry : inverseLut) {
+        std::cout << "  " << inverseLutEntry.first << ": ";
+        std::cout << inverseLutEntry.second << std::endl;
     }
 }
 

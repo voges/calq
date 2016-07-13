@@ -12,6 +12,7 @@
 
 #include "Codecs/CalqCodec.h"
 #include "cmake_config.h"
+#include "common.h"
 #include "definitions.h"
 #include "Exceptions.h"
 #include <chrono>
@@ -42,15 +43,17 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     // get reference sequences
     FASTAParser fastaParser;
     for (auto const &fastaFileName : fastaFileNames) {
-        std::cout << "Parsing FASTA file: " << fastaFileName << std::endl;
+        std::cout << ME << "Parsing FASTA file: " << fastaFileName << std::endl;
         fastaParser.parseFile(fastaFileName, fastaReferences);
-        std::cout << "OK" << std::endl;
+        std::cout << ME << "OK" << std::endl;
     }
 
     // print info about found reference sequences
-    std::cout << "Found the following reference sequence(s):" << std::endl;
+    std::cout << ME << "Found the following reference sequence(s):" << std::endl;
     for (auto const &fastaReference : fastaReferences) {
-        std::cout << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
+        std::cout << "  " << fastaReference.header;
+        std::cout << " (sequence length: " << fastaReference.sequence.size();
+        std::cout << ")" << std::endl;
     }
 }
 
@@ -61,10 +64,11 @@ CalqCodec::~CalqCodec(void)
 
 CalqEncoder::CalqEncoder(const std::string &samFileName,
                          const std::string &cqFileName,
-                         const std::vector<std::string> &fastaFileNames)
+                         const std::vector<std::string> &fastaFileNames,
+                         const int &polyploidy)
     : CalqCodec(samFileName, cqFileName, fastaFileNames)
     , ofbs()
-    , qualEncoder(ofbs, fastaReferences)
+    , qualEncoder(ofbs, fastaReferences, polyploidy)
     , samParser(samFileName)
 {
     // associate the outfile bitstream with the CQ file
@@ -119,11 +123,11 @@ void CalqEncoder::encode(void)
     // print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
-    std::cout << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
+    std::cout << ME << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
               << " ~= " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
-    std::cout << "Compressed " << numRecords << " record(s)" << std::endl;
-    std::cout << "Uncompressed size: " << uncompressedSize << std::endl;
-    std::cout << "Compressed size: " << compressedSize << std::endl;
+    std::cout << ME << "Compressed " << numRecords << " record(s)" << std::endl;
+    std::cout << ME << "Uncompressed size: " << uncompressedSize << std::endl;
+    std::cout << ME << "Compressed size: " << compressedSize << std::endl;
 }
 
 CalqDecoder::CalqDecoder(const std::string &cqFileName,
@@ -155,6 +159,6 @@ void CalqDecoder::decode(void)
         numBlocks++;
     }
 
-    std::cout << "Decoded " << numBlocks << " block(s)" << std::endl;
+    std::cout << ME << "Decoded " << numBlocks << " block(s)" << std::endl;
 }
 

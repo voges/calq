@@ -26,8 +26,7 @@ public:
     Genotyper2(void) {};
     ~Genotyper2(void) {};
 
-    int computeQuantizerIndex(const char &reference,
-                              const std::string &observedNucleotides,
+    int computeQuantizerIndex(const std::string &observedNucleotides,
                               const std::string &observedQualityValues);
 };
 
