@@ -14,7 +14,7 @@
 
 MappedRecord::MappedRecord(const SAMRecord &samRecord)
     : posMin(samRecord.pos - 1) // SAM format counts from 1
-    , posMax(samRecord.pos - 1)  // SAM format counts from 1
+    , posMax(samRecord.pos - 1) // SAM format counts from 1
     , nucleotides(samRecord.seq)
     , qualityValues(samRecord.qual)
     , cigar(samRecord.cigar)
@@ -26,7 +26,7 @@ MappedRecord::MappedRecord(const SAMRecord &samRecord)
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
-            opLen = opLen * 10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
             continue;
         }
         switch (cigar[cigarIdx]) {
@@ -71,7 +71,7 @@ void MappedRecord::extractObservations(const uint32_t &observedPosMin,
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
-            opLen = opLen * 10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
             continue;
         }
 

@@ -15,12 +15,14 @@
 #include "Exceptions.h"
 #include <limits>
 
-static const int Q_ALPHABET_SIZE = 50;
-static const int Q_OFFSET = 33;
-static const int Q_MAX = 83;
-static const int Q_MIN = Q_OFFSET;
+static const int QV_ALPHABET_SIZE = 50;
+static const int QV_OFFSET = 33;
+static const int QV_MAX = 83;
+static const int QV_MIN = QV_OFFSET;
 
 static const unsigned int NUM_QUANTIZERS = 7; // 2-8 steps
+static const unsigned int QUANTIZER_IDX_MIN = 0;
+static const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
 
 QualEncoder::QualEncoder(ofbitstream &ofbs,
                          const std::vector<FASTAReference> &fastaReferences,
@@ -38,7 +40,7 @@ QualEncoder::QualEncoder(ofbitstream &ofbs,
     , observedQualityValues()
     , observedPosMin(std::numeric_limits<uint32_t>::max())
     , observedPosMax(std::numeric_limits<uint32_t>::min())
-    , genotyper(polyploidy, NUM_QUANTIZERS)
+    , genotyper(polyploidy, NUM_QUANTIZERS, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, QV_OFFSET)
     , genotyper2()
     , uniformQuantizers()
     , quantizerIndices()
@@ -49,7 +51,7 @@ QualEncoder::QualEncoder(ofbitstream &ofbs,
     std::cout << ME << "Initializing " << NUM_QUANTIZERS << " uniform quantizers" << std::endl;
     for (unsigned int i = 0; i < NUM_QUANTIZERS; i++) {
         unsigned int numberOfSteps = i + 2;
-        UniformQuantizer uniformQuantizer(Q_MIN, Q_MAX, numberOfSteps);
+        UniformQuantizer uniformQuantizer(QV_MIN, QV_MAX, numberOfSteps);
         //uniformQuantizer.print();
         uniformQuantizers.insert(std::pair<int,UniformQuantizer>(i, uniformQuantizer));
     }
@@ -119,8 +121,9 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // vectors
     // TODO: this loop consumes 99% of the time of this function
     while (observedPosMin < mappedRecord.posMin) {
-        std::cout << ME << "Processing locus: " << observedPosMin << std::endl;
+        std::cerr << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << k << std::endl;
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -155,8 +158,9 @@ size_t QualEncoder::finishBlock(void)
 
     // compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        std::cout << ME << "Processing locus: " << observedPosMin << std::endl;
+        std::cerr << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
+        std::cerr << k << std::endl;
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -212,25 +216,59 @@ void QualEncoder::loadFastaReference(const std::string &rname)
 
 void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
 {
-    for (auto const &qualityValue : mappedRecord.qualityValues) {
-        int qualityValueQuantized = uniformQuantizers.at(4).valueToIndex(qualityValue);
-        //int qualityValueQuantizerIndex = uniformQuantizers.at(4).getIndex(qualityValue);
-        //caac.encodeSymbol(qualityValueQuantized);
-        //caac.updateModel(qualityValueQuantized);
-    }
+    std::cout << ME << "Encoding: " << mappedRecord.posMin << " " << mappedRecord.cigar << " " << mappedRecord.qualityValues << std::endl;
 
-    // DPCM loop
-//     for(std::string::size_type i = 0; i < qual.size(); ++i) {
-//         int q = (int)qualityValues[i];
-//         int qHat = predictor.predict(memory);
-//         int e = q - qHat;
-//         int eQuantIdx = maxLloyd.quantize(e);
-//         int eQuant = maxLloyd.reconstruct(eQuantIdx);
-//         int qQuant = qHat + eQuant;
-//         predictor.update(memory, qQuant);
-//         maxLloyd.update(qQuant);
-//         arithmeticEncoder.encodeSymbol(eQuantIdx);
-//     }
+    // iterators
+    uint32_t mrIdx = 0; // iterator for quality values in the mapped record
+    uint32_t qiIdx = 0; // iterator for quantizer indices
+
+    // iterate through CIGAR string and code the quality values
+    std::string cigar = mappedRecord.cigar;
+    size_t cigarIdx = 0;
+    size_t cigarLen = mappedRecord.cigar.length();
+    size_t opLen = 0; // length of current CIGAR operation
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
+            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+            continue;
+        }
+        switch (cigar[cigarIdx]) {
+        case 'M':
+        case '=':
+        case 'X':
+            // encode opLen quality values with computed quantizer indices
+            for (size_t i = 0; i < opLen; i++) {
+                int qualityValue = (int)mappedRecord.qualityValues[mrIdx++];
+                int quantizerIndex = quantizerIndices[qiIdx++];
+                int qualityValueQuantized = uniformQuantizers.at(quantizerIndex).valueToIndex(qualityValue);
+                std::cout << ME << "idx " << quantizerIndex << ": " << qualityValue << " -> " << qualityValueQuantized << std::endl;
+                //caac.encodeSymbol(qualityValueQuantized);
+                //caac.updateModel(qualityValueQuantized);
+            }
+            break;
+        case 'I':
+        case 'S':
+            // encode opLen quality values with max quantizer index
+            for (size_t i = 0; i < opLen; i++) {
+                int qualityValue = (int)mappedRecord.qualityValues[mrIdx++];
+                int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToIndex(qualityValue);
+                //caac.encodeSymbol(qualityValueQuantized);
+                //caac.updateModel(qualityValueQuantized);
+            }
+            break;
+        case 'D':
+        case 'N':
+            qiIdx += opLen;
+            break; // do nothing as these bases are not present
+        case 'H':
+        case 'P':
+            break; // these have been clipped
+        default: 
+            throwErrorException("Bad CIGAR string");
+        }
+        opLen = 0;
+    }
 }
 
 void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)

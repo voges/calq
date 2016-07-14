@@ -6,7 +6,9 @@
 
 /*
  *  Changelog
- *  2016-05-11: added safe debug macro (voges)
+ *  2017-07-14: Added functions fileBaseName and removeFileNameExtension (voges)
+ *  2016-07-14: Added module name macro (voges)
+ *  2016-05-11: Added safe debug macro (voges)
  */
 
 #ifndef COMMON_H
@@ -26,6 +28,7 @@
     #define DEBUG(c,...) do { } while (false)
 #endif
 
+// this expands to the module name, usage example: std::cout << ME << "Hello";
 #define MODULE_NAME removeFileNameExtension(fileBaseName(std::string(__FILE__)))
 #define COUT_PREFIX std::string("[" + MODULE_NAME + "] ")
 #define ME COUT_PREFIX // for brevity

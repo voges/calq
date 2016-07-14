@@ -23,7 +23,11 @@
  */
 class Genotyper {
 public:
-    Genotyper(const unsigned int &polyploidy, const unsigned int &numQuantizers);
+    Genotyper(const unsigned int &polyploidy, 
+              const unsigned int &numQuantizers,
+              const unsigned int &quantizerIdxMin,
+              const unsigned int &quantizerIdxMax,
+              const unsigned int &qualityValueOffset);
     ~Genotyper(void);
 
 private:
@@ -31,14 +35,12 @@ private:
     void resetLikelihoods(void);
 
 private:
-    bool computeGenotypeLikelihoods(const std::string &observedNucleotides,
+    void computeGenotypeLikelihoods(const std::string &observedNucleotides,
                                     const std::string &observedQualityValues);
 
 public:
     double computeGenotypeEntropy(const std::string &observedNucleotides,
                                   const std::string &observedQualityValues);
-    double computeGenotypeConfidence(const std::string &observedNucleotides,
-                                     const std::string &observedQualityValues);
     int computeQuantizerIndex(const std::string &observedNucleotides,
                               const std::string &observedQualityValues);
 
@@ -49,6 +51,9 @@ private:
     std::map<std::string,double> genotypeLikelihoods;
     const unsigned int numQuantizers;
     const unsigned int polyploidy;
+    const unsigned int qualityValueOffset;
+    const unsigned int quantizerIdxMin;
+    const unsigned int quantizerIdxMax;
 };
 
 #endif // GENOTYPER_H

@@ -7,10 +7,10 @@
 
 /*
  *  Changelog
+ *  2017-07-14: Added functions fileBaseName and removeFileNameExtension (voges)
  *  2016-05-29: Moved the implementation of the fileExists function from
  *              access() (which is defined in unistd.h, which is
- *              Linux-specific) to std::ifstream (which is portable).
- *             (voges)
+ *              Linux-specific) to std::ifstream (which is portable). (voges)
  */
 
 #include "common.h"
@@ -26,7 +26,7 @@ bool fileExists(const std::string &fileName)
 std::string fileBaseName(const std::string &path)
 {
     std::string const &delims = "/\\";
-  return path.substr(path.find_last_of(delims) + 1);
+    return path.substr(path.find_last_of(delims) + 1);
 }
 
 std::string fileNameExtension(const std::string &fileName)

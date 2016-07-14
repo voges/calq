@@ -14,9 +14,6 @@
 #include "Exceptions.h"
 #include <math.h>
 
-// quality value offset
-static const int Q_OFFSET = 33; // TODO: is this alway true?
-
 // allele alphabet
 static const std::vector<char> ALLELE_ALPHABET = {'A','C','G','T','N'};
 
@@ -47,13 +44,20 @@ static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &gen
     return count;
 }
 
-Genotyper::Genotyper(const unsigned int &polyploidy, const unsigned int &numQuantizers)
+Genotyper::Genotyper(const unsigned int &polyploidy, 
+                     const unsigned int &numQuantizers,
+                     const unsigned int &quantizerIdxMin,
+                     const unsigned int &quantizerIdxMax,
+                     const unsigned int &qualityValueOffset)
     : alleleAlphabet(ALLELE_ALPHABET)
     , alleleLikelihoods()
     , genotypeAlphabet()
     , genotypeLikelihoods()
     , numQuantizers(numQuantizers)
     , polyploidy(polyploidy)
+    , qualityValueOffset(qualityValueOffset)
+    , quantizerIdxMin(quantizerIdxMin)
+    , quantizerIdxMax(quantizerIdxMax)
 {
     initLikelihoods();
 }
@@ -97,7 +101,7 @@ void Genotyper::resetLikelihoods(void)
     }
 }
 
-bool Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotides,
+void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotides,
                                            const std::string &observedQualityValues)
 {
     resetLikelihoods();
@@ -106,18 +110,18 @@ bool Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
     if (depth != observedQualityValues.length()) {
         throwErrorException("Observation lengths do not match");
     }
-    if (depth == 0) { return false; } // no computation possible for depth=0
-    if (depth == 1) { return false; } // finest quantization required
-
-    std::cout << ME << "Depth: " << depth << std::endl;
-    std::cout << ME << "Observed nucleotides: " << observedNucleotides << std::endl;
-    std::cout << ME << "Observed quality values: " << observedQualityValues << std::endl;
+    if (depth == 0  || depth == 1) {
+        throwErrorException("Depth must be greater than one");
+    }
 
     for (size_t d = 0; d < depth; d++) {
         char y = (char)observedNucleotides[d];
-        double q = (double)(observedQualityValues[d] - Q_OFFSET);
+        double q = (double)(observedQualityValues[d] - qualityValueOffset);
+        // TODO
+        if (q > 50 || q < 0) throwErrorException("Quality value out of range");
+        // TODO
         double pStrike = 1 - pow(10.0, -q/10.0);
-        double pError = (1-pStrike) / (ALLELE_ALPHABET_SIZE-1);
+        double pError = (1-pStrike) / (ALLELE_ALPHABET.size()-1);
 
         for (auto const &allele : alleleAlphabet) {
             if (allele == y) {
@@ -148,16 +152,17 @@ bool Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
     for (auto &genotypeLikelihood : genotypeLikelihoods) {
         genotypeLikelihood.second /= cum;
     }
-
-    return true;
 }
 
 double Genotyper::computeGenotypeEntropy(const std::string &observedNucleotides,
                                          const std::string &observedQualityValues)
 {
-    if (!computeGenotypeLikelihoods(observedNucleotides, observedQualityValues)) {
-        return -1;
+    const size_t depth = observedNucleotides.length();
+    if (depth == 0 || depth == 1) {
+            return -1.0;
     }
+
+    computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
 
     double entropy = 0.0;
     for (auto &genotypeLikelihood: genotypeLikelihoods) {
@@ -170,12 +175,21 @@ double Genotyper::computeGenotypeEntropy(const std::string &observedNucleotides,
     return entropy;
 }
 
-double Genotyper::computeGenotypeConfidence(const std::string &observedNucleotides,
-                                           const std::string &observedQualityValues)
+int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
+                                     const std::string &observedQualityValues)
 {
-    if (!computeGenotypeLikelihoods(observedNucleotides, observedQualityValues)) {
-        return -1;
+    const size_t depth = observedNucleotides.length();
+    std::cerr << depth << ",";
+    //std::cerr << observedNucleotides << ",";
+    //std::cerr << observedQualityValues << ",";
+    if (depth == 0) {
+        return -1; // computation of quantizer index not possible
     }
+    if (depth == 1) {
+        return quantizerIdxMax; // if depth=1, return maximum quantizer index
+    }
+
+    computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
 
     double largestGenotypeLikelihood = 0.0;
     double secondLargestGenotypeLikelihood = 0.0;
@@ -190,22 +204,9 @@ double Genotyper::computeGenotypeConfidence(const std::string &observedNucleotid
     }
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
+    std::cerr << confidence << ",";
 
-    std::cout << ME << "Confidence: " << confidence << std::endl;
-    return confidence;
-}
-
-int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
-                                     const std::string &observedQualityValues)
-{
-    double confidence = computeGenotypeConfidence(observedNucleotides, observedQualityValues);
-    
-    if (confidence == -1 ) {
-        std::cout << ME << "Select finest quantizer" << std::endl;
-        return -1;
-    }
-
-    std::cout << ME << "Confidence: " << confidence << std::endl;
-    return (int)confidence;
+    //if (confidence == 1) return quantizerIdxMin;
+    return (int)((1-confidence)*(numQuantizers-1));
 }
 
