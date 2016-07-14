@@ -187,7 +187,7 @@ size_t QualEncoder::finishBlock(void)
             }
         }
     }
-
+    
     caac.finishBlock();
     numBlocks++;
 
@@ -309,29 +309,21 @@ void QualDecoder::decodeBlock(void)
     // ifbs.readByte(byte);
     // DUMMY
     //caad.decodeBlock();
+    modelA<int, 16, 14> cmodel2;
+    input_bits<ifbitstream> in2(ifbs, 16);
+    Decompressor<modelA<int, 16, 14>, input_bits<ifbitstream>> caad2(in, cmodel);
 
+    
+    
     std::vector<int> decoded;
-    caad.startBlock();
+    caad2.startBlock();
     std::cout << "decompressing..." << std::endl;
-    caad.decode(decoded);
+    caad2.decode(decoded);
 
     std::cout << "writing to file..." << std::endl;
     for (auto &symbol : decoded) {
         std::cout << symbol << " ";
     }
     std::cout << std::endl;
-
-    // BEGIN TEST CASE
-    std::vector<int> tmp;
-    caad.startBlock();
-    std::cout << "decompressing test case..." << std::endl;
-    caad.decode(tmp);
-    std::cout << "writing test case to file..." << std::endl;
-    for (auto &symbol : tmp) {
-        std::cout << symbol << " ";
-    }
-    std::cout << std::endl;
-    // END TEST CASE
-
 }
 

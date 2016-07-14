@@ -70,11 +70,17 @@ public :
      * The following functions are added, so we can access basic functionality of the streamclass.
      * The output_bytes are only allowd to be derived from std::ostream.
      */
-    void finishBlock(){
+    int finishBlock(){
         if ( m_Mask != 0x80 ){
             m_Output->writeByte(m_NextByte);
             m_Mask = 0x80;
+            m_NextByte = 0x0;
+            return 1;
         }
+        m_NextByte = 0x0;
+        m_Mask = 0x80;
+
+        return 0;
     }
     std::streampos tellp(){
         return m_Output->tellp();
@@ -91,6 +97,7 @@ public :
     void writeByte(const BYTE byte){
         m_Output->writeByte(byte);
     }
+    
 private :
   obitstream *m_Output;
   char m_NextByte;
@@ -147,6 +154,12 @@ public :
     }
     std::streampos tellg(){
         return m_Input->tellg();
+    }
+    
+    void reset(){
+        m_CurrentByte = 0x0;
+        m_LastMask = 1;
+        m_CureB = 0x0;
     }
 
 

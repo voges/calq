@@ -64,7 +64,7 @@ struct modelA : public model_metrics<CODE_VALUE_, CODE_VALUE_BITS_, FREQUENCY_BI
   }
   void reset()
   {
-    for ( int i = 0 ; i < 258 ; i++ )
+      for ( int i = 0 ; i < 258 ; i++ )
       cumulative_frequency[i] = i;
     m_bytesProcessed = 0;
     m_frozen = false;

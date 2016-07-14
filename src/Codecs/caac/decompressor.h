@@ -33,12 +33,12 @@ class Decompressor
     
     void startBlock(){
         m_model.reset();
-        beginBlock = m_input.tellg();
-        std::cout << "fpos startblock " << beginBlock << std::endl;
-        m_input.readUint64(uncompressedSize);
-        std::cout << "block with " << uncompressedSize << " symbols" << std::endl;
-        m_input.readUint64(compressedSize);
+        m_input.reset();
         
+        beginBlock = m_input.tellg();
+        m_input.readUint64(uncompressedSize);
+        m_input.readUint64(compressedSize);
+
         sizeCounter=0;
         high = MODEL::MAX_CODE;
         low = 0;
@@ -61,8 +61,6 @@ class Decompressor
             if ( c == 256 )
                 break;
             
-            //char d = (char)c;
-            //std::string e(1, d);
             output.push_back(c);
             sizeCounter++;
             
@@ -88,14 +86,20 @@ class Decompressor
                 high <<= 1;
                 high++;
                 value <<= 1;
-                //if(m_input.eof())
-                //    break;
-                if ((std::streampos)(beginBlock+(std::streampos)16+(std::streampos)compressedSize) < m_input.tellg()) break;
+                
+                if ((std::streampos)(beginBlock+(std::streampos)16+(std::streampos)compressedSize) <= m_input.tellg())  break;
                 value += m_input.get_bit() ? 1 : 0;
             }
             
         }
         return 0;
+    }
+    
+    std::streampos tellg(){
+        return m_input.tellg();
+    }
+    int eof(){
+        return m_input.eof();
     }
     
     private :

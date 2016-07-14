@@ -154,7 +154,22 @@ void CalqDecoder::decode(void)
 {
     size_t numBlocks = 0;
 
-    while (ifbs.eof() == false) {
+    while (true) {
+        /* The following ifbs.get() is needed, because the decoder never cheks for eof(). He rather checks, if he
+         * read the exact amount of compressed bits + header for every block. Thus the ifbs never gets a failed read
+         * attempt, while the decoder is active. After the last decoded block, the ifbs streams position is at the exact
+         * end of the file. The eofbit is only set, with a failed get()-attempt. Because this attempt never happens within the 
+         * decoder itself, we need to call it upfront and make it a leaving condition for this loop.
+         */
+        std::streampos cur = ifbs.tellg();
+        ifbs.get();
+        if(ifbs.eof()){
+            break;
+        }
+        ifbs.seekg(cur);
+        //end of fix
+        
+        
         qualDecoder.decodeBlock();
         numBlocks++;
     }

@@ -173,20 +173,13 @@ void Compressor<MODEL, OUTPUT>::finishBlock(){
     else
         put_bit_plus_pending(1, pending_bits);
 
-    m_output.finishBlock();
-    //m_output.writeByte(EOF);
+    compressedSize += m_output.finishBlock();
     
     std::streampos pos = m_output.tellp();
     m_output.seekp(blockBegin);
-    std::cout << "fpos for header: " << m_output.tellp() << std::endl;
-    std::cout << "writing uncompressedSize: " << uncompressedSize << std::endl;
     m_output.writeUint64(uncompressedSize);
-    std::cout << "fpos now: " << m_output.tellp() << std::endl;
-    std::cout << "writing compressedSize: " << compressedSize << std::endl;
     m_output.writeUint64(compressedSize);
-    std::cout << "fpos now: " << m_output.tellp() << std::endl;
     m_output.seekp(pos);
-    std::cout << "finished, fpos now: " << m_output.tellp() << std::endl;
 }
 
 template<typename MODEL, typename OUTPUT>

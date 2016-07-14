@@ -86,7 +86,7 @@ int ibitstream::readByte(BYTE &byte)
         return EOF;
     }
 
-    fprintf(stderr, "read 0x%x\n", byte);
+//    fprintf(stderr, "read 0x%x\n", byte);
     return 0;
 }
 
@@ -96,6 +96,8 @@ int ibitstream::readUint64(uint64_t &x)
         throwErrorException("Cannot read a uint64_t from a stream that is not open");
     }
 
+    x = 0x0;
+    
     BYTE hhhh = 0x00;
     BYTE hhh = 0x00;
     BYTE hh = 0x00;
@@ -259,8 +261,6 @@ void obitstream::writeByte(const BYTE byte)
     if (!is_open()) {
         throwErrorException("Stream is not open");
     }
-    std::cout << "WRITING " << std::hex << (int)byte;
-    std::cout << std::dec << " TO POS: " << tellp() << std::endl;
     put((char)byte);
     //fprintf(stderr, "write 0x%x\n", byte);
 }
