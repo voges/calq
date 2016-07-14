@@ -14,15 +14,15 @@
 #define QUALCODEC_H
 
 #include "bitstream.h"
+#include "Codecs/caac/modelA.h"
+#include "Codecs/caac/compressor.h"
+#include "Codecs/caac/decompressor.h"
 #include "Helpers/Genotyper.h"
 #include "Helpers/Genotyper2.h"
 #include "Helpers/MappedRecord.h"
 #include "Quantizers/UniformQuantizer.h"
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
-#include "ARI/modelA.h"
-#include "ARI/compressor.h"
-#include "ARI/decompressor.h"
 #include <math.h>
 #include <fstream>
 #include <map>

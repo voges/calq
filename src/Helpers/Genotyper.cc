@@ -171,7 +171,7 @@ double Genotyper::computeGenotypeEntropy(const std::string &observedNucleotides,
         }
     }
 
-    std::cout << ME << "Entropy: " << entropy << std::endl;
+    std::cerr << entropy << ",";
     return entropy;
 }
 

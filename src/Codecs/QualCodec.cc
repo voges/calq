@@ -191,6 +191,12 @@ size_t QualEncoder::finishBlock(void)
     caac.finishBlock();
     numBlocks++;
 
+    // BEGIN TEST CASE
+    caac.startBlock();
+    caac.encodeSymbol(47);
+    caac.finishBlock();
+    // END TEST CASE
+
     return ret;
 }
 
@@ -304,16 +310,28 @@ void QualDecoder::decodeBlock(void)
     // DUMMY
     //caad.decodeBlock();
 
-    std::vector<std::string> decoded;
+    std::vector<int> decoded;
     caad.startBlock();
     std::cout << "decompressing..." << std::endl;
     caad.decode(decoded);
-    
+
     std::cout << "writing to file..." << std::endl;
-    for (std::vector<std::string>::iterator it = decoded.begin() ; it != decoded.end(); ++it){
-        std::cout <<  std::hex << *it << " ";
+    for (auto &symbol : decoded) {
+        std::cout << symbol << " ";
     }
     std::cout << std::endl;
+
+    // BEGIN TEST CASE
+    std::vector<int> tmp;
+    caad.startBlock();
+    std::cout << "decompressing test case..." << std::endl;
+    caad.decode(tmp);
+    std::cout << "writing test case to file..." << std::endl;
+    for (auto &symbol : tmp) {
+        std::cout << symbol << " ";
+    }
+    std::cout << std::endl;
+    // END TEST CASE
 
 }
 

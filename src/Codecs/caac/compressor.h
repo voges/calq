@@ -14,7 +14,7 @@
 #include <fstream>
 
 
-#include "byteio.h"
+
 #include "bitio.h"
 
 
@@ -74,6 +74,7 @@ private:
  */
 template<typename MODEL, typename OUTPUT>
 void Compressor<MODEL, OUTPUT>::startBlock(){
+    m_model.reset();
     blockBegin = m_output.tellp();
     std::streamoff offset = 2*sizeof(uint64_t);
     m_output.seekp(blockBegin+offset);
@@ -176,14 +177,17 @@ void Compressor<MODEL, OUTPUT>::finishBlock(){
         put_bit_plus_pending(1, pending_bits);
 
     m_output.finishBlock();
-    m_output.writeByte(EOF);
+    //m_output.writeByte(EOF);
     
     std::streampos pos = m_output.tellp();
     m_output.seekp(blockBegin);
+    std::cout << "fpos for header: " << m_output.tellp() << std::endl;
     
+    std::cout << "uncompressedSize: " << uncompressedSize << std::endl;
     m_output.writeUint64(uncompressedSize);
+    std::cout << "compressedSize: " << compressedSize << std::endl;
     m_output.writeUint64(compressedSize);
-    m_output.seekp(pos);
+    m_output.seekp(pos + (std::streampos)1);
 }
 
 template<typename MODEL, typename OUTPUT>

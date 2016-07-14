@@ -30,7 +30,7 @@ THE SOFTWARE.
 #ifndef BITIO_DOT_H
 #define BITIO_DOT_H
 
-#include "byteio.h"
+
 #include "definitions.h"
 
 template<typename OUTPUT>

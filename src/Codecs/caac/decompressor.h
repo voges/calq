@@ -32,9 +32,11 @@ class Decompressor
     }
     
     void startBlock(){
+        m_model.reset();
         beginBlock = m_input.tellg();
         uint64_t compressedSize;
         m_input.readUint64(uncompressedSize);
+        std::cout << "block with " << uncompressedSize << " symbols" << std::endl;
         m_input.readUint64(compressedSize);
         
         sizeCounter=0;
@@ -43,16 +45,17 @@ class Decompressor
         value = 0;
     }
     
-    int decode(std::vector<std::string> &output)
+    int decode(std::vector<int> &output)
     {
         for ( int i = 0 ; i < MODEL::CODE_VALUE_BITS ; i++ ) {
-            if(sizeCounter == uncompressedSize){
-                break;
-            }
+            
             value <<= 1;
             value += m_input.get_bit() ? 1 : 0;
         }
         for ( ; ; ) {
+            if(sizeCounter == uncompressedSize){
+                break;
+            }
             CODE_VALUE range = high - low + 1;
             CODE_VALUE scaled_value =  ((value - low + 1) * m_model.getCount() - 1 ) / range;
             int c;
@@ -60,9 +63,9 @@ class Decompressor
             if ( c == 256 )
                 break;
             
-            char d = (char)c;
-            std::string e(1, d);
-            output.push_back(e);
+            //char d = (char)c;
+            //std::string e(1, d);
+            output.push_back(c);
             sizeCounter++;
             high = low + (range*p.high)/p.count -1;
             low = low + (range*p.low)/p.count;
