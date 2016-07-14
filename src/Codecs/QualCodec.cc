@@ -32,6 +32,8 @@ QualEncoder::QualEncoder(ofbitstream &ofbs,
     , numMappedRecords(0)
     , numUnmappedRecords(0)
     , ofbs(ofbs)
+    , out(ofbs)
+    , caac(out, cmodel)
     , reference("")
     , referencePosMin(std::numeric_limits<uint32_t>::max())
     , referencePosMax(std::numeric_limits<uint32_t>::min())
@@ -77,6 +79,8 @@ void QualEncoder::startBlock(void)
     quantizerIndices.clear();
     quantizerIndicesPosMin = std::numeric_limits<uint32_t>::max();
     quantizerIndicesPosMax = std::numeric_limits<uint32_t>::min();
+    
+    caac.startBlock();
 
     std::cout << ME << "Starting block " << numBlocks << std::endl;
 }
@@ -184,6 +188,7 @@ size_t QualEncoder::finishBlock(void)
         }
     }
 
+    caac.finishBlock();
     numBlocks++;
 
     return ret;
@@ -243,7 +248,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 int quantizerIndex = quantizerIndices[qiIdx++];
                 int qualityValueQuantized = uniformQuantizers.at(quantizerIndex).valueToIndex(qualityValue);
                 std::cout << ME << "idx " << quantizerIndex << ": " << qualityValue << " -> " << qualityValueQuantized << std::endl;
-                //caac.encodeSymbol(qualityValueQuantized);
+                caac.encodeSymbol(qualityValueQuantized);
                 //caac.updateModel(qualityValueQuantized);
             }
             break;
@@ -253,7 +258,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
             for (size_t i = 0; i < opLen; i++) {
                 int qualityValue = (int)mappedRecord.qualityValues[mrIdx++];
                 int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToIndex(qualityValue);
-                //caac.encodeSymbol(qualityValueQuantized);
+                caac.encodeSymbol(qualityValueQuantized);
                 //caac.updateModel(qualityValueQuantized);
             }
             break;
@@ -280,6 +285,8 @@ QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vecto
     : fastaReferences(fastaReferences)
     , ifbs(ifbs)
     , ofs(ofs)
+    , in(ifbs, 16)
+    , caad(in, cmodel)
 {
 
 }
@@ -292,10 +299,21 @@ QualDecoder::~QualDecoder(void)
 void QualDecoder::decodeBlock(void)
 {
     // DUMMY
-    BYTE byte;
-    ifbs.readByte(byte);
+    // BYTE byte;
+    // ifbs.readByte(byte);
     // DUMMY
+    //caad.decodeBlock();
 
-    // caac.decodeBlock();
+    std::vector<std::string> decoded;
+    caad.startBlock();
+    std::cout << "decompressing..." << std::endl;
+    caad.decode(decoded);
+    
+    std::cout << "writing to file..." << std::endl;
+    for (std::vector<std::string>::iterator it = decoded.begin() ; it != decoded.end(); ++it){
+        std::cout <<  std::hex << *it << " ";
+    }
+    std::cout << std::endl;
+
 }
 

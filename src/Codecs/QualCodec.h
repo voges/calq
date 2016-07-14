@@ -20,6 +20,9 @@
 #include "Quantizers/UniformQuantizer.h"
 #include "Parsers/FASTAReference.h"
 #include "Parsers/SAMRecord.h"
+#include "ARI/modelA.h"
+#include "ARI/compressor.h"
+#include "ARI/decompressor.h"
 #include <math.h>
 #include <fstream>
 #include <map>
@@ -49,6 +52,12 @@ private:
     size_t numMappedRecords;
     size_t numUnmappedRecords;
     ofbitstream &ofbs;
+    
+    //ari member variables
+    output_bits<ofbitstream> out;
+    modelA<int, 16, 14> cmodel;
+    Compressor<modelA<int, 16, 14>, output_bits<ofbitstream>> caac;
+
 
     // these member variables are used per block
 
@@ -102,6 +111,12 @@ private:
     std::vector<FASTAReference> fastaReferences;
     ifbitstream &ifbs;
     std::ofstream &ofs;
+    
+    //ari member variables
+    modelA<int, 16, 14> cmodel;
+    input_bits<ifbitstream> in;
+    Decompressor<modelA<int, 16, 14>, input_bits<ifbitstream>> caad;
+
 };
 
 #endif // QUALCODEC_H
