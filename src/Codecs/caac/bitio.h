@@ -30,30 +30,37 @@ THE SOFTWARE.
 #ifndef BITIO_DOT_H
 #define BITIO_DOT_H
 
-
+#include "bitstream.h"
 #include "definitions.h"
 
+
+/* Why is the bitstream.h class not sufficient for the use in this project and why do we need this wrapper class:
+ * obistream starts to construct a byte from the LSB to the MSB. The ARI-algorithm works the exact opposite way and expects 
+ * the MSB to be read first. This is were ibitstream starts to fail and
+ *
+ */
 template<typename OUTPUT>
 class output_bits
 {
 public :
-  output_bits(OUTPUT &output)
-  : m_Output(output),
-    m_NextByte(0),
+  output_bits(obitstream &output)
+  : m_NextByte(0),
     m_Mask(0x80) 
   {
+      m_Output = &output;
   }
   ~output_bits()
   {
     if ( m_Mask != 0x80 )
-      m_Output.putByte(m_NextByte);
+      m_Output->writeByte(m_NextByte);
   }
+    
   void put_bit( bool val ) {
     if ( val )
       m_NextByte |= m_Mask;
     m_Mask >>= 1;
     if ( !m_Mask) {
-      m_Output.putByte(m_NextByte);
+      m_Output->writeByte(m_NextByte);
       m_Mask = 0x80;
       m_NextByte = 0;
     }
@@ -65,27 +72,27 @@ public :
      */
     void finishBlock(){
         if ( m_Mask != 0x80 ){
-            m_Output.putByte(m_NextByte);
+            m_Output->writeByte(m_NextByte);
             m_Mask = 0x80;
         }
     }
     std::streampos tellp(){
-        return m_Output.tellp();
+        return m_Output->tellp();
     }
     void seekp(std::streampos pos, std::ios_base::seekdir way){
-        m_Output.seekp(pos, way);
+        m_Output->seekp(pos, way);
     }
     void seekp(std::streampos pos){
-        m_Output.seekp(pos);
+        m_Output->seekp(pos);
     }
     void writeUint64(const uint64_t x){
-        m_Output.writeUint64(x);
+        m_Output->writeUint64(x);
     }
     void writeByte(const BYTE byte){
-        m_Output.writeByte(byte);
+        m_Output->writeByte(byte);
     }
 private :
-  output_bytes<OUTPUT> m_Output;
+  obitstream *m_Output;
   char m_NextByte;
   unsigned char m_Mask;
 
@@ -95,18 +102,20 @@ template<typename INPUT>
 class input_bits
 {
 public :
-  input_bits(INPUT &input, int code_value_bits)
-  : m_Input(input),
-    m_CurrentByte(0),
+  input_bits(ibitstream &input, int code_value_bits)
+  : m_CurrentByte(0),
     m_LastMask(1),
     m_CodeValueBits(code_value_bits) 
   {
+      m_Input = &input;
   }
+    
   bool get_bit() {
     if ( m_LastMask == 1 ) {
-      m_CurrentByte = m_Input.getByte();
+      m_Input->readByte(m_CureB);
+        m_CurrentByte = m_CureB;
       if ( m_CurrentByte < 0 ) {
-        if ( m_CodeValueBits <= 0 ) 
+        if ( m_CodeValueBits <= 0 )
           throw std::logic_error("EOF on input");
         else
           m_CodeValueBits -= 8;
@@ -118,31 +127,32 @@ public :
   }
     /*
      * Added by Philipp Schelske
-     * This function is needed to make the throw std::logic_error("EOF on input") unnecessary.
+     * Following functions are implemented to make the ibitstream functions accessable.
      */
     bool eof(){
-        return m_Input.eof();
+        return m_Input->eof();
     }
     void seekg(std::streampos pos, std::ios_base::seekdir way){
-        m_Input.seekg(pos, way);
+        m_Input->seekg(pos, way);
     }
     void seekg(std::streampos pos){
-        m_Input.seekg(pos);
+        m_Input->seekg(pos);
     }
 
     int readUint64(uint64_t &x){
-       return m_Input.readUint64(x);
+       return m_Input->readUint64(x);
     }
     int readByte(BYTE &byte){
-        return m_Input.readByte(byte);
+        return m_Input->readByte(byte);
     }
     std::streampos tellg(){
-        return m_Input.tellg();
+        return m_Input->tellg();
     }
 
 
 private :
-  input_bytes<INPUT> m_Input;
+  ibitstream *m_Input;
+    BYTE m_CureB;
   int m_CurrentByte;
   unsigned char m_LastMask;
   int m_CodeValueBits;

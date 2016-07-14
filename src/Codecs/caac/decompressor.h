@@ -90,8 +90,7 @@ class Decompressor
                     break;
                 value += m_input.get_bit() ? 1 : 0;
             }
-            
-            if(m_input.eof())
+            if(sizeCounter == uncompressedSize)
                 break;
         }
         return 0;
