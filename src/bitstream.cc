@@ -86,7 +86,7 @@ int ibitstream::readByte(BYTE &byte)
         return EOF;
     }
 
-    //fprintf(stderr, "read 0x%x\n", byte);
+    fprintf(stderr, "read 0x%x\n", byte);
     return 0;
 }
 
@@ -259,7 +259,8 @@ void obitstream::writeByte(const BYTE byte)
     if (!is_open()) {
         throwErrorException("Stream is not open");
     }
-
+    std::cout << "WRITING " << std::hex << (int)byte;
+    std::cout << std::dec << " TO POS: " << tellp() << std::endl;
     put((char)byte);
     //fprintf(stderr, "write 0x%x\n", byte);
 }

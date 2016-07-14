@@ -34,7 +34,7 @@ class Decompressor
     void startBlock(){
         m_model.reset();
         beginBlock = m_input.tellg();
-        uint64_t compressedSize;
+        std::cout << "fpos startblock " << beginBlock << std::endl;
         m_input.readUint64(uncompressedSize);
         std::cout << "block with " << uncompressedSize << " symbols" << std::endl;
         m_input.readUint64(compressedSize);
@@ -53,9 +53,7 @@ class Decompressor
             value += m_input.get_bit() ? 1 : 0;
         }
         for ( ; ; ) {
-            if(sizeCounter == uncompressedSize){
-                break;
-            }
+
             CODE_VALUE range = high - low + 1;
             CODE_VALUE scaled_value =  ((value - low + 1) * m_model.getCount() - 1 ) / range;
             int c;
@@ -67,6 +65,10 @@ class Decompressor
             //std::string e(1, d);
             output.push_back(c);
             sizeCounter++;
+            
+            if(sizeCounter == uncompressedSize)
+                break;
+            
             high = low + (range*p.high)/p.count -1;
             low = low + (range*p.low)/p.count;
             for( ; ; ) {
@@ -86,12 +88,12 @@ class Decompressor
                 high <<= 1;
                 high++;
                 value <<= 1;
-                if(m_input.eof())
-                    break;
+                //if(m_input.eof())
+                //    break;
+                if ((std::streampos)(beginBlock+(std::streampos)16+(std::streampos)compressedSize) < m_input.tellg()) break;
                 value += m_input.get_bit() ? 1 : 0;
             }
-            if(sizeCounter == uncompressedSize)
-                break;
+            
         }
         return 0;
     }
@@ -105,6 +107,7 @@ class Decompressor
     CODE_VALUE value = 0;
     std::streampos beginBlock;
     uint64_t uncompressedSize;
+    uint64_t compressedSize;
     uint64_t sizeCounter;
 };
 

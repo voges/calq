@@ -179,12 +179,14 @@ void Compressor<MODEL, OUTPUT>::finishBlock(){
     std::streampos pos = m_output.tellp();
     m_output.seekp(blockBegin);
     std::cout << "fpos for header: " << m_output.tellp() << std::endl;
-    
-    std::cout << "uncompressedSize: " << uncompressedSize << std::endl;
+    std::cout << "writing uncompressedSize: " << uncompressedSize << std::endl;
     m_output.writeUint64(uncompressedSize);
-    std::cout << "compressedSize: " << compressedSize << std::endl;
+    std::cout << "fpos now: " << m_output.tellp() << std::endl;
+    std::cout << "writing compressedSize: " << compressedSize << std::endl;
     m_output.writeUint64(compressedSize);
-    m_output.seekp(pos + (std::streampos)1);
+    std::cout << "fpos now: " << m_output.tellp() << std::endl;
+    m_output.seekp(pos);
+    std::cout << "finished, fpos now: " << m_output.tellp() << std::endl;
 }
 
 template<typename MODEL, typename OUTPUT>
