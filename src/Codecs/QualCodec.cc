@@ -187,7 +187,7 @@ size_t QualEncoder::finishBlock(void)
             }
         }
     }
-    
+
     caac.finishBlock();
     numBlocks++;
 
@@ -264,6 +264,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
             for (size_t i = 0; i < opLen; i++) {
                 int qualityValue = (int)mappedRecord.qualityValues[mrIdx++];
                 int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToIndex(qualityValue);
+                std::cout << ME << "idx " << QUANTIZER_IDX_MAX << ": " << qualityValue << " -> " << qualityValueQuantized << std::endl;
                 caac.encodeSymbol(qualityValueQuantized);
                 //caac.updateModel(qualityValueQuantized);
             }
@@ -313,14 +314,11 @@ void QualDecoder::decodeBlock(void)
     input_bits<ifbitstream> in2(ifbs, 16);
     Decompressor<modelA<int, 16, 14>, input_bits<ifbitstream>> caad2(in, cmodel);
 
-    
-    
     std::vector<int> decoded;
     caad2.startBlock();
-    std::cout << "decompressing..." << std::endl;
     caad2.decode(decoded);
 
-    std::cout << "writing to file..." << std::endl;
+    std::cout << ME << "Decompressed: " << std::endl;
     for (auto &symbol : decoded) {
         std::cout << symbol << " ";
     }
