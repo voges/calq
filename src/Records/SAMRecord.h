@@ -12,7 +12,7 @@
 #ifndef SAMRECORD_H
 #define SAMRECORD_H
 
-#include "constants.h"
+#include "Common/constants.h"
 #include <stdint.h>
 
 /** @brief Class: SAMRecord

@@ -16,9 +16,9 @@
 
 
 #include <stdexcept>
-#include "bitstream.h"
-#include "model_metrics.h"
-#include "modelA.h"
+#include "Compressors/bitstream.h"
+#include "Compressors/caac/model_metrics.h"
+#include "Compressors/caac/modelA.h"
 
 
 /* @brief class Compressor

@@ -10,8 +10,8 @@
  */
 
 #include "Quantizers/UniformQuantizer.h"
-#include "common.h"
-#include "Exceptions.h"
+#include "Common/Exceptions.h"
+#include "Common/debug.h"
 #include <cmath>
 #include <queue>
 #include <vector>

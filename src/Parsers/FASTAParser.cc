@@ -10,8 +10,8 @@
  */
 
 #include "Parsers/FASTAParser.h"
-#include "common.h"
-#include "Exceptions.h"
+#include "Common/Exceptions.h"
+#include "Common/fileSystemHelpers.h"
 #include <fstream>
 #include <iostream>
 

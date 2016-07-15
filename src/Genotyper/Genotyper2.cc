@@ -9,8 +9,8 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Helpers/Genotyper2.h"
-#include "Exceptions.h"
+#include "Genotyper/Genotyper2.h"
+#include "Common/Exceptions.h"
 #include <math.h>
 
 static const int Q_OFFSET = 33;

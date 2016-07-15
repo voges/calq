@@ -11,10 +11,10 @@
  */
 
 #include "Codecs/CalqCodec.h"
-#include "cmake_config.h"
-#include "common.h"
-#include "definitions.h"
-#include "Exceptions.h"
+//#include "cmake_config.h"
+#include "Common/Exceptions.h"
+#include "Common/debug.h"
+#include "Common/definitions.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>

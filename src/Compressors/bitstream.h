@@ -30,7 +30,7 @@
 #ifndef BITSTREAM_H
 #define BITSTREAM_H
 
-#include "definitions.h"
+#include "Common/definitions.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>

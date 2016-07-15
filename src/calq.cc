@@ -21,7 +21,8 @@
  *              getopt.h on Windows systems) (voges)
  */
 
-#include "os_config.h"
+#include "Common/debug.h"
+#include "Common/os_config.h"
 
 #ifdef OS_WINDOWS
     #define TCLAP_NAMESTARTSTRING "~~"
@@ -31,13 +32,13 @@
     #define TCLAP_FLAGSTARTSTRING "-"
 #endif
 
-#include "CLIOptions.h"
+#include "Common/CLIOptions.h"
+#include "Common/Exceptions.h"
+#include "Common/fileSystemHelpers.h"
 #include "Codecs/CalqCodec.h"
-#include "common.h"
 #include "cmake_config.h"
-#include "Exceptions.h"
+#include "tclap/CmdLine.h"
 #include <iostream>
-#include <tclap/CmdLine.h>
 
 CLIOptions cliOptions;
 

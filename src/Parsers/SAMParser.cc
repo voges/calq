@@ -10,8 +10,8 @@
  */
 
 #include "Parsers/SAMParser.h"
-#include "common.h"
-#include "Exceptions.h"
+#include "Common/Exceptions.h"
+#include "Common/fileSystemHelpers.h"
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>

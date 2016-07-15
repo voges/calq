@@ -12,7 +12,7 @@
 #ifndef FASTAPARSER_H
 #define FASTAPARSER_H
 
-#include "constants.h"
+#include "Common/constants.h"
 #include "Parsers/FASTAReference.h"
 #include <string>
 #include <vector>

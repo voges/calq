@@ -9,8 +9,8 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Helpers/MappedRecord.h"
-#include "Exceptions.h"
+#include "Common/Exceptions.h"
+#include "Records/MappedRecord.h"
 
 MappedRecord::MappedRecord(const SAMRecord &samRecord)
     : posMin(samRecord.pos - 1) // SAM format counts from 1

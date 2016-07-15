@@ -13,8 +13,8 @@
 #ifndef CALQCODEC_H
 #define CALQCODEC_H
 
-#include "bitstream.h"
 #include "Codecs/QualCodec.h"
+#include "Compressors/bitstream.h"
 #include "Parsers/FASTAParser.h"
 #include "Parsers/SAMParser.h"
 #include <fstream>

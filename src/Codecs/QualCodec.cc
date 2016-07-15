@@ -11,8 +11,8 @@
  */
 
 #include "Codecs/QualCodec.h"
-#include "common.h"
-#include "Exceptions.h"
+#include "Common/Exceptions.h"
+#include "Common/debug.h"
 #include <limits>
 
 static const int QV_ALPHABET_SIZE = 50;

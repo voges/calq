@@ -15,8 +15,8 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "bitstream.h"
-#include "Exceptions.h"
+#include "Compressors/bitstream.h"
+#include "Common/Exceptions.h"
 
 static const int NUM_BITS_IN_BYTE = 8;
 

@@ -30,9 +30,8 @@ THE SOFTWARE.
 #ifndef BITIO_DOT_H
 #define BITIO_DOT_H
 
-#include "bitstream.h"
-#include "definitions.h"
-
+#include "Common/definitions.h"
+#include "Compressors/bitstream.h"
 
 /* Why is the bitstream.h class not sufficient for the use in this project and why do we need this wrapper class:
  * obistream starts to construct a byte from the LSB to the MSB. The ARI-algorithm works the exact opposite way and expects 

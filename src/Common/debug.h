@@ -1,20 +1,18 @@
-/** @file common.h
- *  @brief This file contains common global definitions.
+/** @file debug.h
+ *  @brief This file contains useful debug macros.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
 
 /*
  *  Changelog
- *  2017-07-14: Added functions fileBaseName and removeFileNameExtension (voges)
- *  2016-07-14: Added module name macro (voges)
- *  2016-05-11: Added safe debug macro (voges)
+ *  YYYY-MM-DD: What (who)
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef DEBUG_H
+#define DEBUG_H
 
-#include <string>
+#include "Common/fileSystemHelpers.h"
 
 // safe debug macro, usage example: DEBUG("status: %d\n", s);
 #define DBG
@@ -33,11 +31,5 @@
 #define COUT_PREFIX std::string("[" + MODULE_NAME + "] ")
 #define ME COUT_PREFIX // for brevity
 
-bool fileExists(const std::string &fileName);
-std::string fileBaseName(const std::string &path);
-std::string fileNameExtension(const std::string &fileName);
-std::string removeFileNameExtension(const std::string &fileName);
-bool yesno(void);
-
-#endif // COMMON_H
+#endif // DEBUG_H
 

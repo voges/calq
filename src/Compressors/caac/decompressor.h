@@ -7,7 +7,7 @@
 #ifndef DECOMPRESSOR_H
 #define DECOMPRESSOR_H
 
-#include "bitstream.h"
+#include "Compressors/bitstream.h"
 #include <vector>
 
 

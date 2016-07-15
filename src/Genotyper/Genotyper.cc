@@ -9,9 +9,10 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Helpers/Genotyper.h"
-#include "common.h"
-#include "Exceptions.h"
+#include "Genotyper/Genotyper.h"
+#include "Common/debug.h"
+#include "Common/Exceptions.h"
+#include "Common/fileSystemHelpers.h"
 #include <math.h>
 
 // allele alphabet

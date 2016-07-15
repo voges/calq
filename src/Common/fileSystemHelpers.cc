@@ -1,6 +1,6 @@
-/** @file common.cc
+/** @file fileSystemHelpers.cc
  *  @brief This file contains the implementations of the functions defined
- *         in common.h.
+ *         in fileSystemHelpers.h.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -13,9 +13,8 @@
  *              Linux-specific) to std::ifstream (which is portable). (voges)
  */
 
-#include "common.h"
+#include "fileSystemHelpers.h"
 #include <fstream>
-#include <string.h>
 
 bool fileExists(const std::string &fileName)
 {
@@ -41,15 +40,5 @@ std::string removeFileNameExtension(const std::string &fileName)
 {
   std::string::size_type const p(fileName.find_last_of('.'));
   return p > 0 && p != std::string::npos ? fileName.substr(0, p) : fileName;
-}
-
-bool yesno(void)
-{
-    int c = getchar();
-    bool yes = c == 'y' || c == 'Y';
-    while (c != '\n' && c != EOF) {
-        c = getchar();
-    }
-    return yes;
 }
 
