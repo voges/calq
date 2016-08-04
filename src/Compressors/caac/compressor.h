@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include "bitio.h"
 
 
 #include <stdexcept>
@@ -149,11 +148,11 @@ void Compressor<MODEL, OUTPUT>::encodeSymbol(int c){
 
 template<typename MODEL, typename OUTPUT>
 inline void Compressor<MODEL, OUTPUT>::put_bit_plus_pending(bool bit, int &pending_bits){
-    m_output.put_bit(bit);
+    m_output.writeBit(bit);
     incrementCompressedSize();
     for ( int i = 0 ; i < pending_bits ; i++ )
     {
-        m_output.put_bit(!bit);
+        m_output.writeBit(!bit);
         incrementCompressedSize();
     }
     pending_bits = 0;
@@ -173,7 +172,7 @@ void Compressor<MODEL, OUTPUT>::finishBlock(){
     else
         put_bit_plus_pending(1, pending_bits);
 
-    compressedSize += m_output.finishBlock();
+    compressedSize += m_output.reset();
     
     std::streampos pos = m_output.tellp();
     m_output.seekp(blockBegin);

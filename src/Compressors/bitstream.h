@@ -126,6 +126,14 @@ public:
      *  @return Returns true if this ibitstream is open and false otherwise.
      */
     virtual bool is_open(void);
+    
+    /** @brief Member function: reset
+     *
+     *  Resets current member variables to be able to read new Bytes.
+     *
+     *  @return Void.
+     */
+    void reset(void);
 
 private:
     std::streampos lastTell;
@@ -210,6 +218,14 @@ public:
      *  @return Returns true if this obitstream is open and false otherwise.
      */
     virtual bool is_open(void);
+    
+    /** @brief Member function: reset
+     *
+     *  Resets current member variables to be able to write new Bytes.
+     *
+     *  @return Void.
+     */
+    int reset(void);
 
 private:
     std::streampos lastTell;

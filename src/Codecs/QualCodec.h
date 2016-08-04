@@ -54,9 +54,8 @@ private:
     ofbitstream &ofbs;
     
     //ari member variables
-    output_bits<ofbitstream> out;
     modelA<int, 16, 14> cmodel;
-    Compressor<modelA<int, 16, 14>, output_bits<ofbitstream>> caac;
+    Compressor<modelA<int, 16, 14>, ofbitstream> caac;
 
 
     // these member variables are used per block
@@ -114,8 +113,7 @@ private:
     
     //ari member variables
     modelA<int, 16, 14> cmodel;
-    input_bits<ifbitstream> in;
-    Decompressor<modelA<int, 16, 14>, input_bits<ifbitstream>> caad;
+    Decompressor<modelA<int, 16, 14>, ifbitstream> caad;
 
 };
 

@@ -50,7 +50,7 @@ class Decompressor
         for ( int i = 0 ; i < MODEL::CODE_VALUE_BITS ; i++ ) {
             
             value <<= 1;
-            value += m_input.get_bit() ? 1 : 0;
+            value += m_input.readBit() ? 1 : 0;
         }
         for ( ; ; ) {
 
@@ -88,7 +88,7 @@ class Decompressor
                 value <<= 1;
                 
                 if ((std::streampos)(beginBlock+(std::streampos)16+(std::streampos)compressedSize) <= m_input.tellg())  break;
-                value += m_input.get_bit() ? 1 : 0;
+                value += m_input.readBit() ? 1 : 0;
             }
             
         }

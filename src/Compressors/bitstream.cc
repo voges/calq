@@ -34,7 +34,7 @@ ibitstream::ibitstream(void)
     : std::istream(NULL)
     , lastTell(0)
     , currByte(0)
-    , pos(NUM_BITS_IN_BYTE) 
+    , pos(-1)
 {
     ///
     /// Each ibitstream tracks 3 integers as private data.
@@ -47,7 +47,7 @@ ibitstream::ibitstream(void)
     ///
 }
 
-int ibitstream::readBit(void) 
+int ibitstream::readBit(void)
 {
     ///
     /// If bits remain in currByte, retrieve next bit and increment pos.
@@ -55,25 +55,30 @@ int ibitstream::readBit(void)
     /// byte and start reading from bit position 0 of that byte.
     /// If read byte from file at EOF, return EOF.
     ///
-
+    
     if (!is_open()) {
         throwErrorException("Cannot read a bit from a stream that is not open");
     }
-
-    // if just finished bits from currByte or if data read from stream after 
+    
+    // if just finished bits from currByte or if data read from stream after
     // last readBit
-    if (lastTell != tellg() || pos == NUM_BITS_IN_BYTE) {
+    if (lastTell != tellg() || pos == -1) {
         // read next single byte from file
         if ((currByte = get()) == EOF) {
             return EOF;
         }
-        pos = 0; // start reading from first bit of new byte
+        pos = 7; // start reading from first bit of new byte
         lastTell = tellg();
     }
-
+    
     int result = getNthBit(pos, currByte);
-    pos++; // advance bit position for next call to readBit
+    pos--; // advance bit position for next call to readBit
     return result;
+}
+
+void ibitstream::reset(){
+    currByte=0;
+    pos=-1;
 }
 
 int ibitstream::readByte(BYTE &byte)
@@ -197,7 +202,7 @@ obitstream::obitstream()
     : std::ostream(NULL)
     , lastTell(0)
     , currByte(0)
-    , pos(NUM_BITS_IN_BYTE) 
+    , pos(-1)
 {
     ///
     /// Each obitstream tracks 3 integers as private data.
@@ -210,51 +215,61 @@ obitstream::obitstream()
     ///
 }
 
-void obitstream::writeBit(const int bit) 
+void obitstream::writeBit(const int bit)
 {
     ///
     /// If bits remain to be written in currByte, add bit into byte and increment
     /// pos.
     /// Else if end of currByte (or some other write happened), then start a fresh
     /// byte at position 0.
-    /// We write the byte out for each bit (backing up to overwrite as needed), 
+    /// We write the byte out for each bit (backing up to overwrite as needed),
     /// rather than waiting for 8 bits. This is because the client might make
     /// 3 writeBit calls and then start using << so we can't wait til full-byte
     /// boundary to flush any partial-byte bits.
     ///
-
+    
     if (bit != 0 && bit != 1) {
         throwErrorException("Must pass an integer argument of 0 or 1");
     }
-
+    
     if (!is_open()) {
         throwErrorException("Stream is not open");
     }
-
-    // if just filled currByte or if data written to stream after last 
+    
+    // if just filled currByte or if data written to stream after last
     // writeBit
-    if (lastTell != tellp() || pos == NUM_BITS_IN_BYTE) {
+    if (lastTell != tellp() || pos == -1) {
         currByte = 0; // zero out byte for next writes
-        pos = 0;      // start writing to first bit of new byte
+        pos = 7;      // start writing to first bit of new byte
     }
-
+    
     if (bit) {
         // only need to change if bit needs to be 1 (byte starts already zeroed)
         setNthBit(pos, currByte);
     }
-
+    
     // only write if first bit in byte or changing 0 to 1
-    if (pos == 0 || bit) {
-        if (pos != 0) {
+    if (pos == 7 || bit) {
+        if (pos != 7) {
             seekp(-1, std::ios::cur); // back up to overwrite if pos > 0
         }
         put(currByte);
     }
-
-    pos++; // advance to next bit position for next write
+    
+    
+    pos--; // advance to next bit position for next write
     lastTell = tellp();
-
+    
 }
+
+int obitstream::reset(){
+    if(pos != -1){
+        pos = -1;
+        return 1;
+    }
+    currByte = 0;
+    return 0;
+    }
 
 void obitstream::writeByte(const BYTE byte)
 {

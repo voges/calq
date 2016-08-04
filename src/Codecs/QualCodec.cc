@@ -32,8 +32,7 @@ QualEncoder::QualEncoder(ofbitstream &ofbs,
     , numMappedRecords(0)
     , numUnmappedRecords(0)
     , ofbs(ofbs)
-    , out(ofbs)
-    , caac(out, cmodel)
+    , caac(ofbs, cmodel)
     , reference("")
     , referencePosMin(std::numeric_limits<uint32_t>::max())
     , referencePosMax(std::numeric_limits<uint32_t>::min())
@@ -191,12 +190,6 @@ size_t QualEncoder::finishBlock(void)
     caac.finishBlock();
     numBlocks++;
 
-    // BEGIN TEST CASE
-    caac.startBlock();
-    caac.encodeSymbol(47);
-    caac.finishBlock();
-    // END TEST CASE
-
     return ret;
 }
 
@@ -292,8 +285,7 @@ QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vecto
     : fastaReferences(fastaReferences)
     , ifbs(ifbs)
     , ofs(ofs)
-    , in(ifbs, 16)
-    , caad(in, cmodel)
+    , caad(ifbs, cmodel)
 {
 
 }
@@ -310,13 +302,9 @@ void QualDecoder::decodeBlock(void)
     // ifbs.readByte(byte);
     // DUMMY
     //caad.decodeBlock();
-    modelA<int, 16, 14> cmodel2;
-    input_bits<ifbitstream> in2(ifbs, 16);
-    Decompressor<modelA<int, 16, 14>, input_bits<ifbitstream>> caad2(in, cmodel);
-
     std::vector<int> decoded;
-    caad2.startBlock();
-    caad2.decode(decoded);
+    caad.startBlock();
+    caad.decode(decoded);
 
     std::cout << ME << "Decompressed: " << std::endl;
     for (auto &symbol : decoded) {
