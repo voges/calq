@@ -14,10 +14,10 @@
 
 #include <string>
 
-bool fileExists(const std::string &fileName);
+bool fileExists(const std::string &path);
 std::string fileBaseName(const std::string &path);
-std::string fileNameExtension(const std::string &fileName);
-std::string removeFileNameExtension(const std::string &fileName);
+std::string fileNameExtension(const std::string &path);
+std::string removeFileNameExtension(const std::string &path);
 
 #endif // FILESYSTEMHELPERS_H
 

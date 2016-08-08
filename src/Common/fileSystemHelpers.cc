@@ -16,9 +16,9 @@
 #include "fileSystemHelpers.h"
 #include <fstream>
 
-bool fileExists(const std::string &fileName)
+bool fileExists(const std::string &path)
 {
-    std::ifstream ifs(fileName.c_str());
+    std::ifstream ifs(path.c_str());
     return ifs.good();
 }
 
@@ -28,7 +28,7 @@ std::string fileBaseName(const std::string &path)
     return path.substr(path.find_last_of(delims) + 1);
 }
 
-std::string fileNameExtension(const std::string &fileName)
+std::string fileNameExtension(const std::string &path)
 {
     if (fileName.find_last_of(".") != std::string::npos) {
         return fileName.substr(fileName.find_last_of(".")+1);
@@ -36,9 +36,9 @@ std::string fileNameExtension(const std::string &fileName)
     return "";
 }
 
-std::string removeFileNameExtension(const std::string &fileName)
+std::string removeFileNameExtension(const std::string &path)
 {
-  std::string::size_type const p(fileName.find_last_of('.'));
-  return p > 0 && p != std::string::npos ? fileName.substr(0, p) : fileName;
+    std::string::size_type const p(fileName.find_last_of('.'));
+    return p > 0 && p != std::string::npos ? fileName.substr(0, p) : fileName;
 }
 
