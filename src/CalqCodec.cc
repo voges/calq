@@ -127,6 +127,9 @@ void CalqEncoder::encode(void)
     std::cout << ME << "Compressed " << numRecords << " record(s)" << std::endl;
     std::cout << ME << "Uncompressed size: " << uncompressedSize << std::endl;
     std::cout << ME << "Compressed size: " << compressedSize << std::endl;
+    std::cout << ME << "Compression ratio: " << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
+    std::cout << ME << "Compression factor: " << (double)uncompressedSize/(double)compressedSize << std::endl;
+    std::cout << ME << "Bits per quality value: " << ((double)compressedSize * 8)/(double)uncompressedSize << std::endl;
 }
 
 void CalqEncoder::writeFileHeader(void)
@@ -163,7 +166,11 @@ CalqDecoder::~CalqDecoder(void)
 void CalqDecoder::decode(void)
 {
     size_t numBlocks = 0;
-    qualDecoder.decodeBlock();
+    while (cqFile.tell() < cqFile.size()) {
+        std::cout << ME << "Decoding block: " << numBlocks << std::endl;
+        qualDecoder.decodeBlock();
+        numBlocks++;
+    }
     std::cout << ME << "Decoded " << numBlocks << " block(s)" << std::endl;
 }
 

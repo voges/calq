@@ -6,7 +6,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: What (who)
+ *  YYYY-MM-DD: what (who)
  */
 
 #ifndef RLE_H

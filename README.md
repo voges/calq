@@ -29,8 +29,8 @@ We provide a CMakeLists.txt to build the program with CMake.
 ## Contribution guidelines ##
 
 * Please write code conforming to the used coding style
-* Please \#include with paths relative to src/. Place corresponding header (*.h)
-  and source files (*.c/*.cc) in the same directory. The source files shall
+* Please \#include with paths relative to src/. Place corresponding header
+  and source files in the same directory. The source files shall
   include the corresponding header file without any path.
 
 ## Who do I talk to? ##

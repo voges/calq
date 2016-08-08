@@ -63,6 +63,8 @@ static void printCopyright(void)
 
 int main(int argc, char *argv[])
 {
+    std::cout << std::setprecision(2) << std::fixed;
+
     printVersion();
     printCopyright();
 

@@ -53,8 +53,8 @@ private:
 
     // String (i.e. byte buffer) holding the quantizer indices to be encoded or
     // transmitted
-    std::string quantizerIndicesForTransmission;
-    std::string qualityValueIndicesForTransmission;
+    std::string qi;
+    std::string qvi;
 
     // Reference loaded for the current block
     std::string reference;

@@ -6,7 +6,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: What (who)
+ *  YYYY-MM-DD: what (who)
  */
 
 #include "rle.h"
@@ -74,11 +74,11 @@ void rle_encode(const std::string &in,
         if ((currChar != prevChar) || (n == maxRunLength)) {
             if (n < RLE_MIN_RUN_LENGTH) {
                 for (size_t j = 0; j < n; j++) {
-                    out += (char)prevChar;
+                    out += prevChar;
                 }
             } else {
                 out += (char)(n + N);
-                out += (char)prevChar;
+                out += prevChar;
             }
             n = 0;
         }
@@ -87,16 +87,15 @@ void rle_encode(const std::string &in,
     }
 
     // Write out last run
-    if (n <= 1) {
-        if (n < RLE_MIN_RUN_LENGTH) {
-            for (size_t j = 0; j < n; j++) {
-                out += (char)prevChar;
-            }
-        } else {
-            out += (char)(n + N);
+    if (n < RLE_MIN_RUN_LENGTH) {
+        for (size_t j = 0; j < n; j++) {
             out += (char)prevChar;
         }
+    } else {
+        out += (char)(n + N);
+        out += prevChar;
     }
+
 }
 
 void rle_decode(const std::string &in,
