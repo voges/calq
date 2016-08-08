@@ -3,6 +3,6 @@
 *.a
 *.so
 .directory # created by Dolphin file manager
-*.kdev4
+*kdev4*
 build
 
