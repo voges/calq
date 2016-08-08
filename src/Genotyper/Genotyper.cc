@@ -16,7 +16,7 @@
 #include <math.h>
 
 // Allele alphabet
-static const std::vector<char> ALLELE_ALPHABET = {'A','C','G','T','N'};
+static const std::vector<char> ALLELE_ALPHABET = {'A','C','G','T'};
 
 static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &genotypeAlphabet,
                                                    const std::vector<char> &alleleAlphabet,
