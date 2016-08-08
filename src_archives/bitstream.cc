@@ -15,7 +15,7 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Compressors/bitstream.h"
+#include "bitstream.h"
 #include "Common/Exceptions.h"
 
 static const int NUM_BITS_IN_BYTE = 8;
@@ -277,7 +277,7 @@ void obitstream::writeByte(const BYTE byte)
         throwErrorException("Stream is not open");
     }
     put((char)byte);
-    //fprintf(stderr, "write 0x%x\n", byte);
+    fprintf(stderr, "write 0x%x\n", byte);
 }
 
 void obitstream::writeUint64(const uint64_t x)

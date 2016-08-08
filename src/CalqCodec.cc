@@ -7,14 +7,13 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
-#include "Codecs/CalqCodec.h"
-//#include "cmake_config.h"
+#include "CalqCodec.h"
+#include "cmake_config.h"
 #include "Common/Exceptions.h"
 #include "Common/debug.h"
-#include "Common/definitions.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>
@@ -40,7 +39,7 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     , inFileName(inFileName)
     , outFileName(outFileName)
 {
-    // get reference sequences
+    // Get reference sequences
     FASTAParser fastaParser;
     for (auto const &fastaFileName : fastaFileNames) {
         std::cout << ME << "Parsing FASTA file: " << fastaFileName << std::endl;
@@ -48,7 +47,7 @@ CalqCodec::CalqCodec(const std::string &inFileName,
         std::cout << ME << "OK" << std::endl;
     }
 
-    // print info about found reference sequences
+    // Print info about found reference sequences
     std::cout << ME << "Found the following reference sequence(s):" << std::endl;
     for (auto const &fastaReference : fastaReferences) {
         std::cout << "  " << fastaReference.header;
@@ -65,19 +64,19 @@ CalqCodec::~CalqCodec(void)
 CalqEncoder::CalqEncoder(const std::string &samFileName,
                          const std::string &cqFileName,
                          const std::vector<std::string> &fastaFileNames,
-                         const int &polyploidy)
+                         const unsigned int &polyploidy)
     : CalqCodec(samFileName, cqFileName, fastaFileNames)
-    , ofbs()
-    , qualEncoder(ofbs, fastaReferences, polyploidy)
+    , cqFile(cqFileName, "w")
+    , polyploidy(polyploidy)
+    , qualEncoder(cqFile, fastaReferences, polyploidy)
     , samParser(samFileName)
 {
-    // associate the outfile bitstream with the CQ file
-    ofbs.open(cqFileName);
+    writeFileHeader();
 }
 
 CalqEncoder::~CalqEncoder(void)
 {
-    ofbs.close();
+    // empty
 }
 
 void CalqEncoder::encode(void)
@@ -88,7 +87,7 @@ void CalqEncoder::encode(void)
     size_t compressedSize = 0;
     size_t numRecords = 0;
 
-    // send all records to the QualEncoder
+    // Send all records to the QualEncoder
     std::string rnamePrev("");
     uint32_t posPrev = 0;
     bool first = true;
@@ -100,7 +99,7 @@ void CalqEncoder::encode(void)
         if (samRecordIsMapped(samParser.curr) == true) {
             if (first == false) {
                 if (samParser.curr.rname != rnamePrev) {
-                    // start a new block
+                    // Start a new block
                     compressedSize += qualEncoder.finishBlock();
                     qualEncoder.startBlock();
                 } else {
@@ -120,7 +119,7 @@ void CalqEncoder::encode(void)
 
     compressedSize += qualEncoder.finishBlock();
 
-    // print summary
+    // Print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
     std::cout << ME << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
@@ -130,50 +129,63 @@ void CalqEncoder::encode(void)
     std::cout << ME << "Compressed size: " << compressedSize << std::endl;
 }
 
+void CalqEncoder::writeFileHeader(void)
+{
+    size_t fileHeaderSize = 0;
+
+    const size_t magicSize = 5;
+    char magic[magicSize] = "calq";
+    const size_t versionSize = 6;
+    char version[versionSize] = VERSION;
+    fileHeaderSize += cqFile.write(magic, magicSize);
+    fileHeaderSize += cqFile.write(version, versionSize);
+    fileHeaderSize += cqFile.writeUint32(polyploidy);
+
+    std::cout << ME << "File header size: " << fileHeaderSize << std::endl;
+}
+
 CalqDecoder::CalqDecoder(const std::string &cqFileName,
                          const std::string &qualFileName,
                          const std::vector<std::string> &fastaFileNames)
     : CalqCodec(cqFileName, qualFileName, fastaFileNames)
-    , ifbs()
-    , ofs()
-    , qualDecoder(ifbs, ofs, fastaReferences)
+    , cqFile(cqFileName, "r")
+    , qualFile(qualFileName, "w")
+    , qualDecoder(cqFile, qualFile, fastaReferences)
 {
-    // associate the infile bitstream with the CQ file and the outfile stream
-    // with the QUAL file
-    ifbs.open(cqFileName);
-    ofs.open(qualFileName);
+    readFileHeader();
 }
 
 CalqDecoder::~CalqDecoder(void)
 {
-    ifbs.close();
-    ofs.close();
+    // empty
 }
 
 void CalqDecoder::decode(void)
 {
     size_t numBlocks = 0;
+    qualDecoder.decodeBlock();
+    std::cout << ME << "Decoded " << numBlocks << " block(s)" << std::endl;
+}
 
-    while (true) {
-        /* The following ifbs.get() is needed, because the decoder never cheks for eof(). He rather checks, if he
-         * read the exact amount of compressed bits + header for every block. Thus the ifbs never gets a failed read
-         * attempt, while the decoder is active. After the last decoded block, the ifbs streams position is at the exact
-         * end of the file. The eofbit is only set, with a failed get()-attempt. Because this attempt never happens within the 
-         * decoder itself, we need to call it upfront and make it a leaving condition for this loop.
-         */
-        std::streampos cur = ifbs.tellg();
-        ifbs.get();
-        if(ifbs.eof()){
-            break;
-        }
-        ifbs.seekg(cur);
-        //end of fix
-        
-        
-        qualDecoder.decodeBlock();
-        numBlocks++;
+void CalqDecoder::readFileHeader(void)
+{
+    std::cout << ME << "Reading file header" << std::endl;
+
+    const size_t magicSize = 5;
+    char magic[magicSize];
+    const size_t versionSize = 6;
+    char version[versionSize];
+    unsigned int polyploidy;
+    cqFile.read(magic, magicSize);
+    cqFile.read(version, versionSize);
+    cqFile.readUint32(&polyploidy);
+
+    if (strncmp(version, VERSION, 5) != 0) {
+        throwErrorException("CQ file was compressed with another version");
     }
 
-    std::cout << ME << "Decoded " << numBlocks << " block(s)" << std::endl;
+    std::cout << ME << "Magic: " << magic << std::endl;
+    std::cout << ME << "Version: " << version << std::endl;
+    std::cout << ME << "Polyploidy: " << polyploidy << std::endl;
 }
 

@@ -6,10 +6,10 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
-#include "Genotyper/Genotyper2.h"
+#include "Genotyper2.h"
 #include "Common/Exceptions.h"
 #include <math.h>
 
@@ -27,8 +27,8 @@ static void allele2genotype(std::map<std::string, double> &genotypeLikelihoods,
     std::string s("");
 
     if (depth == 0 ) {
-        // we are using the log likelihood to avoid numerical problems
-        // TODO: replace w/ std::log1p (more accurate)
+        // We are using the log likelihood to avoid numerical problems
+        // TODO: Replace w/ std::log1p (more accurate)
         p = log((baseLikelihoods[genotype[0]] + baseLikelihoods[genotype[1]]) / 2.0);
         s = std::string() + genotype[0]+genotype[1];
         genotypeLikelihoods[s] += p;
@@ -45,7 +45,7 @@ static void allele2genotype(std::map<std::string, double> &genotypeLikelihoods,
 int Genotyper2::computeQuantizerIndex(const std::string &observedNucleotides,
                                       const std::string &observedQualityValues)
 {
-    // sequencing depth at this position
+    // Sequencing depth at this position
     size_t depth = observedNucleotides.length();
 
     if (depth != observedQualityValues.length()) {
@@ -55,12 +55,12 @@ int Genotyper2::computeQuantizerIndex(const std::string &observedNucleotides,
         return 0; // should return QUANTIZER_INDEX_MAX;
     }
 
-    // a map containing the likelihood of each of the possible alleles
-    // NOTE: can we work with integers (counts) instead??
+    // A map containing the likelihood of each of the possible alleles
+    // NOTE: Can we work with integers (counts) instead??
     std::map<char,double> baseLikelihoods;
 
-    // a map containing the likelihood of each of the possible genotypes
-    // NOTE: can we work with integers (counts) instead??
+    // A map containing the likelihood of each of the possible genotypes
+    // NOTE: Can we work with integers (counts) instead??
     std::map<std::string,double> genotypeLikelihoods;
 
     for (size_t i = 0; i < depth; i++) {
@@ -80,10 +80,10 @@ int Genotyper2::computeQuantizerIndex(const std::string &observedNucleotides,
         allele2genotype(genotypeLikelihoods, baseLikelihoods, 2, 0);
     }
 
-    // normalize the genotype likelihoods applying the softmax
+    // Normalize the genotype likelihoods applying the softmax
     double cum = 0.0;
     for (auto &genotypeLikelihood : genotypeLikelihoods) {
-        // TODO: replace with std::expm1 (more accurate)
+        // TODO: Replace with std::expm1 (more accurate)
         genotypeLikelihood.second = exp(genotypeLikelihood.second);
         cum += genotypeLikelihood.second;
     }
@@ -91,7 +91,7 @@ int Genotyper2::computeQuantizerIndex(const std::string &observedNucleotides,
         genotypeLikelihood.second /= cum;
     }
 
-    // compute the entropy
+    // Compute the entropy
     double entropy = 0.0;
     for (auto &genotypeLikelihood: genotypeLikelihoods) {
         if (genotypeLikelihood.second != 0) {
@@ -99,7 +99,7 @@ int Genotyper2::computeQuantizerIndex(const std::string &observedNucleotides,
         }
     }
 
-    // debug output
+    // Debug output
     std::cerr << entropy;
 
     return 0;

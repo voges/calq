@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 11)
 
-# set up project-specific variables
+# Set up project-specific variables
 set(PROJECT_NAME "calq")
 project(${PROJECT_NAME})
 set(PROJECT_VERSION_MAJOR 1)
@@ -12,7 +12,7 @@ set(PROJECT_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(PROJECT_SOURCE_DIR ${PROJECT_ROOT_DIR}/src/)
 set(PROJECT_INCLUDE_DIR ${PROJECT_ROOT_DIR}/src/)
 
-# get all source and header files (C and C++)
+# Get all source and header files (C and C++)
 file(GLOB_RECURSE C_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.c)
 file(GLOB_RECURSE CC_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.cc)
 file(GLOB_RECURSE CPP_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.cpp)
@@ -22,17 +22,17 @@ file(GLOB_RECURSE HPP_HEADER_FILES ${PROJECT_INCLUDE_DIR}/*.hpp)
 set(PROJECT_SOURCE_FILES ${C_SOURCE_FILES} ${CC_SOURCE_FILES} ${CPP_SOURCE_FILES})
 set(PROJECT_HEADER_FILES ${H_HEADER_FILES} ${HH_HEADER_FILES} ${HPP_HEADER_FILES})
 
-# group the source and header files
+# Group the source and header files
 source_group(src FILES ${PROJECT_SOURCE_FILES})
 source_group(include FILES ${PROJECT_HEADER_FILES})
 
-# set compiler flags
+# Set compiler flags
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     message(STATUS "Detected GNU Compiler Collection")
 
     # C compiler flags
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -02")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -02")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wfloat-equal")
@@ -72,7 +72,7 @@ else ()
     message(FATAL_ERROR "Compiler not supported: ${CMAKE_CXX_COMPILER_ID}")
 endif ()
 
-# generate version.h
+# Generate version.h
 file(WRITE ${PROJECT_BUILD_DIR}/version.cmake "file(WRITE version.h \"#ifndef VERSION_H\\n\")\n")
 file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION_H\\n\\n\")\n")
 file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION \\\"${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}\\\"\\n\")\n")
@@ -85,7 +85,7 @@ add_custom_target(version
     ADD_DEPENDENCIES ${PROJECT_BUILD_DIR}/version.cmake
 )
 
-# write build time in UTC ISO 8601 to timestamp.h
+# Write build time in UTC ISO 8601 to timestamp.h
 message(STATUS "Creating target for ${PROJECT_BUILD_DIR}/timestamp.h")
 file(WRITE ${PROJECT_BUILD_DIR}/timestamp.cmake "STRING(TIMESTAMP TIMESTAMP_UTC UTC)\n")
 file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(WRITE timestamp.h \"#ifndef TIMESTAMP_H\\n\")\n")
@@ -97,31 +97,31 @@ add_custom_target(timestamp
     ADD_DEPENDENCIES ${PROJECT_BUILD_DIR}/timestamp.cmake
 )
 
-# generate gitrevision.h if Git is available and the .git directory is present
+# Generate gitrevision.h if Git is available and the .git directory is present
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
 find_file(GIT_DIR NAMES .git PATHS ${PROJECT_ROOT_DIR} NO_DEFAULT_PATH)
-if (GIT_SCM AND GIT_DIR)
+if (GIT_SCM AND EXISTS ${GIT_DIR})
 
-    # create git.h that depends on the Git HEAD log
+    # Create git.h that depends on the Git HEAD log
     message(STATUS "Git is available and .git/ directory is present")
     message(STATUS "Creating target for ${PROJECT_BUILD_DIR}/git.h")
 
-    # get the current working branch
+    # Get the current working branch
     execute_process(COMMAND ${GIT_SCM} rev-parse --abbrev-ref HEAD
                     WORKING_DIRECTORY ${PROJECT_ROOT_DIR}
                     OUTPUT_VARIABLE GIT_BRANCH
                     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    # get the latest abbreviated commit hash of the working branch
+    # Get the latest abbreviated commit hash of the working branch
     execute_process(COMMAND ${GIT_SCM} log -1 --format=%h #"--pretty=format:%H"
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                     OUTPUT_VARIABLE GIT_COMMIT_HASH_SHORT
                     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    # get the latest long commit hash of the working branch
+    # Get the latest long commit hash of the working branch
     execute_process(COMMAND ${GIT_SCM} log -1 --format=%H #"--pretty=format:%H"
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                     OUTPUT_VARIABLE GIT_COMMIT_HASH_LONG
@@ -139,15 +139,18 @@ if (GIT_SCM AND GIT_DIR)
         ADD_DEPENDENCIES ${GIT_DIR}/logs/HEAD
     )
 else ()
-    # no version control
-    message(STATUS "Will not remake ${PROJECT_BUILD_DIR}/git.h")
+    # No version control
+    message(STATUS "Git is not available or .git/ directory not found")
+    message(FATAL_ERROR "Build stopped")
 endif ()
 
 # Doxygen documentation
 find_package(Doxygen)
-if (DOXYGEN_FOUND)
-    message(STATUS "Doxygen is available; issue 'make doc' to build documentation")
-    set(DOXYFILE_IN ${PROJECT_ROOT_DIR}/Doxyfile.in)
+set(DOXYFILE_IN ${PROJECT_ROOT_DIR}/Doxyfile.in)
+if (DOXYGEN_FOUND AND EXISTS ${DOXYFILE_IN})
+    message(STATUS "Doxygen is available")
+    message(STATUS "Found Doxyfile.in: ${DOXYFILE_IN}")
+    message(STATUS "Issue 'make doc' to build documentation")
     set(DOXYFILE ${PROJECT_BUILD_DIR}/Doxyfile)
     set(DOXYGEN_DIR ${PROJECT_BUILD_DIR}/doc/)
     configure_file(${DOXYFILE_IN} ${DOXYFILE} @ONLY)
@@ -157,10 +160,10 @@ if (DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
 else ()
-    message(WARNING "Doxygen not found; target 'doc' not available")
+    message(WARNING "Doxygen or Doxyfile.in not found; target 'doc' not available")
 endif ()
 
-# includes, targets, and dependencies
+# Includes, targets, and dependencies
 include_directories(${PROJECT_BUILD_DIR})
 include_directories(${PROJECT_INCLUDE_DIR})
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})

@@ -7,7 +7,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #include "Exceptions.h"

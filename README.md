@@ -2,27 +2,38 @@
 
 [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
-### What is this repository for? ###
+## What is this repository for? ##
 
-* Implementation of "Coverage-adaptive lossy compression of next-generation sequencing quality values"
+* Lossy compression of next-generation sequencing quality values
 * Current version: 1.0.0
 
-### Build on Linux with GCC ###
+## Build instructions
+
+We provide a CMakeLists.txt to build the program with CMake.
+
+### Linux + GCC ###
 
     mkdir build_linux_gcc
     cd build_linux_gcc
     cmake ..
     make
 
-### Build on Windows with MSVC ###
+### Windows + MSVC ###
 
     TBD
 
-### Contribution guidelines ###
+### Apple + AppleClang ###
+
+    TBD
+
+## Contribution guidelines ##
 
 * Please write code conforming to the used coding style
-* \#include relative to src/
+* Please \#include with paths relative to src/. Place corresponding header (*.h)
+  and source files (*.c/*.cc) in the same directory. The source files shall
+  include the corresponding header file without any path.
 
-### Who do I talk to? ###
+## Who do I talk to? ##
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
+

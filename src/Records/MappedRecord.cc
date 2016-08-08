@@ -6,11 +6,11 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
+#include "MappedRecord.h"
 #include "Common/Exceptions.h"
-#include "Records/MappedRecord.h"
 
 MappedRecord::MappedRecord(const SAMRecord &samRecord)
     : posMin(samRecord.pos - 1) // SAM format counts from 1
@@ -19,7 +19,7 @@ MappedRecord::MappedRecord(const SAMRecord &samRecord)
     , qualityValues(samRecord.qual)
     , cigar(samRecord.cigar)
 {
-    // compute last position on the reference this record is mapping to
+    // Compute last position on the reference this record is mapping to
     size_t cigarIdx = 0;
     size_t cigarLen = cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
@@ -79,7 +79,7 @@ void MappedRecord::extractObservations(const uint32_t &observedPosMin,
         case 'M':
         case '=':
         case 'X':
-            // add matching parts
+            // Add matching parts
             for (size_t i = 0; i < opLen; i++) {
                 observedNucleotides[observedIdx] += nucleotides[idx];
                 observedQualityValues[observedIdx] += qualityValues[idx];

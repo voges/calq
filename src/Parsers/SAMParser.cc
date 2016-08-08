@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: what (who)
  */
 
-#include "Parsers/SAMParser.h"
+#include "SAMParser.h"
 #include "Common/Exceptions.h"
 #include "Common/fileSystemHelpers.h"
 #include <iostream>

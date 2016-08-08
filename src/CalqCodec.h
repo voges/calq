@@ -7,16 +7,16 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #ifndef CALQCODEC_H
 #define CALQCODEC_H
 
-#include "Codecs/QualCodec.h"
-#include "Compressors/bitstream.h"
+#include "IO/File.h"
 #include "Parsers/FASTAParser.h"
 #include "Parsers/SAMParser.h"
+#include "QualCodec.h"
 #include <fstream>
 #include <string>
 #include <vector>
@@ -84,15 +84,18 @@ public:
     CalqEncoder(const std::string &samFileName,
                 const std::string &cqFileName,
                 const std::vector<std::string> &fastaFileNames,
-                const int &polyploidy);
+                const unsigned int &polyploidy);
     ~CalqEncoder(void);
 
     void encode(void);
 
 private:
-    ofbitstream ofbs;
+    File cqFile;
+    unsigned int polyploidy;
     QualEncoder qualEncoder;
     SAMParser samParser;
+
+    void writeFileHeader(void);
 };
 
 /** @brief Class: CalqDecoder
@@ -111,9 +114,11 @@ public:
     void decode(void);
 
 private:
-    ifbitstream ifbs;
-    std::ofstream ofs;
+    File cqFile;
+    File qualFile;
     QualDecoder qualDecoder;
+
+    void readFileHeader(void);
 };
 
 #endif // CALQCODEC_H

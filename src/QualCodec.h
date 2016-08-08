@@ -7,18 +7,14 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #ifndef QUALCODEC_H
 #define QUALCODEC_H
 
-#include "Compressors/bitstream.h"
-#include "Compressors/caac/modelA.h"
-#include "Compressors/caac/compressor.h"
-#include "Compressors/caac/decompressor.h"
 #include "Genotyper/Genotyper.h"
-#include "Genotyper/Genotyper2.h"
+#include "IO/File.h"
 #include "Parsers/FASTAReference.h"
 #include "Quantizers/UniformQuantizer.h"
 #include "Records/SAMRecord.h"
@@ -35,9 +31,9 @@
  */
 class QualEncoder {
 public:
-    QualEncoder(ofbitstream &ofbs, 
+    QualEncoder(File &cqFile, 
                 const std::vector<FASTAReference> &fastaReferences,
-                const int &polyploidy);
+                const unsigned int &polyploidy);
     ~QualEncoder(void);
 
     void startBlock(void);
@@ -46,44 +42,43 @@ public:
     size_t finishBlock(void);
 
 private:
-    // these member variables are used throughout coding multiple blocks
+    // These member variables are used throughout coding multiple blocks
     std::vector<FASTAReference> fastaReferences;
     size_t numBlocks;
     size_t numMappedRecords;
     size_t numUnmappedRecords;
-    ofbitstream &ofbs;
-    
-    //ari member variables
-    modelA<int, 16, 14> cmodel;
-    Compressor<modelA<int, 16, 14>, ofbitstream> caac;
+    File &cqFile;
 
+    // These member variables are used per block
 
-    // these member variables are used per block
+    // String (i.e. byte buffer) holding the quantizer indices to be encoded or
+    // transmitted
+    std::string quantizerIndicesForTransmission;
+    std::string qualityValueIndicesForTransmission;
 
-    // reference loaded for the current block
+    // Reference loaded for the current block
     std::string reference;
     uint32_t referencePosMin;
     uint32_t referencePosMax;
 
-    // queue holding the mapped records; records get popped when they are
+    // Queue holding the mapped records; records get popped when they are
     // finally encoded
     std::queue<MappedRecord> mappedRecordQueue;
 
-    // current observed nucleotides and quality values; when a quantizer index
+    // Current observed nucleotides and quality values; when a quantizer index
     // is computed for a certain position, the vectors are shrinked
     std::vector<std::string> observedNucleotides;
     std::vector<std::string> observedQualityValues;
     uint32_t observedPosMin;
     uint32_t observedPosMax;
 
-    // class to perform the magic
+    // Class to perform the magic ;)
     Genotyper genotyper;
-    Genotyper2 genotyper2;
 
-    // quantizers
+    // Quantizers
     std::map<int,UniformQuantizer> uniformQuantizers;
 
-    // computed quantizer indices; when the indices are not needed anymore; the
+    // Computed quantizer indices; when the indices are not needed anymore; the
     // vector is shrinked
     std::vector<int> quantizerIndices;
     uint32_t quantizerIndicesPosMin;
@@ -101,20 +96,17 @@ private:
  */
 class QualDecoder {
 public:
-    QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vector<FASTAReference> &fastaReferences);
+    QualDecoder(File &cqFile,
+                File &qualFile,
+                const std::vector<FASTAReference> &fastaReferences);
     ~QualDecoder(void);
 
     void decodeBlock(void);
 
 private:
+    File &cqFile;
     std::vector<FASTAReference> fastaReferences;
-    ifbitstream &ifbs;
-    std::ofstream &ofs;
-    
-    //ari member variables
-    modelA<int, 16, 14> cmodel;
-    Decompressor<modelA<int, 16, 14>, ifbitstream> caad;
-
+    File &qualFile;
 };
 
 #endif // QUALCODEC_H

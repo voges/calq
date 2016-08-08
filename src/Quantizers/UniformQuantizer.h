@@ -6,7 +6,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #ifndef UNIFORMQUANTIZER_H
@@ -34,8 +34,9 @@ public:
     void print(void);
 
 private:
-    std::map<int,std::pair<int,int>> lut; // value -> (index,reconstructionValue)
-    std::map<int,int> inverseLut; // index -> reconstructionValue
+    std::map<int,std::pair<int,int>> lut; // value->(index,reconstructionValue)
+    std::map<int,int> inverseLut; // index->reconstructionValue
 };
 
 #endif // UNIFORMQUANTIZER_H
+

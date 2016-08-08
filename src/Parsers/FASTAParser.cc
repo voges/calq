@@ -6,10 +6,10 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
-#include "Parsers/FASTAParser.h"
+#include "FASTAParser.h"
 #include "Common/Exceptions.h"
 #include "Common/fileSystemHelpers.h"
 #include <fstream>
@@ -52,7 +52,7 @@ void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTARefere
                 fastaReference.header = line+1; // do not take the '>'
                 fastaReference.sequence = "";
             }
-            // remove everything after the first space from header line
+            // Remove everything after the first space from header line
             std::size_t foundSpace = fastaReference.header.find_first_of(" ");
             if (foundSpace != std::string::npos) {
                 fastaReference.header = fastaReference.header.substr(0, foundSpace);

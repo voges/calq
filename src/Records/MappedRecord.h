@@ -6,7 +6,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #ifndef MAPPEDRECORD_H

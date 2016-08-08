@@ -7,13 +7,16 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
-#include "Codecs/QualCodec.h"
+#include "QualCodec.h"
 #include "Common/Exceptions.h"
 #include "Common/debug.h"
+#include "Compressors/range/range.h"
+#include "Compressors/rle/rle.h"
 #include <limits>
+#include <stdlib.h>
 
 static const int QV_ALPHABET_SIZE = 50;
 static const int QV_OFFSET = 33;
@@ -24,15 +27,16 @@ static const unsigned int NUM_QUANTIZERS = 7; // 2-8 steps
 static const unsigned int QUANTIZER_IDX_MIN = 0;
 static const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
 
-QualEncoder::QualEncoder(ofbitstream &ofbs,
+QualEncoder::QualEncoder(File &cqFile,
                          const std::vector<FASTAReference> &fastaReferences,
-                         const int &polyploidy)
+                         const unsigned int &polyploidy)
     : fastaReferences(fastaReferences)
     , numBlocks(0)
     , numMappedRecords(0)
     , numUnmappedRecords(0)
-    , ofbs(ofbs)
-    , caac(ofbs, cmodel)
+    , cqFile(cqFile)
+    , quantizerIndicesForTransmission("")
+    , qualityValueIndicesForTransmission("")
     , reference("")
     , referencePosMin(std::numeric_limits<uint32_t>::max())
     , referencePosMax(std::numeric_limits<uint32_t>::min())
@@ -42,13 +46,12 @@ QualEncoder::QualEncoder(ofbitstream &ofbs,
     , observedPosMin(std::numeric_limits<uint32_t>::max())
     , observedPosMax(std::numeric_limits<uint32_t>::min())
     , genotyper(polyploidy, NUM_QUANTIZERS, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, QV_OFFSET)
-    , genotyper2()
     , uniformQuantizers()
     , quantizerIndices()
     , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
-    // init uniform quantizers
+    // Init uniform quantizers
     std::cout << ME << "Initializing " << NUM_QUANTIZERS << " uniform quantizers" << std::endl;
     for (unsigned int i = 0; i < NUM_QUANTIZERS; i++) {
         unsigned int numberOfSteps = i + 2;
@@ -67,6 +70,8 @@ QualEncoder::~QualEncoder(void)
 
 void QualEncoder::startBlock(void)
 {
+    quantizerIndicesForTransmission = "";
+    qualityValueIndicesForTransmission = "";
     reference = "";
     referencePosMin = std::numeric_limits<uint32_t>::max();
     referencePosMax = std::numeric_limits<uint32_t>::min();
@@ -78,8 +83,6 @@ void QualEncoder::startBlock(void)
     quantizerIndices.clear();
     quantizerIndicesPosMin = std::numeric_limits<uint32_t>::max();
     quantizerIndicesPosMax = std::numeric_limits<uint32_t>::min();
-    
-    caac.startBlock();
 
     std::cout << ME << "Starting block " << numBlocks << std::endl;
 }
@@ -101,7 +104,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
         quantizerIndicesPosMin = observedPosMin;
     }
 
-    // construct a mapped record from the given SAM record
+    // Construct a mapped record from the given SAM record
     MappedRecord mappedRecord(samRecord);
 
     // Check if we need to update the max mapping position for records in this
@@ -124,9 +127,9 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // vectors
     // TODO: this loop consumes 99% of the time of this function
     while (observedPosMin < mappedRecord.posMin) {
-        std::cerr << observedPosMin << ",";
+        //std::cerr << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << k << std::endl;
+        //std::cerr << k << std::endl;
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -134,13 +137,13 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
         observedPosMin++;
     }
 
-    // check which records from the queue are ready for processing
+    // Check which records from the queue are ready for processing
     while (mappedRecordQueue.front().posMax < observedPosMin) {
         encodeMappedQualityValues(mappedRecordQueue.front());
         uint32_t currFirstPosition = mappedRecordQueue.front().posMin;
         mappedRecordQueue.pop();
 
-        // check if we can shrink the quantizer indices vector
+        // Check if we can shrink the quantizer indices vector
         if (mappedRecordQueue.empty() == false) {
             uint32_t nextFirstPosition = mappedRecordQueue.front().posMin;
             if (nextFirstPosition > currFirstPosition) {
@@ -159,11 +162,12 @@ size_t QualEncoder::finishBlock(void)
 
     std::cout << ME << "Finishing block " << numBlocks << std::endl;
 
-    // compute all remaining quantizers
+    // Compute all remaining quantizers
+    std::cout << ME << "Computing remaining quantizers" << std::endl;
     while (observedPosMin <= observedPosMax) {
-        std::cerr << observedPosMin << ",";
+        //std::cerr << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << k << std::endl;
+        //std::cerr << k << std::endl;
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -171,13 +175,14 @@ size_t QualEncoder::finishBlock(void)
         observedPosMin++;
     }
 
-    // process all remaining records from queue
+    // Process all remaining records from queue
+    std::cout << ME << "Processing remaining records from queue" << std::endl;
     while (mappedRecordQueue.empty() == false) {
         encodeMappedQualityValues(mappedRecordQueue.front());
         uint32_t currFirstPosition = mappedRecordQueue.front().posMin;
         mappedRecordQueue.pop();
 
-        // check if we can shrink the quantizerIndices vector
+        // Check if we can shrink the quantizerIndices vector
         if (mappedRecordQueue.empty() == false) {
             uint32_t nextFirstPosition = mappedRecordQueue.front().posMin;
             if (nextFirstPosition > currFirstPosition) {
@@ -187,7 +192,34 @@ size_t QualEncoder::finishBlock(void)
         }
     }
 
-    caac.finishBlock();
+    // RLE+Range encoding for quantizer indices
+    std::cout << ME << "Run-length encoding quantizer indices" << std::endl;
+    std::cout << ME << "Quantizer indices: " << quantizerIndicesForTransmission << std::endl;
+    std::string qiRLE("");
+    rle_encode(quantizerIndicesForTransmission, qiRLE, NUM_QUANTIZERS, (unsigned int)'0');
+
+    std::cout << ME << "Range encoding quantizer indices" << std::endl;
+    unsigned char *qiRLERange;
+    unsigned int qiRLERangeSize = 0;
+    qiRLERange = range_compress_o1((unsigned char *)qiRLE.c_str(), qiRLE.size(), &qiRLERangeSize);
+    ret += cqFile.writeUint64(qiRLERangeSize);
+    ret += cqFile.write(qiRLERange, qiRLERangeSize);
+    free(qiRLERange);
+
+    // RLE+Range encoding for quality value indices
+    std::cout << ME << "Run-length encoding quality value indices" << std::endl;
+    std::cout << ME << "Quality value indices: " << qualityValueIndicesForTransmission << std::endl;
+    std::string qviRLE("");
+    rle_encode(qualityValueIndicesForTransmission, qviRLE, 8, (unsigned int)'0');
+
+    std::cout << ME << "Range encoding quality value indices" << std::endl;
+    unsigned char *qviRLERange;
+    unsigned int qviRLERangeSize = 0;
+    qviRLERange = range_compress_o1((unsigned char *)qviRLE.c_str(), qviRLE.size(), &qviRLERangeSize);
+    ret += cqFile.writeUint64(qviRLERangeSize);
+    ret += cqFile.write(qviRLERange, qviRLERangeSize);
+    free(qviRLERange);
+
     numBlocks++;
 
     return ret;
@@ -195,7 +227,7 @@ size_t QualEncoder::finishBlock(void)
 
 void QualEncoder::loadFastaReference(const std::string &rname)
 {
-    // find FASTA reference for this RNAME
+    // Find FASTA reference for this RNAME
     std::cout << ME << "Searching FASTA reference for: " << rname << std::endl;
     bool foundFastaReference = false;
 
@@ -226,7 +258,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
     uint32_t mrIdx = 0; // iterator for quality values in the mapped record
     uint32_t qiIdx = 0; // iterator for quantizer indices
 
-    // iterate through CIGAR string and code the quality values
+    // Iterate through CIGAR string and code the quality values
     std::string cigar = mappedRecord.cigar;
     size_t cigarIdx = 0;
     size_t cigarLen = mappedRecord.cigar.length();
@@ -241,25 +273,25 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
         case 'M':
         case '=':
         case 'X':
-            // encode opLen quality values with computed quantizer indices
+            // Encode opLen quality values with computed quantizer indices
             for (size_t i = 0; i < opLen; i++) {
                 int qualityValue = (int)mappedRecord.qualityValues[mrIdx++];
                 int quantizerIndex = quantizerIndices[qiIdx++];
-                int qualityValueQuantized = uniformQuantizers.at(quantizerIndex).valueToIndex(qualityValue);
-                std::cout << ME << "idx " << quantizerIndex << ": " << qualityValue << " -> " << qualityValueQuantized << std::endl;
-                caac.encodeSymbol(qualityValueQuantized);
-                //caac.updateModel(qualityValueQuantized);
+                int qualityValueIndex = uniformQuantizers.at(quantizerIndex).valueToIndex(qualityValue);
+                quantizerIndicesForTransmission += std::to_string(quantizerIndex);
+                qualityValueIndicesForTransmission += std::to_string(qualityValueIndex);
+                //std::cout << ME << "idx " << quantizerIndex << ": " << qualityValue << " -> " << qualityValueIndex << std::endl;
             }
             break;
         case 'I':
         case 'S':
-            // encode opLen quality values with max quantizer index
+            // Encode opLen quality values with max quantizer index
             for (size_t i = 0; i < opLen; i++) {
                 int qualityValue = (int)mappedRecord.qualityValues[mrIdx++];
-                int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToIndex(qualityValue);
-                std::cout << ME << "idx " << QUANTIZER_IDX_MAX << ": " << qualityValue << " -> " << qualityValueQuantized << std::endl;
-                caac.encodeSymbol(qualityValueQuantized);
-                //caac.updateModel(qualityValueQuantized);
+                int qualityValueIndex = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToIndex(qualityValue);
+                quantizerIndicesForTransmission += std::to_string(QUANTIZER_IDX_MAX);
+                qualityValueIndicesForTransmission += std::to_string(qualityValueIndex);
+                //std::cout << ME << "idx " << QUANTIZER_IDX_MAX << ": " << qualityValue << " -> " << qualityValueIndex << std::endl;
             }
             break;
         case 'D':
@@ -281,11 +313,12 @@ void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
     // TODO
 }
 
-QualDecoder::QualDecoder(ifbitstream &ifbs, std::ofstream &ofs, const std::vector<FASTAReference> &fastaReferences)
-    : fastaReferences(fastaReferences)
-    , ifbs(ifbs)
-    , ofs(ofs)
-    , caad(ifbs, cmodel)
+QualDecoder::QualDecoder(File &cqFile,
+                         File &qualFile,
+                         const std::vector<FASTAReference> &fastaReferences)
+    : cqFile(cqFile)
+    , fastaReferences(fastaReferences)
+    , qualFile(qualFile)
 {
 
 }
@@ -297,19 +330,26 @@ QualDecoder::~QualDecoder(void)
 
 void QualDecoder::decodeBlock(void)
 {
-    // DUMMY
-    // BYTE byte;
-    // ifbs.readByte(byte);
-    // DUMMY
-    //caad.decodeBlock();
-    std::vector<int> decoded;
-    caad.startBlock();
-    caad.decode(decoded);
-
-    std::cout << ME << "Decompressed: " << std::endl;
-    for (auto &symbol : decoded) {
-        std::cout << symbol << " ";
-    }
-    std::cout << std::endl;
+    uint64_t qiRLERangeSize = 0;
+    cqFile.readUint64(&qiRLERangeSize);
+    unsigned char *qiRLERangeBuffer = (unsigned char *)malloc(qiRLERangeSize);
+    cqFile.read(qiRLERangeBuffer, qiRLERangeSize);
+    unsigned int qiRLESize = 0;
+    unsigned char *qiRLEBuffer = range_decompress_o1(qiRLERangeBuffer, qiRLERangeSize, &qiRLESize);
+    std::string qiRLEString((char *)qiRLEBuffer);
+    std::string qi("");
+    rle_decode(qiRLEString, qi, NUM_QUANTIZERS, (unsigned int)'0');
+    std::cout << "Decoded quantizer indices: " << qi << std::endl;
+    
+    uint64_t qviRLERangeSize = 0;
+    cqFile.readUint64(&qviRLERangeSize);
+    unsigned char *qviRLERangeBuffer = (unsigned char *)malloc(qviRLERangeSize);
+    cqFile.read(qviRLERangeBuffer, qviRLERangeSize);
+    unsigned int qviRLESize = 0;
+    unsigned char *qviRLEBuffer = range_decompress_o1(qviRLERangeBuffer, qviRLERangeSize, &qviRLESize);
+    std::string qviRLEString((char *)qviRLEBuffer);
+    std::string qvi("");
+    rle_decode(qviRLEString, qvi, NUM_QUANTIZERS, (unsigned int)'0');
+    std::cout << "Decoded quality value indices: " << qvi << std::endl;
 }
 

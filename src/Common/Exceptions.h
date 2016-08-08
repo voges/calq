@@ -7,7 +7,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #ifndef EXCEPTIONS_H
@@ -75,7 +75,7 @@ public:
     {
         //std::cerr << file << ":" << function << ":" << line << ": ";
         std::string tmp = file + ":" + function + ":" + std::to_string(line) + ": " + msg;
-        // can use the original name here, as it is still defined
+        // Can use the original name here, as it is still defined
         throwErrorException(tmp);
     }
 

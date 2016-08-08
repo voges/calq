@@ -6,14 +6,14 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
 #ifndef FASTAPARSER_H
 #define FASTAPARSER_H
 
+#include "FASTAReference.h"
 #include "Common/constants.h"
-#include "Parsers/FASTAReference.h"
 #include <string>
 #include <vector>
 

@@ -6,16 +6,16 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
-#include "Genotyper/Genotyper.h"
+#include "Genotyper.h"
 #include "Common/debug.h"
 #include "Common/Exceptions.h"
 #include "Common/fileSystemHelpers.h"
 #include <math.h>
 
-// allele alphabet
+// Allele alphabet
 static const std::vector<char> ALLELE_ALPHABET = {'A','C','G','T','N'};
 
 static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &genotypeAlphabet,
@@ -70,7 +70,7 @@ Genotyper::~Genotyper(void)
 
 void Genotyper::initLikelihoods(void)
 {
-    // init map containing the allele likelihoods
+    // Init map containing the allele likelihoods
     std::cout << ME << "Allele alphabet: ";
     for (auto const &allele : alleleAlphabet) {
         std::cout << allele << " ";
@@ -78,7 +78,7 @@ void Genotyper::initLikelihoods(void)
     }
     std::cout << std::endl;
 
-    // init map containing the genotype likelihoods
+    // Init map containing the genotype likelihoods
     int chosen[ALLELE_ALPHABET.size()];
     combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, ALLELE_ALPHABET.size());
 
@@ -139,12 +139,12 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
             }
             p /= polyploidy;
 
-            // we are using the log likelihood to avoid numerical problems
+            // We are using the log likelihood to avoid numerical problems
             genotypeLikelihoods[genotype] += log(p);
         }
     }
 
-    // normalize the genotype likelihoods
+    // Nnormalize the genotype likelihoods
     double cum = 0.0;
     for (auto &genotypeLikelihood : genotypeLikelihoods) {
         genotypeLikelihood.second = exp(genotypeLikelihood.second);
@@ -180,7 +180,7 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
                                      const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
-    std::cerr << depth << ",";
+    //std::cerr << depth << ",";
     //std::cerr << observedNucleotides << ",";
     //std::cerr << observedQualityValues << ",";
     if (depth == 0) {
@@ -205,7 +205,7 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
     }
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
-    std::cerr << confidence << ",";
+    //std::cerr << confidence << ",";
 
     //if (confidence == 1) return quantizerIdxMin;
     return (int)((1-confidence)*(numQuantizers-1));

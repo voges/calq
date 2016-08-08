@@ -6,10 +6,10 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: what (who)
+ *  YYYY-MM-DD: What (who)
  */
 
-#include "Quantizers/UniformQuantizer.h"
+#include "UniformQuantizer.h"
 #include "Common/Exceptions.h"
 #include "Common/debug.h"
 #include <cmath>
@@ -22,15 +22,15 @@ UniformQuantizer::UniformQuantizer(const int &minimumValue,
     : lut()
     , inverseLut()
 {
-    // sanity checks
+    // Sanity checks
     if ((minimumValue >= maximumValue) || (numberOfSteps <= 1)) {
         throwErrorException("Error in quantizer initialization");
     }
 
-    // compute the step size
+    // Compute the step size
     double stepSize = (maximumValue - minimumValue) / numberOfSteps;
 
-    // compute the borders and the representative values
+    // Compute the borders and the representative values
     std::queue<double> borders;
     std::queue<int> reconstructionValues;
     double newBorder = minimumValue;
@@ -44,7 +44,7 @@ UniformQuantizer::UniformQuantizer(const int &minimumValue,
     }
     borders.push(maximumValue);
 
-    // fill the quantization table
+    // Fill the quantization table
     borders.pop();
     int currentIndex = 0;
     int currentReconstructionValue = reconstructionValues.front();

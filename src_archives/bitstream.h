@@ -126,7 +126,7 @@ public:
      *  @return Returns true if this ibitstream is open and false otherwise.
      */
     virtual bool is_open(void);
-    
+
     /** @brief Member function: reset
      *
      *  Resets current member variables to be able to read new Bytes.
@@ -167,13 +167,13 @@ public:
      *  @return Void.
      */
     void writeBit(const int bit);
-    
+
     /** @brief Member function: writeByte
      *
      *  Writes a single byte to the obitstream.
      *  Raises an error if this obitstream has not been properly opened.
      *
-     *  @param bit Bit to write
+     *  @param byte Byte to write
      *  @return Void.
      */
     void writeByte(const BYTE byte);
