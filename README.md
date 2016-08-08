@@ -13,9 +13,9 @@ We provide a CMakeLists.txt to build the program with CMake.
 
 ### Linux + GCC ###
 
-    mkdir build_linux_gcc
-    cd build_linux_gcc
-    cmake ..
+    mkdir build/linux_gcc
+    cd build/linux_gcc
+    cmake ../..
     make
 
 ### Windows + MSVC ###
@@ -36,4 +36,3 @@ We provide a CMakeLists.txt to build the program with CMake.
 ## Who do I talk to? ##
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
-
