@@ -60,6 +60,7 @@ void rle_encode(const std::string &in,
 
     const unsigned int maxRunLength = RLE_MAX_RUN_LENGTH - N;
     out = "";
+    out.reserve(in.size());
     char prevChar = in[0] - offset;
     if ((unsigned int)prevChar > N-1) {
         throwErrorException("Symbol in stream out of range");
@@ -96,6 +97,7 @@ void rle_encode(const std::string &in,
         out += prevChar;
     }
 
+    out.resize(out.length());
 }
 
 void rle_decode(const std::string &in,
@@ -118,14 +120,15 @@ void rle_decode(const std::string &in,
     }
 
     out = "";
+    out.reserve(2*in.size());
     size_t i = 0;
 
     while (i < in.length()) {
-        char currChar = in[i++];
+        unsigned char currChar = in[i++];
 
         // Check, if currChar contains a run-length
         if ((unsigned int)currChar > N-1) {
-            char runSymbol = in[i++] + (char)offset;
+            unsigned char runSymbol = in[i++] + (unsigned char)offset;
             auto runLength = currChar - N;
             for (size_t j = 0; j < runLength; j++) {
                 out += runSymbol;
@@ -134,5 +137,7 @@ void rle_decode(const std::string &in,
             out += currChar + (char)offset;
         }
     }
+
+    out.resize(out.length());
 }
 

@@ -262,7 +262,7 @@ unsigned char * range_compress_o0(unsigned char *in,
     /* Compute statistics. */
     memset(F, 0, 256*sizeof(int));
     memset(C, 0, 256*sizeof(int));
-    for (i = 0; i < in_sz; i++) {
+    for (i = 0; i < (int)in_sz; i++) {
         F[c = in[i]]++;
         T++;
     }
@@ -319,7 +319,7 @@ unsigned char * range_compress_o0(unsigned char *in,
     }
 
     /* Tidy up any remainder that isn't a multiple of 4. */
-    for (; i < in_sz; i++) {
+    for (; i < (int)in_sz; i++) {
         unsigned char c;
         c = in[i];
         rangecoder_encode(&rc[0], C[c], F[c]);

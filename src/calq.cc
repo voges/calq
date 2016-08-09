@@ -79,17 +79,24 @@ int main(int argc, char *argv[])
         TCLAP::ValueArg<std::string> outfileArg("o", "outfile", "Output file", false, "", "string", cmd);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", true, "string", cmd);
+        TCLAP::SwitchArg verboseSwitch("v", "verbose", "Verbose output", cmd, false);
 
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
 
-        // get the value parsed by each arg
+        // Get the value parsed by each arg
         cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.force = forceSwitch.getValue();
         cliOptions.inFileName = infileArg.getValue();
         cliOptions.outFileName = outfileArg.getValue();
         cliOptions.polyploidy = polyploidyArg.getValue();
         cliOptions.refFileNames = referenceArg.getValue();
+        cliOptions.verbose = verboseSwitch.getValue();
+
+        // Check verbosity
+        if (cliOptions.verbose == true) {
+            std::cout << ME << "Verbose output activated" << std::endl;
+        }
 
         // Check polyploidy
         if (cliOptions.polyploidy < 1) {
@@ -161,16 +168,16 @@ int main(int argc, char *argv[])
         }
     std::cout << ME << "Finished" << std::endl;
     } catch (TCLAP::ArgException &tclapException) {
-        std::cerr << "Argument error: " << tclapException.error() << " (argument: " << tclapException.argId() << ")" << std::endl;
+        std::cerr << ME << "Argument error: " << tclapException.error() << " (argument: " << tclapException.argId() << ")" << std::endl;
         return EXIT_FAILURE;
     } catch (const ErrorException &errorException) {
-        std::cerr << "Error: " << errorException.what() << std::endl;
+        std::cerr << ME << "Error: " << errorException.what() << std::endl;
         return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
-        std::cerr << "Fatal error: " << stdException.what() << std::endl;
+        std::cerr << ME << "Fatal error: " << stdException.what() << std::endl;
         return EXIT_FAILURE;
     } catch (...) {
-        std::cerr << "Unkown error occured" << std::endl;
+        std::cerr << ME << "Unkown error occured" << std::endl;
         return EXIT_FAILURE;
     }
 

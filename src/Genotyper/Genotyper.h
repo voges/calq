@@ -27,7 +27,8 @@ public:
               const unsigned int &numQuantizers,
               const unsigned int &quantizerIdxMin,
               const unsigned int &quantizerIdxMax,
-              const unsigned int &qualityValueOffset);
+              const unsigned int &qualityValueMin,
+              const unsigned int &qualityValueMax);
     ~Genotyper(void);
 
 private:
@@ -51,7 +52,8 @@ private:
     std::map<std::string,double> genotypeLikelihoods;
     const unsigned int numQuantizers;
     const unsigned int polyploidy;
-    const unsigned int qualityValueOffset;
+    const unsigned int qualityValueMin;
+    const unsigned int qualityValueMax;
     const unsigned int quantizerIdxMin;
     const unsigned int quantizerIdxMax;
 };

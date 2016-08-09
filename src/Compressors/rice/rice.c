@@ -81,7 +81,7 @@ static void encode(ricecodec_t   *rc,
 }
 
 unsigned char * rice_compress(unsigned char *in,
-                              size_t        in_sz,
+                              const size_t  in_sz,
                               size_t        *out_sz)
 {
     ricecodec_t rc;
@@ -151,8 +151,8 @@ static int get_bit(ricecodec_t *rc, unsigned char *in)
 }
 
 unsigned char * rice_decompress(unsigned char *in,
-                                size_t         in_sz,
-                                size_t         *out_sz)
+                                const size_t  in_sz,
+                                size_t        *out_sz)
 {
     ricecodec_t rc;
     ricecodec_init(&rc, in_sz);
