@@ -130,6 +130,7 @@ void CalqEncoder::encode(void)
     std::cout << ME << "Compression ratio: " << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
     std::cout << ME << "Compression factor: " << (double)uncompressedSize/(double)compressedSize << std::endl;
     std::cout << ME << "Bits per quality value: " << ((double)compressedSize * 8)/(double)uncompressedSize << std::endl;
+    std::cout << ME << "Speed (uncompressed size/time): " << ((double)(uncompressedSize/MB))/(double)std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " MB/s" << std::endl;
 }
 
 void CalqEncoder::writeFileHeader(void)
