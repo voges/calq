@@ -105,6 +105,7 @@ void Genotyper::resetLikelihoods(void)
 void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotides,
                                            const std::string &observedQualityValues)
 {
+    int i = 0;
     resetLikelihoods();
 
     const size_t depth = observedNucleotides.length();
@@ -115,6 +116,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         throwErrorException("Depth must be greater than one");
     }
 
+    tempGenotypeLL = (double*)calloc(sizeof(double), 1024);
     for (size_t d = 0; d < depth; d++) {
         char y = (char)observedNucleotides[d];
         double q = (double)(observedQualityValues[d] - qualityValueOffset);
@@ -123,26 +125,21 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         // TODO
         double pStrike = 1 - pow(10.0, -q/10.0);
         double pError = (1-pStrike) / (ALLELE_ALPHABET.size()-1);
-
-        for (auto const &allele : alleleAlphabet) {
-            if (allele == y) {
-                alleleLikelihoods[allele] = pStrike;
-            } else {
-                alleleLikelihoods[allele] = pError;
-            }
-        }
-
+        int i = 0;
         for (auto const &genotype : genotypeAlphabet) {
             double p = 0.0;
             for (size_t i = 0; i < polyploidy; i++) {
-                p += alleleLikelihoods[genotype[i]];
+                p += (y==genotype[i])? pStrike:pError;
             }
             p /= polyploidy;
 
             // We are using the log likelihood to avoid numerical problems
-            genotypeLikelihoods[genotype] += log(p);
+            tempGenotypeLL[i++] += log(p);
         }
     }
+    for (auto const &genotype : genotypeAlphabet)
+        genotypeLikelihoods[genotype] = tempGenotypeLL[i++];
+    free(tempGenotypeLL);
 
     // Nnormalize the genotype likelihoods
     double cum = 0.0;

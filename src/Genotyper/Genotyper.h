@@ -49,6 +49,7 @@ private:
     std::map<char,double> alleleLikelihoods;
     std::vector<std::string> genotypeAlphabet;
     std::map<std::string,double> genotypeLikelihoods;
+    double *tempGenotypeLL;
     const unsigned int numQuantizers;
     const unsigned int polyploidy;
     const unsigned int qualityValueOffset;
