@@ -49,12 +49,13 @@ private:
     size_t numUnmappedRecords;
     File &cqFile;
 
-    // These member variables are used per block
+    // The following member variables are used per block; all of them are reset
+    // by startBlock.
 
-    // String (i.e. byte buffer) holding the quantizer indices to be encoded or
-    // transmitted
-    std::string qi;
-    std::string qvi;
+    // Strings (i.e. byte buffers) holding the data to be transmitted
+    std::string qi; // quantizer indices
+    std::string qvi; // quality value indices
+    std::string uqv; // unmapped quality values
 
     // Reference loaded for the current block
     std::string reference;

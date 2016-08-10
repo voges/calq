@@ -29,6 +29,7 @@ public:
         , outFileName("")
         , polyploidy(2)
         , refFileNames()
+        , verbose(false)
     {}
     ~CLIOptions(void) {}
 
@@ -39,6 +40,7 @@ public:
     std::string outFileName;
     int polyploidy;
     std::vector<std::string> refFileNames;
+    bool verbose;
 };
 
 extern CLIOptions cliOptions; // this instance is globally accessible

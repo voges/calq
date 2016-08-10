@@ -1,5 +1,5 @@
-/** @file rice.h
- *  @brief This file contains the interface to the Rice codec.
+/** @file zlib_wrap.h
+ *  @brief This file contains the interface to the zlib wrapper.
  *
  *  Note it is up to the calling code to ensure that no overruns on input and
  *  output buffers occur!
@@ -13,25 +13,25 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef RICE_H
-#define RICE_H
-
-#include <stdlib.h>
+#ifndef ZLIB_WRAP_H
+#define ZLIB_WRAP_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-unsigned char * rice_compress(unsigned char *in,
+#include <stdlib.h>
+
+unsigned char * zlib_compress(unsigned char *in,
                               const size_t  in_sz,
                               size_t        *out_sz);
-unsigned char * rice_decompress(unsigned char *in,
+unsigned char * zlib_decompress(unsigned char *in,
                                 const size_t  in_sz,
-                                size_t        *out_sz);
+                                const size_t  out_sz);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // RICE_H
+#endif // ZLIB_WRAP_H
 

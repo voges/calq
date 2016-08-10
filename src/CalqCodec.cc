@@ -130,6 +130,7 @@ void CalqEncoder::encode(void)
     std::cout << ME << "Compression ratio: " << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
     std::cout << ME << "Compression factor: " << (double)uncompressedSize/(double)compressedSize << std::endl;
     std::cout << ME << "Bits per quality value: " << ((double)compressedSize * 8)/(double)uncompressedSize << std::endl;
+    std::cout << ME << "Speed (uncompressed size/time): " << ((double)(uncompressedSize/MB))/(double)std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " MB/s" << std::endl;
 }
 
 void CalqEncoder::writeFileHeader(void)
@@ -165,12 +166,20 @@ CalqDecoder::~CalqDecoder(void)
 
 void CalqDecoder::decode(void)
 {
+    auto startTime = std::chrono::steady_clock::now();
+
     size_t numBlocks = 0;
     while (cqFile.tell() < cqFile.size()) {
-        std::cout << ME << "Decoding block: " << numBlocks << std::endl;
+        std::cout << ME << "Decoding block " << numBlocks << std::endl;
         qualDecoder.decodeBlock();
         numBlocks++;
     }
+
+    // Print summary
+    auto stopTime = std::chrono::steady_clock::now();
+    auto diffTime = stopTime - startTime;
+    std::cout << ME << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
+              << " ~= " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
     std::cout << ME << "Decoded " << numBlocks << " block(s)" << std::endl;
 }
 
