@@ -126,21 +126,9 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
             throwErrorException("Quality value out of range");
         }
         double pStrike = 1 - pow(10.0, -q/10.0);
-<<<<<<< HEAD
+
         double pError = (1-pStrike) / (GENOTYPER_ALLELE_ALPHABET.size()-1);
         int i = 0;
-=======
-        double pError = (1-pStrike) / (GENOTYPER_ALLELE_ALPHABET.size()-1);
-
-        for (auto const &allele : alleleAlphabet) {
-            if (allele == y) {
-                alleleLikelihoods[allele] = pStrike;
-            } else {
-                alleleLikelihoods[allele] = pError;
-            }
-        }
-
->>>>>>> 1e81276713f6918c75f61e19c0848574b9107970
         for (auto const &genotype : genotypeAlphabet) {
             double p = 0.0;
             for (size_t i = 0; i < polyploidy; i++) {
