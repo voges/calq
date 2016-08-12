@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		81BA05B91D2C04BB00F56115 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81BA05B81D2C04BB00F56115 /* main.cpp */; };
+		818CC2D11D592732004037B5 /* calq.cc in Sources */ = {isa = PBXBuildFile; fileRef = 818CC2D01D592732004037B5 /* calq.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +23,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		818CC2CF1D58EC7C004037B5 /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; name = src; path = ../src; sourceTree = "<group>"; };
+		818CC2D01D592732004037B5 /* calq.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calq.cc; sourceTree = "<group>"; };
 		81BA05B51D2C04BB00F56115 /* calq_ */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = calq_; sourceTree = BUILT_PRODUCTS_DIR; };
-		81BA05B81D2C04BB00F56115 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +42,8 @@
 		81BA05AC1D2C04BA00F56115 = {
 			isa = PBXGroup;
 			children = (
-				81BA05B71D2C04BB00F56115 /* calq_ */,
+				818CC2D01D592732004037B5 /* calq.cc */,
+				818CC2CF1D58EC7C004037B5 /* src */,
 				81BA05B61D2C04BB00F56115 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +54,6 @@
 				81BA05B51D2C04BB00F56115 /* calq_ */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		81BA05B71D2C04BB00F56115 /* calq_ */ = {
-			isa = PBXGroup;
-			children = (
-				81BA05B81D2C04BB00F56115 /* main.cpp */,
-			);
-			path = calq_;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,7 +112,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				81BA05B91D2C04BB00F56115 /* main.cpp in Sources */,
+				818CC2D11D592732004037B5 /* calq.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +203,8 @@
 		81BA05BD1D2C04BB00F56115 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = /Users/mikelhernaez/calq/src;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -216,6 +212,8 @@
 		81BA05BE1D2C04BB00F56115 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = /Users/mikelhernaez/calq/src;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -239,6 +237,7 @@
 				81BA05BE1D2C04BB00F56115 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
