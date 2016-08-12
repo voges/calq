@@ -1,7 +1,5 @@
 # README #
 
-[Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
 ## What is this repository for? ##
 
 * Lossy compression of next-generation sequencing quality values
@@ -36,3 +34,4 @@ We provide a CMakeLists.txt to build the program with CMake.
 ## Who do I talk to? ##
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
+Mikel Hernaez <[mhernaez@stanford.edu](mailto:mhernaez@stanford.edu)>

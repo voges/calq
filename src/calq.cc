@@ -47,7 +47,7 @@ static void printVersion(void)
     std::cout << "Program: calq" << std::endl;
     std::cout << "Version: " << VERSION << std::endl;
     std::cout << "Build time: " << TIMESTAMP_UTC << std::endl;
-    std::cout << "Git branch: " << GIT_BRANCH << std::endl;
+    //std::cout << "Git branch: " << GIT_BRANCH << std::endl;
     std::cout << "Git commit hash: " << GIT_COMMIT_HASH_SHORT << std::endl;
     std::cout << std::endl;
 }

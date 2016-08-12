@@ -10,11 +10,21 @@
  */
 
 #include "rice.h"
+#include "Common/os_config.h"
 #include <stdbool.h>
 #include <string.h>
 
-#define RICE_KB 1024LL
-#define RICE_MB (RICE_KB * 1024LL)
+#if defined(OS_WINDOWS)
+    #include <windows.h>
+#elif defined(OS_APPLE) || defined(OS_LINUX)
+    #include <unistd.h> /* sysconf(3) */
+#else
+    #error "Operating system not supported"
+#endif
+
+// TODO: Let pointers returned by malloc point to addresses at the start of a
+//       page and verify, that realloc just extends the continuous memory
+//       block
 
 #ifndef SIZE_MAX
 #define SIZE_MAX (size_t)-1 // due to portability
@@ -154,6 +164,16 @@ unsigned char * rice_decompress(unsigned char *in,
                                 const size_t  in_sz,
                                 size_t        *out_sz)
 {
+#if defined(OS_WINDOWS)
+    SYSTEM_INFO si;
+    GetSystemInfo(&si);
+    const unsigned long pageSize = (unsigned long)si.dwPageSize;
+#elif defined(OS_APPLE) || defined(OS_LINUX)
+    const long pageSize = sysconf(_SC_PAGESIZE); // _SC_PAGE_SIZE is OK, too
+#else
+    #error "Operating system not supported"
+#endif
+
     ricecodec_t rc;
     ricecodec_init(&rc, in_sz);
     *out_sz = 0;
@@ -185,7 +205,7 @@ unsigned char * rice_decompress(unsigned char *in,
 
         // Allocate additional page if needed
         if (rc.out_idx == out_alloc) {
-            out_alloc = *out_sz + (4 * RICE_KB);
+            out_alloc = *out_sz + pageSize;
             out = (unsigned char*)realloc(out, out_alloc);
             if (!out) abort();
         }

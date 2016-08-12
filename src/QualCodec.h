@@ -13,8 +13,8 @@
 #ifndef QUALCODEC_H
 #define QUALCODEC_H
 
+#include "Common/File.h"
 #include "Genotyper/Genotyper.h"
-#include "IO/File.h"
 #include "Parsers/FASTAReference.h"
 #include "Quantizers/UniformQuantizer.h"
 #include "Records/SAMRecord.h"

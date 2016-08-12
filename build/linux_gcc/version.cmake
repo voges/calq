@@ -1,0 +1,7 @@
+file(WRITE version.h "#ifndef VERSION_H\n")
+file(APPEND version.h "#define VERSION_H\n\n")
+file(APPEND version.h "#define VERSION \"1.0.0\"\n")
+file(APPEND version.h "#define VERSION_MAJOR 1\n")
+file(APPEND version.h "#define VERSION_MINOR 0\n")
+file(APPEND version.h "#define VERSION_PATCH 0\n\n")
+file(APPEND version.h "#endif // VERSION_H\n\n")
