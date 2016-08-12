@@ -11,6 +11,7 @@
  */
 
 #include "QualCodec.h"
+#include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/debug.h"
 #include "Compressors/range/range.h"
@@ -202,30 +203,34 @@ size_t QualEncoder::finishBlock(void)
     }
 
     // RLE encoding for quantizer indices
-    std::cout << ME << "Run-length encoding quantizer indices" << std::endl;
     //std::cout << ME << "Quantizer indices: " << qi << std::endl;
-    std::cout << ME << "qilength: " << qi.length() << std::endl;
+    unsigned char *qiBuffer = (unsigned char *)qi.c_str();
+    size_t qiBufferSize = qi.length();
     size_t qiRLESize = 0;
-    unsigned char *qiRLE = rle_encode((unsigned char *)qi.c_str(), qi.length(), &qiRLESize, QUANTIZER_NUM, (unsigned char)'0');
-    std::cout << ME << "qiRLElength: " << qiRLESize << std::endl;
+    std::cout << ME << "Run-length encoding quantizer indices" << std::endl;
+    std::cout << ME << "  " << qiBufferSize << " -> ";
+    unsigned char *qiRLE = rle_encode(qiBuffer, qiBufferSize, &qiRLESize, QUANTIZER_NUM, (unsigned char)'0');
+    std::cout << qiRLESize << std::endl;
 
     // Range encoding for quantizer indices
-    std::cout << ME << "Range encoding quantizer indices" << std::endl;
-    unsigned int qiRangeSize = 0;
-    if (qiRLESize > 1000000) {
-        printf("blk");
-    }
-    
-    // Code in 1 MB blocks
-    unsigned int coded = 0;
-    while (coded < qiRLESize) {
-        unsigned int tocode = 0;
-        if (qiRLESize - coded > 1000000) tocode = 1000000;
-        else tocode = qiRLESize-coded;
-        unsigned char *qiRange = range_compress_o1(qiRLE+coded, (unsigned int)tocode, &qiRangeSize);
-        coded += tocode;
-        std::cout << ME << "qiRangeSize: " << qiRangeSize << std::endl;
-        
+    std::cout << ME << "Range encoding run-length encoded quantizer indices in blocks of 1 MB" << std::endl;
+    size_t numQiBlocks = (size_t)ceil((double)qiRLESize / (double)MB);
+    ret += cqFile.writeUint64(numQiBlocks);
+    std::cout << ME << "  Needing " << numQiBlocks << " block(s)" << std::endl;
+
+    size_t encodedQiBytes = 0;
+    while (encodedQiBytes < qiRLESize) {
+        unsigned int bytesToEncode = 0;
+        if ((qiRLESize - encodedQiBytes) > MB) {
+            bytesToEncode = MB;
+        } else {
+            bytesToEncode = qiRLESize - encodedQiBytes;
+        }
+        std::cout << ME << "  " << bytesToEncode << " -> ";
+        unsigned int qiRangeSize = 0;
+        unsigned char *qiRange = range_compress_o1(qiRLE+encodedQiBytes, (unsigned int)bytesToEncode, &qiRangeSize);
+        std::cout << qiRangeSize << std::endl;
+        encodedQiBytes += bytesToEncode;
         ret += cqFile.writeUint64(qiRangeSize);
         ret += cqFile.write(qiRange, qiRangeSize);
         free(qiRange);
@@ -233,26 +238,34 @@ size_t QualEncoder::finishBlock(void)
     free(qiRLE);
 
     // RLE encoding for quality value indices
-    std::cout << ME << "Run-length encoding quality value indices" << std::endl;
     //std::cout << ME << "Quality value indices: " << qvi << std::endl;
+    unsigned char *qviBuffer = (unsigned char *)qvi.c_str();
+    size_t qviBufferSize = qvi.length();
     size_t qviRLESize = 0;
-    unsigned char *qviRLE = rle_encode((unsigned char *)qvi.c_str(), qvi.length(), &qviRLESize, QUANTIZER_STEP_MAX, (unsigned char)'0');
+    std::cout << ME << "Run-length encoding quality value indices" << std::endl;
+    std::cout << ME << "  " << qviBufferSize << " -> ";
+    unsigned char *qviRLE = rle_encode(qviBuffer, qviBufferSize, &qviRLESize, QUANTIZER_STEP_MAX, (unsigned char)'0');
+    std::cout << qviRLESize << std::endl;
 
     // Range encoding for quality value indices
-    std::cout << ME << "Range encoding quality value indices" << std::endl;
-    unsigned int qviRangeSize = 0;
-    if (qviRLESize > 1000000) {
-        printf("blk");
-    }
-    
-    coded = 0;
-    while (coded < qviRLESize) {
-        unsigned int tocode = 0;
-        if (qviRLESize - coded > 1000000) tocode = 1000000;
-        else tocode = qviRLESize-coded;
-        unsigned char *qviRange = range_compress_o1(qviRLE+coded, (unsigned int)tocode, &qviRangeSize);
-        coded += tocode;
-        
+    std::cout << ME << "Range encoding run-length encoded quantizer indices in blocks of 1 MB" << std::endl;
+    size_t numQviBlocks = (size_t)ceil((double)qviRLESize / (double)MB);
+    ret += cqFile.writeUint64(numQviBlocks);
+    std::cout << ME << "  Needing " << numQviBlocks << " block(s)" << std::endl;
+
+    size_t encodedQviBytes = 0;
+    while (encodedQviBytes < qviRLESize) {
+        unsigned int bytesToEncode = 0;
+        if ((qviRLESize - encodedQviBytes) > MB) {
+            bytesToEncode = MB;
+        } else {
+            bytesToEncode = qviRLESize - encodedQviBytes;
+        }
+        std::cout << ME << "  " << bytesToEncode << " -> ";
+        unsigned int qviRangeSize = 0;
+        unsigned char *qviRange = range_compress_o1(qviRLE+encodedQviBytes, (unsigned int)bytesToEncode, &qviRangeSize);
+        std::cout << qviRangeSize << std::endl;
+        encodedQviBytes += bytesToEncode;
         ret += cqFile.writeUint64(qviRangeSize);
         ret += cqFile.write(qviRange, qviRangeSize);
         free(qviRange);
@@ -260,16 +273,31 @@ size_t QualEncoder::finishBlock(void)
     free(qviRLE);
 
     // Range encoding for unmapped quality values
-//     std::cout << ME << "Range encoding unmapped quality values" << std::endl;
-//     //std::cout << ME << "Unmapped quality values: " << uqv << std::endl;
-//     unsigned int uqvRangeSize = 0;
-//     if (uqv.length() > 1000000) {
-//         throwErrorException("blk");
-//     }
-//     unsigned char *uqvRange = range_compress_o1((unsigned char *)uqv.c_str(), uqv.length(), &uqvRangeSize);
-//     ret += cqFile.writeUint64(uqvRangeSize);
-//     ret += cqFile.write(uqvRange, uqvRangeSize);
-//     free(uqvRange);
+    //std::cout << ME << "Unmapped quality values: " << uqv << std::endl;
+    unsigned char *uqvBuffer = (unsigned char *)uqv.c_str();
+    size_t uqvBufferSize = uqv.length();
+    size_t numUqvBlocks = (size_t)ceil((double)uqvBufferSize / (double)MB);
+    ret += cqFile.writeUint64(numQviBlocks);
+    std::cout << ME << "Range encoding unmapped quality values (" << uqvBufferSize << " byte(s)) in blocks of 1 MB" << std::endl;
+    std::cout << ME << "  Needing " << numUqvBlocks << " block(s)" << std::endl;
+
+    size_t encodedUqvBytes = 0;
+    while (encodedUqvBytes < uqvBufferSize) {
+        unsigned int bytesToEncode = 0;
+        if ((uqvBufferSize - encodedUqvBytes) > MB) {
+            bytesToEncode = MB;
+        } else {
+            bytesToEncode = uqvBufferSize - encodedUqvBytes;
+        }
+        std::cout << ME << "  " << bytesToEncode << " -> ";
+        unsigned int uqvRangeSize = 0;
+        unsigned char *uqvRange = range_compress_o1(uqvBuffer+encodedUqvBytes, (unsigned int)bytesToEncode, &uqvRangeSize);
+        std::cout << uqvRangeSize  << std::endl;
+        encodedUqvBytes += bytesToEncode;
+        ret += cqFile.writeUint64(uqvRangeSize);
+        ret += cqFile.write(uqvRange, uqvRangeSize);
+        free(uqvRange);
+    }
 
     std::cout << ME << "Finished block " << numBlocks << std::endl;
 

@@ -310,6 +310,8 @@ stdio.h
 string
 -
 
+/home/voges/git/calq/src/Common/constants.h
+
 /home/voges/git/calq/src/Common/debug.h
 Common/fileSystemHelpers.h
 /home/voges/git/calq/src/Common/Common/fileSystemHelpers.h
@@ -435,6 +437,8 @@ string
 /home/voges/git/calq/src/QualCodec.cc
 QualCodec.h
 /home/voges/git/calq/src/QualCodec.h
+Common/constants.h
+/home/voges/git/calq/src/Common/constants.h
 Common/Exceptions.h
 /home/voges/git/calq/src/Common/Exceptions.h
 Common/debug.h

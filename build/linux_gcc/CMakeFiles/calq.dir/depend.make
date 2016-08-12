@@ -71,10 +71,10 @@ CMakeFiles/calq.dir/src/Parsers/SAMParser.cc.o: ../../src/Records/SAMRecord.h
 CMakeFiles/calq.dir/src/Parsers/SAMParser.cc.o: ../../src/Parsers/SAMParser.cc
 CMakeFiles/calq.dir/src/Parsers/SAMParser.cc.o: ../../src/Parsers/SAMParser.h
 
-CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Common/constants.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Common/fileSystemHelpers.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Common/Exceptions.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Common/File.h
+CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Common/constants.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Common/debug.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Compressors/range/range.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o: ../../src/Compressors/rle/rle.h

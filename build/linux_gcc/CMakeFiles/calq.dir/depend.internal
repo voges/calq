@@ -72,10 +72,10 @@ CMakeFiles/calq.dir/src/Parsers/SAMParser.cc.o
  /home/voges/git/calq/src/Parsers/SAMParser.cc
  /home/voges/git/calq/src/Parsers/SAMParser.h
 CMakeFiles/calq.dir/src/QualCodec.cc.o
- ../../src/Common/constants.h
  ../../src/Common/fileSystemHelpers.h
  /home/voges/git/calq/src/Common/Exceptions.h
  /home/voges/git/calq/src/Common/File.h
+ /home/voges/git/calq/src/Common/constants.h
  /home/voges/git/calq/src/Common/debug.h
  /home/voges/git/calq/src/Compressors/range/range.h
  /home/voges/git/calq/src/Compressors/rle/rle.h
