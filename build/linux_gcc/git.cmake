@@ -1,0 +1,6 @@
+file(WRITE git.h "#ifndef GIT_H\n")
+file(APPEND git.h "#define GIT_H\n\n")
+file(APPEND git.h "#define GIT_BRANCH \"master\"\n")
+file(APPEND git.h "#define GIT_COMMIT_HASH_SHORT \"efb9b4a\"\n")
+file(APPEND git.h "#define GIT_COMMIT_HASH_LONG \"efb9b4a07bd554e0356beda42a65f7e4663965aa\"\n\n")
+file(APPEND git.h "#endif // GIT_H\n\n")

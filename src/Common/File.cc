@@ -11,6 +11,8 @@
 
 #include "File.h"
 #include "Common/Exceptions.h"
+#include "Common/os_config.h"
+#include <limits.h>
 #include <stdio.h>
 
 File::File(void)
@@ -34,11 +36,17 @@ File::~File(void)
 
 void File::open(const std::string &path, const char *mode)
 {
-    fp = fopen(path.c_str(), mode);
-    if (fp == NULL) {
-        fclose(fp);
+#ifdef OS_WINDOWS
+    int err = fopen_s(&fp, path.c_str(), mode);
+    if (err != 0) {
         throwErrorException("Failed to open file");
     }
+#else
+    fp = fopen(path.c_str(), mode);
+    if (fp == NULL) {
+        throwErrorException("Failed to open file");
+    }
+#endif
 
     // Compute file size
     fseek(fp, 0, SEEK_END);
@@ -66,7 +74,8 @@ void File::advance(const size_t &offset)
 
 bool File::eof(void) 
 {
-    return feof(fp); 
+    int eof = feof(fp);
+    return eof != 0 ? true : false;
 }
 
 void * File::handle(void)
@@ -76,7 +85,10 @@ void * File::handle(void)
 
 void File::seek(const size_t &pos)
 {
-    int ret = fseek(fp, pos, SEEK_SET);
+    if (pos > LONG_MAX) {
+        throwErrorException("pos out of range");
+    }
+    int ret = fseek(fp, (long)pos, SEEK_SET);
     if (ret != 0) {
         throwErrorException("fseek failed");
     }

@@ -13,7 +13,7 @@
 #ifndef CALQCODEC_H
 #define CALQCODEC_H
 
-#include "IO/File.h"
+#include "Common/File.h"
 #include "Parsers/FASTAParser.h"
 #include "Parsers/SAMParser.h"
 #include "QualCodec.h"

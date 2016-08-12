@@ -10,7 +10,7 @@
 
 /*
  *  Changelog
- *  YYYY-MM-DD: What (who)
+ *  YYYY-MM-DD: what (who)
  */
 
 #ifndef RANGE_H
@@ -24,13 +24,13 @@ unsigned char * range_compress_o0(unsigned char *in,
                                   unsigned int  in_sz,
                                   unsigned int  *out_sz);
 unsigned char * range_decompress_o0(unsigned char *in,
-                                   unsigned int   in_sz,
+                                   //unsigned int   in_sz,
                                    unsigned int   *out_sz);
 unsigned char * range_compress_o1(unsigned char *in,
                                   unsigned int  in_sz,
                                   unsigned int  *out_sz);
 unsigned char * range_decompress_o1(unsigned char *in,
-                                    unsigned int  in_sz,
+                                    //unsigned int  in_sz,
                                     unsigned int  *out_sz);
 
 #ifdef __cplusplus

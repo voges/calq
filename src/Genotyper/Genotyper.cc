@@ -107,7 +107,6 @@ void Genotyper::resetLikelihoods(void)
 void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotides,
                                            const std::string &observedQualityValues)
 {
-    int i = 0;
     resetLikelihoods();
 
     const size_t depth = observedNucleotides.length();
@@ -118,7 +117,8 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         throwErrorException("Depth must be greater than one");
     }
 
-    tempGenotypeLL = (double*)calloc(sizeof(double), 1024);
+    double *tempGenotypeLikelihoods = (double *)calloc(genotypeAlphabet.size(), sizeof(double));
+    unsigned int itr = 0;
     for (size_t d = 0; d < depth; d++) {
         char y = (char)observedNucleotides[d];
         double q = (double)(observedQualityValues[d] - qualityValueMin);
@@ -128,23 +128,25 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         double pStrike = 1 - pow(10.0, -q/10.0);
 
         double pError = (1-pStrike) / (GENOTYPER_ALLELE_ALPHABET.size()-1);
-        int i = 0;
+        itr = 0;
         for (auto const &genotype : genotypeAlphabet) {
             double p = 0.0;
-            for (size_t i = 0; i < polyploidy; i++) {
-                p += (y==genotype[i])? pStrike:pError;
+            for (unsigned int i = 0; i < polyploidy; i++) {
+                p += (y == genotype[i]) ? pStrike : pError;
             }
             p /= polyploidy;
 
             // We are using the log likelihood to avoid numerical problems
-            tempGenotypeLL[i++] += log(p);
+            tempGenotypeLikelihoods[itr++] += log(p);
         }
     }
-    for (auto const &genotype : genotypeAlphabet)
-        genotypeLikelihoods[genotype] = tempGenotypeLL[i++];
-    free(tempGenotypeLL);
+    itr = 0;
+    for (auto const &genotype : genotypeAlphabet) {
+        genotypeLikelihoods[genotype] = tempGenotypeLikelihoods[itr++];
+    }
+    free(tempGenotypeLikelihoods);
 
-    // Nnormalize the genotype likelihoods
+    // Normalize the genotype likelihoods
     double cum = 0.0;
     for (auto &genotypeLikelihood : genotypeLikelihoods) {
         genotypeLikelihood.second = exp(genotypeLikelihood.second);
