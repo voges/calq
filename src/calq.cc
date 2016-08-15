@@ -107,7 +107,9 @@ int main(int argc, char *argv[])
         if (cliOptions.blockSize < 1) {
             throwErrorException("Block size must be greater than 0");
         }
-        std::cout << ME << "Using block size: " << cliOptions.blockSize << std::endl;
+        if (decompressSwitch.isSet() == false) {
+            std::cout << ME << "Using block size: " << cliOptions.blockSize << std::endl;
+        }
 
         // Check polyploidy
         if (cliOptions.polyploidy < 1) {
