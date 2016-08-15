@@ -111,7 +111,7 @@ public:
                 const std::vector<FASTAReference> &fastaReferences);
     ~QualDecoder(void);
 
-    void decodeBlock(void);
+    size_t decodeBlock(void);
 
 private:
     File &cqFile;

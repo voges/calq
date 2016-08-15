@@ -180,7 +180,7 @@ CalqDecoder::CalqDecoder(const std::string &cqFileName,
     , qualFile(qualFileName, "w")
     , qualDecoder(cqFile, qualFile, fastaReferences)
 {
-    readFileHeader();
+    // empty
 }
 
 CalqDecoder::~CalqDecoder(void)
@@ -192,33 +192,39 @@ void CalqDecoder::decode(void)
 {
     auto startTime = std::chrono::steady_clock::now();
 
+    size_t compressedSize = 0;
+    /*size_t fileHeaderSize = */readFileHeader();
+
     size_t numBlocks = 0;
     while (cqFile.tell() < cqFile.size()) {
         std::cout << ME << "Decoding block " << numBlocks << std::endl;
-        qualDecoder.decodeBlock();
+        compressedSize += qualDecoder.decodeBlock();
         numBlocks++;
     }
 
     // Print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
-    std::cout << ME << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
+    std::cout << ME << "STATISTICS" << std::endl;
+    std::cout << ME << "  Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
               << " ~= " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
-    std::cout << ME << "Decoded " << numBlocks << " block(s)" << std::endl;
+    std::cout << ME << "  Decoded " << numBlocks << " block(s)" << std::endl;
+    std::cout << ME << "  Speed (compressed size/time): " << ((double)(compressedSize/MB))/(double)std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " MB/s" << std::endl;
 }
 
-void CalqDecoder::readFileHeader(void)
+size_t CalqDecoder::readFileHeader(void)
 {
     std::cout << ME << "Reading file header" << std::endl;
+    size_t ret = 0;
 
     const size_t magicSize = 5;
     char magic[magicSize];
     const size_t versionSize = 6;
     char version[versionSize];
     unsigned int polyploidy;
-    cqFile.read(magic, magicSize);
-    cqFile.read(version, versionSize);
-    cqFile.readUint32(&polyploidy);
+    ret += cqFile.read(magic, magicSize);
+    ret += cqFile.read(version, versionSize);
+    ret += cqFile.readUint32(&polyploidy);
 
     if (strncmp(version, VERSION, 5) != 0) {
         throwErrorException("CQ file was compressed with another version");
@@ -227,5 +233,7 @@ void CalqDecoder::readFileHeader(void)
     std::cout << ME << "Magic: " << magic << std::endl;
     std::cout << ME << "Version: " << version << std::endl;
     std::cout << ME << "Polyploidy: " << polyploidy << std::endl;
+
+    return ret;
 }
 

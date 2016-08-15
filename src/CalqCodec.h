@@ -120,7 +120,7 @@ private:
     File qualFile;
     QualDecoder qualDecoder;
 
-    void readFileHeader(void);
+    size_t readFileHeader(void);
 };
 
 #endif // CALQCODEC_H
