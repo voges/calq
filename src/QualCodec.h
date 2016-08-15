@@ -42,15 +42,24 @@ public:
     size_t finishBlock(void);
 
 private:
+    ////////////////////////////////////////////////////////////////////////////
     // These member variables are used throughout coding multiple blocks
+    ////////////////////////////////////////////////////////////////////////////
+
     std::vector<FASTAReference> fastaReferences;
     size_t numBlocks;
     size_t numMappedRecords;
     size_t numUnmappedRecords;
     File &cqFile;
 
+    ////////////////////////////////////////////////////////////////////////////
     // The following member variables are used per block; all of them are reset
     // by startBlock.
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Counters
+    size_t numMappedRecordsInBlock;
+    size_t numUnmappedRecordsInBlock;
 
     // Strings (i.e. byte buffers) holding the data to be transmitted
     std::string qi; // quantizer indices

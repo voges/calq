@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
         TCLAP::CmdLine cmd("calq - Lossy compression of next-generation sequencing quality values", ' ', VERSION);
 
         // TCLAP arguments
+        TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
         TCLAP::SwitchArg forceSwitch("f", "force", "Force overwriting of output files, etc.", cmd, false);
         TCLAP::UnlabeledValueArg<std::string> infileArg("infile", "Input file", true, "", "string", cmd);
@@ -84,7 +85,16 @@ int main(int argc, char *argv[])
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
 
+        // Check for sanity
+        if (blockSizeArg.isSet() && decompressSwitch.isSet()) {
+            throwErrorException("Combining arguments 'b' and 'd' is forbidden");
+        }
+        if (polyploidyArg.isSet() && decompressSwitch.isSet()) {
+            throwErrorException("Combining arguments 'p' and 'd' is forbidden");
+        }
+
         // Get the value parsed by each arg
+        cliOptions.blockSize = blockSizeArg.getValue();
         cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.force = forceSwitch.getValue();
         cliOptions.inFileName = infileArg.getValue();
@@ -93,10 +103,11 @@ int main(int argc, char *argv[])
         cliOptions.refFileNames = referenceArg.getValue();
         cliOptions.verbose = verboseSwitch.getValue();
 
-        // Check verbosity
-        if (cliOptions.verbose == true) {
-            std::cout << ME << "Verbose output activated" << std::endl;
+        // Check block size
+        if (cliOptions.blockSize < 1) {
+            throwErrorException("Block size must be greater than 0");
         }
+        std::cout << ME << "Using block size: " << cliOptions.blockSize << std::endl;
 
         // Check polyploidy
         if (cliOptions.polyploidy < 1) {
@@ -106,6 +117,11 @@ int main(int argc, char *argv[])
             throwErrorException("Polyploidy very high (use option 'f' to force processing)");
         }
         std::cout << ME << "Using polyploidy: " << cliOptions.polyploidy << std::endl;
+
+        // Check verbosity
+        if (cliOptions.verbose == true) {
+            std::cout << ME << "Verbose output activated" << std::endl;
+        }
 
         // Check if the input file exists and if it has the correct extension
         std::cout << ME << "Checking input file: " << cliOptions.inFileName << std::endl;
@@ -160,7 +176,7 @@ int main(int argc, char *argv[])
 
         // Compress or decompress
         if (cliOptions.decompress == false) {
-            CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames, (unsigned int)cliOptions.polyploidy);
+            CalqEncoder calqEncoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames, (unsigned int)cliOptions.blockSize, (unsigned int)cliOptions.polyploidy);
             calqEncoder.encode();
         } else {
             CalqDecoder calqDecoder(cliOptions.inFileName, cliOptions.outFileName, cliOptions.refFileNames);

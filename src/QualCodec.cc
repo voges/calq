@@ -84,6 +84,8 @@ void QualEncoder::startBlock(void)
 {
     std::cout << ME << "Starting block " << numBlocks << std::endl;
 
+    numMappedRecordsInBlock = 0;
+    numUnmappedRecordsInBlock = 0;
     qi = "";
     qvi = "";
     uqv = "";
@@ -103,6 +105,7 @@ void QualEncoder::startBlock(void)
 void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
 {
     encodeUnmappedQualityValues(std::string(samRecord.qual));
+    numUnmappedRecordsInBlock++;
     numUnmappedRecords++;
 }
 
@@ -165,6 +168,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
         }
     }
 
+    numMappedRecordsInBlock++;
     numMappedRecords++;
 }
 
@@ -173,6 +177,8 @@ size_t QualEncoder::finishBlock(void)
     size_t ret = 0;
 
     std::cout << ME << "Finishing block " << numBlocks << std::endl;
+    std::cout << ME << "  " << numMappedRecordsInBlock << " mapped record(s)" << std::endl;
+    std::cout << ME << "  " << numUnmappedRecordsInBlock << " unmapped record(s)" << std::endl;
 
     // Compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
@@ -206,100 +212,112 @@ size_t QualEncoder::finishBlock(void)
     //std::cout << ME << "Quantizer indices: " << qi << std::endl;
     unsigned char *qiBuffer = (unsigned char *)qi.c_str();
     size_t qiBufferSize = qi.length();
-    size_t qiRLESize = 0;
-    std::cout << ME << "Run-length encoding quantizer indices" << std::endl;
-    std::cout << ME << "  " << qiBufferSize << " -> ";
-    unsigned char *qiRLE = rle_encode(qiBuffer, qiBufferSize, &qiRLESize, QUANTIZER_NUM, (unsigned char)'0');
-    std::cout << qiRLESize << std::endl;
+    if (qiBufferSize > 0) {
+        size_t qiRLESize = 0;
+        //std::cout << ME << "Run-length encoding quantizer indices" << std::endl;
+        //std::cout << ME << "  " << qiBufferSize << " -> ";
+        unsigned char *qiRLE = rle_encode(qiBuffer, qiBufferSize, &qiRLESize, QUANTIZER_NUM, (unsigned char)'0');
+        //std::cout << qiRLESize << std::endl;
 
-    // Range encoding for quantizer indices
-    std::cout << ME << "Range encoding run-length encoded quantizer indices in blocks of 1 MB" << std::endl;
-    size_t numQiBlocks = (size_t)ceil((double)qiRLESize / (double)MB);
-    ret += cqFile.writeUint64(numQiBlocks);
-    std::cout << ME << "  Needing " << numQiBlocks << " block(s)" << std::endl;
+        // Range encoding for quantizer indices
+        //std::cout << ME << "Range encoding run-length encoded quantizer indices in blocks of 1 MB" << std::endl;
+        size_t numQiBlocks = (size_t)ceil((double)qiRLESize / (double)MB);
+        ret += cqFile.writeUint64(numQiBlocks);
+        //std::cout << ME << "  Needing " << numQiBlocks << " block(s)" << std::endl;
 
-    size_t encodedQiBytes = 0;
-    while (encodedQiBytes < qiRLESize) {
-        unsigned int bytesToEncode = 0;
-        if ((qiRLESize - encodedQiBytes) > MB) {
-            bytesToEncode = MB;
-        } else {
-            bytesToEncode = qiRLESize - encodedQiBytes;
+        size_t encodedQiBytes = 0;
+        while (encodedQiBytes < qiRLESize) {
+            unsigned int bytesToEncode = 0;
+            if ((qiRLESize - encodedQiBytes) > MB) {
+                bytesToEncode = MB;
+            } else {
+                bytesToEncode = qiRLESize - encodedQiBytes;
+            }
+            //std::cout << ME << "  " << bytesToEncode << " -> ";
+            unsigned int qiRangeSize = 0;
+            unsigned char *qiRange = range_compress_o1(qiRLE+encodedQiBytes, (unsigned int)bytesToEncode, &qiRangeSize);
+            //std::cout << qiRangeSize << std::endl;
+            encodedQiBytes += bytesToEncode;
+            ret += cqFile.writeUint64(qiRangeSize);
+            ret += cqFile.write(qiRange, qiRangeSize);
+            free(qiRange);
         }
-        std::cout << ME << "  " << bytesToEncode << " -> ";
-        unsigned int qiRangeSize = 0;
-        unsigned char *qiRange = range_compress_o1(qiRLE+encodedQiBytes, (unsigned int)bytesToEncode, &qiRangeSize);
-        std::cout << qiRangeSize << std::endl;
-        encodedQiBytes += bytesToEncode;
-        ret += cqFile.writeUint64(qiRangeSize);
-        ret += cqFile.write(qiRange, qiRangeSize);
-        free(qiRange);
+        free(qiRLE);
+    } else {
+        // nothing
     }
-    free(qiRLE);
 
     // RLE encoding for quality value indices
     //std::cout << ME << "Quality value indices: " << qvi << std::endl;
     unsigned char *qviBuffer = (unsigned char *)qvi.c_str();
     size_t qviBufferSize = qvi.length();
-    size_t qviRLESize = 0;
-    std::cout << ME << "Run-length encoding quality value indices" << std::endl;
-    std::cout << ME << "  " << qviBufferSize << " -> ";
-    unsigned char *qviRLE = rle_encode(qviBuffer, qviBufferSize, &qviRLESize, QUANTIZER_STEP_MAX, (unsigned char)'0');
-    std::cout << qviRLESize << std::endl;
+    if (qviBufferSize > 0) {
+        size_t qviRLESize = 0;
+        //std::cout << ME << "Run-length encoding quality value indices" << std::endl;
+        //std::cout << ME << "  " << qviBufferSize << " -> ";
+        unsigned char *qviRLE = rle_encode(qviBuffer, qviBufferSize, &qviRLESize, QUANTIZER_STEP_MAX, (unsigned char)'0');
+        //std::cout << qviRLESize << std::endl;
 
-    // Range encoding for quality value indices
-    std::cout << ME << "Range encoding run-length encoded quantizer indices in blocks of 1 MB" << std::endl;
-    size_t numQviBlocks = (size_t)ceil((double)qviRLESize / (double)MB);
-    ret += cqFile.writeUint64(numQviBlocks);
-    std::cout << ME << "  Needing " << numQviBlocks << " block(s)" << std::endl;
+        // Range encoding for quality value indices
+        //std::cout << ME << "Range encoding run-length encoded quantizer indices in blocks of 1 MB" << std::endl;
+        size_t numQviBlocks = (size_t)ceil((double)qviRLESize / (double)MB);
+        ret += cqFile.writeUint64(numQviBlocks);
+        //std::cout << ME << "  Needing " << numQviBlocks << " block(s)" << std::endl;
 
-    size_t encodedQviBytes = 0;
-    while (encodedQviBytes < qviRLESize) {
-        unsigned int bytesToEncode = 0;
-        if ((qviRLESize - encodedQviBytes) > MB) {
-            bytesToEncode = MB;
-        } else {
-            bytesToEncode = qviRLESize - encodedQviBytes;
+        size_t encodedQviBytes = 0;
+        while (encodedQviBytes < qviRLESize) {
+            unsigned int bytesToEncode = 0;
+            if ((qviRLESize - encodedQviBytes) > MB) {
+                bytesToEncode = MB;
+            } else {
+                bytesToEncode = qviRLESize - encodedQviBytes;
+            }
+            //std::cout << ME << "  " << bytesToEncode << " -> ";
+            unsigned int qviRangeSize = 0;
+            unsigned char *qviRange = range_compress_o1(qviRLE+encodedQviBytes, (unsigned int)bytesToEncode, &qviRangeSize);
+            //std::cout << qviRangeSize << std::endl;
+            encodedQviBytes += bytesToEncode;
+            ret += cqFile.writeUint64(qviRangeSize);
+            ret += cqFile.write(qviRange, qviRangeSize);
+            free(qviRange);
         }
-        std::cout << ME << "  " << bytesToEncode << " -> ";
-        unsigned int qviRangeSize = 0;
-        unsigned char *qviRange = range_compress_o1(qviRLE+encodedQviBytes, (unsigned int)bytesToEncode, &qviRangeSize);
-        std::cout << qviRangeSize << std::endl;
-        encodedQviBytes += bytesToEncode;
-        ret += cqFile.writeUint64(qviRangeSize);
-        ret += cqFile.write(qviRange, qviRangeSize);
-        free(qviRange);
+        free(qviRLE);
+    } else {
+        // nothing
     }
-    free(qviRLE);
 
     // Range encoding for unmapped quality values
     //std::cout << ME << "Unmapped quality values: " << uqv << std::endl;
     unsigned char *uqvBuffer = (unsigned char *)uqv.c_str();
     size_t uqvBufferSize = uqv.length();
-    size_t numUqvBlocks = (size_t)ceil((double)uqvBufferSize / (double)MB);
-    ret += cqFile.writeUint64(numQviBlocks);
-    std::cout << ME << "Range encoding unmapped quality values (" << uqvBufferSize << " byte(s)) in blocks of 1 MB" << std::endl;
-    std::cout << ME << "  Needing " << numUqvBlocks << " block(s)" << std::endl;
+    if (uqvBufferSize > 0) {
+        size_t numUqvBlocks = (size_t)ceil((double)uqvBufferSize / (double)MB);
+        ret += cqFile.writeUint64(numUqvBlocks);
+        //std::cout << ME << "Range encoding unmapped quality values (" << uqvBufferSize << " byte(s)) in blocks of 1 MB" << std::endl;
+        //std::cout << ME << "  Needing " << numUqvBlocks << " block(s)" << std::endl;
 
-    size_t encodedUqvBytes = 0;
-    while (encodedUqvBytes < uqvBufferSize) {
-        unsigned int bytesToEncode = 0;
-        if ((uqvBufferSize - encodedUqvBytes) > MB) {
-            bytesToEncode = MB;
-        } else {
-            bytesToEncode = uqvBufferSize - encodedUqvBytes;
+        size_t encodedUqvBytes = 0;
+        while (encodedUqvBytes < uqvBufferSize) {
+            unsigned int bytesToEncode = 0;
+            if ((uqvBufferSize - encodedUqvBytes) > MB) {
+                bytesToEncode = MB;
+            } else {
+                bytesToEncode = uqvBufferSize - encodedUqvBytes;
+            }
+            //std::cout << ME << "  " << bytesToEncode << " -> ";
+            unsigned int uqvRangeSize = 0;
+            unsigned char *uqvRange = range_compress_o1(uqvBuffer+encodedUqvBytes, (unsigned int)bytesToEncode, &uqvRangeSize);
+            //std::cout << uqvRangeSize  << std::endl;
+            encodedUqvBytes += bytesToEncode;
+            ret += cqFile.writeUint64(uqvRangeSize);
+            ret += cqFile.write(uqvRange, uqvRangeSize);
+            free(uqvRange);
         }
-        std::cout << ME << "  " << bytesToEncode << " -> ";
-        unsigned int uqvRangeSize = 0;
-        unsigned char *uqvRange = range_compress_o1(uqvBuffer+encodedUqvBytes, (unsigned int)bytesToEncode, &uqvRangeSize);
-        std::cout << uqvRangeSize  << std::endl;
-        encodedUqvBytes += bytesToEncode;
-        ret += cqFile.writeUint64(uqvRangeSize);
-        ret += cqFile.write(uqvRange, uqvRangeSize);
-        free(uqvRange);
+    } else {
+        // nothing
     }
 
-    std::cout << ME << "Finished block " << numBlocks << std::endl;
+    //std::cout << ME << "Finished block " << numBlocks << std::endl;
 
     numBlocks++;
 

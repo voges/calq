@@ -84,18 +84,20 @@ public:
     CalqEncoder(const std::string &samFileName,
                 const std::string &cqFileName,
                 const std::vector<std::string> &fastaFileNames,
+                const unsigned int &blockSize,
                 const unsigned int &polyploidy);
     ~CalqEncoder(void);
 
     void encode(void);
 
 private:
+    unsigned int blockSize;
     File cqFile;
     unsigned int polyploidy;
     QualEncoder qualEncoder;
     SAMParser samParser;
 
-    void writeFileHeader(void);
+    size_t writeFileHeader(void);
 };
 
 /** @brief Class: CalqDecoder

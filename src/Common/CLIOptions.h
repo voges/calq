@@ -23,17 +23,19 @@
 class CLIOptions {
 public:
     CLIOptions(void)
-        : decompress(false)
+        : blockSize(0)
+        , decompress(false)
         , force(false)
         , inFileName("")
         , outFileName("")
-        , polyploidy(2)
+        , polyploidy(0)
         , refFileNames()
         , verbose(false)
     {}
     ~CLIOptions(void) {}
 
 public:
+    int blockSize;
     bool decompress;
     bool force;
     std::string inFileName;
