@@ -19,19 +19,6 @@
 #include <limits>
 #include <stdlib.h>
 
-// Typical quality value ranges:
-//   Sanger         Phred+33   [0,40]
-//   Solexa         Solexa+64  [-5,40]
-//   Illumina 1.3+  Phred+64   [0,40]
-//   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
-//   Illumina 1.8+  Phred+33   [0,41]
-
-static const int QV_OFFSET_33 = 33;
-static const int QV_OFFSET_64 = 64;
-static const int QV_OFFSET = QV_OFFSET_33;
-static const int QV_MIN = QV_OFFSET;
-static const int QV_MAX = 104;
-
 static const unsigned int QUANTIZER_STEP_MIN = 2;
 static const unsigned int QUANTIZER_STEP_MAX = 8;
 static const unsigned int QUANTIZER_NUM = QUANTIZER_STEP_MAX-QUANTIZER_STEP_MIN+1; // 2-8 steps
@@ -40,12 +27,18 @@ static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 
 QualEncoder::QualEncoder(File &cqFile,
                          const std::vector<FASTAReference> &fastaReferences,
-                         const unsigned int &polyploidy)
+                         const unsigned int &polyploidy,
+                         const int &qvOffset,
+                         const int &qvMin,
+                         const int &qvMax)
     : fastaReferences(fastaReferences)
     , numBlocks(0)
     , numMappedRecords(0)
     , numUnmappedRecords(0)
     , cqFile(cqFile)
+    , qvOffset(qvOffset)
+    , qvMin(qvMin)
+    , qvMax(qvMax)
     , qi("")
     , qvi("")
     , uqv("")
@@ -57,7 +50,7 @@ QualEncoder::QualEncoder(File &cqFile,
     , observedQualityValues()
     , observedPosMin(std::numeric_limits<uint32_t>::max())
     , observedPosMax(std::numeric_limits<uint32_t>::min())
-    , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, QV_MIN, QV_MAX)
+    , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
     , uniformQuantizers()
     , quantizerIndices()
     , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
@@ -67,7 +60,7 @@ QualEncoder::QualEncoder(File &cqFile,
     std::cout << ME << "Initializing " << QUANTIZER_NUM << " uniform quantizers" << std::endl;
     for (unsigned int i = 0; i < QUANTIZER_NUM; i++) {
         unsigned int numberOfSteps = QUANTIZER_STEP_MIN;
-        UniformQuantizer uniformQuantizer(QV_MIN, QV_MAX, numberOfSteps);
+        UniformQuantizer uniformQuantizer(qvMin, qvMax, numberOfSteps);
         //uniformQuantizer.print();
         uniformQuantizers.insert(std::pair<int,UniformQuantizer>(i, uniformQuantizer));
     }

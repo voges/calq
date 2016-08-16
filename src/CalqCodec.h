@@ -65,27 +65,14 @@ protected:
 */
 class CalqEncoder: public CalqCodec {
 public:
-
-    /** @brief Constructor: CalqEncoder
-     *
-     *  Initializes a new CalqEncoder instance with a SAM file to be encoded,
-     *  a CQ file to write the bitstream to and a set of FASTA files to read
-     *  the reference sequence(s) from.
-     *
-     *  @param samFileName The name of the SAM file to be encoded. The file has
-     *         to exist and  has to be readable.
-     *  @param cqFileName The name of the CQ file to write the encoded
-     *         bitstream to. The file may not exist already.
-     *  @param fastaFileNames A vector containing the names of all FASTA
-     *         files which contents shall be used as reference sequence(s).
-     *         The FASTA files have to exists and have to be readable.
-     *  @return Void
-     */
     CalqEncoder(const std::string &samFileName,
                 const std::string &cqFileName,
                 const std::vector<std::string> &fastaFileNames,
                 const unsigned int &blockSize,
-                const unsigned int &polyploidy);
+                const unsigned int &polyploidy,
+                const int &qvOffset,
+                const int &qvMin,
+                const int &qvMax);
     ~CalqEncoder(void);
 
     void encode(void);

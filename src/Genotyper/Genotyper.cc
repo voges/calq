@@ -209,6 +209,14 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
     //std::cerr << confidence << ",";
 
+//     for (auto &genotypeLikelihood : genotypeLikelihoods) {
+//         if (genotypeLikelihood.second > largestGenotypeLikelihood) {
+//             largestGenotypeLikelihood = genotypeLikelihood.second;
+//         }
+//     }
+//     // Convert the probability to phred score
+//     double gtLLPhred = -log10(1-largestGenotypeLikelihood);
+
     //if (confidence == 1) return quantizerIdxMin;
     return (int)((1-confidence)*(numQuantizers-1));
 }

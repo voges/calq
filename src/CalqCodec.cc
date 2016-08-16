@@ -63,12 +63,15 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
                          const std::string &cqFileName,
                          const std::vector<std::string> &fastaFileNames,
                          const unsigned int &blockSize,
-                         const unsigned int &polyploidy)
+                         const unsigned int &polyploidy,
+                         const int &qvOffset,
+                         const int &qvMin,
+                         const int &qvMax)
     : CalqCodec(samFileName, cqFileName, fastaFileNames)
     , blockSize(blockSize)
     , cqFile(cqFileName, "w")
     , polyploidy(polyploidy)
-    , qualEncoder(cqFile, fastaReferences, polyploidy)
+    , qualEncoder(cqFile, fastaReferences, polyploidy, qvOffset, qvMin, qvMax)
     , samParser(samFileName)
 {
     // empty

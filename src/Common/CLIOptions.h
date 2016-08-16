@@ -30,6 +30,7 @@ public:
         , outFileName("")
         , polyploidy(0)
         , refFileNames()
+        , type("")
         , verbose(false)
     {}
     ~CLIOptions(void) {}
@@ -42,6 +43,7 @@ public:
     std::string outFileName;
     int polyploidy;
     std::vector<std::string> refFileNames;
+    std::string type;
     bool verbose;
 };
 
