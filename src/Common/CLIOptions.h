@@ -30,6 +30,7 @@ public:
         , outFileName("")
         , polyploidy(0)
         , refFileNames()
+        , samFileName("")
         , type("")
         , verbose(false)
     {}
@@ -43,6 +44,7 @@ public:
     std::string outFileName;
     int polyploidy;
     std::vector<std::string> refFileNames;
+    std::string samFileName;
     std::string type;
     bool verbose;
 };

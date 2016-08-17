@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
         TCLAP::ValueArg<std::string> outfileArg("o", "outfile", "Output file", false, "", "string", cmd);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", true, "string", cmd);
+        TCLAP::ValueArg<std::string> samfileArg("s", "samfile", "SAM file", false, "", "string", cmd);
         TCLAP::ValueArg<std::string> typeArg("t", "type", "Type of quality values (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+)", false, "illumina-1.8+", "string", cmd);
         TCLAP::SwitchArg verboseSwitch("v", "verbose", "Verbose output", cmd, false);
 
@@ -93,6 +94,12 @@ int main(int argc, char *argv[])
         if (polyploidyArg.isSet() && decompressSwitch.isSet()) {
             throwErrorException("Combining arguments 'p' and 'd' is forbidden");
         }
+        if (samfileArg.isSet() && !decompressSwitch.isSet()) {
+            throwErrorException("Argument 's' is forbidden for compression");
+        }
+        if (!samfileArg.isSet() && decompressSwitch.isSet()) {
+            throwErrorException("Option 's' is mandatory for decompression");
+        }
 
         // Get the value parsed by each arg
         cliOptions.blockSize = blockSizeArg.getValue();
@@ -102,6 +109,7 @@ int main(int argc, char *argv[])
         cliOptions.outFileName = outfileArg.getValue();
         cliOptions.polyploidy = polyploidyArg.getValue();
         cliOptions.refFileNames = referenceArg.getValue();
+        cliOptions.samFileName = samfileArg.getValue();
         cliOptions.type = typeArg.getValue();
         cliOptions.verbose = verboseSwitch.getValue();
 
@@ -128,29 +136,24 @@ int main(int argc, char *argv[])
         //   Illumina 1.3+  Phred+64   [0,40]
         //   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
         //   Illumina 1.8+  Phred+33   [0,41]
-        int qvOffset = 0;
         int qvMin = 0;
         int qvMax = 0;
         if (cliOptions.type == "sanger") {
-            qvOffset = 33;
-            qvMin = qvOffset;
-            qvMax = qvOffset + 40;
+            qvMin = 33;
+            qvMax = qvMin + 40;
         } else if (cliOptions.type == "illumina-1.3+") {
-            qvOffset = 64;
-            qvMin = qvOffset;
-            qvMax = qvOffset + 40;
+            qvMin = 64;
+            qvMax = qvMin + 40;
         } else if (cliOptions.type == "illumina-1.5+") {
-            qvOffset = 64;
-            qvMin = qvOffset;
-            qvMax = qvOffset + 40;
+            qvMin = 64;
+            qvMax = qvMin + 40;
         } else if (cliOptions.type == "illumina-1.8+") {
-            qvOffset = 33;
-            qvMin = qvOffset;
-            qvMax = qvOffset + 41;
+            qvMin = 33;
+            qvMax = qvMin + 41;
         } else {
             throwErrorException("Quality value type not supported");
         }
-        std::cout << ME << "Using quality value type: " << cliOptions.type << " (offset,min,max)=(" << qvOffset << "," << qvMin << "," << qvMax << ")" << std::endl;
+        std::cout << ME << "Using quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
 
         // Check verbosity
         if (cliOptions.verbose == true) {
@@ -164,11 +167,11 @@ int main(int argc, char *argv[])
         }
         if (cliOptions.decompress == false) {
             if (fileNameExtension(cliOptions.inFileName) != std::string("sam")) {
-                throwErrorException("Input file fileNameExtension must be 'sam'");
+                throwErrorException("Input file extension must be 'sam'");
             }
         } else {
             if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
-                throwErrorException("Input file fileNameExtension must be 'cq'");
+                throwErrorException("Input file extension must be 'cq'");
             }
         }
         std::cout << ME << "OK" << std::endl;
@@ -200,7 +203,7 @@ int main(int argc, char *argv[])
             std::cout << ME << "Checking reference file: " << refFileName << std::endl;
             if (   fileNameExtension(refFileName) != std::string("fa")
                 && fileNameExtension(refFileName) != std::string("fasta")) {
-                throwErrorException("Reference file fileNameExtension must be 'fa' or 'fasta'");
+                throwErrorException("Reference file extension must be 'fa' or 'fasta'");
             }
             if (!fileExists(refFileName)) {
                 throwErrorException("Cannot access reference file");
@@ -210,18 +213,28 @@ int main(int argc, char *argv[])
 
         // Compress or decompress
         if (cliOptions.decompress == false) {
-            CalqEncoder calqEncoder(cliOptions.inFileName, 
-                                    cliOptions.outFileName, 
-                                    cliOptions.refFileNames, 
-                                    (unsigned int)cliOptions.blockSize, 
-                                    (unsigned int)cliOptions.polyploidy, 
-                                    qvOffset, 
-                                    qvMin, 
+            CalqEncoder calqEncoder(cliOptions.inFileName,
+                                    cliOptions.outFileName,
+                                    cliOptions.refFileNames,
+                                    (unsigned int)cliOptions.blockSize,
+                                    (unsigned int)cliOptions.polyploidy,
+                                    qvMin,
                                     qvMax);
             calqEncoder.encode();
         } else {
-            CalqDecoder calqDecoder(cliOptions.inFileName, 
-                                    cliOptions.outFileName, 
+            // Check if the SAM file exists and if it has the correct extension
+            std::cout << ME << "Checking SAM file: " << cliOptions.samFileName << std::endl;
+            if (!fileExists(cliOptions.samFileName)) {
+                throwErrorException("Cannot access SAM file");
+            }
+            if (fileNameExtension(cliOptions.samFileName) != std::string("sam")) {
+                throwErrorException("SAM file extension must be 'sam'");
+            }
+            std::cout << ME << "OK" << std::endl;
+
+            CalqDecoder calqDecoder(cliOptions.inFileName,
+                                    cliOptions.outFileName,
+                                    cliOptions.samFileName,
                                     cliOptions.refFileNames);
             calqDecoder.decode();
         }

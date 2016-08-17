@@ -70,7 +70,6 @@ public:
                 const std::vector<std::string> &fastaFileNames,
                 const unsigned int &blockSize,
                 const unsigned int &polyploidy,
-                const int &qvOffset,
                 const int &qvMin,
                 const int &qvMax);
     ~CalqEncoder(void);
@@ -97,6 +96,7 @@ class CalqDecoder: public CalqCodec {
 public:
     CalqDecoder(const std::string &cqFileName,
                 const std::string &qualFileName,
+                const std::string &samFileName,
                 const std::vector<std::string> &fastaFileNames);
     ~CalqDecoder(void);
 
@@ -106,6 +106,7 @@ private:
     File cqFile;
     File qualFile;
     QualDecoder qualDecoder;
+    SAMParser samParser;
 
     size_t readFileHeader(void);
 };

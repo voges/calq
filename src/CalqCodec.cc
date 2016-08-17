@@ -64,14 +64,13 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
                          const std::vector<std::string> &fastaFileNames,
                          const unsigned int &blockSize,
                          const unsigned int &polyploidy,
-                         const int &qvOffset,
                          const int &qvMin,
                          const int &qvMax)
     : CalqCodec(samFileName, cqFileName, fastaFileNames)
     , blockSize(blockSize)
     , cqFile(cqFileName, "w")
     , polyploidy(polyploidy)
-    , qualEncoder(cqFile, fastaReferences, polyploidy, qvOffset, qvMin, qvMax)
+    , qualEncoder(cqFile, fastaReferences, polyploidy, qvMin, qvMax)
     , samParser(samFileName)
 {
     // empty
@@ -177,11 +176,13 @@ size_t CalqEncoder::writeFileHeader(void)
 
 CalqDecoder::CalqDecoder(const std::string &cqFileName,
                          const std::string &qualFileName,
+                         const std::string &samFileName,
                          const std::vector<std::string> &fastaFileNames)
     : CalqCodec(cqFileName, qualFileName, fastaFileNames)
     , cqFile(cqFileName, "r")
     , qualFile(qualFileName, "w")
     , qualDecoder(cqFile, qualFile, fastaReferences)
+    , samParser(samFileName)
 {
     // empty
 }
@@ -202,6 +203,16 @@ void CalqDecoder::decode(void)
     while (cqFile.tell() < cqFile.size()) {
         std::cout << ME << "Decoding block " << numBlocks << std::endl;
         compressedSize += qualDecoder.decodeBlock();
+
+        // Get numRecordsInBlock from SAM file
+//         do {
+//             if (samRecordIsMapped(samParser.curr) == true) {
+// 
+//             } else {
+// 
+//             }
+//         } while (samParser.next());
+
         numBlocks++;
     }
 

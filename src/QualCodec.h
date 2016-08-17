@@ -34,7 +34,6 @@ public:
     QualEncoder(File &cqFile, 
                 const std::vector<FASTAReference> &fastaReferences,
                 const unsigned int &polyploidy,
-                const int &qvOffset,
                 const int &qvMin,
                 const int &qvMax);
     ~QualEncoder(void);
@@ -54,7 +53,6 @@ private:
     size_t numMappedRecords;
     size_t numUnmappedRecords;
     File &cqFile;
-    int qvOffset;
     int qvMin;
     int qvMax;
 

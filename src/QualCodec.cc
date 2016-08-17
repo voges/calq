@@ -28,7 +28,6 @@ static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 QualEncoder::QualEncoder(File &cqFile,
                          const std::vector<FASTAReference> &fastaReferences,
                          const unsigned int &polyploidy,
-                         const int &qvOffset,
                          const int &qvMin,
                          const int &qvMax)
     : fastaReferences(fastaReferences)
@@ -36,7 +35,6 @@ QualEncoder::QualEncoder(File &cqFile,
     , numMappedRecords(0)
     , numUnmappedRecords(0)
     , cqFile(cqFile)
-    , qvOffset(qvOffset)
     , qvMin(qvMin)
     , qvMax(qvMax)
     , qi("")
