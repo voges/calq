@@ -32,7 +32,7 @@ public:
      *  'readSAMheader'. The SAM header is stored in 'header'. Reads the first
      *  record and stores it in 'curr'.
      */
-    SAMParser(const std::string &fileName);
+    explicit SAMParser(const std::string &fileName);
 
     /** @brief Destructor: SAMParser
      *

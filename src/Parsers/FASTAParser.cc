@@ -15,25 +15,37 @@
 #include <fstream>
 #include <iostream>
 
-FASTAParser::FASTAParser(void)
+FASTAParser::FASTAParser(void): line(NULL), lineSize(sizeof(char) * (4*KB))
+{
+    line = (char *)malloc(lineSize); // usually, lines are limited to 80 chars, so 4 KB should be enough
+}
+
+FASTAParser::FASTAParser(const FASTAParser &fastaParser)
+    : line(fastaParser.line)
+    , lineSize(fastaParser.lineSize)
 {
     // empty
 }
 
 FASTAParser::~FASTAParser(void) 
 {
-    // empty
+    free(line);
 }
 
 void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTAReference> &fastaReferences)
 {
+    if (fileName.length() == 0) {
+        throwErrorException("No file name given");
+    }
     if (   fileNameExtension(fileName) != std::string("fa")
         && fileNameExtension(fileName) != std::string("fasta")) {
         throwErrorException("Reference file extension must be 'fa' or 'fasta'");
     }
-
-    if (!fileExists(fileName)) {
+    if (fileExists(fileName) == false) {
         throwErrorException("Cannot access reference file");
+    }
+    if (fastaReferences.size() != 0) {
+        throwErrorException("Vector 'fastaReferences' must be empty");
     }
 
     std::ifstream ifs;
@@ -42,7 +54,7 @@ void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTARefere
     FASTAReference fastaReference;
     bool first = true;
 
-    while (ifs.getline(line, sizeof(line))) {
+    while (ifs.getline(line, lineSize)) {
         if (line[0] == '>') {
             if (first) {
                 fastaReference.header = line+1; // do not take the '>'

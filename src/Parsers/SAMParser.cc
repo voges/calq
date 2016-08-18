@@ -21,10 +21,12 @@ SAMParser::SAMParser(const std::string &fileName)
     , curr()
     , ifs()
 {
+    if (fileName.length() == 0) {
+        throwErrorException("No file name given");
+    }
     if (fileNameExtension(fileName) != std::string("sam")) {
         throwErrorException("SAM file extension must be 'sam'");
     }
-
     if (!fileExists(fileName)) {
         throwErrorException("Cannot access SAM file");
     }

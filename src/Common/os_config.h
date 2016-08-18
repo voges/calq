@@ -24,7 +24,7 @@
         #define OS_WINDOWS_32
     #endif
 #elif __APPLE__
-    // Defines for Apple (all Mac OSs and iOSs)
+    // Defines for Apple (all Mac OSes and iOSes)
     #define OS_APPLE
 #elif __linux__
     // Defines for Linux

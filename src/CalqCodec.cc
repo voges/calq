@@ -18,9 +18,9 @@
 #include <iostream>
 #include <string.h>
 
-static bool samRecordIsMapped(SAMRecord &samRecord)
+static bool samRecordIsMapped(const SAMRecord &samRecord)
 {
-    if (   ((samRecord.flag & 0x4) == 1)
+    if (   ((samRecord.flag & 0x4) != 0)
         || (strlen(samRecord.rname) == 0 || samRecord.rname[0] == '*')
         || (samRecord.pos == 0)
         || (strlen(samRecord.cigar) == 0 || samRecord.cigar[0] == '*')
@@ -39,6 +39,16 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     , inFileName(inFileName)
     , outFileName(outFileName)
 {
+    if (inFileName.length() == 0) {
+        throwErrorException("No input file name given");
+    }
+    if (outFileName.length() == 0) {
+        throwErrorException("No output file name given");
+    }
+    if (fastaFileNames.size() == 0) {
+        throwErrorException("No FASTA file names given");
+    }
+
     // Get reference sequences
     FASTAParser fastaParser;
     for (auto const &fastaFileName : fastaFileNames) {
@@ -148,15 +158,17 @@ void CalqEncoder::encode(void)
     // Print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
-    std::cout << ME << "STATISTICS" << std::endl;
-    std::cout << ME << "  Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms" << " ~= " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
-    std::cout << ME << "  Compressed " << numRecords << " record(s) (" << numMappedRecords << " mapped record(s) and " << numUnmappedRecords << " unmapped record(s)) in " << numBlocks << " block(s)" << std::endl;
+    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
+    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    std::cout << ME << "COMPRESSION STATISTICS" << std::endl;
+    std::cout << ME << "  Took " << diffTimeMs << " ms" << " ~= " << diffTimeS << " s" << std::endl;
+    std::cout << ME << "  Compressed " << numMappedRecords << " mapped + " << numUnmappedRecords << " unmapped = " << numRecords << " record(s) in " << numBlocks << " block(s)" << std::endl;
     std::cout << ME << "  Uncompressed size: " << uncompressedSize << std::endl;
     std::cout << ME << "  Compressed size: " << compressedSize << " (+ file header size: " << fileHeaderSize << ")" << std::endl;
     std::cout << ME << "  Compression ratio: " << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
     std::cout << ME << "  Compression factor: " << (double)uncompressedSize/(double)compressedSize << std::endl;
     std::cout << ME << "  Bits per quality value: " << ((double)compressedSize * 8)/(double)uncompressedSize << std::endl;
-    std::cout << ME << "  Speed (uncompressed size/time): " << ((double)(uncompressedSize/MB))/(double)std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " MB/s" << std::endl;
+    std::cout << ME << "  Speed (uncompressed size/time): " << ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000) << " MB/s" << std::endl;
 }
 
 size_t CalqEncoder::writeFileHeader(void)
@@ -197,11 +209,11 @@ void CalqDecoder::decode(void)
     auto startTime = std::chrono::steady_clock::now();
 
     size_t compressedSize = 0;
-    /*size_t fileHeaderSize = */readFileHeader();
+    size_t fileHeaderSize = readFileHeader();
 
     size_t numBlocks = 0;
     while (cqFile.tell() < cqFile.size()) {
-        std::cout << ME << "Decoding block " << numBlocks << std::endl;
+        //std::cout << ME << "Decoding block " << numBlocks << std::endl;
         compressedSize += qualDecoder.decodeBlock();
 
         // Get numRecordsInBlock from SAM file
@@ -219,11 +231,13 @@ void CalqDecoder::decode(void)
     // Print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
-    std::cout << ME << "STATISTICS" << std::endl;
-    std::cout << ME << "  Took " << std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count() << " ms"
-              << " ~= " << std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " s" << std::endl;
+    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
+    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    std::cout << ME << "DECOMPRESSION STATISTICS" << std::endl;
+    std::cout << ME << "  Took " << diffTimeMs << " ms" << " ~= " << diffTimeS << " s" << std::endl;
     std::cout << ME << "  Decoded " << numBlocks << " block(s)" << std::endl;
-    std::cout << ME << "  Speed (compressed size/time): " << ((double)(compressedSize/MB))/(double)std::chrono::duration_cast<std::chrono::seconds>(diffTime).count() << " MB/s" << std::endl;
+    std::cout << ME << "  Compressed size: " << compressedSize << " (+ file header size: " << fileHeaderSize << ")" << std::endl;
+    std::cout << ME << "  Speed (compressed size/time): " << ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000) << " MB/s" << std::endl;
 }
 
 size_t CalqDecoder::readFileHeader(void)
@@ -244,9 +258,9 @@ size_t CalqDecoder::readFileHeader(void)
         throwErrorException("CQ file was compressed with another version");
     }
 
-    std::cout << ME << "Magic: " << magic << std::endl;
-    std::cout << ME << "Version: " << version << std::endl;
-    std::cout << ME << "Polyploidy: " << polyploidy << std::endl;
+    std::cout << ME << "  Magic: " << magic << std::endl;
+    std::cout << ME << "  Version: " << version << std::endl;
+    std::cout << ME << "  Polyploidy: " << polyploidy << std::endl;
 
     return ret;
 }

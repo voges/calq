@@ -23,7 +23,7 @@
  */
 class MappedRecord {
 public:
-    MappedRecord(const SAMRecord &samRecord);
+    explicit MappedRecord(const SAMRecord &samRecord);
     ~MappedRecord(void);
 
     uint32_t posMin;

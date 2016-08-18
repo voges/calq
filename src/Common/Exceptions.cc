@@ -12,9 +12,9 @@
 
 #include "Exceptions.h"
 
-Exception::Exception(const std::string &msg)
+Exception::Exception(const std::string &msg): msg(msg)
 {
-    this->msg = msg;
+    // empty
 }
 
 Exception::~Exception(void) throw () 

@@ -23,7 +23,7 @@
  */
 class Exception : public std::exception {
 public:
-    Exception(const std::string &msg);
+    explicit Exception(const std::string &msg);
     virtual ~Exception(void) throw();
     virtual std::string getMessage(void) const;
     virtual const char * what(void) const throw();
@@ -34,14 +34,14 @@ protected:
 
 /** @brief Class: ErrorException
  *
- *  This exception is thrown by calls to the >throwErrorException function.
+ *  This exception is thrown by calls to the throwErrorException function.
  *  If an ErrorException is thrown at any point in the range of the try block
  *  (including in functions called from that code), control will jump
  *  immediately to the error handler.
  */
 class ErrorException : public Exception {
 public:
-    ErrorException(const std::string &msg): Exception(msg) {}
+    explicit ErrorException(const std::string &msg): Exception(msg) {}
 };
 
 /** @brief Global function: throwErrorException

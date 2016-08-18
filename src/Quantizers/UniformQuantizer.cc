@@ -95,7 +95,7 @@ int UniformQuantizer::valueToReconstructionValue(const int &value)
     return lut[value].second;
 }
 
-void UniformQuantizer::print(void)
+void UniformQuantizer::print(void) const
 {
     std::cout << ME << "LUT:" << std::endl;
     for (auto const &lutEntry : lut) {

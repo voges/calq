@@ -14,10 +14,6 @@
 
 #include <string>
 
-/** @brief Class: File
- *
- *  The File class handles basic file I/O.
- */
 class File {
 public:
     File(void);

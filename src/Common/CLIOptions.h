@@ -15,11 +15,6 @@
 #include <string>
 #include <vector>
 
-/** @brief Class: CLIOptions
- *
- *  The CLIOptions class is a container for command line options provided by
- *  the user.
- */
 class CLIOptions {
 public:
     CLIOptions(void)

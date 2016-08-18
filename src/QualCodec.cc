@@ -11,13 +11,16 @@
  */
 
 #include "QualCodec.h"
+#include "Common/CLIOptions.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/debug.h"
 #include "Compressors/range/range.h"
 #include "Compressors/rle/rle.h"
+#include <iomanip>
 #include <limits>
 #include <stdlib.h>
+#include <string.h>
 
 static const unsigned int QUANTIZER_STEP_MIN = 2;
 static const unsigned int QUANTIZER_STEP_MAX = 8;
@@ -30,13 +33,26 @@ QualEncoder::QualEncoder(File &cqFile,
                          const unsigned int &polyploidy,
                          const int &qvMin,
                          const int &qvMax)
-    : fastaReferences(fastaReferences)
-    , numBlocks(0)
-    , numMappedRecords(0)
-    , numUnmappedRecords(0)
-    , cqFile(cqFile)
+    // Class scope
+    : verbose(false)
     , qvMin(qvMin)
     , qvMax(qvMax)
+    , fastaReferences(fastaReferences)
+    , cqFile(cqFile)
+    , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
+    , uniformQuantizers()
+    , uncompressedSize(0)
+    , compressedSize(0)
+    , numBlocks(0)
+    , numRecords(0)
+    , numMappedRecords(0)
+    , numUnmappedRecords(0)
+    // Block scope
+    , uncompressedSizeOfBlock(0)
+    , compressedSizeOfBlock(0)
+    , numRecordsInBlock(0)
+    , numMappedRecordsInBlock(0)
+    , numUnmappedRecordsInBlock(0)
     , qi("")
     , qvi("")
     , uqv("")
@@ -48,12 +64,22 @@ QualEncoder::QualEncoder(File &cqFile,
     , observedQualityValues()
     , observedPosMin(std::numeric_limits<uint32_t>::max())
     , observedPosMax(std::numeric_limits<uint32_t>::min())
-    , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
-    , uniformQuantizers()
     , quantizerIndices()
     , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
+    if (fastaReferences.size() == 0) {
+        throwErrorException("No FASTA references given");
+    }
+    if (polyploidy == 0) {
+        throwErrorException("polyploidy must be greater than zero");
+    }
+
+    // Check if this class shall be verbose
+    if (cliOptions.verbose == true) {
+        verbose = true;
+    }
+
     // Init uniform quantizers
     std::cout << ME << "Initializing " << QUANTIZER_NUM << " uniform quantizers" << std::endl;
     for (unsigned int i = 0; i < QUANTIZER_NUM; i++) {
@@ -66,15 +92,28 @@ QualEncoder::QualEncoder(File &cqFile,
 
 QualEncoder::~QualEncoder(void)
 {
-    std::cout << ME << "Encoded " << numMappedRecords << " mapped record(s)"
-              << " and " << numUnmappedRecords << " unmapped record(s)"
-              << " in " << numBlocks << " block(s)" << std::endl;
+    if (verbose == true) {
+        std::cout << ME << "QualEncoder statistics:" << std::endl;
+        std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSize << std::endl;
+        std::cout << ME << "  Compressed size:    " << std::setw(9) << compressedSize << std::endl;
+        std::cout << ME << "  Blocks:             " << std::setw(9) << numBlocks << std::endl;
+        std::cout << ME << "  Records:            " << std::setw(9) << numRecords << std::endl;
+        std::cout << ME << "    Mapped:           " << std::setw(9) << numMappedRecords << std::endl;
+        std::cout << ME << "    Unmapped:         " << std::setw(9) << numUnmappedRecords << std::endl;
+        std::cout << ME << "  Compression ratio:  " << std::setw(9) << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
+        std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSize/(double)compressedSize << std::endl;
+
+    }
 }
 
 void QualEncoder::startBlock(void)
 {
     std::cout << ME << "Starting block " << numBlocks << std::endl;
 
+    // Reset all variables in block scope
+    uncompressedSizeOfBlock = 0;
+    compressedSizeOfBlock = 0;
+    numRecordsInBlock = 0;
     numMappedRecordsInBlock = 0;
     numUnmappedRecordsInBlock = 0;
     qi = "";
@@ -95,13 +134,22 @@ void QualEncoder::startBlock(void)
 
 void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
 {
+    uncompressedSizeOfBlock += strlen(samRecord.qual);
+    uncompressedSize += strlen(samRecord.qual);
+
     encodeUnmappedQualityValues(std::string(samRecord.qual));
+
     numUnmappedRecordsInBlock++;
+    numRecordsInBlock++;
     numUnmappedRecords++;
+    numRecords++;
 }
 
 void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 {
+    uncompressedSizeOfBlock += strlen(samRecord.qual);
+    uncompressedSize += strlen(samRecord.qual);
+
     // If the reference is empty, then this is the first mapped record being
     // added to the current block. If so, we load the corresponding reference
     // and initially set the min mapping positions for this block.
@@ -160,16 +208,14 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     }
 
     numMappedRecordsInBlock++;
+    numRecordsInBlock++;
     numMappedRecords++;
+    numRecords++;
 }
 
 size_t QualEncoder::finishBlock(void)
 {
     size_t ret = 0;
-
-    std::cout << ME << "Finishing block " << numBlocks << std::endl;
-    std::cout << ME << "  " << numMappedRecordsInBlock << " mapped record(s)" << std::endl;
-    std::cout << ME << "  " << numUnmappedRecordsInBlock << " unmapped record(s)" << std::endl;
 
     // Compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
@@ -198,6 +244,12 @@ size_t QualEncoder::finishBlock(void)
             }
         }
     }
+
+    // Write block number and numbers of records to output file
+    ret += cqFile.writeUint64(numBlocks);
+    ret += cqFile.writeUint64(numRecordsInBlock);
+    ret += cqFile.writeUint64(numMappedRecordsInBlock);
+    ret += cqFile.writeUint64(numUnmappedRecordsInBlock);
 
     // RLE and range encoding for quantizer indices
     //std::cout << "Quantizer indices: " << qi << std::endl;
@@ -318,8 +370,22 @@ size_t QualEncoder::finishBlock(void)
         ret += cqFile.writeUint64(0);
     }
 
-    //std::cout << ME << "Finished block " << numBlocks << std::endl;
+    // Update sizes & counters
+    compressedSizeOfBlock += ret;
+    compressedSize += compressedSizeOfBlock;
     numBlocks++;
+
+    // Print statistics for this block
+    if (verbose == true) {
+        std::cout << ME << "Encoded block " << (numBlocks-1) << std::endl;
+        std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSizeOfBlock << std::endl;
+        std::cout << ME << "  Compressed size:    " << std::setw(9) << compressedSizeOfBlock << std::endl;
+        std::cout << ME << "  Records:            " << std::setw(9) << numRecordsInBlock << std::endl;
+        std::cout << ME << "    Mapped:           " << std::setw(9) << numMappedRecordsInBlock << std::endl;
+        std::cout << ME << "    Unmapped:         " << std::setw(9) << numUnmappedRecordsInBlock << std::endl;
+        std::cout << ME << "  Compression ratio:  " << std::setw(9) << (double)compressedSizeOfBlock*100/(double)uncompressedSizeOfBlock << "%" << std::endl;
+        std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSizeOfBlock/(double)compressedSizeOfBlock << std::endl;
+    }
 
     return ret;
 }
@@ -327,7 +393,9 @@ size_t QualEncoder::finishBlock(void)
 void QualEncoder::loadFastaReference(const std::string &rname)
 {
     // Find FASTA reference for this RNAME
-    std::cout << ME << "Searching FASTA reference for: " << rname << std::endl;
+    if (verbose) {
+        std::cout << ME << "Searching FASTA reference for: " << rname << std::endl;
+    }
     bool foundFastaReference = false;
 
     for (auto const &fastaReference : fastaReferences) {
@@ -343,7 +411,9 @@ void QualEncoder::loadFastaReference(const std::string &rname)
     }
 
     if (foundFastaReference == true) {
-        std::cout << ME << "Found FASTA reference" << std::endl;
+        if (verbose) {
+            std::cout << ME << "Found FASTA reference" << std::endl;
+        }
     } else {
         throwErrorException("Could not find FASTA reference");
     }
@@ -411,21 +481,67 @@ void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
 QualDecoder::QualDecoder(File &cqFile,
                          File &qualFile,
                          const std::vector<FASTAReference> &fastaReferences)
-    : cqFile(cqFile)
+    // Class scope
+    : verbose(false)
     , fastaReferences(fastaReferences)
+    , cqFile(cqFile)
     , qualFile(qualFile)
+    , uncompressedSize(0)
+    , compressedSize(0)
+    , numBlocks(0)
+    , numRecords(0)
+    , numMappedRecords(0)
+    , numUnmappedRecords(0)
+    // Block scope
+    , uncompressedSizeOfBlock(0)
+    , compressedSizeOfBlock(0)
+    , numRecordsInBlock(0)
+    , numMappedRecordsInBlock(0)
+    , numUnmappedRecordsInBlock(0)
 {
-
+    // Check if this class shall be verbose
+    if (cliOptions.verbose == true) {
+        verbose = true;
+    }
 }
 
 QualDecoder::~QualDecoder(void)
 {
-    // empty
+    if (verbose == true) {
+        std::cout << ME << "QualDecoder statistics:" << std::endl;
+        //std::cout << ME << "  Uncompressed size: " << std::setw(9) << uncompressedSize << std::endl;
+        std::cout << ME << "  Compressed size:   " << std::setw(9) << compressedSize << std::endl;
+        std::cout << ME << "  Blocks:            " << std::setw(9) << numBlocks << std::endl;
+        std::cout << ME << "  Records:           " << std::setw(9) << numRecords << std::endl;
+        std::cout << ME << "    Mapped:          " << std::setw(9) << numMappedRecords << std::endl;
+        std::cout << ME << "    Unmapped:        " << std::setw(9) << numUnmappedRecords << std::endl;
+    }
 }
 
 size_t QualDecoder::decodeBlock(void)
 {
     size_t ret = 0;
+
+    std::cout << ME << "Decoding block " << numBlocks << std::endl;
+
+    // Reset all variables in block scope
+    uncompressedSizeOfBlock = 0;
+    compressedSizeOfBlock = 0;
+    numRecordsInBlock = 0;
+    numMappedRecordsInBlock = 0;
+    numUnmappedRecordsInBlock = 0;
+
+    // Read and check block number
+    uint64_t blockNumber = 0;
+    ret += cqFile.readUint64(&blockNumber);
+    if (numBlocks != blockNumber) {
+        throwErrorException("Corrupted block number in CQ file");
+    }
+
+    // Read record numbers for this block
+    ret += cqFile.readUint64(&numRecordsInBlock);
+    ret += cqFile.readUint64(&numMappedRecordsInBlock);
+    ret += cqFile.readUint64(&numUnmappedRecordsInBlock);
 
     std::string qiRLEString("");
     uint64_t numQiBlocks = 0;
@@ -456,7 +572,7 @@ size_t QualDecoder::decodeBlock(void)
 
         size_t qiSize = 0;
         unsigned char *qi = rle_decode((unsigned char *)qiRLEString.c_str(), qiRLEString.length(), &qiSize, QUANTIZER_NUM, (unsigned int)'0');
-        std::string qiString((char *)qi, qiSize);
+        //std::string qiString((char *)qi, qiSize);
         //std::cout << ME << "Decoded quantizer indices: " << qiString << std::endl;
         free(qi);
     }
@@ -490,12 +606,12 @@ size_t QualDecoder::decodeBlock(void)
 
         size_t qviSize = 0;
         unsigned char *qvi = rle_decode((unsigned char *)qviRLEString.c_str(), qviRLEString.length(), &qviSize, QUANTIZER_STEP_MAX, (unsigned int)'0');
-        std::string qviString((char *)qvi, qviSize);
+        //std::string qviString((char *)qvi, qviSize);
         //std::cout << ME << "Decoded quality value indices: " << qviString << std::endl;
         free(qvi);
     }
 
-    std::string uqvString("");
+    //std::string uqvString("");
     uint64_t numUqvBlocks = 0;
     ret += cqFile.readUint64(&numUqvBlocks);
     for (size_t i = 0; i < numUqvBlocks; i++) {
@@ -509,19 +625,37 @@ size_t QualDecoder::decodeBlock(void)
             unsigned int uqvSize = 0;
             unsigned char *uqv= range_decompress_o1(uqvRange, &uqvSize);
             free(uqvRange);
-            std::string uqvStringTmp((char *)uqv, uqvSize);
+            //std::string uqvStringTmp((char *)uqv, uqvSize);
             free(uqv);
-            uqvString += uqvStringTmp;
+            //uqvString += uqvStringTmp;
         } else { // uqvRangeFlag == 0
             unsigned int uqvSize = 0;
             ret += cqFile.readUint32(&uqvSize);
             unsigned char *uqv = (unsigned char *)malloc(uqvSize);
             ret += cqFile.read(uqv, uqvSize);
-            std::string uqvStringTmp((char *)uqv, uqvSize);
+            //std::string uqvStringTmp((char *)uqv, uqvSize);
             free(uqv);
-            uqvString += uqvStringTmp;
+            //uqvString += uqvStringTmp;
         }
         //std::cout << ME << "Decoded unmapped quality values: " << uqvString << std::endl;
+    }
+
+    // Update sizes & counters
+    compressedSizeOfBlock += ret;
+    compressedSize += compressedSizeOfBlock;
+    numBlocks++;
+    numRecords += numRecordsInBlock;
+    numMappedRecords += numMappedRecordsInBlock;
+    numUnmappedRecords += numUnmappedRecordsInBlock;
+
+    // Print statistics for this block
+    if (verbose == true) {
+        std::cout << ME << "Decoded block " << blockNumber << std::endl;
+        //std::cout << ME << "  Uncompressed size: " << uncompressedSizeOfBlock << std::endl;
+        std::cout << ME << "  Compressed size: " << std::setw(9) << compressedSizeOfBlock << std::endl;
+        std::cout << ME << "  Records:         " << std::setw(9) << numRecordsInBlock << std::endl;
+        std::cout << ME << "    Mapped:        " << std::setw(9) << numMappedRecordsInBlock << std::endl;
+        std::cout << ME << "    Unmapped:      " << std::setw(9) << numUnmappedRecordsInBlock << std::endl;
     }
 
     return ret;

@@ -31,7 +31,7 @@ public:
     int indexToReconstructionValue(const int &index);
     int valueToReconstructionValue(const int &value);
 
-    void print(void);
+    void print(void) const;
 
 private:
     std::map<int,std::pair<int,int>> lut; // value->(index,reconstructionValue)

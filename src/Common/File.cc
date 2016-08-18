@@ -14,6 +14,7 @@
 #include "Common/os_config.h"
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 
 File::File(void)
     : fp(NULL)
@@ -36,6 +37,13 @@ File::~File(void)
 
 void File::open(const std::string &path, const char *mode)
 {
+    if (fp != NULL) { 
+        throwErrorException("File pointer already in use");
+    }
+    if (strlen(mode) == 0) {
+        throwErrorException("mode is empty");
+    }
+
 #ifdef OS_WINDOWS
     int err = fopen_s(&fp, path.c_str(), mode);
     if (err != 0) {
@@ -110,11 +118,17 @@ size_t File::tell(void)
 
 size_t File::read(void *buffer, const size_t &size) 
 {
+    if (size == 0) {
+        throwErrorException("Attempted to read zero bytes");
+    }
     return fread(buffer, 1, size, fp); 
 }
 
 size_t File::write(void *buffer, const size_t &size) 
 {
+    if (size == 0) {
+        throwErrorException("Attempted to write zero bytes");
+    }
     return fwrite(buffer, 1, size, fp); 
 }
 
@@ -140,11 +154,11 @@ size_t File::readUint16(uint16_t *word)
     if (ret != sizeof(uint16_t)) {
         free(buffer);
         throwErrorException("read failed");
+    } else {
+        *word = (uint16_t)buffer[2] <<  8 | (uint16_t)buffer[3];
+        free(buffer);
     }
 
-    *word = (uint16_t)buffer[2] <<  8 | (uint16_t)buffer[3];
-
-    free(buffer);
     return ret;
 }
 
@@ -160,14 +174,14 @@ size_t File::readUint32(uint32_t *dword)
     if (ret != sizeof(uint32_t)) {
         free(buffer);
         throwErrorException("read failed");
+    } else {
+        *dword = (uint32_t)buffer[0] << 24 |
+                (uint32_t)buffer[1] << 16 |
+                (uint32_t)buffer[2] <<  8 |
+                (uint32_t)buffer[3];
+        free(buffer);
     }
 
-    *dword = (uint32_t)buffer[0] << 24 |
-             (uint32_t)buffer[1] << 16 |
-             (uint32_t)buffer[2] <<  8 |
-             (uint32_t)buffer[3];
-
-    free(buffer);
     return ret;
 }
 
@@ -183,18 +197,18 @@ size_t File::readUint64(uint64_t *qword)
     if (ret != sizeof(uint64_t)) {
         free(buffer);
         throwErrorException("read failed");
+    } else {
+        *qword = (uint64_t)buffer[0] << 56 |
+                (uint64_t)buffer[1] << 48 |
+                (uint64_t)buffer[2] << 40 |
+                (uint64_t)buffer[3] << 32 |
+                (uint64_t)buffer[4] << 24 |
+                (uint64_t)buffer[5] << 16 |
+                (uint64_t)buffer[6] <<  8 |
+                (uint64_t)buffer[7];
+        free(buffer);
     }
 
-    *qword = (uint64_t)buffer[0] << 56 |
-             (uint64_t)buffer[1] << 48 |
-             (uint64_t)buffer[2] << 40 |
-             (uint64_t)buffer[3] << 32 |
-             (uint64_t)buffer[4] << 24 |
-             (uint64_t)buffer[5] << 16 |
-             (uint64_t)buffer[6] <<  8 |
-             (uint64_t)buffer[7];
-
-    free(buffer);
     return ret;
 }
 

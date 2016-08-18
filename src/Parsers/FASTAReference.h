@@ -21,10 +21,7 @@
  */
 class FASTAReference {
 public:
-    FASTAReference(void) 
-        : header("")
-        , sequence("")
-    {}
+    FASTAReference(void): header(""), sequence("") {}
     ~FASTAReference(void) {}
 
     std::string header;

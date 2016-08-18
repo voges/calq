@@ -94,6 +94,9 @@ int main(int argc, char *argv[])
         if (polyploidyArg.isSet() && decompressSwitch.isSet()) {
             throwErrorException("Combining arguments 'p' and 'd' is forbidden");
         }
+        if (typeArg.isSet() && decompressSwitch.isSet()) {
+            throwErrorException("Combining arguments 't' and 'd' is forbidden");
+        }
         if (samfileArg.isSet() && !decompressSwitch.isSet()) {
             throwErrorException("Argument 's' is forbidden for compression");
         }
@@ -112,48 +115,6 @@ int main(int argc, char *argv[])
         cliOptions.samFileName = samfileArg.getValue();
         cliOptions.type = typeArg.getValue();
         cliOptions.verbose = verboseSwitch.getValue();
-
-        // Check block size
-        if (cliOptions.blockSize < 1) {
-            throwErrorException("Block size must be greater than 0");
-        }
-        if (decompressSwitch.isSet() == false) {
-            std::cout << ME << "Using block size: " << cliOptions.blockSize << std::endl;
-        }
-
-        // Check polyploidy
-        if (cliOptions.polyploidy < 1) {
-            throwErrorException("Polyploidy must be greater than 0");
-        }
-        if (cliOptions.polyploidy > 6 && cliOptions.force == false) {
-            throwErrorException("Polyploidy very high (use option 'f' to force processing)");
-        }
-        std::cout << ME << "Using polyploidy: " << cliOptions.polyploidy << std::endl;
-
-        // Check type of quality values
-        // Supported quality value ranges:
-        //   Sanger         Phred+33   [0,40]
-        //   Illumina 1.3+  Phred+64   [0,40]
-        //   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
-        //   Illumina 1.8+  Phred+33   [0,41]
-        int qvMin = 0;
-        int qvMax = 0;
-        if (cliOptions.type == "sanger") {
-            qvMin = 33;
-            qvMax = qvMin + 40;
-        } else if (cliOptions.type == "illumina-1.3+") {
-            qvMin = 64;
-            qvMax = qvMin + 40;
-        } else if (cliOptions.type == "illumina-1.5+") {
-            qvMin = 64;
-            qvMax = qvMin + 40;
-        } else if (cliOptions.type == "illumina-1.8+") {
-            qvMin = 33;
-            qvMax = qvMin + 41;
-        } else {
-            throwErrorException("Quality value type not supported");
-        }
-        std::cout << ME << "Using quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
 
         // Check verbosity
         if (cliOptions.verbose == true) {
@@ -213,6 +174,48 @@ int main(int argc, char *argv[])
 
         // Compress or decompress
         if (cliOptions.decompress == false) {
+            // Check block size
+            if (cliOptions.blockSize < 1) {
+                throwErrorException("Block size must be greater than 0");
+            }
+            if (decompressSwitch.isSet() == false) {
+                std::cout << ME << "Using block size: " << cliOptions.blockSize << std::endl;
+            }
+
+            // Check polyploidy
+            if (cliOptions.polyploidy < 1) {
+                throwErrorException("Polyploidy must be greater than 0");
+            }
+            if (cliOptions.polyploidy > 6 && cliOptions.force == false) {
+                throwErrorException("Polyploidy very high (use option 'f' to force processing)");
+            }
+            std::cout << ME << "Using polyploidy: " << cliOptions.polyploidy << std::endl;
+
+            // Check type of quality values
+            // Supported quality value ranges:
+            //   Sanger         Phred+33   [0,40]
+            //   Illumina 1.3+  Phred+64   [0,40]
+            //   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
+            //   Illumina 1.8+  Phred+33   [0,41]
+            int qvMin = 0;
+            int qvMax = 0;
+            if (cliOptions.type == "sanger") {
+                qvMin = 33;
+                qvMax = qvMin + 40;
+            } else if (cliOptions.type == "illumina-1.3+") {
+                qvMin = 64;
+                qvMax = qvMin + 40;
+            } else if (cliOptions.type == "illumina-1.5+") {
+                qvMin = 64;
+                qvMax = qvMin + 40;
+            } else if (cliOptions.type == "illumina-1.8+") {
+                qvMin = 33;
+                qvMax = qvMin + 41;
+            } else {
+                throwErrorException("Quality value type not supported");
+            }
+            std::cout << ME << "Using quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
+
             CalqEncoder calqEncoder(cliOptions.inFileName,
                                     cliOptions.outFileName,
                                     cliOptions.refFileNames,

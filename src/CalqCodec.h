@@ -21,33 +21,11 @@
 #include <string>
 #include <vector>
 
-/** @brief Class: CalqCodec
- *
- *  The CalqEncoder and the CalqDecoder classes inherit common methods from
- *  this class.
- */
 class CalqCodec {
 public:
-    /** @brief Constructor: CalqCodec
-     *
-     *  Initializes a new CalqCodec instance and reads the reference
-     *  sequence(s) from all provided FASTA files. The reference
-     *  sequence(s) are stored in 'fastaReferences'.
-     *
-     *  @param inFileName File name of the input file to be en- or decoded
-     *  @param outfileName File name of the output file
-     *  @param fastaFileNames Vector containing the file names of the FASTA
-     *         which contain the reference sequence(s) used during en- or
-     *         decoding
-     */
     CalqCodec(const std::string &inFileName,
               const std::string &outFileName,
               const std::vector<std::string> &fastaFileNames);
-
-    /** @brief Destructor: CalqCodec
-     *
-     *  Destructs a CalqCodec instance.
-     */
     virtual ~CalqCodec(void);
 
 protected:
@@ -56,13 +34,6 @@ protected:
     const std::string outFileName;
 };
 
-/** @brief Class: CalqEncoder
-*
-*  The CalqEncoder provides only one interface to the outside which is the
-*  member function encode; it encodes the SAM file with the name infileName
-*  with the specified blockSize and writes the encoded bitstream to the CQ
-*  file with the name outfileName.
-*/
 class CalqEncoder: public CalqCodec {
 public:
     CalqEncoder(const std::string &samFileName,
@@ -86,12 +57,6 @@ private:
     size_t writeFileHeader(void);
 };
 
-/** @brief Class: CalqDecoder
- *
- *  The CalqDecoder provides only one interface to the outside which is the
- *  member function decode; it decodes the CQ file with the name infileName
- *  and writes the decoded quality scores to the file with the name outfileName.
- */
 class CalqDecoder: public CalqCodec {
 public:
     CalqDecoder(const std::string &cqFileName,

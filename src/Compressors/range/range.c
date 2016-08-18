@@ -259,22 +259,22 @@ unsigned char * range_compress_o0(unsigned char *in,
                                   unsigned int  *out_sz)
 {
     unsigned char* out_buf = malloc((size_t)(1.05*in_sz + 257*257*3 + 21));
+    if (!out_buf) { return NULL; }
+
     unsigned char* cp;
     int F[256], C[256], T = 0, i, j, n, i_end;
-    unsigned char c;
+    //unsigned char c;
     rangecoder_t rc[8];
     char* blk0 = malloc(BLK_SIZE2);
     char* blk1 = malloc(BLK_SIZE2);
     char* blk2 = malloc(BLK_SIZE2);
     char* blk3 = malloc(BLK_SIZE2);
 
-    if (!out_buf) return NULL;
-
     /* Compute statistics. */
     memset(F, 0, 256*sizeof(int));
     memset(C, 0, 256*sizeof(int));
     for (i = 0; i < (int)in_sz; i++) {
-        F[c = in[i]]++;
+        F[/*c = */in[i]]++;
         T++;
     }
 
@@ -445,10 +445,10 @@ unsigned char * range_decompress_o0(unsigned char *in,
     rangecoder_start_decode(&rc[2]);
     cp += sz + 4;
 
-    sz = cp[0] + (cp[1]<<8) + (cp[2]<<16) + (cp[3]<<24);
+    //sz = cp[0] + (cp[1]<<8) + (cp[2]<<16) + (cp[3]<<24);
     rangecoder_input(&rc[3], (char* )cp+4);
     rangecoder_start_decode(&rc[3]);
-    cp += sz + 4;
+    //cp += sz + 4;
 
     /* Tight decoding loop, unrolled 4-ways. */
     i_end = out_size&~3;
@@ -509,7 +509,7 @@ unsigned char * range_compress_o1(unsigned char *in,
     unsigned char c;
     char* blk = malloc(BLK_SIZE2*8+8);
 
-    if (!out_buf || !out_buf) {
+    if (!blk || !out_buf) {
         if (blk) free(blk);
         if (out_buf) free(out_buf);
         return NULL;
@@ -799,9 +799,9 @@ unsigned char * range_decompress_o1(unsigned char *in,
     rangecoder_input(&rc[6], (char* )cp+4);
     cp += sz+4;
 
-    sz = cp[0] + (cp[1]<<8) + (cp[2]<<16) + (cp[3]<<24);
+    //sz = cp[0] + (cp[1]<<8) + (cp[2]<<16) + (cp[3]<<24);
     rangecoder_input(&rc[7], (char* )cp+4);
-    cp += sz+4;
+    //cp += sz+4;
 
     rangecoder_start_decode(&rc[0]);
     rangecoder_start_decode(&rc[1]);

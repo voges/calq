@@ -25,10 +25,6 @@
 #include <queue>
 #include <vector>
 
-/** @brief Class: QualEncoder
- *
- *  The QualEncoder class encodes the quality scores.
- */
 class QualEncoder {
 public:
     QualEncoder(File &cqFile, 
@@ -45,27 +41,41 @@ public:
 
 private:
     ////////////////////////////////////////////////////////////////////////////
+    // Class scope:
     // These member variables are used throughout coding multiple blocks
     ////////////////////////////////////////////////////////////////////////////
 
-    std::vector<FASTAReference> fastaReferences;
-    size_t numBlocks;
-    size_t numMappedRecords;
-    size_t numUnmappedRecords;
-    File &cqFile;
+    // Generic
+    bool verbose;
     int qvMin;
     int qvMax;
+    std::vector<FASTAReference> fastaReferences;
+    File &cqFile;
+    Genotyper genotyper;
+    std::map<int,UniformQuantizer> uniformQuantizers;
+
+    // Sizes & counters
+    size_t uncompressedSize;
+    size_t compressedSize;
+    size_t numBlocks;
+    size_t numRecords;
+    size_t numMappedRecords;
+    size_t numUnmappedRecords;
 
     ////////////////////////////////////////////////////////////////////////////
+    // Block scope:
     // The following member variables are used per block; all of them are reset
     // by startBlock.
     ////////////////////////////////////////////////////////////////////////////
 
-    // Counters
+    // Sizes & counters
+    size_t uncompressedSizeOfBlock;
+    size_t compressedSizeOfBlock;
+    size_t numRecordsInBlock;
     size_t numMappedRecordsInBlock;
     size_t numUnmappedRecordsInBlock;
 
-    // Strings (i.e. byte buffers) holding the data to be transmitted
+    // Strings to buffer the data to be transmitted
     std::string qi; // quantizer indices
     std::string qvi; // quality value indices
     std::string uqv; // unmapped quality values
@@ -86,12 +96,6 @@ private:
     uint32_t observedPosMin;
     uint32_t observedPosMax;
 
-    // Class to perform the magic ;)
-    Genotyper genotyper;
-
-    // Quantizers
-    std::map<int,UniformQuantizer> uniformQuantizers;
-
     // Computed quantizer indices; when the indices are not needed anymore; the
     // vector is shrinked
     std::vector<int> quantizerIndices;
@@ -104,10 +108,6 @@ private:
     void encodeUnmappedQualityValues(const std::string &qualityValues);
 };
 
-/** @brief Class: QualDecoder
- *
- *  The QualDecoder class decodes the encoded bitstream.
- */
 class QualDecoder {
 public:
     QualDecoder(File &cqFile,
@@ -118,9 +118,37 @@ public:
     size_t decodeBlock(void);
 
 private:
-    File &cqFile;
+    ////////////////////////////////////////////////////////////////////////////
+    // Class scope:
+    // These member variables are used throughout decoding multiple blocks
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Generic
+    bool verbose;
     std::vector<FASTAReference> fastaReferences;
+    File &cqFile;
     File &qualFile;
+
+    // Sizes & counters
+    size_t uncompressedSize;
+    size_t compressedSize;
+    size_t numBlocks;
+    size_t numRecords;
+    size_t numMappedRecords;
+    size_t numUnmappedRecords;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Block scope:
+    // The following member variables are used per block; all of them are reset
+    // by decodeBlock.
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Sizes & counters
+    size_t uncompressedSizeOfBlock;
+    size_t compressedSizeOfBlock;
+    size_t numRecordsInBlock;
+    size_t numMappedRecordsInBlock;
+    size_t numUnmappedRecordsInBlock;
 };
 
 #endif // QUALCODEC_H
