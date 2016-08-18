@@ -1,7 +1,0 @@
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
-
-#define TIMESTAMP_UTC "2016-08-17T11:46:42Z"
-
-#endif // TIMESTAMP_H
-

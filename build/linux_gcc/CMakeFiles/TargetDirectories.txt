@@ -1,5 +1,0 @@
-/home/voges/git/calq/build/linux_gcc/CMakeFiles/calq.dir
-/home/voges/git/calq/build/linux_gcc/CMakeFiles/doc.dir
-/home/voges/git/calq/build/linux_gcc/CMakeFiles/git.dir
-/home/voges/git/calq/build/linux_gcc/CMakeFiles/timestamp.dir
-/home/voges/git/calq/build/linux_gcc/CMakeFiles/version.dir
