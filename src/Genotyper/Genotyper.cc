@@ -174,7 +174,6 @@ double Genotyper::computeGenotypeEntropy(const std::string &observedNucleotides,
         }
     }
 
-    std::cerr << entropy << ",";
     return entropy;
 }
 
@@ -207,7 +206,6 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
     }
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
-    //std::cerr << confidence << ",";
 
 //     for (auto &genotypeLikelihood : genotypeLikelihoods) {
 //         if (genotypeLikelihood.second > largestGenotypeLikelihood) {
@@ -227,5 +225,29 @@ void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
 {
     //haploid: base N has Q and P -- select max as new QV
     //diploid: base N has Q and P1,2,3,4 -- select max as new QV
+
+//     adjustedQualityValues = "";
+//     const size_t depth = observedNucleotides.length();
+// 
+//     if ((depth == 0) || (depth == 1)) {
+//         adjustedQualityValues = observedQualityValues;
+//     }
+// 
+//     computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
+//     
+//     // Get likelihoods for the alleles
+//     std::map<char,std::vector<double>> nucleotideQualityValues;
+//     for (auto const &allele : alleleAlphabet) {
+//         for (auto const &genotype : genotypeAlphabet) {
+//             if (genotype.find(allele) != std::string::npos) {
+//                 nucleotideQualityValues[allele].append(genotypeLikelihoods[genotype];
+//             }
+//         }
+//     }
+//     
+//     // Get the largest likelihood
+//     for (auto const &nucleotideQualityValue : nucleotideQualityValues) {
+//         
+//     }
 }
 
