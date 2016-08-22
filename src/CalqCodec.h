@@ -24,12 +24,10 @@
 class CalqCodec {
 public:
     CalqCodec(const std::string &inFileName,
-              const std::string &outFileName,
-              const std::vector<std::string> &fastaFileNames);
+              const std::string &outFileName);
     virtual ~CalqCodec(void);
 
 protected:
-    std::vector<FASTAReference> fastaReferences;
     const std::string inFileName;
     const std::string outFileName;
 };
@@ -50,6 +48,7 @@ public:
 private:
     unsigned int blockSize;
     File cqFile;
+    std::vector<FASTAReference> fastaReferences;
     unsigned int polyploidy;
     QualEncoder qualEncoder;
     SAMParser samParser;
@@ -61,8 +60,7 @@ class CalqDecoder: public CalqCodec {
 public:
     CalqDecoder(const std::string &cqFileName,
                 const std::string &qualFileName,
-                const std::string &samFileName,
-                const std::vector<std::string> &fastaFileNames);
+                const std::string &samFileName);
     ~CalqDecoder(void);
 
     void decode(void);

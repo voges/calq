@@ -176,9 +176,9 @@ size_t File::readUint32(uint32_t *dword)
         throwErrorException("read failed");
     } else {
         *dword = (uint32_t)buffer[0] << 24 |
-                (uint32_t)buffer[1] << 16 |
-                (uint32_t)buffer[2] <<  8 |
-                (uint32_t)buffer[3];
+                 (uint32_t)buffer[1] << 16 |
+                 (uint32_t)buffer[2] <<  8 |
+                 (uint32_t)buffer[3];
         free(buffer);
     }
 
@@ -199,13 +199,13 @@ size_t File::readUint64(uint64_t *qword)
         throwErrorException("read failed");
     } else {
         *qword = (uint64_t)buffer[0] << 56 |
-                (uint64_t)buffer[1] << 48 |
-                (uint64_t)buffer[2] << 40 |
-                (uint64_t)buffer[3] << 32 |
-                (uint64_t)buffer[4] << 24 |
-                (uint64_t)buffer[5] << 16 |
-                (uint64_t)buffer[6] <<  8 |
-                (uint64_t)buffer[7];
+                 (uint64_t)buffer[1] << 48 |
+                 (uint64_t)buffer[2] << 40 |
+                 (uint64_t)buffer[3] << 32 |
+                 (uint64_t)buffer[4] << 24 |
+                 (uint64_t)buffer[5] << 16 |
+                 (uint64_t)buffer[6] <<  8 |
+                 (uint64_t)buffer[7];
         free(buffer);
     }
 

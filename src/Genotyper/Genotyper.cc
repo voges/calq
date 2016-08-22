@@ -221,3 +221,11 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
     return (int)((1-confidence)*(numQuantizers-1));
 }
 
+void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
+                                             const std::string &observedNucleotides,
+                                             const std::string &observedQualityValues)
+{
+    //haploid: base N has Q and P -- select max as new QV
+    //diploid: base N has Q and P1,2,3,4 -- select max as new QV
+}
+

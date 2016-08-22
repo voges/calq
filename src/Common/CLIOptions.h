@@ -24,6 +24,7 @@ public:
         , inFileName("")
         , outFileName("")
         , polyploidy(0)
+        , quantizedPrintout(false)
         , refFileNames()
         , samFileName("")
         , type("")
@@ -38,6 +39,7 @@ public:
     std::string inFileName;
     std::string outFileName;
     int polyploidy;
+    bool quantizedPrintout;
     std::vector<std::string> refFileNames;
     std::string samFileName;
     std::string type;

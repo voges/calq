@@ -29,15 +29,14 @@ static const unsigned int QUANTIZER_IDX_MIN = 0;
 static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 
 QualEncoder::QualEncoder(File &cqFile,
-                         const std::vector<FASTAReference> &fastaReferences,
                          const unsigned int &polyploidy,
                          const int &qvMin,
                          const int &qvMax)
     // Class scope
-    : verbose(false)
+    : fastaReferences()
+    , verbose(false)
     , qvMin(qvMin)
     , qvMax(qvMax)
-    , fastaReferences(fastaReferences)
     , cqFile(cqFile)
     , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
     , uniformQuantizers()
@@ -68,9 +67,6 @@ QualEncoder::QualEncoder(File &cqFile,
     , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
-    if (fastaReferences.size() == 0) {
-        throwErrorException("No FASTA references given");
-    }
     if (polyploidy == 0) {
         throwErrorException("polyploidy must be greater than zero");
     }
@@ -478,12 +474,9 @@ void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
     uqv += qualityValues;
 }
 
-QualDecoder::QualDecoder(File &cqFile,
-                         File &qualFile,
-                         const std::vector<FASTAReference> &fastaReferences)
+QualDecoder::QualDecoder(File &cqFile, File &qualFile)
     // Class scope
     : verbose(false)
-    , fastaReferences(fastaReferences)
     , cqFile(cqFile)
     , qualFile(qualFile)
     , uncompressedSize(0)

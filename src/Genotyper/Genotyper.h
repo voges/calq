@@ -44,6 +44,9 @@ public:
                                   const std::string &observedQualityValues);
     int computeQuantizerIndex(const std::string &observedNucleotides,
                               const std::string &observedQualityValues);
+    void computeAdjustedQualityValues(std::string &adjustedQualityValues,
+                                      const std::string &observedNucleotides,
+                                      const std::string &observedQualityValues);
 
 private:
     const std::vector<char> alleleAlphabet;

@@ -72,36 +72,56 @@ int main(int argc, char *argv[])
         // TCLAP class
         TCLAP::CmdLine cmd("calq - Lossy compression of next-generation sequencing quality values", ' ', VERSION);
 
-        // TCLAP arguments
-        TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
-        TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
+        // TCLAP arguments (both compression and decompression)
         TCLAP::SwitchArg forceSwitch("f", "force", "Force overwriting of output files, etc.", cmd, false);
         TCLAP::UnlabeledValueArg<std::string> infileArg("infile", "Input file", true, "", "string", cmd);
         TCLAP::ValueArg<std::string> outfileArg("o", "outfile", "Output file", false, "", "string", cmd);
-        TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
-        TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", true, "string", cmd);
-        TCLAP::ValueArg<std::string> samfileArg("s", "samfile", "SAM file", false, "", "string", cmd);
-        TCLAP::ValueArg<std::string> typeArg("t", "type", "Type of quality values (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+)", false, "illumina-1.8+", "string", cmd);
         TCLAP::SwitchArg verboseSwitch("v", "verbose", "Verbose output", cmd, false);
+
+        // TCLAP arguments (only compression)
+        TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
+        TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
+        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Print quantized quality values", cmd, false);
+        TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", false, "string", cmd);
+        TCLAP::ValueArg<std::string> typeArg("t", "type", "Type of quality values (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+)", false, "illumina-1.8+", "string", cmd);
+
+        // TCLAP arguments (only decompression)
+        TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
+        TCLAP::ValueArg<std::string> samfileArg("s", "samfile", "SAM file", false, "", "string", cmd);
 
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
 
-        // Check for sanity
-        if (blockSizeArg.isSet() && decompressSwitch.isSet()) {
-            throwErrorException("Combining arguments 'b' and 'd' is forbidden");
+        // Check for sanity in compression mode
+        if (decompressSwitch.isSet() == false) {
+            if (referenceArg.isSet() == false) {
+                throwErrorException("Argument 'r' required in compression mode");
+            }
+            if (samfileArg.isSet() == true) {
+                throwErrorException("Argument 's' forbidden in compression mode");
+            }
         }
-        if (polyploidyArg.isSet() && decompressSwitch.isSet()) {
-            throwErrorException("Combining arguments 'p' and 'd' is forbidden");
-        }
-        if (typeArg.isSet() && decompressSwitch.isSet()) {
-            throwErrorException("Combining arguments 't' and 'd' is forbidden");
-        }
-        if (samfileArg.isSet() && !decompressSwitch.isSet()) {
-            throwErrorException("Argument 's' is forbidden for compression");
-        }
-        if (!samfileArg.isSet() && decompressSwitch.isSet()) {
-            throwErrorException("Option 's' is mandatory for decompression");
+
+        // Check for sanity in decompression mode
+        if (decompressSwitch.isSet() == true) {
+            if (samfileArg.isSet() == false) {
+                throwErrorException("Argument 's' required in compression mode");
+            }
+            if (blockSizeArg.isSet()) {
+                throwErrorException("Argument 'b' forbidden in decompression mode");
+            }
+            if (polyploidyArg.isSet() == true) {
+                throwErrorException("Argument 'p' forbidden in decompression mode");
+            }
+            if (quantizedPrintoutSwitch.isSet() == true) {
+                throwErrorException("Argument 'q' forbidden in decompression mode");
+            }
+            if (referenceArg.isSet() == true) {
+                throwErrorException("Argument 'r' forbidden in decompression mode");
+            }
+            if (typeArg.isSet() == true) {
+                throwErrorException("Argument 't' forbidden in decompression mode");
+            }
         }
 
         // Get the value parsed by each arg
@@ -111,94 +131,76 @@ int main(int argc, char *argv[])
         cliOptions.inFileName = infileArg.getValue();
         cliOptions.outFileName = outfileArg.getValue();
         cliOptions.polyploidy = polyploidyArg.getValue();
+        cliOptions.quantizedPrintout = quantizedPrintoutSwitch.getValue();
         cliOptions.refFileNames = referenceArg.getValue();
         cliOptions.samFileName = samfileArg.getValue();
         cliOptions.type = typeArg.getValue();
         cliOptions.verbose = verboseSwitch.getValue();
 
-        // Check verbosity
+        std::cout << ME << "Checking command line arguments" << std::endl;
+
+        // Check command line options for both compression and decompression
+        if (cliOptions.force == true) {
+            std::cout << ME << "Force switch set - overwriting output file(s)" << std::endl;
+        }
+        if (fileExists(cliOptions.inFileName) == false) {
+            throwErrorException("Cannot access input file");
+        }
         if (cliOptions.verbose == true) {
             std::cout << ME << "Verbose output activated" << std::endl;
         }
 
-        // Check if the input file exists and if it has the correct extension
-        std::cout << ME << "Checking input file: " << cliOptions.inFileName << std::endl;
-        if (!fileExists(cliOptions.inFileName)) {
-            throwErrorException("Cannot access input file");
-        }
+        // Check command line options for compression mode
+        int qvMin = 0;
+        int qvMax = 0;
         if (cliOptions.decompress == false) {
             if (fileNameExtension(cliOptions.inFileName) != std::string("sam")) {
                 throwErrorException("Input file extension must be 'sam'");
             }
-        } else {
-            if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
-                throwErrorException("Input file extension must be 'cq'");
-            }
-        }
-        std::cout << ME << "OK" << std::endl;
+            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
 
-        // Create correct output file name if it was not provided via the
-        // command line options and check if output file is already there and
-        // if the user wants to overwrite it in this case
-        std::cout << ME << "Checking output file: ";
-        if (cliOptions.decompress == false) {
             if (cliOptions.outFileName.empty()) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".cq");
             }
-        } else {
-            if (cliOptions.outFileName.empty()) {
-                cliOptions.outFileName.append(cliOptions.inFileName);
-                cliOptions.outFileName.append(".qual");
+            if ((fileExists(cliOptions.outFileName) == true) && (cliOptions.force == false)) {
+                throwErrorException("Output file already exists (use option 'f' to force overwriting)");
             }
-        }
-        std::cout << cliOptions.outFileName << std::endl;
-        if (fileExists(cliOptions.outFileName) && cliOptions.force == false) {
-            throwErrorException("Output file already exists (use option 'f' to force overwriting)");
-        }
-        std::cout << ME << "OK" << std::endl;
+            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
 
-        // Check if the reference file(s) exist and check for FASTA file
-        // ending(s)
-        for (auto const &refFileName : cliOptions.refFileNames) {
-            std::cout << ME << "Checking reference file: " << refFileName << std::endl;
-            if (   fileNameExtension(refFileName) != std::string("fa")
-                && fileNameExtension(refFileName) != std::string("fasta")) {
-                throwErrorException("Reference file extension must be 'fa' or 'fasta'");
-            }
-            if (!fileExists(refFileName)) {
-                throwErrorException("Cannot access reference file");
-            }
-            std::cout << ME << "OK" << std::endl;
-        }
-
-        // Compress or decompress
-        if (cliOptions.decompress == false) {
-            // Check block size
             if (cliOptions.blockSize < 1) {
                 throwErrorException("Block size must be greater than 0");
             }
-            if (decompressSwitch.isSet() == false) {
-                std::cout << ME << "Using block size: " << cliOptions.blockSize << std::endl;
-            }
+            std::cout << ME << "Block size: " << cliOptions.blockSize << std::endl;
 
-            // Check polyploidy
             if (cliOptions.polyploidy < 1) {
                 throwErrorException("Polyploidy must be greater than 0");
             }
-            if (cliOptions.polyploidy > 6 && cliOptions.force == false) {
+            if ((cliOptions.polyploidy > 6) && (cliOptions.force == false)) {
                 throwErrorException("Polyploidy very high (use option 'f' to force processing)");
             }
-            std::cout << ME << "Using polyploidy: " << cliOptions.polyploidy << std::endl;
+            std::cout << ME << "Polyploidy: " << cliOptions.polyploidy << std::endl;
 
-            // Check type of quality values
+            if (cliOptions.quantizedPrintout == true) {
+                std::cout << ME << "Printing out quantized quality values to stderr" << std::endl;
+            }
+
+            for (auto const &refFileName : cliOptions.refFileNames) {
+                if (   fileNameExtension(refFileName) != std::string("fa")
+                    && fileNameExtension(refFileName) != std::string("fasta")) {
+                    throwErrorException("Reference file extension must be 'fa' or 'fasta'");
+                }
+                if (!fileExists(refFileName)) {
+                    throwErrorException("Cannot access reference file");
+                }
+                std::cout << ME << "Reference file: " << refFileName << std::endl;
+            }
+
             // Supported quality value ranges:
             //   Sanger         Phred+33   [0,40]
             //   Illumina 1.3+  Phred+64   [0,40]
             //   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
             //   Illumina 1.8+  Phred+33   [0,41]
-            int qvMin = 0;
-            int qvMax = 0;
             if (cliOptions.type == "sanger") {
                 qvMin = 33;
                 qvMax = qvMin + 40;
@@ -214,31 +216,49 @@ int main(int argc, char *argv[])
             } else {
                 throwErrorException("Quality value type not supported");
             }
-            std::cout << ME << "Using quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
+            std::cout << ME << "Quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
+        }
 
-            CalqEncoder calqEncoder(cliOptions.inFileName,
-                                    cliOptions.outFileName,
-                                    cliOptions.refFileNames,
-                                    (unsigned int)cliOptions.blockSize,
-                                    (unsigned int)cliOptions.polyploidy,
-                                    qvMin,
-                                    qvMax);
-            calqEncoder.encode();
-        } else {
+        // Check command line options for compression mode
+        if (cliOptions.decompress == true) {
+            if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
+                throwErrorException("Input file extension must be 'cq'");
+            }
+            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
+
+            if (cliOptions.outFileName.empty()) {
+                cliOptions.outFileName.append(cliOptions.inFileName);
+                cliOptions.outFileName.append(".qual");
+            }
+            if ((fileExists(cliOptions.outFileName) == true) && (cliOptions.force == false)) {
+                throwErrorException("Output file already exists (use option 'f' to force overwriting)");
+            }
+            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
+
             // Check if the SAM file exists and if it has the correct extension
-            std::cout << ME << "Checking SAM file: " << cliOptions.samFileName << std::endl;
-            if (!fileExists(cliOptions.samFileName)) {
+            if (fileExists(cliOptions.samFileName) == false) {
                 throwErrorException("Cannot access SAM file");
             }
             if (fileNameExtension(cliOptions.samFileName) != std::string("sam")) {
                 throwErrorException("SAM file extension must be 'sam'");
             }
-            std::cout << ME << "OK" << std::endl;
+            std::cout << ME << "SAM file: " << cliOptions.samFileName << std::endl;
+        }
 
+        // Compress or decompress
+        if (cliOptions.decompress == false) {
+            CalqEncoder calqEncoder(cliOptions.inFileName,
+                                    cliOptions.outFileName,
+                                    cliOptions.refFileNames,
+                                    cliOptions.blockSize,
+                                    cliOptions.polyploidy,
+                                    qvMin,
+                                    qvMax);
+            calqEncoder.encode();
+        } else {
             CalqDecoder calqDecoder(cliOptions.inFileName,
                                     cliOptions.outFileName,
-                                    cliOptions.samFileName,
-                                    cliOptions.refFileNames);
+                                    cliOptions.samFileName);
             calqDecoder.decode();
         }
     std::cout << ME << "Finished" << std::endl;

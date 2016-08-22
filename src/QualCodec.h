@@ -28,7 +28,6 @@
 class QualEncoder {
 public:
     QualEncoder(File &cqFile, 
-                const std::vector<FASTAReference> &fastaReferences,
                 const unsigned int &polyploidy,
                 const int &qvMin,
                 const int &qvMax);
@@ -38,6 +37,9 @@ public:
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
     size_t finishBlock(void);
+
+public:
+    std::vector<FASTAReference> fastaReferences;
 
 private:
     ////////////////////////////////////////////////////////////////////////////
@@ -49,7 +51,7 @@ private:
     bool verbose;
     int qvMin;
     int qvMax;
-    std::vector<FASTAReference> fastaReferences;
+
     File &cqFile;
     Genotyper genotyper;
     std::map<int,UniformQuantizer> uniformQuantizers;
@@ -110,9 +112,7 @@ private:
 
 class QualDecoder {
 public:
-    QualDecoder(File &cqFile,
-                File &qualFile,
-                const std::vector<FASTAReference> &fastaReferences);
+    QualDecoder(File &cqFile, File &qualFile);
     ~QualDecoder(void);
 
     size_t decodeBlock(void);
@@ -125,7 +125,6 @@ private:
 
     // Generic
     bool verbose;
-    std::vector<FASTAReference> fastaReferences;
     File &cqFile;
     File &qualFile;
 

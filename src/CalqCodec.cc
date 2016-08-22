@@ -33,10 +33,8 @@ static bool samRecordIsMapped(const SAMRecord &samRecord)
 }
 
 CalqCodec::CalqCodec(const std::string &inFileName,
-                     const std::string &outFileName,
-                     const std::vector<std::string> &fastaFileNames)
-    : fastaReferences()
-    , inFileName(inFileName)
+                     const std::string &outFileName)
+    : inFileName(inFileName)
     , outFileName(outFileName)
 {
     if (inFileName.length() == 0) {
@@ -44,23 +42,6 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     }
     if (outFileName.length() == 0) {
         throwErrorException("No output file name given");
-    }
-    if (fastaFileNames.size() == 0) {
-        throwErrorException("No FASTA file names given");
-    }
-
-    // Get reference sequences
-    FASTAParser fastaParser;
-    for (auto const &fastaFileName : fastaFileNames) {
-        std::cout << ME << "Parsing FASTA file: " << fastaFileName << std::endl;
-        fastaParser.parseFile(fastaFileName, fastaReferences);
-        std::cout << ME << "OK" << std::endl;
-    }
-
-    // Print info about found reference sequences
-    std::cout << ME << "Found the following reference sequence(s):" << std::endl;
-    for (auto const &fastaReference : fastaReferences) {
-        std::cout << ME << "  " << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
     }
 }
 
@@ -76,14 +57,33 @@ CalqEncoder::CalqEncoder(const std::string &samFileName,
                          const unsigned int &polyploidy,
                          const int &qvMin,
                          const int &qvMax)
-    : CalqCodec(samFileName, cqFileName, fastaFileNames)
+    : CalqCodec(samFileName, cqFileName)
     , blockSize(blockSize)
     , cqFile(cqFileName, "w")
+    , fastaReferences()
     , polyploidy(polyploidy)
-    , qualEncoder(cqFile, fastaReferences, polyploidy, qvMin, qvMax)
+    , qualEncoder(cqFile, polyploidy, qvMin, qvMax)
     , samParser(samFileName)
 {
-    // empty
+    if (fastaFileNames.size() == 0) {
+        throwErrorException("No FASTA file names given");
+    }
+
+    // Get reference sequences
+    FASTAParser fastaParser;
+    for (auto const &fastaFileName : fastaFileNames) {
+        std::cout << ME << "Parsing FASTA file: " << fastaFileName << std::endl;
+        fastaParser.parseFile(fastaFileName, fastaReferences);
+    }
+
+    // Print info about found reference sequences
+    std::cout << ME << "Found the following reference sequence(s):" << std::endl;
+    for (auto const &fastaReference : fastaReferences) {
+        std::cout << ME << "  " << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
+    }
+
+    // Now pass the FASTA references to the qualEncoder
+    qualEncoder.fastaReferences = fastaReferences;
 }
 
 CalqEncoder::~CalqEncoder(void)
@@ -188,12 +188,11 @@ size_t CalqEncoder::writeFileHeader(void)
 
 CalqDecoder::CalqDecoder(const std::string &cqFileName,
                          const std::string &qualFileName,
-                         const std::string &samFileName,
-                         const std::vector<std::string> &fastaFileNames)
-    : CalqCodec(cqFileName, qualFileName, fastaFileNames)
+                         const std::string &samFileName)
+    : CalqCodec(cqFileName, qualFileName)
     , cqFile(cqFileName, "r")
     , qualFile(qualFileName, "w")
-    , qualDecoder(cqFile, qualFile, fastaReferences)
+    , qualDecoder(cqFile, qualFile)
     , samParser(samFileName)
 {
     // empty
