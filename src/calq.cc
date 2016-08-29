@@ -252,6 +252,7 @@ int main(int argc, char *argv[])
                                     cliOptions.refFileNames,
                                     cliOptions.blockSize,
                                     cliOptions.polyploidy,
+                                    cliOptions.quantizedPrintout,
                                     qvMin,
                                     qvMax);
             calqEncoder.encode();

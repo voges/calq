@@ -31,7 +31,8 @@ static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 QualEncoder::QualEncoder(File &cqFile,
                          const unsigned int &polyploidy,
                          const int &qvMin,
-                         const int &qvMax)
+                         const int &qvMax,
+                         const bool &quantizedPrintout)
     // Class scope
     : fastaReferences()
     , verbose(false)
@@ -40,6 +41,7 @@ QualEncoder::QualEncoder(File &cqFile,
     , cqFile(cqFile)
     , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
     , uniformQuantizers()
+    , quantizedPrintout(quantizedPrintout)
     , uncompressedSize(0)
     , compressedSize(0)
     , numBlocks(0)
@@ -443,6 +445,10 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 int qualityValueIndex = uniformQuantizers.at(quantizerIndex).valueToIndex(qualityValue);
                 qi += std::to_string(quantizerIndex);
                 qvi += std::to_string(qualityValueIndex);
+                if (quantizedPrintout == true) {
+                    int qualityValueQuantized = uniformQuantizers.at(quantizerIndex).valueToReconstructionValue(qualityValue);
+                    std::cerr << (char)qualityValueQuantized;
+                }
             }
             break;
         case 'I':
@@ -453,6 +459,10 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 int qualityValueIndex = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToIndex(qualityValue);
                 qi += std::to_string(QUANTIZER_IDX_MAX);
                 qvi += std::to_string(qualityValueIndex);
+                if (quantizedPrintout == true) {
+                    int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToReconstructionValue(qualityValue);
+                    std::cerr << (char)qualityValueQuantized;
+                }
             }
             break;
         case 'D':
@@ -467,11 +477,19 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
         }
         opLen = 0;
     }
+
+    if (quantizedPrintout == true) {
+        std::cerr << std::endl;
+    }
 }
 
 void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
 {
     uqv += qualityValues;
+
+    if (quantizedPrintout == true) {
+        std::cerr << qualityValues << std::endl;
+    }
 }
 
 QualDecoder::QualDecoder(File &cqFile, File &qualFile)
