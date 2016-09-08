@@ -39,7 +39,6 @@ public:
                 const std::vector<std::string> &fastaFileNames,
                 const unsigned int &blockSize,
                 const unsigned int &polyploidy,
-                const bool &quantizedPrintout,
                 const int &qvMin,
                 const int &qvMax);
     ~CalqEncoder(void);

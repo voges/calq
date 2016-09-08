@@ -61,41 +61,41 @@ fi
 set +x;echo "";echo "### Map and mark duplicates ###";echo "";set -x
 
 ### Generate BWA index
-$bwa index -a bwtsw $ref_FASTA
+date; $bwa index -a bwtsw $ref_FASTA
 
 ### BWA MEM alignment
-$bwa mem -t $num_threads -M $ref_FASTA $reads_FASTQ > $root.aln.sam
+date; $bwa mem -t $num_threads -M $ref_FASTA $reads_FASTQ > $root.aln_bwa.sam
 
 ### Sort SAM file and convert to BAM
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar SortSam I=$root.aln.sam O=$root.aln.sorted.bam SORT_ORDER=coordinate
-rm -f $root.aln.sam
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar SortSam I=$root.aln_bwa.sam O=$root.aln_bwa.sorted.bam SORT_ORDER=coordinate
+rm -f $root.aln_bwa.sam
 
 ### Mark duplicates in the BAM file
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates I=$root.aln.sorted.bam O=$root.aln.sorted.dedup.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates I=$root.aln_bwa.sorted.bam O=$root.aln_bwa.sorted.dupmark.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
 rm -f $root.dedup_metrics.txt
-rm -f $root.aln.sorted.bam
+rm -f $root.aln_bwa.sorted.bam
 
 ### Add read group name
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln.sorted.dedup.bam O=$root.aln.sorted.dedup.rg.bam RGID=1 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=$sample
-rm -f $root.aln.sorted.dedup.bam
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bwa.sorted.dupmark.bam O=$root.aln_bwa.sorted.dupmark.rg.bam RGID=1 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=$sample
+rm -f $root.aln_bwa.sorted.dupmark.bam
 
 ### Index the BAM file
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar BuildBamIndex I=$root.aln.sorted.dedup.rg.bam
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar BuildBamIndex I=$root.aln_bwa.sorted.dupmark.rg.bam
 
 ###############################################################################
 #                      Recalibrate base quality scores                        #
 ###############################################################################
-#java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T baseRecalibrator -R $ref_FASTA -I $root.aln.sorted.dedup.rg.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
-#java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T PrintReads -R $ref_FASTA -I $root.aln.sorted.dedup.rg.bam -BQSR $root.bqsr.table -o $root.aln.sorted.dedup.rg.recal.bam
+#date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T baseRecalibrator -R $ref_FASTA -I $root.aln_bwa.sorted.dupmark.rg.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
+#date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T PrintReads -R $ref_FASTA -I $root.aln_bwa.sorted.dupmark.rg.bam -BQSR $root.bqsr.table -o $root.aln_bwa.sorted.dupmark.rg.recal.bam
 #rm -f $root.bqsr.table
-#rm -f $root.aln.sorted.dedup.rg.bam
+#rm -f $root.aln_bwa.sorted.dupmark.rg.bam
 
 ###############################################################################
 #                      Call variants using Haplotype Caller                   #
 ###############################################################################
 SEC=10
 SCC=30
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T HaplotypeCaller -R $ref_FASTA -I $root.aln.sorted.dedup.rg.bam --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $root.raw_variants.vcf
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T HaplotypeCaller -R $ref_FASTA -I $root.aln_bwa.sorted.dupmark.rg.bam --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $root.raw_variants.vcf
 
 ###############################################################################
 #                      Recalibrate variant quality scores                     #
@@ -109,14 +109,14 @@ resourceIndels="mills,known=true,training=true,truth=true,prior=12.0 $mills_VCF"
 recalParamsIndels="-an DP -an QD -an FS -an SOR -an MQRankSum -an ReadPosRankSum"
 filterLevel="99.0"
 
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.raw_variants.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.raw_variants.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.recalibrated_snps+raw_indels.vcf
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.raw_variants.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.raw_variants.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.recalibrated_snps+raw_indels.vcf
 rm -f $root.snps.recal
 rm -f $root.snps.tranches
 rm -f $root.snps.r
 
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.recalibrated_snps+raw_indels.vcf -resource:$resourceIndels $recalParamsIndels -mode INDEL -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 --maxGaussians 4 -recalFile $root.indels.recal -tranchesFile $root.indels.tranches -rscriptFile $root.indels.r
-java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.recalibrated_snps+raw_indels.vcf -mode INDEL -recalFile $root.indels.recal -tranchesFile $root.indels.tranches --ts_filter_level $filterLevel -o $root.recalibrated_variants.vcf
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.recalibrated_snps+raw_indels.vcf -resource:$resourceIndels $recalParamsIndels -mode INDEL -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 --maxGaussians 4 -recalFile $root.indels.recal -tranchesFile $root.indels.tranches -rscriptFile $root.indels.r
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.recalibrated_snps+raw_indels.vcf -mode INDEL -recalFile $root.indels.recal -tranchesFile $root.indels.tranches --ts_filter_level $filterLevel -o $root.recalibrated_variants.vcf
 rm -f $root.indels.recal
 rm -f $root.indels.tranches
 rm -f $root.indels.r

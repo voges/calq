@@ -19,6 +19,7 @@
 File::File(void)
     : fp(NULL)
     , fsize(0)
+    , isOpen(false)
 {
     // empty
 }
@@ -26,6 +27,7 @@ File::File(void)
 File::File(const std::string &path, const char *mode)
     : fp(NULL)
     , fsize(0)
+    , isOpen(false)
 {
     open(path, mode);
 }
@@ -60,15 +62,19 @@ void File::open(const std::string &path, const char *mode)
     fseek(fp, 0, SEEK_END);
     fsize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
+
+    isOpen = true;
 }
 
 void File::close(void) 
-{ 
-    if (fp != NULL) {
-        fclose(fp);
-        fp = NULL;
-    } else {
-        throwErrorException("Failed to close file");
+{
+    if (isOpen == true) {
+        if (fp != NULL) {
+            fclose(fp);
+            fp = NULL;
+        } else {
+            throwErrorException("Failed to close file");
+        }
     }
 }
 

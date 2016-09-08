@@ -13,6 +13,7 @@
 #define DEBUG_H
 
 #include "Common/fileSystemHelpers.h"
+#include <Common/misc.h>
 
 // Safe debug macro, usage example: DEBUG("status: %d\n", s);
 #define DBG
@@ -26,9 +27,10 @@
     #define DEBUG(c,...) do { } while (false)
 #endif
 
-// This expands to the module name, usage example: std::cout << ME << "Hello";
+// Usage example: std::cout << ME << "Hello";
 #define MODULE_NAME removeFileNameExtension(fileBaseName(std::string(__FILE__)))
-#define COUT_PREFIX std::string("[" + MODULE_NAME + "] ")
+#define CURRENT_DATE_AND_TIME currentDateAndTime()
+#define COUT_PREFIX std::string("[" + MODULE_NAME + " @ " + CURRENT_DATE_AND_TIME + "] ")
 #define ME COUT_PREFIX // for brevity
 
 #endif // DEBUG_H

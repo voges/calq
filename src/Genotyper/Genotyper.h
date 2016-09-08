@@ -59,6 +59,7 @@ private:
     const unsigned int qualityValueMax;
     const unsigned int quantizerIdxMin;
     const unsigned int quantizerIdxMax;
+    bool stats;
 };
 
 #endif // GENOTYPER_H

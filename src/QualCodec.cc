@@ -17,8 +17,10 @@
 #include "Common/debug.h"
 #include "Compressors/range/range.h"
 #include "Compressors/rle/rle.h"
+#include <chrono>
 #include <iomanip>
 #include <limits>
+#include <sstream>
 #include <stdlib.h>
 #include <string.h>
 
@@ -31,17 +33,17 @@ static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 QualEncoder::QualEncoder(File &cqFile,
                          const unsigned int &polyploidy,
                          const int &qvMin,
-                         const int &qvMax,
-                         const bool &quantizedPrintout)
+                         const int &qvMax)
     // Class scope
     : fastaReferences()
+    , encoderStats(false)
+    , quantizedPrintout(false)
     , verbose(false)
     , qvMin(qvMin)
     , qvMax(qvMax)
     , cqFile(cqFile)
     , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
     , uniformQuantizers()
-    , quantizedPrintout(quantizedPrintout)
     , uncompressedSize(0)
     , compressedSize(0)
     , numBlocks(0)
@@ -57,6 +59,7 @@ QualEncoder::QualEncoder(File &cqFile,
     , qi("")
     , qvi("")
     , uqv("")
+    , referenceName("")
     , reference("")
     , referencePosMin(std::numeric_limits<uint32_t>::max())
     , referencePosMax(std::numeric_limits<uint32_t>::min())
@@ -73,7 +76,15 @@ QualEncoder::QualEncoder(File &cqFile,
         throwErrorException("polyploidy must be greater than zero");
     }
 
-    // Check if this class shall be verbose
+    if (cliOptions.quantizedPrintout == true) {
+        quantizedPrintout = true;
+    }
+
+    if (cliOptions.encoderStats == true) {
+        encoderStats = true;
+        std::cerr << "rname,pos,depth,k" << std::endl;
+    }
+
     if (cliOptions.verbose == true) {
         verbose = true;
     }
@@ -179,9 +190,10 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // the quantizer indices for these positions and shrink the observation
     // vectors
     while (observedPosMin < mappedRecord.posMin) {
-        //std::cerr << observedPosMin << ",";
+        if (encoderStats == true) { std::cerr << referenceName << "," << observedPosMin << ","; }
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        //std::cerr << k << std::endl;
+        if (encoderStats == true) { std::cerr << k << std::endl; }
+
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -217,9 +229,10 @@ size_t QualEncoder::finishBlock(void)
 
     // Compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        //std::cerr << observedPosMin << ",";
+        if (encoderStats == true) { std::cerr << referenceName << "," << observedPosMin << ","; }
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        //std::cerr << k << std::endl;
+        if (encoderStats == true) { std::cerr << k << std::endl; }
+
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
         observedNucleotides.erase(observedNucleotides.begin());
@@ -402,6 +415,7 @@ void QualEncoder::loadFastaReference(const std::string &rname)
                 throwErrorException("Found multiple FASTA references");
             }
             foundFastaReference = true;
+            referenceName = fastaReference.header;
             reference = fastaReference.sequence;
             referencePosMin = 0;
             referencePosMax = (uint32_t)reference.size() - 1;

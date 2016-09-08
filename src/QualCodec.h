@@ -30,8 +30,7 @@ public:
     QualEncoder(File &cqFile, 
                 const unsigned int &polyploidy,
                 const int &qvMin,
-                const int &qvMax,
-                const bool &quantizedPrintout);
+                const int &qvMax);
     ~QualEncoder(void);
 
     void startBlock(void);
@@ -49,6 +48,8 @@ private:
     ////////////////////////////////////////////////////////////////////////////
 
     // Generic
+    bool encoderStats;
+    bool quantizedPrintout;
     bool verbose;
     int qvMin;
     int qvMax;
@@ -56,8 +57,6 @@ private:
     File &cqFile;
     Genotyper genotyper;
     std::map<int,UniformQuantizer> uniformQuantizers;
-
-    bool quantizedPrintout;
 
     // Sizes & counters
     size_t uncompressedSize;
@@ -86,6 +85,7 @@ private:
     std::string uqv; // unmapped quality values
 
     // Reference loaded for the current block
+    std::string referenceName;
     std::string reference;
     uint32_t referencePosMin;
     uint32_t referencePosMax;

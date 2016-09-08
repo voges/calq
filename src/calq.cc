@@ -80,8 +80,9 @@ int main(int argc, char *argv[])
 
         // TCLAP arguments (only compression)
         TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
+        TCLAP::SwitchArg encoderStatsSwitch("e", "encoderStats", "Print encoder statistics to stderr", cmd, false);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
-        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Print quantized quality values", cmd, false);
+        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Print quantized quality values to stderr", cmd, false);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", false, "string", cmd);
         TCLAP::ValueArg<std::string> typeArg("t", "type", "Type of quality values (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+)", false, "illumina-1.8+", "string", cmd);
 
@@ -107,8 +108,11 @@ int main(int argc, char *argv[])
             if (samfileArg.isSet() == false) {
                 throwErrorException("Argument 's' required in compression mode");
             }
-            if (blockSizeArg.isSet()) {
+            if (blockSizeArg.isSet() == true) {
                 throwErrorException("Argument 'b' forbidden in decompression mode");
+            }
+            if (encoderStatsSwitch.isSet() == true) {
+                throwErrorException("Argument 'e' forbidden in decompression mode");
             }
             if (polyploidyArg.isSet() == true) {
                 throwErrorException("Argument 'p' forbidden in decompression mode");
@@ -128,6 +132,7 @@ int main(int argc, char *argv[])
         cliOptions.blockSize = blockSizeArg.getValue();
         cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.force = forceSwitch.getValue();
+        cliOptions.encoderStats = encoderStatsSwitch.getValue();
         cliOptions.inFileName = infileArg.getValue();
         cliOptions.outFileName = outfileArg.getValue();
         cliOptions.polyploidy = polyploidyArg.getValue();
@@ -173,6 +178,13 @@ int main(int argc, char *argv[])
             }
             std::cout << ME << "Block size: " << cliOptions.blockSize << std::endl;
 
+            if (cliOptions.encoderStats == true) {
+                if (cliOptions.quantizedPrintout == true) {
+                    throwErrorException("Combining arguments 'e' and 'q' is forbidden");
+                }
+                std::cout << ME << "Printing encoder statistics to stderr" << std::endl;
+            }
+
             if (cliOptions.polyploidy < 1) {
                 throwErrorException("Polyploidy must be greater than 0");
             }
@@ -182,7 +194,10 @@ int main(int argc, char *argv[])
             std::cout << ME << "Polyploidy: " << cliOptions.polyploidy << std::endl;
 
             if (cliOptions.quantizedPrintout == true) {
-                std::cout << ME << "Printing out quantized quality values to stderr" << std::endl;
+                if (cliOptions.encoderStats == true) {
+                    throwErrorException("Combining arguments 'q' and 'e' is forbidden");
+                }
+                std::cout << ME << "Printing quantized quality values to stderr" << std::endl;
             }
 
             for (auto const &refFileName : cliOptions.refFileNames) {
@@ -219,7 +234,7 @@ int main(int argc, char *argv[])
             std::cout << ME << "Quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
         }
 
-        // Check command line options for compression mode
+        // Check command line options for decompression mode
         if (cliOptions.decompress == true) {
             if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
                 throwErrorException("Input file extension must be 'cq'");
@@ -252,7 +267,6 @@ int main(int argc, char *argv[])
                                     cliOptions.refFileNames,
                                     cliOptions.blockSize,
                                     cliOptions.polyploidy,
-                                    cliOptions.quantizedPrintout,
                                     qvMin,
                                     qvMax);
             calqEncoder.encode();

@@ -57,39 +57,39 @@ date; $bwa index -a bwtsw $ref_FASTA
 
 ### BWA MEM alignment
 read_group_id="@RG\tID:1\tSM:$sample\tLB:lib1"
-date; $bwa mem -t $num_threads -R $read_group_id -M $ref_FASTA $reads_FASTQ > $root.aln.sam
+date; $bwa mem -t $num_threads -R $read_group_id -M $ref_FASTA $reads_FASTQ > $root.aln_bwa.sam
 
 ### Clean up read pairing information and flags and convert to BAM
-date; $samtools fixmate -O bam $root.aln.sam $root.aln.fixmate.bam
-rm -f $root.aln.sam
+date; $samtools fixmate -O bam $root.aln_bwa.sam $root.aln_bwa.fixmate.bam
+rm -f $root.aln_bwa.sam
 
 ### Sort BAM file
-date; $samtools sort -T $samtoolsTmpDir -@ $num_threads -O bam $root.aln.fixmate.bam > $root.aln.fixmate.sorted.bam
-rm -f $root.aln.fixmate.bam
+date; $samtools sort -T $samtoolsTmpDir -@ $num_threads -O bam $root.aln_bwa.fixmate.bam > $root.aln_bwa.fixmate.sorted.bam
+rm -f $root.aln_bwa.fixmate.bam
 
 ###############################################################################
 #                                 Improvement                                 #
 ###############################################################################
 
 ### Reduce the number of miscalls of INDELs by realigning
-date; java -Xmx2g -jar $GenomeAnalysisTK_jar -T RealignerTargetCreator -R $ref_FASTA -I $root.aln.fixmate.sorted.bam -o $root.realigner_target.intervals --known $mills_VCF
-date; java -Xmx4g -jar $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln.fixmate.sorted.bam -targetIntervals $root.realigner_target.intervals --known $mills_VCF -o $root.aln.fixmate.sorted.realn.bam
+date; java -Xmx2g -jar $GenomeAnalysisTK_jar -T RealignerTargetCreator -R $ref_FASTA -I $root.aln_bwa.fixmate.sorted.bam -o $root.realigner_target.intervals --known $mills_VCF
+date; java -Xmx4g -jar $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bwa.fixmate.sorted.bam -targetIntervals $root.realigner_target.intervals --known $mills_VCF -o $root.aln_bwa.fixmate.sorted.realn.bam
 rm -f $root.realigner_target.intervals
-rm -f $root.aln.fixmate.sorted.bam
+rm -f $root.aln_bwa.fixmate.sorted.bam
 
 ### Mark duplicates in the BAM file
-date; java -Xmx2g -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates VALIDATION_STRINGENCY=LENIENT I=$root.aln.fixmate.sorted.realn.bam O=$root.aln.fixmate.sorted.realn.dedup.bam
-rm -f $root.aln.fixmate.sorted.realn.bam
+date; java -Xmx2g -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates VALIDATION_STRINGENCY=LENIENT I=$root.aln_bwa.fixmate.sorted.realn.bam O=$root.aln_bwa.fixmate.sorted.realn.dupmark.bam
+rm -f $root.aln_bwa.fixmate.sorted.realn.bam
 
 ### Index the BAM file
-date; $samtools index $root.aln.fixmate.sorted.realn.dedup.bam
+date; $samtools index $root.aln_bwa.fixmate.sorted.realn.dupmark.bam
 
 ###############################################################################
 #                               Variant calling                               #
 ###############################################################################
 
 ### Call variants
-date; $samtools mpileup -ugf $root.aln.fixmate.sorted.realn.dedup.bam | $bcftools call -vmO z -o $root.raw_variants.vcf.gz
+date; $samtools mpileup -ugf $ref_FASTA $root.aln_bwa.fixmate.sorted.realn.dupmark.bam | $bcftools call -vmO z -o $root.raw_variants.vcf.gz
 
 ### Index VCF file
 date; $tabix -p vcf $root.raw_variants.vcf.gz

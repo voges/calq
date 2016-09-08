@@ -20,6 +20,7 @@ public:
     CLIOptions(void)
         : blockSize(0)
         , decompress(false)
+        , encoderStats(false)
         , force(false)
         , inFileName("")
         , outFileName("")
@@ -35,6 +36,7 @@ public:
 public:
     int blockSize;
     bool decompress;
+    bool encoderStats;
     bool force;
     std::string inFileName;
     std::string outFileName;

@@ -10,6 +10,7 @@
  */
 
 #include "Genotyper.h"
+#include "Common/CLIOptions.h"
 #include "Common/debug.h"
 #include "Common/Exceptions.h"
 #include "Common/fileSystemHelpers.h"
@@ -61,7 +62,12 @@ Genotyper::Genotyper(const unsigned int &polyploidy,
     , qualityValueMax(qualityValueMax)
     , quantizerIdxMin(quantizerIdxMin)
     , quantizerIdxMax(quantizerIdxMax)
+    , stats(false)
 {
+    if (cliOptions.encoderStats == true) {
+        stats = true;
+    }
+
     initLikelihoods();
 }
 
@@ -181,7 +187,7 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
                                      const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
-    //std::cerr << depth << ",";
+    if (stats == true) { std::cerr << depth << ","; }
     //std::cerr << observedNucleotides << ",";
     //std::cerr << observedQualityValues << ",";
     if (depth == 0) {
@@ -207,14 +213,6 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
 
-//     for (auto &genotypeLikelihood : genotypeLikelihoods) {
-//         if (genotypeLikelihood.second > largestGenotypeLikelihood) {
-//             largestGenotypeLikelihood = genotypeLikelihood.second;
-//         }
-//     }
-//     // Convert the probability to phred score
-//     double gtLLPhred = -log10(1-largestGenotypeLikelihood);
-
     //if (confidence == 1) return quantizerIdxMin;
     return (int)((1-confidence)*(numQuantizers-1));
 }
@@ -226,6 +224,14 @@ void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
     //haploid: base N has Q and P -- select max as new QV
     //diploid: base N has Q and P1,2,3,4 -- select max as new QV
 
+//     for (auto &genotypeLikelihood : genotypeLikelihoods) {
+//         if (genotypeLikelihood.second > largestGenotypeLikelihood) {
+//             largestGenotypeLikelihood = genotypeLikelihood.second;
+//         }
+//     }
+//     // Convert the probability to phred score
+//     double gtLLPhred = -log10(1-largestGenotypeLikelihood);
+    
 //     adjustedQualityValues = "";
 //     const size_t depth = observedNucleotides.length();
 // 

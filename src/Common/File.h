@@ -48,6 +48,7 @@ public:
 private:
     FILE *fp;
     size_t fsize;
+    bool isOpen;
 };
 
 #endif // FILE_H
