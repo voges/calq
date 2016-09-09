@@ -18,11 +18,11 @@ ref_FASTA=$3
 
 ### Ground truth
 if [ compare == "giab" ]; then
-    ground_truth_VCF_GZ="/data/gidb/simulations/GIAB-NA12878_HB001-NISTv3.2.2/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.vcf.gz"
-    ground_truth_BED="/data/gidb/simulations/GIAB-NA12878_HB001-NISTv3.2.2/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed"
+    ground_truth_VCF_GZ="/data/gidb/variant_gold_standards/GIAB-NA12878_HB001-NISTv3.2.2/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.vcf.gz"
+    ground_truth_BED="/data/gidb/variant_gold_standards/GIAB-NA12878_HB001-NISTv3.2.2/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed"
 elif [ compare == "platinum" ]; then
-    ground_truth_VCF_GZ="/data/gidb/simulations/Illumina_Platinum_Genomes-hg19-8.0.1-NA12878/NA12878.vcf.gz"
-    ground_truth_BED="/data/gidb/simulations/Illumina_Platinum_Genomes-hg19-8.0.1-NA12878/ConfidentRegions.bed"
+    ground_truth_VCF_GZ="/data/gidb/svariant_gold_standards/Illumina_Platinum_Genomes-hg19-8.0.1-NA12878/NA12878.vcf.gz"
+    ground_truth_BED="/data/gidb/variant_gold_standards/Illumina_Platinum_Genomes-hg19-8.0.1-NA12878/ConfidentRegions.bed"
 else
     echo "Usage: $0 giab|platinum variants.vcf ref.fasta"
     exit -1
