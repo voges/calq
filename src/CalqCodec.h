@@ -13,6 +13,7 @@
 #ifndef CALQCODEC_H
 #define CALQCODEC_H
 
+#include "Common/CLIOptions.h"
 #include "Common/File.h"
 #include "Parsers/FASTAParser.h"
 #include "Parsers/SAMParser.h"
@@ -34,13 +35,7 @@ protected:
 
 class CalqEncoder: public CalqCodec {
 public:
-    CalqEncoder(const std::string &samFileName,
-                const std::string &cqFileName,
-                const std::vector<std::string> &fastaFileNames,
-                const unsigned int &blockSize,
-                const unsigned int &polyploidy,
-                const int &qvMin,
-                const int &qvMax);
+    CalqEncoder(const CLIOptions &cliOptions);
     ~CalqEncoder(void);
 
     void encode(void);
@@ -58,9 +53,7 @@ private:
 
 class CalqDecoder: public CalqCodec {
 public:
-    CalqDecoder(const std::string &cqFileName,
-                const std::string &qualFileName,
-                const std::string &samFileName);
+    CalqDecoder(const CLIOptions &cliOptions);
     ~CalqDecoder(void);
 
     void decode(void);

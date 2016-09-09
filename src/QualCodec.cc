@@ -30,19 +30,15 @@ static const unsigned int QUANTIZER_NUM = QUANTIZER_STEP_MAX-QUANTIZER_STEP_MIN+
 static const unsigned int QUANTIZER_IDX_MIN = 0;
 static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 
-QualEncoder::QualEncoder(File &cqFile,
-                         const unsigned int &polyploidy,
-                         const int &qvMin,
-                         const int &qvMax)
+QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
     // Class scope
     : fastaReferences()
-    , encoderStats(false)
     , quantizedPrintout(false)
     , verbose(false)
-    , qvMin(qvMin)
-    , qvMax(qvMax)
+    , qvMin(cliOptions.qvMin)
+    , qvMax(cliOptions.qvMax)
     , cqFile(cqFile)
-    , genotyper(polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
+    , genotyper(cliOptions.polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
     , uniformQuantizers()
     , uncompressedSize(0)
     , compressedSize(0)
@@ -72,18 +68,24 @@ QualEncoder::QualEncoder(File &cqFile,
     , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
-    if (polyploidy == 0) {
-        throwErrorException("polyploidy must be greater than zero");
+    if (cliOptions.polyploidy == 0) {
+        std::cout << "Polyploidy: " << cliOptions.polyploidy << std::endl;
+        throwErrorException("Polyploidy must be greater than zero");
     }
 
     if (cliOptions.quantizedPrintout == true) {
+        std::string qualFileName(cliOptions.outFileName);
+        qualFileName += ".qual";
+        std::cout << ME << "Printing quantized quality values to file: " << qualFileName << std::endl;
+        if ((fileExists(qualFileName) == true) && (cliOptions.force == false)) {
+            throwErrorException("Quantized quality values file already exists (use option 'f' to force overwriting)");
+        }
+
+        qualFile.open(qualFileName);
         quantizedPrintout = true;
     }
 
-    if (cliOptions.encoderStats == true) {
-        encoderStats = true;
-        std::cerr << "rname,pos,depth,k" << std::endl;
-    }
+    std::cerr << "rname,pos,depth,entropy,k" << std::endl;
 
     if (cliOptions.verbose == true) {
         verbose = true;
@@ -101,6 +103,10 @@ QualEncoder::QualEncoder(File &cqFile,
 
 QualEncoder::~QualEncoder(void)
 {
+    if (qualFile.is_open()) {
+        qualFile.close();
+    }
+
     if (verbose == true) {
         std::cout << ME << "QualEncoder statistics:" << std::endl;
         std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSize << std::endl;
@@ -190,9 +196,9 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // the quantizer indices for these positions and shrink the observation
     // vectors
     while (observedPosMin < mappedRecord.posMin) {
-        if (encoderStats == true) { std::cerr << referenceName << "," << observedPosMin << ","; }
+        std::cerr << referenceName << "," << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        if (encoderStats == true) { std::cerr << k << std::endl; }
+        std::cerr << k << std::endl;
 
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
@@ -229,9 +235,9 @@ size_t QualEncoder::finishBlock(void)
 
     // Compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        if (encoderStats == true) { std::cerr << referenceName << "," << observedPosMin << ","; }
+        std::cerr << referenceName << "," << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        if (encoderStats == true) { std::cerr << k << std::endl; }
+        std::cerr << k << std::endl;
 
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
@@ -398,6 +404,8 @@ size_t QualEncoder::finishBlock(void)
         std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSizeOfBlock/(double)compressedSizeOfBlock << std::endl;
     }
 
+    std::cout << ME << "Finished block " << (numBlocks-1) << " (" << numRecordsInBlock << " records)" << std::endl;
+
     return ret;
 }
 
@@ -461,7 +469,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 qvi += std::to_string(qualityValueIndex);
                 if (quantizedPrintout == true) {
                     int qualityValueQuantized = uniformQuantizers.at(quantizerIndex).valueToReconstructionValue(qualityValue);
-                    std::cerr << (char)qualityValueQuantized;
+                    qualFile << (char)qualityValueQuantized;
                 }
             }
             break;
@@ -475,7 +483,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 qvi += std::to_string(qualityValueIndex);
                 if (quantizedPrintout == true) {
                     int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToReconstructionValue(qualityValue);
-                    std::cerr << (char)qualityValueQuantized;
+                    qualFile << (char)qualityValueQuantized;
                 }
             }
             break;
@@ -486,14 +494,15 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
         case 'H':
         case 'P':
             break; // these have been clipped
-        default: 
+        default:
+            std::cout << ME << "CIGAR string: " << cigar << std::endl;
             throwErrorException("Bad CIGAR string");
         }
         opLen = 0;
     }
 
     if (quantizedPrintout == true) {
-        std::cerr << std::endl;
+        qualFile << std::endl;
     }
 }
 
@@ -502,11 +511,11 @@ void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
     uqv += qualityValues;
 
     if (quantizedPrintout == true) {
-        std::cerr << qualityValues << std::endl;
+        qualFile << qualityValues << std::endl;
     }
 }
 
-QualDecoder::QualDecoder(File &cqFile, File &qualFile)
+QualDecoder::QualDecoder(File &cqFile, File &qualFile, const CLIOptions &cliOptions)
     // Class scope
     : verbose(false)
     , cqFile(cqFile)
@@ -560,6 +569,7 @@ size_t QualDecoder::decodeBlock(void)
     uint64_t blockNumber = 0;
     ret += cqFile.readUint64(&blockNumber);
     if (numBlocks != blockNumber) {
+        std::cout << ME << "Block number: " << blockNumber << std::endl;
         throwErrorException("Corrupted block number in CQ file");
     }
 

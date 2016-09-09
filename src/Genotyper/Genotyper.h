@@ -40,8 +40,6 @@ private:
                                     const std::string &observedQualityValues);
 
 public:
-    double computeGenotypeEntropy(const std::string &observedNucleotides,
-                                  const std::string &observedQualityValues);
     int computeQuantizerIndex(const std::string &observedNucleotides,
                               const std::string &observedQualityValues);
     void computeAdjustedQualityValues(std::string &adjustedQualityValues,

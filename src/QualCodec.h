@@ -13,6 +13,7 @@
 #ifndef QUALCODEC_H
 #define QUALCODEC_H
 
+#include "Common/CLIOptions.h"
 #include "Common/File.h"
 #include "Genotyper/Genotyper.h"
 #include "Parsers/FASTAReference.h"
@@ -27,10 +28,7 @@
 
 class QualEncoder {
 public:
-    QualEncoder(File &cqFile, 
-                const unsigned int &polyploidy,
-                const int &qvMin,
-                const int &qvMax);
+    QualEncoder(File &cqFile, const CLIOptions &cliOptions);
     ~QualEncoder(void);
 
     void startBlock(void);
@@ -48,11 +46,12 @@ private:
     ////////////////////////////////////////////////////////////////////////////
 
     // Generic
-    bool encoderStats;
     bool quantizedPrintout;
     bool verbose;
     int qvMin;
     int qvMax;
+
+    std::ofstream qualFile;
 
     File &cqFile;
     Genotyper genotyper;
@@ -115,7 +114,7 @@ private:
 
 class QualDecoder {
 public:
-    QualDecoder(File &cqFile, File &qualFile);
+    QualDecoder(File &cqFile, File &qualFile, const CLIOptions &cliOptions);
     ~QualDecoder(void);
 
     size_t decodeBlock(void);

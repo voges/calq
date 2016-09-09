@@ -64,10 +64,6 @@ Genotyper::Genotyper(const unsigned int &polyploidy,
     , quantizerIdxMax(quantizerIdxMax)
     , stats(false)
 {
-    if (cliOptions.encoderStats == true) {
-        stats = true;
-    }
-
     initLikelihoods();
 }
 
@@ -129,6 +125,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         char y = (char)observedNucleotides[d];
         double q = (double)(observedQualityValues[d] - qualityValueMin);
         if ((q > qualityValueMax-qualityValueMin) || q < 0) {
+            std::cout << ME << "min,curr,max=" << 0 << "," << (int)q << "," << qualityValueMax-qualityValueMin << std::endl;
             throwErrorException("Quality value out of range");
         }
         double pStrike = 1 - pow(10.0, -q/10.0);
@@ -163,31 +160,11 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
     }
 }
 
-double Genotyper::computeGenotypeEntropy(const std::string &observedNucleotides,
-                                         const std::string &observedQualityValues)
-{
-    const size_t depth = observedNucleotides.length();
-    if (depth == 0 || depth == 1) {
-        return -1.0;
-    }
-
-    computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
-
-    double entropy = 0.0;
-    for (auto &genotypeLikelihood: genotypeLikelihoods) {
-        if (genotypeLikelihood.second != 0) {
-            entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
-        }
-    }
-
-    return entropy;
-}
-
 int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
                                      const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
-    if (stats == true) { std::cerr << depth << ","; }
+    std::cerr << depth << ",";
     //std::cerr << observedNucleotides << ",";
     //std::cerr << observedQualityValues << ",";
     if (depth == 0) {
@@ -198,6 +175,14 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
     }
 
     computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
+
+    double entropy = 0.0;
+    for (auto &genotypeLikelihood: genotypeLikelihoods) {
+        if (genotypeLikelihood.second != 0) {
+            entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
+        }
+    }
+    std::cerr << entropy << ",";
 
     double largestGenotypeLikelihood = 0.0;
     double secondLargestGenotypeLikelihood = 0.0;

@@ -38,6 +38,7 @@
 #include "Common/Exceptions.h"
 #include "Common/fileSystemHelpers.h"
 #include "tclap/CmdLine.h"
+#include <cctype>
 #include <iostream>
 
 CLIOptions cliOptions;
@@ -69,6 +70,8 @@ int main(int argc, char *argv[])
     printCopyright();
 
     try {
+        CLIOptions cliOptions;
+
         // TCLAP class
         TCLAP::CmdLine cmd("calq - Lossy compression of next-generation sequencing quality values", ' ', VERSION);
 
@@ -80,11 +83,10 @@ int main(int argc, char *argv[])
 
         // TCLAP arguments (only compression)
         TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
-        TCLAP::SwitchArg encoderStatsSwitch("e", "encoderStats", "Print encoder statistics to stderr", cmd, false);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
-        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Print quantized quality values to stderr", cmd, false);
+        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Print quantized quality values", cmd, false);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", false, "string", cmd);
-        TCLAP::ValueArg<std::string> typeArg("t", "type", "Type of quality values (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+)", false, "illumina-1.8+", "string", cmd);
+        TCLAP::ValueArg<std::string> typeArg("t", "type", "Quality value type (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+, min:max)", false, "illumina-1.8+", "string", cmd);
 
         // TCLAP arguments (only decompression)
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
@@ -111,9 +113,6 @@ int main(int argc, char *argv[])
             if (blockSizeArg.isSet() == true) {
                 throwErrorException("Argument 'b' forbidden in decompression mode");
             }
-            if (encoderStatsSwitch.isSet() == true) {
-                throwErrorException("Argument 'e' forbidden in decompression mode");
-            }
             if (polyploidyArg.isSet() == true) {
                 throwErrorException("Argument 'p' forbidden in decompression mode");
             }
@@ -132,7 +131,6 @@ int main(int argc, char *argv[])
         cliOptions.blockSize = blockSizeArg.getValue();
         cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.force = forceSwitch.getValue();
-        cliOptions.encoderStats = encoderStatsSwitch.getValue();
         cliOptions.inFileName = infileArg.getValue();
         cliOptions.outFileName = outfileArg.getValue();
         cliOptions.polyploidy = polyploidyArg.getValue();
@@ -149,6 +147,7 @@ int main(int argc, char *argv[])
             std::cout << ME << "Force switch set - overwriting output file(s)" << std::endl;
         }
         if (fileExists(cliOptions.inFileName) == false) {
+            std::cout << ME << "Input file name: " << cliOptions.inFileName << std::endl;
             throwErrorException("Cannot access input file");
         }
         if (cliOptions.verbose == true) {
@@ -156,51 +155,40 @@ int main(int argc, char *argv[])
         }
 
         // Check command line options for compression mode
-        int qvMin = 0;
-        int qvMax = 0;
         if (cliOptions.decompress == false) {
+            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
             if (fileNameExtension(cliOptions.inFileName) != std::string("sam")) {
                 throwErrorException("Input file extension must be 'sam'");
             }
-            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
 
             if (cliOptions.outFileName.empty()) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".cq");
             }
+            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
             if ((fileExists(cliOptions.outFileName) == true) && (cliOptions.force == false)) {
                 throwErrorException("Output file already exists (use option 'f' to force overwriting)");
             }
-            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
 
+            std::cout << ME << "Block size: " << cliOptions.blockSize << std::endl;
             if (cliOptions.blockSize < 1) {
                 throwErrorException("Block size must be greater than 0");
             }
-            std::cout << ME << "Block size: " << cliOptions.blockSize << std::endl;
 
-            if (cliOptions.encoderStats == true) {
-                if (cliOptions.quantizedPrintout == true) {
-                    throwErrorException("Combining arguments 'e' and 'q' is forbidden");
-                }
-                std::cout << ME << "Printing encoder statistics to stderr" << std::endl;
-            }
-
+            std::cout << ME << "Polyploidy: " << cliOptions.polyploidy << std::endl;
             if (cliOptions.polyploidy < 1) {
                 throwErrorException("Polyploidy must be greater than 0");
             }
             if ((cliOptions.polyploidy > 6) && (cliOptions.force == false)) {
                 throwErrorException("Polyploidy very high (use option 'f' to force processing)");
             }
-            std::cout << ME << "Polyploidy: " << cliOptions.polyploidy << std::endl;
 
             if (cliOptions.quantizedPrintout == true) {
-                if (cliOptions.encoderStats == true) {
-                    throwErrorException("Combining arguments 'q' and 'e' is forbidden");
-                }
-                std::cout << ME << "Printing quantized quality values to stderr" << std::endl;
+                std::cout << ME << "Printing quantized quality values" << std::endl;
             }
 
             for (auto const &refFileName : cliOptions.refFileNames) {
+                std::cout << ME << "Reference file: " << refFileName << std::endl;
                 if (   fileNameExtension(refFileName) != std::string("fa")
                     && fileNameExtension(refFileName) != std::string("fasta")) {
                     throwErrorException("Reference file extension must be 'fa' or 'fasta'");
@@ -208,7 +196,6 @@ int main(int argc, char *argv[])
                 if (!fileExists(refFileName)) {
                     throwErrorException("Cannot access reference file");
                 }
-                std::cout << ME << "Reference file: " << refFileName << std::endl;
             }
 
             // Supported quality value ranges:
@@ -216,64 +203,80 @@ int main(int argc, char *argv[])
             //   Illumina 1.3+  Phred+64   [0,40]
             //   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
             //   Illumina 1.8+  Phred+33   [0,41]
+            std::cout << ME << "Quality value type: " << cliOptions.type << std::endl;
             if (cliOptions.type == "sanger") {
-                qvMin = 33;
-                qvMax = qvMin + 40;
+                cliOptions.qvMin = 33;
+                cliOptions.qvMax = cliOptions.qvMin + 40;
             } else if (cliOptions.type == "illumina-1.3+") {
-                qvMin = 64;
-                qvMax = qvMin + 40;
+                cliOptions.qvMin = 64;
+                cliOptions.qvMax = cliOptions.qvMin + 40;
             } else if (cliOptions.type == "illumina-1.5+") {
-                qvMin = 64;
-                qvMax = qvMin + 40;
+                cliOptions.qvMin = 64;
+                cliOptions.qvMax = cliOptions.qvMin + 40;
             } else if (cliOptions.type == "illumina-1.8+") {
-                qvMin = 33;
-                qvMax = qvMin + 41;
+                cliOptions.qvMin = 33;
+                cliOptions.qvMax = cliOptions.qvMin + 41;
             } else {
-                throwErrorException("Quality value type not supported");
+                size_t colon = cliOptions.type.find_first_of(':');
+                if (colon != std::string::npos) {
+                    std::string min = cliOptions.type.substr(0, colon);
+                    std::string max = cliOptions.type.substr(colon+1);
+
+                    if (std::all_of(min.begin(), min.end(), ::isdigit) == false) {
+                        throwErrorException("Quality value minimum is not numeric");
+                    }
+                    if (min.empty() == true) {
+                        throwErrorException("Quality value minimum is empty");
+                    }
+                    if (std::all_of(max.begin(), max.end(), ::isdigit) == false) {
+                        throwErrorException("Quality value maximum is not numeric");
+                    }
+                    if (max.empty() == true) {
+                        throwErrorException("Quality value maximum is empty");
+                    }
+
+                    cliOptions.qvMin = std::stoi(min);
+                    cliOptions.qvMax = std::stoi(max);
+                } else {
+                    std::cout << ME << "Quality value type: " << cliOptions.type << std::endl;
+                    throwErrorException("Quality value type not supported");
+                }
             }
-            std::cout << ME << "Quality value type: " << cliOptions.type << " [" << qvMin << "," << qvMax << "]" << std::endl;
+            std::cout << ME << "Quality value range: [" << cliOptions.qvMin << "," << cliOptions.qvMax << "]" << std::endl;
         }
 
         // Check command line options for decompression mode
         if (cliOptions.decompress == true) {
+            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
             if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
                 throwErrorException("Input file extension must be 'cq'");
             }
-            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
 
             if (cliOptions.outFileName.empty()) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".qual");
             }
+            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
             if ((fileExists(cliOptions.outFileName) == true) && (cliOptions.force == false)) {
                 throwErrorException("Output file already exists (use option 'f' to force overwriting)");
             }
-            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
 
             // Check if the SAM file exists and if it has the correct extension
-            if (fileExists(cliOptions.samFileName) == false) {
+           std::cout << ME << "SAM file: " << cliOptions.samFileName << std::endl;
+           if (fileExists(cliOptions.samFileName) == false) {
                 throwErrorException("Cannot access SAM file");
             }
             if (fileNameExtension(cliOptions.samFileName) != std::string("sam")) {
                 throwErrorException("SAM file extension must be 'sam'");
             }
-            std::cout << ME << "SAM file: " << cliOptions.samFileName << std::endl;
         }
 
         // Compress or decompress
         if (cliOptions.decompress == false) {
-            CalqEncoder calqEncoder(cliOptions.inFileName,
-                                    cliOptions.outFileName,
-                                    cliOptions.refFileNames,
-                                    cliOptions.blockSize,
-                                    cliOptions.polyploidy,
-                                    qvMin,
-                                    qvMax);
+            CalqEncoder calqEncoder(cliOptions);
             calqEncoder.encode();
         } else {
-            CalqDecoder calqDecoder(cliOptions.inFileName,
-                                    cliOptions.outFileName,
-                                    cliOptions.samFileName);
+            CalqDecoder calqDecoder(cliOptions);
             calqDecoder.decode();
         }
     std::cout << ME << "Finished" << std::endl;

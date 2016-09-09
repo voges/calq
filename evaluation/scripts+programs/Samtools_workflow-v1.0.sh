@@ -27,7 +27,7 @@ root="$root.$script_name-$sample"
 ###############################################################################
 
 ### GATK bundle
-gatk_bundle_path="/data/gidb/simulations/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/gidb/GATK_bundle-2.8-b37"
 ref_FASTA="$gatk_bundle_path/human_g1k_v37.fasta"
 mills_VCF="$gatk_bundle_path/Mills_and_1000G_gold_standard.indels.b37.vcf"
 

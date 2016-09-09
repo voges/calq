@@ -20,12 +20,13 @@ public:
     CLIOptions(void)
         : blockSize(0)
         , decompress(false)
-        , encoderStats(false)
         , force(false)
         , inFileName("")
         , outFileName("")
         , polyploidy(0)
         , quantizedPrintout(false)
+        , qvMin(0)
+        , qvMax(0)
         , refFileNames()
         , samFileName("")
         , type("")
@@ -36,19 +37,20 @@ public:
 public:
     int blockSize;
     bool decompress;
-    bool encoderStats;
     bool force;
     std::string inFileName;
     std::string outFileName;
     int polyploidy;
     bool quantizedPrintout;
+    int qvMin;
+    int qvMax;
     std::vector<std::string> refFileNames;
     std::string samFileName;
     std::string type;
     bool verbose;
 };
 
-extern CLIOptions cliOptions; // this instance is globally accessible
+//extern CLIOptions cliOptions; // this instance is globally accessible
 
 #endif // CLIOPTIONS_H
 

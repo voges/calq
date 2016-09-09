@@ -50,29 +50,23 @@ CalqCodec::~CalqCodec(void)
     // empty
 }
 
-CalqEncoder::CalqEncoder(const std::string &samFileName,
-                         const std::string &cqFileName,
-                         const std::vector<std::string> &fastaFileNames,
-                         const unsigned int &blockSize,
-                         const unsigned int &polyploidy,
-                         const int &qvMin,
-                         const int &qvMax)
-    : CalqCodec(samFileName, cqFileName)
-    , blockSize(blockSize)
-    , cqFile(cqFileName, "w")
+CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
+    : CalqCodec(cliOptions.inFileName, cliOptions.outFileName)
+    , blockSize(cliOptions.blockSize)
+    , cqFile(cliOptions.outFileName, "w")
     , fastaReferences()
-    , polyploidy(polyploidy)
-    , qualEncoder(cqFile, polyploidy, qvMin, qvMax)
-    , samParser(samFileName)
+    , polyploidy(cliOptions.polyploidy)
+    , qualEncoder(cqFile, cliOptions)
+    , samParser(cliOptions.inFileName)
 {
-    if (fastaFileNames.size() == 0) {
-        throwErrorException("No FASTA file names given");
+    if (cliOptions.refFileNames.size() == 0) {
+        throwErrorException("No reference file names given");
     }
 
     // Get reference sequences
     FASTAParser fastaParser;
-    for (auto const &fastaFileName : fastaFileNames) {
-        std::cout << ME << "Parsing FASTA file: " << fastaFileName << std::endl;
+    for (auto const &fastaFileName : cliOptions.refFileNames) {
+        std::cout << ME << "Parsing reference file: " << fastaFileName << std::endl;
         fastaParser.parseFile(fastaFileName, fastaReferences);
     }
 
@@ -186,14 +180,12 @@ size_t CalqEncoder::writeFileHeader(void)
     return ret;
 }
 
-CalqDecoder::CalqDecoder(const std::string &cqFileName,
-                         const std::string &qualFileName,
-                         const std::string &samFileName)
-    : CalqCodec(cqFileName, qualFileName)
-    , cqFile(cqFileName, "r")
-    , qualFile(qualFileName, "w")
-    , qualDecoder(cqFile, qualFile)
-    , samParser(samFileName)
+CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
+    : CalqCodec(cliOptions.inFileName, cliOptions.outFileName)
+    , cqFile(cliOptions.inFileName, "r")
+    , qualFile(cliOptions.outFileName, "w")
+    , qualDecoder(cqFile, qualFile, cliOptions)
+    , samParser(cliOptions.samFileName)
 {
     // empty
 }
@@ -254,6 +246,8 @@ size_t CalqDecoder::readFileHeader(void)
     ret += cqFile.readUint32(&polyploidy);
 
     if (strncmp(version, VERSION, 5) != 0) {
+        std::cout << ME << "Program version: " << VERSION << std::endl;
+        std::cout << ME << "File version: " << version << std::endl;
         throwErrorException("CQ file was compressed with another version");
     }
 
