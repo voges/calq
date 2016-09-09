@@ -168,9 +168,11 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
     //std::cerr << observedNucleotides << ",";
     //std::cerr << observedQualityValues << ",";
     if (depth == 0) {
+        std::cerr << 0 << ",";
         return -1; // computation of quantizer index not possible
     }
     if (depth == 1) {
+        std::cerr << 0 << ",";
         return quantizerIdxMax;
     }
 

@@ -120,3 +120,4 @@ date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FAS
 rm -f $root.indels.recal
 rm -f $root.indels.tranches
 rm -f $root.indels.r
+

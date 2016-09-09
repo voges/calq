@@ -98,7 +98,7 @@ date; $samtools index $root.aln_bwa.sorted.dupmark.dedup.rg.bam
 ###############################################################################
 #                              Indel realignment                              #
 ###############################################################################
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -R $ref_FASTA -I $root.aln_bwa.sorted.dupmark.dedup.rg.bam -known $mills_VCF -o $root.realigner_target.intervals
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -R $ref_FASTA -I $root.aln_bwa.sorted.dupmark.dedup.rg.bam --known $mills_VCF -o $root.realigner_target.intervals
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bwa.sorted.dupmark.dedup.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bwa.sorted.dupmark.dedup.rg.realn.bam
 rm -f $root.realigner_target.intervals
 rm -f $root.aln_bwa.sorted.dupmark.dedup.rg.bam

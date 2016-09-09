@@ -44,7 +44,6 @@ for row in reader:
         columns[i].append(row[i])
 
 plt.figure(1)
-plots = []
 for i in range(0, numDatasets):
     plt.plot(columns[0], columns[i+1], label=ids[i]+", AUC="+aucs[i])
 
