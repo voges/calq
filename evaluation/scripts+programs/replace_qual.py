@@ -56,3 +56,4 @@ while 1:
     idx += 1
 print ""
 print "Processed {} lines ({} header lines, {} alignment lines)".format(idx, headerLines, alignmentLines)
+

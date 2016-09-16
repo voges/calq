@@ -23,7 +23,7 @@ else
     $samtools faidx $1
 fi
 
-date; echo "Extracting $chromosome from FASTA file $1"
+date; echo "Extracting chromosome $chromosome from FASTA file $1"
 $samtools faidx $1 $chromosome 1> $root.$chromosome.fa
-date; echo "Wrote $chromosome to FASTA file $root.$chromosome.fa"
+date; echo "Wrote chromosome $chromosome to FASTA file $root.$chromosome.fa"
 

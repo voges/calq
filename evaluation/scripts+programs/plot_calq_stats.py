@@ -52,3 +52,4 @@ plt.xlabel('Locus')
 plt.ylabel('Entropy')
 plt.legend(loc='lower right')
 plt.savefig(pngFileName, format='png', dpi=900)
+

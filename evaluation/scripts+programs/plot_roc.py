@@ -21,11 +21,9 @@ if len(sys.argv) != 2:
 rocFileName = sys.argv[1]
 rocFile = open(rocFileName, 'r')
 pngFileName = rocFileName + ".png"
-epsFileName = rocFileName + ".eps"
 
 print "ROC file: {}".format(rocFileName)
 print "PNG file: {}".format(pngFileName)
-print "EPS file: {}".format(epsFileName)
 
 reader = csv.reader(rocFile, delimiter=",")
 
@@ -52,4 +50,4 @@ plt.xlabel('False positive rate')
 plt.ylabel('True positive rate')
 plt.legend(loc='lower right')
 plt.savefig(pngFileName, format='png', dpi=900)
-plt.savefig(epsFileName, format='eps', dpi=900)
+

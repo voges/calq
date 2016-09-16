@@ -16,7 +16,7 @@ install_path="/project/dna/install"
 samtools="$install_path/samtools-1.3/bin/samtools"
 
 if [[ $1 == *.sam ]]; then
-    date; echo "Converting $1 to BAM file $root.bam"
+    date; echo "Converting SAM file $1 to BAM file $root.bam"
     $samtools view -bh $1 > $root.bam
 fi
 
