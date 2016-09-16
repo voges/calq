@@ -48,11 +48,11 @@ GenomeAnalysisTK_jar="$install_path/gatk-3.6/GenomeAnalysisTK.jar"
 
 ### Temporary directories
 javaIOTmpDir="$root/javaIOTmp.dir/"
-samtoolsTmpDir="$rootsamtoolTmp.dir/"
+samtoolsTmpDir="$root/samtoolsTmp.dir/"
 
 ### Reference indexing
 if [ ! -e "${ref_FASTA}.fai" ]; then
-    $samtools faidx $ref_FASTA; date
+    date; $samtools faidx $ref_FASTA
 fi
 
 ###############################################################################
