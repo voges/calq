@@ -30,7 +30,7 @@ root="$root.$script_name-$sample"
 
 ### GATK bundle
 gatk_bundle_path="/data/gidb/GATK_bundle-2.8-b37"
-ref_FASTA="$gatk_bundle_path/human_g1k_v37.fasta"
+ref_FASTA="./human_g1k_v37.21.fasta"
 hapmap_VCF="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_VCF="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
 KG_VCF="$gatk_bundle_path/1000G_phase1.snps.high_confidence.b37.vcf"
@@ -57,8 +57,8 @@ fi
 ###############################################################################
 #                           Alignment with Bowtie2                            #
 ###############################################################################
-date; $bowtie2-build $ref_FASTA bowtie2_indexes
-date; $bowtie2 -x bowtie2_indexes -1 $reads_FASTQ -S $root.aln_bowtie2.sam
+date; $bowtie2-build $ref_FASTA $root.bowtie2_idx
+date; $bowtie2 -x $root.bowtie2_idx -U $reads_FASTQ -S $root.aln_bowtie2.sam --threads $num_threads
 
 ###############################################################################
 #                             Sorting & indexing                              #
@@ -70,9 +70,8 @@ rm -f $root.aln_bowtie2.sam
 
 ### Sort and index BAM file
 date; $samtools sort -T $samtoolsTmpDir -@ $num_threads -O bam $root.aln_bowtie2.bam > $root.aln_bowtie2.sorted.bam
-#date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar SortSam I=$root.aln_bwa.sam O=$root.aln_bwa.sorted.bam SORT_ORDER=coordinate
 rm -f $root.aln_bowtie2.bam
-date; $samtools index -T $samtoolsTmpDir -@ $num_threads $root.aln_bowtie2.sorted.bam
+date; $samtools index $root.aln_bowtie2.sorted.bam
 
 ###############################################################################
 #                              Duplicate removal                              #
@@ -88,10 +87,9 @@ date; $samtools view -hb -F 0xF40 $root.aln_bowtie2.sorted.dupmark.bam > $root.a
 rm -f $root.aln_bowtie2.sorted.dupmark.bam
 
 ### Label the BAM headers and index the resulting file
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.dedup.bam O=$root.aln_bowtie2.sorted.dupmark.dedup.rg.bam RGID=1 RGLB=Library RPGL=ILLUMINA RGPU=PlatformUnit RGSM=$sample
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.dedup.bam O=$root.aln_bowtie2.sorted.dupmark.dedup.rg.bam RGID=1 RGLB=Library RGPL=Illumina RGPU=PlatformUnit RGSM=$sample
 rm -f $root.aln_bowtie2.sorted.dupmark.dedup.bam
 date; $samtools index $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam
-#date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar BuildBamIndex I=$root.aln_bwa.sorted.dupmark.rg.bam
 
 ###############################################################################
 #                              Indel realignment                              #
@@ -104,10 +102,11 @@ rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam
 ###############################################################################
 #                      Base quality score recalibration                       #
 ###############################################################################
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T baseRecalibrator -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T BaseRecalibrator -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -nct $num_threads -T PrintReads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam
 rm -f $root.bqsr.table
-rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
+# Keep the BAM file without BQSR!
+#rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
 
 ###############################################################################
 #                          Variant calling with GATK                          #
@@ -116,10 +115,10 @@ rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
 ### Call variants using Haplotype Caller
 SEC=10
 SCC=30
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T HaplotypeCaller -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam --dbnsp $dbsnps_VCF --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $root.raw_variants.vcf
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T HaplotypeCaller -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam --dbsnp $dbsnps_VCF --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.raw_variants.vcf
 
 ### SNP extraction
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T SelectVariants -R $ref_FASTA -V $root.raw_variants.vcf -selectType SNP -o $root.snps.vcf
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T SelectVariants -R $ref_FASTA -V $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.raw_variants.vcf -selectType SNP -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf
 
 ### Fiter the variants using VQSR
 resourceSNPs1="hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap_VCF"
@@ -128,8 +127,8 @@ resourceSNPs3="1000G,known=false,training=true,truth=false,prior=10.0 $KG_VCF"
 resourceSNPs4="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_VCF"
 recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum"
 filterLevel="99.0"
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.snps.vcf -mode SNP -recalFile $root.snps.recal  -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.snps.filtered.vcf
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -mode SNP -recalFile $root.snps.recal  -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.filtered.vcf
 rm -f $root.snps.recal
 rm -f $root.snps.tranches
 rm -f $root.snps.r
