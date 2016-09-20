@@ -30,7 +30,7 @@ root="$root.$script_name-$sample"
 
 ### GATK bundle
 gatk_bundle_path="/data/gidb/GATK_bundle-2.8-b37"
-ref_FASTA="./human_g1k_v37.21.fasta"
+ref_FASTA="$gatk_bundle_path/human_g1k_v37.21.fasta"
 hapmap_VCF="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_VCF="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
 KG_VCF="$gatk_bundle_path/1000G_phase1.snps.high_confidence.b37.vcf"
