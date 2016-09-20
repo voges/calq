@@ -49,16 +49,12 @@ GenomeAnalysisTK_jar="$install_path/gatk-3.6/GenomeAnalysisTK.jar"
 javaIOTmpDir="$root/javaIOTmp.dir/"
 samtoolsTmpDir="$root/samtoolsTmp.dir/"
 
-### Reference indexing
-if [ ! -e "${ref_FASTA}.fai" ]; then
-    date; $samtools faidx $ref_FASTA
-fi
-
 ###############################################################################
 #                           Alignment with Bowtie2                            #
 ###############################################################################
 date; $bowtie2-build $ref_FASTA $root.bowtie2_idx
 date; $bowtie2 -x $root.bowtie2_idx -U $reads_FASTQ -S $root.aln_bowtie2.sam --threads $num_threads
+rm -f $root.bowtie2_idx*
 
 ###############################################################################
 #                             Sorting & indexing                              #
@@ -81,6 +77,7 @@ date; $samtools index $root.aln_bowtie2.sorted.bam
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates I=$root.aln_bowtie2.sorted.bam O=$root.aln_bowtie2.sorted.dupmark.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
 rm -f $root.dedup_metrics.txt
 rm -f $root.aln_bowtie2.sorted.bam
+rm -f $root.aln_bowtie2.sorted.bam.bai
 
 ### Remove duplicates
 date; $samtools view -@ $num_threads -bh -F 0xF40 $root.aln_bowtie2.sorted.dupmark.bam > $root.aln_bowtie2.sorted.dupmark.dedup.bam
@@ -98,6 +95,7 @@ date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T Realigne
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
 rm -f $root.realigner_target.intervals
 rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam
+rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam.bai
 
 ###############################################################################
 #                      Base quality score recalibration                       #
@@ -130,6 +128,7 @@ filterLevel="99.0"
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T VariantRecalibrator -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -R $ref_FASTA -T ApplyRecalibration -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -mode SNP -recalFile $root.snps.recal  -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.filtered.vcf
 rm -f $root.snps.recal
+rm -f $root.snps.recal.idx
 rm -f $root.snps.tranches
 rm -f $root.snps.r
 

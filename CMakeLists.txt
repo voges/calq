@@ -171,5 +171,5 @@ add_dependencies(${PROJECT_NAME} timestamp)
 add_dependencies(${PROJECT_NAME} git)
 #add_dependencies(${PROJECT_NAME} doc)
 add_dependencies(${PROJECT_NAME} version)
-target_link_libraries(${PROJECT_NAME} z)
+#target_link_libraries(${PROJECT_NAME} z)
 

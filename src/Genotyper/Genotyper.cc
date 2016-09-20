@@ -18,6 +18,7 @@
 
 // Allele alphabet
 static const std::vector<char> GENOTYPER_ALLELE_ALPHABET = {'A','C','G','T'};
+static const size_t GENOTYPER_ALLELE_ALPHABET_SIZE = 4;
 
 static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &genotypeAlphabet,
                                                    const std::vector<char> &alleleAlphabet,
@@ -83,8 +84,8 @@ void Genotyper::initLikelihoods(void)
     std::cout << std::endl;
 
     // Init map containing the genotype likelihoods
-    int chosen[GENOTYPER_ALLELE_ALPHABET.size()];
-    combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, GENOTYPER_ALLELE_ALPHABET.size());
+    int chosen[GENOTYPER_ALLELE_ALPHABET_SIZE];
+    combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, GENOTYPER_ALLELE_ALPHABET_SIZE);
 
     std::cout << ME << "Genotype alphabet ";
     std::cout << "(" << genotypeAlphabet.size() << " possible genotypes): ";
