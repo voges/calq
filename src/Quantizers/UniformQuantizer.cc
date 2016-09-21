@@ -11,7 +11,7 @@
 
 #include "UniformQuantizer.h"
 #include "Common/Exceptions.h"
-#include "Common/debug.h"
+#include "Common/log.h"
 #include <cmath>
 #include <queue>
 #include <vector>

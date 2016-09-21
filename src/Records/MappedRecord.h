@@ -13,6 +13,7 @@
 #define MAPPEDRECORD_H
 
 #include "Records/SAMRecord.h"
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -33,8 +34,8 @@ public:
     std::string cigar;
 
     void extractObservations(const uint32_t &observedPosMin,
-                             std::vector<std::string> &observedNucleotides,
-                             std::vector<std::string> &observedQualityValues);
+                             std::deque<std::string> &observedNucleotides,
+                             std::deque<std::string> &observedQualityValues);
 };
 
 #endif // MAPPEDRECORD_H

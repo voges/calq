@@ -54,6 +54,7 @@ public:
  */
 inline void throwErrorException(const std::string &msg)
 {
+    std::cout.flush();
     throw ErrorException(msg);
 }
 

@@ -95,8 +95,8 @@ private:
 
     // Current observed nucleotides and quality values; when a quantizer index
     // is computed for a certain position, the vectors are shrinked
-    std::vector<std::string> observedNucleotides;
-    std::vector<std::string> observedQualityValues;
+    std::deque<std::string> observedNucleotides;
+    std::deque<std::string> observedQualityValues;
     uint32_t observedPosMin;
     uint32_t observedPosMax;
 

@@ -11,6 +11,7 @@
 
 #include "MappedRecord.h"
 #include "Common/Exceptions.h"
+#include <string.h>
 
 MappedRecord::MappedRecord(const SAMRecord &samRecord)
     : posMin(samRecord.pos - 1) // SAM format counts from 1
@@ -60,8 +61,8 @@ MappedRecord::~MappedRecord(void)
 }
 
 void MappedRecord::extractObservations(const uint32_t &observedPosMin,
-                                       std::vector<std::string> &observedNucleotides,
-                                       std::vector<std::string> &observedQualityValues)
+                                       std::deque<std::string> &observedNucleotides,
+                                       std::deque<std::string> &observedQualityValues)
 {
     size_t cigarIdx = 0;
     size_t cigarLen = cigar.length();

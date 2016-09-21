@@ -39,11 +39,14 @@ File::~File(void)
 
 void File::open(const std::string &path, const char *mode)
 {
-    if (fp != NULL) { 
-        throwErrorException("File pointer already in use");
+    if (path.empty() == true) {
+        throwErrorException("path is empty");
     }
     if (strlen(mode) == 0) {
         throwErrorException("mode is empty");
+    }
+    if (fp != NULL) { 
+        throwErrorException("File pointer already in use");
     }
 
 #ifdef OS_WINDOWS

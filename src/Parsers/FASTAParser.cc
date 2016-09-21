@@ -11,13 +11,13 @@
 
 #include "FASTAParser.h"
 #include "Common/Exceptions.h"
-#include "Common/fileSystemHelpers.h"
+#include "Common/helpers.h"
 #include <fstream>
 #include <iostream>
 
 FASTAParser::FASTAParser(void): line(NULL), lineSize(sizeof(char) * (4*KB))
 {
-    line = (char *)malloc(lineSize); // usually, lines are limited to 80 chars, so 4 KB should be enough
+    line = (char *)malloc(lineSize); // usually lines are limited to 80 chars, so 4 KB should be enough
 }
 
 FASTAParser::FASTAParser(const FASTAParser &fastaParser)
@@ -34,7 +34,7 @@ FASTAParser::~FASTAParser(void)
 
 void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTAReference> &fastaReferences)
 {
-    if (fileName.length() == 0) {
+    if (fileName.empty() == true) {
         throwErrorException("No file name given");
     }
     if (   fileNameExtension(fileName) != std::string("fa")
@@ -45,7 +45,7 @@ void FASTAParser::parseFile(const std::string &fileName, std::vector<FASTARefere
         throwErrorException("Cannot access reference file");
     }
     if (fastaReferences.size() != 0) {
-        throwErrorException("Vector 'fastaReferences' must be empty");
+        throwErrorException("Vector 'fastaReferences' is not empty");
     }
 
     std::ifstream ifs;

@@ -10,7 +10,7 @@
  */
 
 #include "rle.h"
-#include "Common/debug.h"
+#include "Common/log.h"
 #include "Common/Exceptions.h"
 #include "Common/os_config.h"
 #include <iostream>
@@ -18,7 +18,7 @@
 #if defined(OS_WINDOWS)
     #include <windows.h>
 #elif defined(OS_APPLE) || defined(OS_LINUX)
-    #include <unistd.h> /* sysconf(3) */
+    #include <unistd.h> // sysconf(3)
 #else
     #error "Operating system not supported"
 #endif

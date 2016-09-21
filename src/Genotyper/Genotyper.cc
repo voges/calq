@@ -11,9 +11,9 @@
 
 #include "Genotyper.h"
 #include "Common/CLIOptions.h"
-#include "Common/debug.h"
+#include "Common/log.h"
 #include "Common/Exceptions.h"
-#include "Common/fileSystemHelpers.h"
+#include "Common/helpers.h"
 #include <math.h>
 
 // Allele alphabet

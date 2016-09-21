@@ -14,7 +14,7 @@
 #include "Common/CLIOptions.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
-#include "Common/debug.h"
+#include "Common/log.h"
 #include "Compressors/range/range.h"
 #include "Compressors/rle/rle.h"
 #include <chrono>
@@ -181,9 +181,9 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // block. If so, we also need to update the size of our observation vectors.
     if (mappedRecord.posMax > observedPosMax) {
         observedPosMax = mappedRecord.posMax;
-        size_t observedSize = observedPosMax - observedPosMin + 1;
-        observedNucleotides.resize(observedSize);
-        observedQualityValues.resize(observedSize);
+        size_t observedLength = observedPosMax - observedPosMin + 1;
+        observedNucleotides.resize(observedLength);
+        observedQualityValues.resize(observedLength);
     }
 
     // Parse CIGAR string and assign nucleotides and QVs from the record 
@@ -196,14 +196,15 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // the quantizer indices for these positions and shrink the observation
     // vectors
     while (observedPosMin < mappedRecord.posMin) {
-        std::cerr << referenceName << "," << observedPosMin << ",";
+        //std::cerr << referenceName << "," << observedPosMin << "," << referencePosMax;
+        //std::cout << observedPosMin << "/" << referencePosMax << "(" << (double)observedPosMin*100/(double)referencePosMax << "%)" << std::endl;
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << k << std::endl;
+        //std::cerr << k << std::endl;
 
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
-        observedNucleotides.erase(observedNucleotides.begin());
-        observedQualityValues.erase(observedQualityValues.begin());
+        observedNucleotides.pop_front();
+        observedQualityValues.pop_front();
         observedPosMin++;
     }
 
@@ -235,14 +236,14 @@ size_t QualEncoder::finishBlock(void)
 
     // Compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        std::cerr << referenceName << "," << observedPosMin << ",";
+        //std::cerr << referenceName << "," << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        std::cerr << k << std::endl;
+        //std::cerr << k << std::endl;
 
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
-        observedNucleotides.erase(observedNucleotides.begin());
-        observedQualityValues.erase(observedQualityValues.begin());
+        observedNucleotides.pop_front();
+        observedQualityValues.pop_front();
         observedPosMin++;
     }
 
@@ -446,7 +447,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
     uint32_t qiIdx = 0; // iterator for quantizer indices
 
     // Iterate through CIGAR string and code the quality values
-    std::string cigar = mappedRecord.cigar;
+    std::string cigar(mappedRecord.cigar);
     size_t cigarIdx = 0;
     size_t cigarLen = mappedRecord.cigar.length();
     size_t opLen = 0; // length of current CIGAR operation

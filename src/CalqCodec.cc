@@ -13,7 +13,7 @@
 #include "CalqCodec.h"
 #include "cmake_config.h"
 #include "Common/Exceptions.h"
-#include "Common/debug.h"
+#include "Common/log.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>
@@ -37,10 +37,10 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     : inFileName(inFileName)
     , outFileName(outFileName)
 {
-    if (inFileName.length() == 0) {
+    if (inFileName.empty()) {
         throwErrorException("No input file name given");
     }
-    if (outFileName.length() == 0) {
+    if (outFileName.empty()) {
         throwErrorException("No output file name given");
     }
 }
@@ -59,6 +59,18 @@ CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     , qualEncoder(cqFile, cliOptions)
     , samParser(cliOptions.inFileName)
 {
+    if (cliOptions.inFileName.empty()) {
+        throwErrorException("No input file name given");
+    }
+    if (cliOptions.outFileName.empty()) {
+        throwErrorException("No output file name given");
+    }
+    if (cliOptions.blockSize < 1) {
+        throwErrorException("Block size must be greater than zero");
+    }
+    if (cliOptions.polyploidy < 1) {
+        throwErrorException("Polyploidy must be greater than zero");
+    }
     if (cliOptions.refFileNames.size() == 0) {
         throwErrorException("No reference file names given");
     }
@@ -66,14 +78,14 @@ CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     // Get reference sequences
     FASTAParser fastaParser;
     for (auto const &fastaFileName : cliOptions.refFileNames) {
-        std::cout << ME << "Parsing reference file: " << fastaFileName << std::endl;
+        LOG("Parsing reference file: %s", fastaFileName.c_str());
         fastaParser.parseFile(fastaFileName, fastaReferences);
     }
 
     // Print info about found reference sequences
-    std::cout << ME << "Found the following reference sequence(s):" << std::endl;
+    LOG("Found the following reference sequence(s):");
     for (auto const &fastaReference : fastaReferences) {
-        std::cout << ME << "  " << fastaReference.header << " (sequence length: " << fastaReference.sequence.size() << ")" << std::endl;
+        LOG("  %s (sequence length: %lu)", fastaReference.header.c_str(), fastaReference.sequence.size());
     }
 
     // Now pass the FASTA references to the qualEncoder

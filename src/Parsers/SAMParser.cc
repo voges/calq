@@ -11,7 +11,7 @@
 
 #include "SAMParser.h"
 #include "Common/Exceptions.h"
-#include "Common/fileSystemHelpers.h"
+#include "Common/helpers.h"
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -21,13 +21,13 @@ SAMParser::SAMParser(const std::string &fileName)
     , curr()
     , ifs()
 {
-    if (fileName.length() == 0) {
+    if (fileName.empty() == true) {
         throwErrorException("No file name given");
     }
     if (fileNameExtension(fileName) != std::string("sam")) {
         throwErrorException("SAM file extension must be 'sam'");
     }
-    if (!fileExists(fileName)) {
+    if (fileExists(fileName) == false) {
         throwErrorException("Cannot access SAM file");
     }
 

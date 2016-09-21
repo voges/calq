@@ -21,7 +21,7 @@
  *              on Windows) (voges)
  */
 
-#include "Common/debug.h"
+#include "Common/log.h"
 #include "Common/os_config.h"
 
 #ifdef OS_WINDOWS
@@ -36,44 +36,37 @@
 #include "cmake_config.h"
 #include "Common/CLIOptions.h"
 #include "Common/Exceptions.h"
-#include "Common/fileSystemHelpers.h"
+#include "Common/helpers.h"
 #include "tclap/CmdLine.h"
 #include <cctype>
 #include <iostream>
 
 CLIOptions cliOptions;
 
-static void printVersion(void)
+static void printVersionAndCopyright(void)
 {
-    std::cout << "Program: calq" << std::endl;
-    std::cout << "Version: " << VERSION << std::endl;
-    std::cout << "Build time: " << TIMESTAMP_UTC << std::endl;
-    //std::cout << "Git branch: " << GIT_BRANCH << std::endl;
-    std::cout << "Git commit hash: " << GIT_COMMIT_HASH_SHORT << std::endl;
-    std::cout << std::endl;
-}
-
-static void printCopyright(void)
-{
-    std::cout << "Copyright (c) 2015-" << BUILD_YEAR << std::endl;
-    std::cout << "Leibniz Universitaet Hannover" << std::endl;
-    std::cout << "Institut fuer Informationsverarbeitung (TNT)" << std::endl;
-    std::cout << "Contact: Jan Voges <voges@tnt.uni-hannover.de>" << std::endl;
-    std::cout << std::endl;
+    LOG("----------------------------------------------");
+    LOG("Program: calq");
+    LOG("Version: %s", VERSION);
+    LOG("Build time: %s", TIMESTAMP_UTC);
+    LOG("Git commit hash: %s", GIT_COMMIT_HASH_SHORT);
+    LOG("----------------------------------------------");
+    LOG("Copyright (c) 2015-%d", BUILD_YEAR);
+    LOG("Leibniz Universitaet Hannover");
+    LOG("Institut fuer Informationsverarbeitung (TNT)");
+    LOG("Contact: Jan Voges <voges@tnt.uni-hannover.de>");
+    LOG("----------------------------------------------");
 }
 
 int main(int argc, char *argv[])
 {
-    std::cout << std::setprecision(2) << std::fixed;
-
-    printVersion();
-    printCopyright();
+    printVersionAndCopyright();
 
     try {
         CLIOptions cliOptions;
 
         // TCLAP class
-        TCLAP::CmdLine cmd("calq - Lossy compression of next-generation sequencing quality values", ' ', VERSION);
+        TCLAP::CmdLine cmd("calq", ' ', VERSION);
 
         // TCLAP arguments (both compression and decompression)
         TCLAP::SwitchArg forceSwitch("f", "force", "Force overwriting of output files, etc.", cmd, false);
@@ -140,23 +133,21 @@ int main(int argc, char *argv[])
         cliOptions.type = typeArg.getValue();
         cliOptions.verbose = verboseSwitch.getValue();
 
-        std::cout << ME << "Checking command line arguments" << std::endl;
-
         // Check command line options for both compression and decompression
         if (cliOptions.force == true) {
-            std::cout << ME << "Force switch set - overwriting output file(s)" << std::endl;
+            LOG("Force switch set - overwriting output file(s)");
         }
         if (fileExists(cliOptions.inFileName) == false) {
-            std::cout << ME << "Input file name: " << cliOptions.inFileName << std::endl;
+            LOG("Input file name: %s", cliOptions.inFileName.c_str());
             throwErrorException("Cannot access input file");
         }
         if (cliOptions.verbose == true) {
-            std::cout << ME << "Verbose output activated" << std::endl;
+            LOG("Verbose output activated");
         }
 
         // Check command line options for compression mode
         if (cliOptions.decompress == false) {
-            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
+            LOG("Input file: %s", cliOptions.inFileName.c_str());
             if (fileNameExtension(cliOptions.inFileName) != std::string("sam")) {
                 throwErrorException("Input file extension must be 'sam'");
             }
@@ -165,17 +156,17 @@ int main(int argc, char *argv[])
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".cq");
             }
-            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
+            LOG("Output file: %s", cliOptions.outFileName.c_str());
             if ((fileExists(cliOptions.outFileName) == true) && (cliOptions.force == false)) {
                 throwErrorException("Output file already exists (use option 'f' to force overwriting)");
             }
 
-            std::cout << ME << "Block size: " << cliOptions.blockSize << std::endl;
+            LOG("Block size: %d", cliOptions.blockSize);
             if (cliOptions.blockSize < 1) {
                 throwErrorException("Block size must be greater than 0");
             }
 
-            std::cout << ME << "Polyploidy: " << cliOptions.polyploidy << std::endl;
+            LOG("Polyploidy: %d", cliOptions.polyploidy);
             if (cliOptions.polyploidy < 1) {
                 throwErrorException("Polyploidy must be greater than 0");
             }
@@ -184,11 +175,11 @@ int main(int argc, char *argv[])
             }
 
             if (cliOptions.quantizedPrintout == true) {
-                std::cout << ME << "Printing quantized quality values" << std::endl;
+                LOG("Printing quantized quality values");
             }
 
             for (auto const &refFileName : cliOptions.refFileNames) {
-                std::cout << ME << "Reference file: " << refFileName << std::endl;
+                LOG("Reference file: %s", refFileName.c_str());
                 if (   fileNameExtension(refFileName) != std::string("fa")
                     && fileNameExtension(refFileName) != std::string("fasta")) {
                     throwErrorException("Reference file extension must be 'fa' or 'fasta'");
@@ -203,7 +194,7 @@ int main(int argc, char *argv[])
             //   Illumina 1.3+  Phred+64   [0,40]
             //   Illumina 1.5+  Phred+64   [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
             //   Illumina 1.8+  Phred+33   [0,41]
-            std::cout << ME << "Quality value type: " << cliOptions.type << std::endl;
+            LOG("Quality value type: %s", cliOptions.type.c_str());
             if (cliOptions.type == "sanger") {
                 cliOptions.qvMin = 33;
                 cliOptions.qvMax = cliOptions.qvMin + 40;
@@ -238,16 +229,15 @@ int main(int argc, char *argv[])
                     cliOptions.qvMin = std::stoi(min);
                     cliOptions.qvMax = std::stoi(max);
                 } else {
-                    std::cout << ME << "Quality value type: " << cliOptions.type << std::endl;
                     throwErrorException("Quality value type not supported");
                 }
             }
-            std::cout << ME << "Quality value range: [" << cliOptions.qvMin << "," << cliOptions.qvMax << "]" << std::endl;
+            LOG("Quality value range: [%d,%d]", cliOptions.qvMin, cliOptions.qvMax);
         }
 
         // Check command line options for decompression mode
         if (cliOptions.decompress == true) {
-            std::cout << ME << "Input file: " << cliOptions.inFileName << std::endl;
+            LOG("Input file: %s", cliOptions.inFileName.c_str());
             if (fileNameExtension(cliOptions.inFileName) != std::string("cq")) {
                 throwErrorException("Input file extension must be 'cq'");
             }
@@ -256,13 +246,13 @@ int main(int argc, char *argv[])
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".qual");
             }
-            std::cout << ME << "Output file: " << cliOptions.outFileName << std::endl;
+            LOG("Output file: %s", cliOptions.outFileName.c_str());
             if ((fileExists(cliOptions.outFileName) == true) && (cliOptions.force == false)) {
                 throwErrorException("Output file already exists (use option 'f' to force overwriting)");
             }
 
             // Check if the SAM file exists and if it has the correct extension
-           std::cout << ME << "SAM file: " << cliOptions.samFileName << std::endl;
+           LOG("SAM file: %s", cliOptions.samFileName.c_str());
            if (fileExists(cliOptions.samFileName) == false) {
                 throwErrorException("Cannot access SAM file");
             }
@@ -279,18 +269,20 @@ int main(int argc, char *argv[])
             CalqDecoder calqDecoder(cliOptions);
             calqDecoder.decode();
         }
-    std::cout << ME << "Finished" << std::endl;
+
+    LOG("Finished");
+
     } catch (TCLAP::ArgException &tclapException) {
-        std::cerr << ME << "Argument error: " << tclapException.error() << " (argument: " << tclapException.argId() << ")" << std::endl;
+        LOG("Argument error: %s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());
         return EXIT_FAILURE;
     } catch (const ErrorException &errorException) {
-        std::cerr << ME << "Error: " << errorException.what() << std::endl;
+        LOG("Error: %s", errorException.what());
         return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
-        std::cerr << ME << "Fatal error: " << stdException.what() << std::endl;
+        LOG("Fatal error: %s", stdException.what());
         return EXIT_FAILURE;
     } catch (...) {
-        std::cerr << ME << "Unkown error occured" << std::endl;
+        LOG("Unkown error occured");
         return EXIT_FAILURE;
     }
 
