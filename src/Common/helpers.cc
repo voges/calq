@@ -25,21 +25,22 @@ std::string currentDateAndTime(void)
     time_t t = std::time(NULL);
     std::tm *ttm = NULL;
 
+    // Convert to UTC ('Zulu') time
 #ifdef OS_WINDOWS
-    localtime_s(ttm, &t);
+    gmtime_s(ttm, &t); 
     if (ttm == NULL) {
-        throwErrorException("localtime_s failed");
+        throwErrorException("gmtime_s failed");
     }
 #else
-    ttm = localtime(&t);
+    ttm = gmtime(&t);
     if (ttm == NULL) {
-        throwErrorException("localtime failed");
+        throwErrorException("gmtime failed");
     }
 #endif
 
-    // ISO 8601: 2007-04-05T14:30:21
-    char timeString[] = "yyyy-mm-ddTHH:MM:SS";
-    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%S", ttm) == 0) {
+    // ISO 8601: 2007-04-05T14:30:21Z
+    char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
+    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", ttm) == 0) {
         throwErrorException("strftime failed");
     }
     std::string result(timeString);

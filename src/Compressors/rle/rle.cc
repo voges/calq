@@ -10,7 +10,7 @@
  */
 
 #include "rle.h"
-#include "Common/log.h"
+#include "Common/helpers.h"
 #include "Common/Exceptions.h"
 #include "Common/os_config.h"
 #include <iostream>

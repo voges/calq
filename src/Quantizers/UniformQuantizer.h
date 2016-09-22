@@ -22,8 +22,8 @@
  */
 class UniformQuantizer {
 public:
-    UniformQuantizer(const int &minimumValue, 
-                     const int &maximumValue, 
+    UniformQuantizer(const int &minimumValue,
+                     const int &maximumValue,
                      const unsigned int &numberOfSteps);
     ~UniformQuantizer(void);
 

@@ -11,7 +11,7 @@
 
 #include "Genotyper.h"
 #include "Common/CLIOptions.h"
-#include "Common/log.h"
+#include "Common/helpers.h"
 #include "Common/Exceptions.h"
 #include "Common/helpers.h"
 #include <math.h>
@@ -76,24 +76,18 @@ Genotyper::~Genotyper(void)
 void Genotyper::initLikelihoods(void)
 {
     // Init map containing the allele likelihoods
-    std::cout << ME << "Allele alphabet: ";
     for (auto const &allele : alleleAlphabet) {
-        std::cout << allele << " ";
         alleleLikelihoods.insert(std::pair<char,double>(allele, 0.0));
     }
-    std::cout << std::endl;
 
     // Init map containing the genotype likelihoods
     int chosen[GENOTYPER_ALLELE_ALPHABET_SIZE];
     combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, GENOTYPER_ALLELE_ALPHABET_SIZE);
 
-    std::cout << ME << "Genotype alphabet ";
-    std::cout << "(" << genotypeAlphabet.size() << " possible genotypes): ";
+    LOG("Initializing genotype alphabet with %lu possible genotypes", genotypeAlphabet.size());
     for (auto &genotype : genotypeAlphabet) {
-        std::cout << genotype << " ";
         genotypeLikelihoods.insert(std::pair<std::string,double>(genotype, 0.0));
     }
-    std::cout << std::endl;
 }
 
 void Genotyper::resetLikelihoods(void)
@@ -126,7 +120,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         char y = (char)observedNucleotides[d];
         double q = (double)(observedQualityValues[d] - qualityValueMin);
         if ((q > qualityValueMax-qualityValueMin) || q < 0) {
-            std::cout << ME << "min,curr,max=" << 0 << "," << (int)q << "," << qualityValueMax-qualityValueMin << std::endl;
+            std::cout << "min,curr,max=" << 0 << "," << (int)q << "," << qualityValueMax-qualityValueMin << std::endl;
             throwErrorException("Quality value out of range");
         }
         double pStrike = 1 - pow(10.0, -q/10.0);

@@ -15,7 +15,9 @@
 #include <fstream>
 #include <iostream>
 
-FASTAParser::FASTAParser(void): line(NULL), lineSize(sizeof(char) * (4*KB))
+FASTAParser::FASTAParser(void)
+    : line(NULL)
+    , lineSize(sizeof(char) * (4*KB))
 {
     line = (char *)malloc(lineSize); // usually lines are limited to 80 chars, so 4 KB should be enough
 }

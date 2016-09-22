@@ -13,7 +13,7 @@
 #include "CalqCodec.h"
 #include "cmake_config.h"
 #include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/helpers.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>
@@ -37,10 +37,10 @@ CalqCodec::CalqCodec(const std::string &inFileName,
     : inFileName(inFileName)
     , outFileName(outFileName)
 {
-    if (inFileName.empty()) {
+    if (inFileName.empty() == true) {
         throwErrorException("No input file name given");
     }
-    if (outFileName.empty()) {
+    if (outFileName.empty() == true) {
         throwErrorException("No output file name given");
     }
 }
@@ -111,7 +111,6 @@ void CalqEncoder::encode(void)
 
     size_t fileHeaderSize = writeFileHeader();
 
-    // Send all records to the QualEncoder
     std::string rnamePrev("");
     uint32_t posPrev = 0;
     qualEncoder.startBlock();
@@ -161,20 +160,21 @@ void CalqEncoder::encode(void)
     compressedSize += qualEncoder.finishBlock();
     numBlocks++;
 
-    // Print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-    std::cout << ME << "COMPRESSION STATISTICS" << std::endl;
-    std::cout << ME << "  Took " << diffTimeMs << " ms" << " ~= " << diffTimeS << " s" << std::endl;
-    std::cout << ME << "  Compressed " << numMappedRecords << " mapped + " << numUnmappedRecords << " unmapped = " << numRecords << " record(s) in " << numBlocks << " block(s)" << std::endl;
-    std::cout << ME << "  Uncompressed size: " << uncompressedSize << std::endl;
-    std::cout << ME << "  Compressed size: " << compressedSize << " (+ file header size: " << fileHeaderSize << ")" << std::endl;
-    std::cout << ME << "  Compression ratio: " << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
-    std::cout << ME << "  Compression factor: " << (double)uncompressedSize/(double)compressedSize << std::endl;
-    std::cout << ME << "  Bits per quality value: " << ((double)compressedSize * 8)/(double)uncompressedSize << std::endl;
-    std::cout << ME << "  Speed (uncompressed size/time): " << ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000) << " MB/s" << std::endl;
+
+    LOG("COMPRESSION STATISTICS");
+    LOG("----------------------");
+    LOG("  Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
+    LOG("  Compressed %lu mapped + %lu unmapped = %lu record(s) in %lu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
+    LOG("  Uncompressed size: %lu", uncompressedSize);
+    LOG("  Compressed size: %lu (+ file header size: %lu)", compressedSize, fileHeaderSize);
+    LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
+    LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
+    LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
+    LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 
 size_t CalqEncoder::writeFileHeader(void)
@@ -199,7 +199,15 @@ CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
     , qualDecoder(cqFile, qualFile, cliOptions)
     , samParser(cliOptions.samFileName)
 {
-    // empty
+    if (cliOptions.inFileName.empty()) {
+        throwErrorException("No input file name given");
+    }
+    if (cliOptions.outFileName.empty()) {
+        throwErrorException("No output file name given");
+    }
+    if (cliOptions.samFileName.empty()) {
+        throwErrorException("No SAM file name given");
+    }
 }
 
 CalqDecoder::~CalqDecoder(void)
@@ -231,21 +239,21 @@ void CalqDecoder::decode(void)
         numBlocks++;
     }
 
-    // Print summary
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-    std::cout << ME << "DECOMPRESSION STATISTICS" << std::endl;
-    std::cout << ME << "  Took " << diffTimeMs << " ms" << " ~= " << diffTimeS << " s" << std::endl;
-    std::cout << ME << "  Decoded " << numBlocks << " block(s)" << std::endl;
-    std::cout << ME << "  Compressed size: " << compressedSize << " (+ file header size: " << fileHeaderSize << ")" << std::endl;
-    std::cout << ME << "  Speed (compressed size/time): " << ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000) << " MB/s" << std::endl;
+
+    LOG("DECOMPRESSION STATISTICS");
+    LOG("------------------------");
+    LOG("  Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
+    LOG("  Decoded %lu block(s)", numBlocks);
+    LOG("  Compressed size: %lu (+ file header size: %lu)", compressedSize, fileHeaderSize);
+    LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 
 size_t CalqDecoder::readFileHeader(void)
 {
-    std::cout << ME << "Reading file header" << std::endl;
     size_t ret = 0;
 
     const size_t magicSize = 5;
@@ -258,14 +266,14 @@ size_t CalqDecoder::readFileHeader(void)
     ret += cqFile.readUint32(&polyploidy);
 
     if (strncmp(version, VERSION, 5) != 0) {
-        std::cout << ME << "Program version: " << VERSION << std::endl;
-        std::cout << ME << "File version: " << version << std::endl;
+        LOG("Program version: %s", VERSION);
+        LOG("File version: %s", version);
         throwErrorException("CQ file was compressed with another version");
     }
 
-    std::cout << ME << "  Magic: " << magic << std::endl;
-    std::cout << ME << "  Version: " << version << std::endl;
-    std::cout << ME << "  Polyploidy: " << polyploidy << std::endl;
+    LOG("Magic: %s", magic);
+    LOG("Version: %s",  version);
+    LOG("Polyploidy: %d",  polyploidy);
 
     return ret;
 }

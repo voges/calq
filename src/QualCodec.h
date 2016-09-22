@@ -20,9 +20,10 @@
 #include "Quantizers/UniformQuantizer.h"
 #include "Records/SAMRecord.h"
 #include "Records/MappedRecord.h"
-#include <math.h>
+#include <chrono>
 #include <fstream>
 #include <map>
+#include <math.h>
 #include <queue>
 #include <vector>
 
@@ -47,6 +48,8 @@ private:
 
     // Generic
     bool quantizedPrintout;
+    //std::chrono::time_point<std::chrono::steady_clock> startTime;
+    //std::chrono::time_point<std::chrono::steady_clock> stopTime;
     bool verbose;
     int qvMin;
     int qvMax;

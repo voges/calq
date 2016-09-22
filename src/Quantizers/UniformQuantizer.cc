@@ -11,13 +11,13 @@
 
 #include "UniformQuantizer.h"
 #include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/helpers.h"
 #include <cmath>
 #include <queue>
 #include <vector>
 
-UniformQuantizer::UniformQuantizer(const int &minimumValue, 
-                                   const int &maximumValue, 
+UniformQuantizer::UniformQuantizer(const int &minimumValue,
+                                   const int &maximumValue,
                                    const unsigned int &numberOfSteps)
     : lut()
     , inverseLut()
@@ -97,14 +97,14 @@ int UniformQuantizer::valueToReconstructionValue(const int &value)
 
 void UniformQuantizer::print(void) const
 {
-    std::cout << ME << "LUT:" << std::endl;
+    std::cout << "LUT:" << std::endl;
     for (auto const &lutEntry : lut) {
         std::cout << "  " << lutEntry.first << ": ";
         std::cout << lutEntry.second.first << ",";
         std::cout << lutEntry.second.second << std::endl;
     }
 
-    std::cout << ME << "Inverse LUT:" << std::endl;
+    std::cout << "Inverse LUT:" << std::endl;
     for (auto const &inverseLutEntry : inverseLut) {
         std::cout << "  " << inverseLutEntry.first << ": ";
         std::cout << inverseLutEntry.second << std::endl;

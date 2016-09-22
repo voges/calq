@@ -23,7 +23,7 @@
 */
 class SAMRecord {
 public:
-    char     line[1 * MB]; // buffer for current line (1 million chars should be enough)
+    char     line[1*MB]; // buffer for current line (1 million chars should be enough)
 
     char     *qname; // Query template NAME
     uint16_t flag;   // bitwise FLAG (uint16_t)

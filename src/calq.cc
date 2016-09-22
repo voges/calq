@@ -21,7 +21,7 @@
  *              on Windows) (voges)
  */
 
-#include "Common/log.h"
+#include "Common/helpers.h"
 #include "Common/os_config.h"
 
 #ifdef OS_WINDOWS
@@ -270,19 +270,17 @@ int main(int argc, char *argv[])
             calqDecoder.decode();
         }
 
-    LOG("Finished");
-
     } catch (TCLAP::ArgException &tclapException) {
-        LOG("Argument error: %s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());
+        ERROR("%s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());
         return EXIT_FAILURE;
     } catch (const ErrorException &errorException) {
-        LOG("Error: %s", errorException.what());
+        ERROR("%s", errorException.what());
         return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
-        LOG("Fatal error: %s", stdException.what());
+        ERROR("Fatal: %s", stdException.what());
         return EXIT_FAILURE;
     } catch (...) {
-        LOG("Unkown error occured");
+        ERROR("Unkown error occured");
         return EXIT_FAILURE;
     }
 

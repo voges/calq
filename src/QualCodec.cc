@@ -14,7 +14,7 @@
 #include "Common/CLIOptions.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/helpers.h"
 #include "Compressors/range/range.h"
 #include "Compressors/rle/rle.h"
 #include <chrono>
@@ -34,6 +34,8 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
     // Class scope
     : fastaReferences()
     , quantizedPrintout(false)
+    //, startTime(0)
+    //, stopTime(0)
     , verbose(false)
     , qvMin(cliOptions.qvMin)
     , qvMax(cliOptions.qvMax)
@@ -69,14 +71,13 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
     , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
 {
     if (cliOptions.polyploidy == 0) {
-        std::cout << "Polyploidy: " << cliOptions.polyploidy << std::endl;
         throwErrorException("Polyploidy must be greater than zero");
     }
 
     if (cliOptions.quantizedPrintout == true) {
         std::string qualFileName(cliOptions.outFileName);
         qualFileName += ".qual";
-        std::cout << ME << "Printing quantized quality values to file: " << qualFileName << std::endl;
+        LOG("Printing quantized quality values to file: %s", qualFileName.c_str());
         if ((fileExists(qualFileName) == true) && (cliOptions.force == false)) {
             throwErrorException("Quantized quality values file already exists (use option 'f' to force overwriting)");
         }
@@ -92,7 +93,7 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
     }
 
     // Init uniform quantizers
-    std::cout << ME << "Initializing " << QUANTIZER_NUM << " uniform quantizers" << std::endl;
+    LOG("Initializing %d uniform quantizers", QUANTIZER_NUM);
     for (unsigned int i = 0; i < QUANTIZER_NUM; i++) {
         unsigned int numberOfSteps = QUANTIZER_STEP_MIN;
         UniformQuantizer uniformQuantizer(qvMin, qvMax, numberOfSteps);
@@ -107,23 +108,22 @@ QualEncoder::~QualEncoder(void)
         qualFile.close();
     }
 
-    if (verbose == true) {
-        std::cout << ME << "QualEncoder statistics:" << std::endl;
-        std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSize << std::endl;
-        std::cout << ME << "  Compressed size:    " << std::setw(9) << compressedSize << std::endl;
-        std::cout << ME << "  Blocks:             " << std::setw(9) << numBlocks << std::endl;
-        std::cout << ME << "  Records:            " << std::setw(9) << numRecords << std::endl;
-        std::cout << ME << "    Mapped:           " << std::setw(9) << numMappedRecords << std::endl;
-        std::cout << ME << "    Unmapped:         " << std::setw(9) << numUnmappedRecords << std::endl;
-        std::cout << ME << "  Compression ratio:  " << std::setw(9) << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
-        std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSize/(double)compressedSize << std::endl;
-
-    }
+    LOG("QualEncoder statistics:");
+    LOG("-----------------------");
+//         std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSize << std::endl;
+//         std::cout << ME << "  Compressed size:    " << std::setw(9) << compressedSize << std::endl;
+//         std::cout << ME << "  Blocks:             " << std::setw(9) << numBlocks << std::endl;
+//         std::cout << ME << "  Records:            " << std::setw(9) << numRecords << std::endl;
+//         std::cout << ME << "    Mapped:           " << std::setw(9) << numMappedRecords << std::endl;
+//         std::cout << ME << "    Unmapped:         " << std::setw(9) << numUnmappedRecords << std::endl;
+//         std::cout << ME << "  Compression ratio:  " << std::setw(9) << (double)compressedSize*100/(double)uncompressedSize << "%" << std::endl;
+//         std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSize/(double)compressedSize << std::endl;
 }
 
 void QualEncoder::startBlock(void)
 {
-    std::cout << ME << "Starting block " << numBlocks << std::endl;
+    LOG("Starting block %lu", numBlocks);
+    //startTime = std::chrono::steady_clock::now();
 
     // Reset all variables in block scope
     uncompressedSizeOfBlock = 0;
@@ -393,19 +393,25 @@ size_t QualEncoder::finishBlock(void)
     compressedSize += compressedSizeOfBlock;
     numBlocks++;
 
+    //stopTime = std::chrono::steady_clock::now();
+//     auto diffTime = stopTime - startTime;
+//     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
+//     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    
     // Print statistics for this block
     if (verbose == true) {
-        std::cout << ME << "Encoded block " << (numBlocks-1) << std::endl;
-        std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSizeOfBlock << std::endl;
-        std::cout << ME << "  Compressed size:    " << std::setw(9) << compressedSizeOfBlock << std::endl;
-        std::cout << ME << "  Records:            " << std::setw(9) << numRecordsInBlock << std::endl;
-        std::cout << ME << "    Mapped:           " << std::setw(9) << numMappedRecordsInBlock << std::endl;
-        std::cout << ME << "    Unmapped:         " << std::setw(9) << numUnmappedRecordsInBlock << std::endl;
-        std::cout << ME << "  Compression ratio:  " << std::setw(9) << (double)compressedSizeOfBlock*100/(double)uncompressedSizeOfBlock << "%" << std::endl;
-        std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSizeOfBlock/(double)compressedSizeOfBlock << std::endl;
+//         std::cout << ME << "Encoded block " << (numBlocks-1) << std::endl;
+//         std::cout << ME << "  Uncompressed size:  " << std::setw(9) << uncompressedSizeOfBlock << std::endl;
+//         std::cout << ME << "  Compressed size:    " << std::setw(9) << compressedSizeOfBlock << std::endl;
+//         std::cout << ME << "  Records:            " << std::setw(9) << numRecordsInBlock << std::endl;
+//         std::cout << ME << "    Mapped:           " << std::setw(9) << numMappedRecordsInBlock << std::endl;
+//         std::cout << ME << "    Unmapped:         " << std::setw(9) << numUnmappedRecordsInBlock << std::endl;
+//         std::cout << ME << "  Compression ratio:  " << std::setw(9) << (double)compressedSizeOfBlock*100/(double)uncompressedSizeOfBlock << "%" << std::endl;
+//         std::cout << ME << "  Compression factor: " << std::setw(9) << (double)uncompressedSizeOfBlock/(double)compressedSizeOfBlock << std::endl;
+        LOG("  Bits per quality value: %.4f", ((double)compressedSizeOfBlock * 8)/(double)uncompressedSizeOfBlock);
     }
 
-    std::cout << ME << "Finished block " << (numBlocks-1) << " (" << numRecordsInBlock << " records)" << std::endl;
+    LOG("Finished block %lu (%lu records)", (numBlocks-1), numRecordsInBlock);
 
     return ret;
 }
@@ -413,9 +419,7 @@ size_t QualEncoder::finishBlock(void)
 void QualEncoder::loadFastaReference(const std::string &rname)
 {
     // Find FASTA reference for this RNAME
-    if (verbose) {
-        std::cout << ME << "Searching FASTA reference for: " << rname << std::endl;
-    }
+    LOG("Searching FASTA reference for: %s", rname.c_str());
     bool foundFastaReference = false;
 
     for (auto const &fastaReference : fastaReferences) {
@@ -432,9 +436,7 @@ void QualEncoder::loadFastaReference(const std::string &rname)
     }
 
     if (foundFastaReference == true) {
-        if (verbose) {
-            std::cout << ME << "Found FASTA reference" << std::endl;
-        }
+        LOG("Found FASTA reference %s with loci %d-%d", referenceName.c_str(), referencePosMin, referencePosMax);
     } else {
         throwErrorException("Could not find FASTA reference");
     }
@@ -447,17 +449,17 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
     uint32_t qiIdx = 0; // iterator for quantizer indices
 
     // Iterate through CIGAR string and code the quality values
-    std::string cigar(mappedRecord.cigar);
+    //std::string cigar(mappedRecord.cigar);
     size_t cigarIdx = 0;
     size_t cigarLen = mappedRecord.cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-        if (isdigit(cigar[cigarIdx])) {
-            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+        if (isdigit(mappedRecord.cigar[cigarIdx])) {
+            opLen = opLen*10 + (size_t)mappedRecord.cigar[cigarIdx] - (size_t)'0';
             continue;
         }
-        switch (cigar[cigarIdx]) {
+        switch (mappedRecord.cigar[cigarIdx]) {
         case 'M':
         case '=':
         case 'X':
@@ -496,7 +498,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
         case 'P':
             break; // these have been clipped
         default:
-            std::cout << ME << "CIGAR string: " << cigar << std::endl;
+            //LOG("CIGAR string: %s", mappedRecord.cigar);
             throwErrorException("Bad CIGAR string");
         }
         opLen = 0;
@@ -543,13 +545,13 @@ QualDecoder::QualDecoder(File &cqFile, File &qualFile, const CLIOptions &cliOpti
 QualDecoder::~QualDecoder(void)
 {
     if (verbose == true) {
-        std::cout << ME << "QualDecoder statistics:" << std::endl;
-        //std::cout << ME << "  Uncompressed size: " << std::setw(9) << uncompressedSize << std::endl;
-        std::cout << ME << "  Compressed size:   " << std::setw(9) << compressedSize << std::endl;
-        std::cout << ME << "  Blocks:            " << std::setw(9) << numBlocks << std::endl;
-        std::cout << ME << "  Records:           " << std::setw(9) << numRecords << std::endl;
-        std::cout << ME << "    Mapped:          " << std::setw(9) << numMappedRecords << std::endl;
-        std::cout << ME << "    Unmapped:        " << std::setw(9) << numUnmappedRecords << std::endl;
+//         std::cout << ME << "QualDecoder statistics:" << std::endl;
+//         //std::cout << ME << "  Uncompressed size: " << std::setw(9) << uncompressedSize << std::endl;
+//         std::cout << ME << "  Compressed size:   " << std::setw(9) << compressedSize << std::endl;
+//         std::cout << ME << "  Blocks:            " << std::setw(9) << numBlocks << std::endl;
+//         std::cout << ME << "  Records:           " << std::setw(9) << numRecords << std::endl;
+//         std::cout << ME << "    Mapped:          " << std::setw(9) << numMappedRecords << std::endl;
+//         std::cout << ME << "    Unmapped:        " << std::setw(9) << numUnmappedRecords << std::endl;
     }
 }
 
@@ -557,7 +559,7 @@ size_t QualDecoder::decodeBlock(void)
 {
     size_t ret = 0;
 
-    std::cout << ME << "Decoding block " << numBlocks << std::endl;
+    LOG("Decoding block %lu", numBlocks);
 
     // Reset all variables in block scope
     uncompressedSizeOfBlock = 0;
@@ -570,7 +572,7 @@ size_t QualDecoder::decodeBlock(void)
     uint64_t blockNumber = 0;
     ret += cqFile.readUint64(&blockNumber);
     if (numBlocks != blockNumber) {
-        std::cout << ME << "Block number: " << blockNumber << std::endl;
+        LOG("Block number: %lu", blockNumber);
         throwErrorException("Corrupted block number in CQ file");
     }
 
@@ -686,12 +688,12 @@ size_t QualDecoder::decodeBlock(void)
 
     // Print statistics for this block
     if (verbose == true) {
-        std::cout << ME << "Decoded block " << blockNumber << std::endl;
-        //std::cout << ME << "  Uncompressed size: " << uncompressedSizeOfBlock << std::endl;
-        std::cout << ME << "  Compressed size: " << std::setw(9) << compressedSizeOfBlock << std::endl;
-        std::cout << ME << "  Records:         " << std::setw(9) << numRecordsInBlock << std::endl;
-        std::cout << ME << "    Mapped:        " << std::setw(9) << numMappedRecordsInBlock << std::endl;
-        std::cout << ME << "    Unmapped:      " << std::setw(9) << numUnmappedRecordsInBlock << std::endl;
+//         std::cout << ME << "Decoded block " << blockNumber << std::endl;
+//         //std::cout << ME << "  Uncompressed size: " << uncompressedSizeOfBlock << std::endl;
+//         std::cout << ME << "  Compressed size: " << std::setw(9) << compressedSizeOfBlock << std::endl;
+//         std::cout << ME << "  Records:         " << std::setw(9) << numRecordsInBlock << std::endl;
+//         std::cout << ME << "    Mapped:        " << std::setw(9) << numMappedRecordsInBlock << std::endl;
+//         std::cout << ME << "    Unmapped:      " << std::setw(9) << numUnmappedRecordsInBlock << std::endl;
     }
 
     return ret;
