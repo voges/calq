@@ -25,7 +25,7 @@
 #include <string.h>
 
 static const unsigned int QUANTIZER_STEP_MIN = 2;
-static const unsigned int QUANTIZER_STEP_MAX = 8;
+static const unsigned int QUANTIZER_STEP_MAX = 5;//8;
 static const unsigned int QUANTIZER_NUM = QUANTIZER_STEP_MAX-QUANTIZER_STEP_MIN+1; // 2-8 steps
 static const unsigned int QUANTIZER_IDX_MIN = 0;
 static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
