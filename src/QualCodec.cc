@@ -498,7 +498,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
         case 'P':
             break; // these have been clipped
         default:
-            //LOG("CIGAR string: %s", mappedRecord.cigar);
+            LOG("CIGAR string: %s", mappedRecord.cigar);
             throwErrorException("Bad CIGAR string");
         }
         opLen = 0;
