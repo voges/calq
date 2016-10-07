@@ -18,7 +18,8 @@
 class CLIOptions {
 public:
     CLIOptions(void)
-        : blockSize(0)
+        : alignmentsFileName("")
+        , blockSize(0)
         , decompress(false)
         , force(false)
         , inFileName("")
@@ -28,13 +29,14 @@ public:
         , qvMin(0)
         , qvMax(0)
         , refFileNames()
-        , samFileName("")
+        , stats(false)
         , type("")
         , verbose(false)
     {}
     ~CLIOptions(void) {}
 
 public:
+    std::string alignmentsFileName;
     int blockSize;
     bool decompress;
     bool force;
@@ -45,7 +47,7 @@ public:
     int qvMin;
     int qvMax;
     std::vector<std::string> refFileNames;
-    std::string samFileName;
+    bool stats;
     std::string type;
     bool verbose;
 };

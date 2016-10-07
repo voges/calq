@@ -59,10 +59,10 @@ CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     , qualEncoder(cqFile, cliOptions)
     , samParser(cliOptions.inFileName)
 {
-    if (cliOptions.inFileName.empty()) {
+    if (cliOptions.inFileName.empty() == true) {
         throwErrorException("No input file name given");
     }
-    if (cliOptions.outFileName.empty()) {
+    if (cliOptions.outFileName.empty() == true) {
         throwErrorException("No output file name given");
     }
     if (cliOptions.blockSize < 1) {
@@ -165,10 +165,10 @@ void CalqEncoder::encode(void)
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
     LOG("COMPRESSION STATISTICS");
-    LOG("----------------------");
-    LOG("  Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
+    LOG("  Took %ld ms ~= %ld s ~= %d h", diffTimeMs, diffTimeS, diffTimeH);
     LOG("  Compressed %lu mapped + %lu unmapped = %lu record(s) in %lu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
     LOG("  Uncompressed size: %lu", uncompressedSize);
     LOG("  Compressed size: %lu (+ file header size: %lu)", compressedSize, fileHeaderSize);
@@ -198,16 +198,16 @@ CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
     , cqFile(cliOptions.inFileName, "r")
     , qualFile(cliOptions.outFileName, "w")
     , qualDecoder(cqFile, qualFile, cliOptions)
-    , samParser(cliOptions.samFileName)
+    , samParser(cliOptions.alignmentsFileName)
 {
-    if (cliOptions.inFileName.empty()) {
+    if (cliOptions.inFileName.empty() == true) {
         throwErrorException("No input file name given");
     }
-    if (cliOptions.outFileName.empty()) {
+    if (cliOptions.outFileName.empty() == true) {
         throwErrorException("No output file name given");
     }
-    if (cliOptions.samFileName.empty()) {
-        throwErrorException("No SAM file name given");
+    if (cliOptions.alignmentsFileName.empty() == true) {
+        throwErrorException("No alignments (i.e. SAM) file name given");
     }
 }
 
@@ -231,9 +231,9 @@ void CalqDecoder::decode(void)
         // Get numRecordsInBlock from SAM file
 //         do {
 //             if (samRecordIsMapped(samParser.curr) == true) {
-// 
+//
 //             } else {
-// 
+//
 //             }
 //         } while (samParser.next());
 
@@ -244,10 +244,10 @@ void CalqDecoder::decode(void)
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
     LOG("DECOMPRESSION STATISTICS");
-    LOG("------------------------");
-    LOG("  Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
+    LOG("  Took %ld ms ~= %ld s ~= %d h", diffTimeMs, diffTimeS, diffTimeH);
     LOG("  Decoded %lu block(s)", numBlocks);
     LOG("  Compressed size: %lu (+ file header size: %lu)", compressedSize, fileHeaderSize);
     LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));

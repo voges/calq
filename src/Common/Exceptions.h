@@ -13,6 +13,7 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
+#include "Common/helpers.h"
 #include <exception>
 #include <iostream>
 #include <string>
@@ -64,25 +65,25 @@ inline void throwErrorException(const std::string &msg)
  */
 class ErrorExceptionReporter {
 public:
-    ErrorExceptionReporter(const std::string &function, 
-                           const std::string &file,
+    ErrorExceptionReporter(const std::string &file, 
+                           const std::string &function,
                            const int line)
-        : function(function)
-        , file(file)
+        : file(file)
+        , function(function)
         , line(line)
     {}
 
     void operator()(const std::string &msg)
     {
         //std::cerr << file << ":" << function << ":" << line << ": ";
-        std::string tmp = file + ":" + function + ":" + std::to_string(line) + ": " + msg;
+        std::string tmp = fileBaseName(file) + ":" + function + ":" + std::to_string(line) + ": " + msg;
         // Can use the original name here, as it is still defined
         throwErrorException(tmp);
     }
 
 private:
-    std::string function;
     std::string file;
+    std::string function;
     int line;
 };
 
@@ -90,7 +91,7 @@ private:
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException ErrorExceptionReporter(__FUNCTION__, __FILE__, __LINE__)
+#define throwErrorException ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
 #endif // EXCEPTIONS_H
 

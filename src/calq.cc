@@ -77,13 +77,14 @@ int main(int argc, char *argv[])
         // TCLAP arguments (only compression)
         TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
-        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Print quantized quality values", cmd, false);
+        TCLAP::SwitchArg quantizedPrintoutSwitch("q", "quantizedPrintout", "Generate file with quantized quality values", cmd, false);
         TCLAP::MultiArg<std::string> referenceArg("r", "reference", "Reference file(s) (FASTA format)", false, "string", cmd);
+        TCLAP::SwitchArg statsSwitch("s", "stats", "Generate statistics file", cmd, false);
         TCLAP::ValueArg<std::string> typeArg("t", "type", "Quality value type (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+, min:max)", false, "illumina-1.8+", "string", cmd);
 
         // TCLAP arguments (only decompression)
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress CQ file", cmd, false);
-        TCLAP::ValueArg<std::string> samfileArg("s", "samfile", "SAM file", false, "", "string", cmd);
+        TCLAP::ValueArg<std::string> alignmentsfileArg("a", "alignmentsfile", "Aligments file (SAM format)", false, "", "string", cmd);
 
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
@@ -93,15 +94,15 @@ int main(int argc, char *argv[])
             //if (referenceArg.isSet() == false) {
             //    throwErrorException("Argument 'r' required in compression mode");
             //}
-            if (samfileArg.isSet() == true) {
-                throwErrorException("Argument 's' forbidden in compression mode");
+            if (alignmentsfileArg.isSet() == true) {
+                throwErrorException("Argument 'a' forbidden in compression mode");
             }
         }
 
         // Check for sanity in decompression mode
         if (decompressSwitch.isSet() == true) {
-            if (samfileArg.isSet() == false) {
-                throwErrorException("Argument 's' required in compression mode");
+            if (alignmentsfileArg.isSet() == false) {
+                throwErrorException("Argument 'a' required in decompression mode");
             }
             if (blockSizeArg.isSet() == true) {
                 throwErrorException("Argument 'b' forbidden in decompression mode");
@@ -115,12 +116,16 @@ int main(int argc, char *argv[])
             if (referenceArg.isSet() == true) {
                 throwErrorException("Argument 'r' forbidden in decompression mode");
             }
+            if (statsSwitch.isSet() == true) {
+                throwErrorException("Argument 's' forbidden in decompression mode");
+            }
             if (typeArg.isSet() == true) {
                 throwErrorException("Argument 't' forbidden in decompression mode");
             }
         }
 
         // Get the value parsed by each arg
+        cliOptions.alignmentsFileName = alignmentsfileArg.getValue();
         cliOptions.blockSize = blockSizeArg.getValue();
         cliOptions.decompress = decompressSwitch.getValue();
         cliOptions.force = forceSwitch.getValue();
@@ -129,7 +134,7 @@ int main(int argc, char *argv[])
         cliOptions.polyploidy = polyploidyArg.getValue();
         cliOptions.quantizedPrintout = quantizedPrintoutSwitch.getValue();
         cliOptions.refFileNames = referenceArg.getValue();
-        cliOptions.samFileName = samfileArg.getValue();
+        cliOptions.stats = statsSwitch.getValue();
         cliOptions.type = typeArg.getValue();
         cliOptions.verbose = verboseSwitch.getValue();
 
@@ -175,7 +180,7 @@ int main(int argc, char *argv[])
             }
 
             if (cliOptions.quantizedPrintout == true) {
-                LOG("Printing quantized quality values");
+                LOG("Generating file with quantized quality values");
             }
 
             if (cliOptions.refFileNames.empty() == true) {
@@ -192,6 +197,10 @@ int main(int argc, char *argv[])
                         throwErrorException("Cannot access reference file");
                     }
                 }
+            }
+
+            if (cliOptions.stats == true) {
+                LOG("Generating statistics file");
             }
 
             // Supported quality value ranges:
@@ -256,13 +265,13 @@ int main(int argc, char *argv[])
                 throwErrorException("Output file already exists (use option 'f' to force overwriting)");
             }
 
-            // Check if the SAM file exists and if it has the correct extension
-           LOG("SAM file: %s", cliOptions.samFileName.c_str());
-           if (fileExists(cliOptions.samFileName) == false) {
-                throwErrorException("Cannot access SAM file");
+            // Check if the alignments (i.e. SAM) file exists and if it has the correct extension
+           LOG("Alignments (i.e. SAM) file: %s", cliOptions.alignmentsFileName.c_str());
+           if (fileExists(cliOptions.alignmentsFileName) == false) {
+                throwErrorException("Cannot access alignments (i.e. SAM) file");
             }
-            if (fileNameExtension(cliOptions.samFileName) != std::string("sam")) {
-                throwErrorException("SAM file extension must be 'sam'");
+            if (fileNameExtension(cliOptions.alignmentsFileName) != std::string("sam")) {
+                throwErrorException("Alignments (i.e. SAM) file extension must be 'sam'");
             }
         }
 

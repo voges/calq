@@ -32,6 +32,8 @@ public:
     QualEncoder(File &cqFile, const CLIOptions &cliOptions);
     ~QualEncoder(void);
 
+    void printStats(void) const;
+
     void startBlock(void);
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
@@ -48,11 +50,13 @@ private:
 
     // Generic
     bool quantizedPrintout;
+    bool stats;
     bool verbose;
     int qvMin;
     int qvMax;
 
     std::ofstream qualFile;
+    std::ofstream statsFile;
 
     File &cqFile;
     Genotyper genotyper;
@@ -60,7 +64,11 @@ private:
 
     // Sizes & counters
     size_t uncompressedSize;
+    size_t uncompressedMappedSize;
+    size_t uncompressedUnmappedSize;
     size_t compressedSize;
+    size_t compressedMappedSize;
+    size_t compressedUnmappedSize;
     size_t numBlocks;
     size_t numRecords;
     size_t numMappedRecords;
@@ -78,7 +86,11 @@ private:
 
     // Sizes & counters
     size_t uncompressedSizeOfBlock;
+    size_t uncompressedMappedSizeOfBlock;
+    size_t uncompressedUnmappedSizeOfBlock;
     size_t compressedSizeOfBlock;
+    size_t compressedMappedSizeOfBlock;
+    size_t compressedUnmappedSizeOfBlock;
     size_t numRecordsInBlock;
     size_t numMappedRecordsInBlock;
     size_t numUnmappedRecordsInBlock;
@@ -121,6 +133,8 @@ class QualDecoder {
 public:
     QualDecoder(File &cqFile, File &qualFile, const CLIOptions &cliOptions);
     ~QualDecoder(void);
+
+    void printStats(void) const;
 
     size_t decodeBlock(void);
 
