@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
                 throwErrorException("Input file extension must be 'cq'");
             }
 
-            if (cliOptions.outFileName.empty()) {
+            if (cliOptions.outFileName.empty() == true) {
                 cliOptions.outFileName.append(cliOptions.inFileName);
                 cliOptions.outFileName.append(".qual");
             }
