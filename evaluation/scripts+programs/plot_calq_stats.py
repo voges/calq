@@ -15,7 +15,7 @@ import csv
 from math import log10
 
 if len(sys.argv) != 2:
-    sys.exit("Usage: python plot_calq_stats.py stats.cq.stats")
+    sys.exit("Usage: python plot_calq_stats.py file.cq.stats")
 
 statsFileName = sys.argv[1]
 statsFile = open(statsFileName, 'r')
@@ -43,9 +43,14 @@ plt.plot(columns[1], columns[2], label=headers[2])
 
 tmp = []
 for elem in columns[3]:
-    tmp.append(-log10(float(elem)))
+    if float(elem) > 0:
+        tmp.append(-log10(float(elem)))
+    else:
+        tmp.append(elem)
 
 plt.plot(columns[1], tmp, label=headers[3])
+
+plt.plot(columns[1], columns[4], label=headers[4])
 
 plt.title("Calq encoder statistics")
 plt.xlabel('Locus')

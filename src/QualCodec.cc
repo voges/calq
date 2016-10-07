@@ -98,7 +98,7 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
 
     if (cliOptions.stats == true) {
         std::string statsFileName(cliOptions.outFileName);
-        statsFileName += ".cq_stats";
+        statsFileName += ".stats";
         LOG("Printing encoder statistics to file: %s", statsFileName.c_str());
         if ((fileExists(statsFileName) == true) && (cliOptions.force == false)) {
             throwErrorException("Statistics file already exists (use option 'f' to force overwriting)");
@@ -107,14 +107,16 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
         stats = true;
     }
 
-    statsFile << "rname,pos,depth,entropy,k" << std::endl;
+    if (stats == true) {
+        statsFile << "rname,pos,depth,entropy,k" << std::endl;
+    }
 
     if (cliOptions.verbose == true) {
         verbose = true;
     }
 
     // Init uniform quantizers
-    LOG("Initializing %d uniform quantizers", QUANTIZER_NUM);
+    LOG("Initializing %u uniform quantizers", QUANTIZER_NUM);
     for (unsigned int i = 0; i < QUANTIZER_NUM; i++) {
         unsigned int numberOfSteps = QUANTIZER_STEP_MIN;
         UniformQuantizer uniformQuantizer(qvMin, qvMax, numberOfSteps);
@@ -138,16 +140,16 @@ void QualEncoder::printStats(void) const
 {
     if (verbose == true) {
         LOG("QualEncoder statistics:");
-        LOG("  Blocks:             %9lu", numBlocks);
-        LOG("  Uncompressed size:  %9lu", uncompressedSize);
-        LOG("    Mapped:           %9lu", uncompressedMappedSize);
-        LOG("    Unmapped:         %9lu", uncompressedUnmappedSize);
-        LOG("  Compressed size:    %9lu", compressedSize);
-        LOG("    Mapped:           %9lu", compressedMappedSize);
-        LOG("    Unmapped:         %9lu", compressedUnmappedSize);
-        LOG("  Records:            %9lu", numRecords);
-        LOG("    Mapped:           %9lu", numMappedRecords);
-        LOG("    Unmapped:         %9lu", numUnmappedRecords);
+        LOG("  Blocks:             %9zu", numBlocks);
+        LOG("  Uncompressed size:  %9zu", uncompressedSize);
+        LOG("    Mapped:           %9zu", uncompressedMappedSize);
+        LOG("    Unmapped:         %9zu", uncompressedUnmappedSize);
+        LOG("  Compressed size:    %9zu", compressedSize);
+        LOG("    Mapped:           %9zu", compressedMappedSize);
+        LOG("    Unmapped:         %9zu", compressedUnmappedSize);
+        LOG("  Records:            %9zu", numRecords);
+        LOG("    Mapped:           %9zu", numMappedRecords);
+        LOG("    Unmapped:         %9zu", numUnmappedRecords);
         LOG("  Compression ratio:  %12.2f%%", (double)compressedSize*100/(double)uncompressedSize);
         LOG("    Mapped:           %12.2f%%", (double)compressedMappedSize*100/(double)uncompressedMappedSize);
         LOG("    Unmapped:         %12.2f%%", (double)compressedUnmappedSize*100/(double)uncompressedUnmappedSize);
@@ -156,7 +158,7 @@ void QualEncoder::printStats(void) const
         LOG("    Unmapped:         %12.2f", (double)uncompressedUnmappedSize/(double)compressedUnmappedSize);
     }
 
-    LOG("Encoded %lu record(s) in %lu block(s)", numRecords, numBlocks);
+    LOG("Encoded %zu record(s) in %zu block(s)", numRecords, numBlocks);
     LOG("Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
     LOG("  Mapped: %.4f", ((double)compressedMappedSize * 8)/(double)uncompressedMappedSize);
     LOG("  Unmapped: %.4f", ((double)compressedUnmappedSize * 8)/(double)uncompressedUnmappedSize);
@@ -164,7 +166,7 @@ void QualEncoder::printStats(void) const
 
 void QualEncoder::startBlock(void)
 {
-    LOG("Starting block %lu", numBlocks);
+    LOG("Starting block %zu", numBlocks);
 
     // Reset all variables in block scope
     blockStartTime = std::chrono::steady_clock::now();
@@ -251,10 +253,16 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     // the quantizer indices for these positions and shrink the observation
     // vectors
     while (observedPosMin < mappedRecord.posMin) {
-        //std::cerr << referenceName << "," << observedPosMin << "," << referencePosMax;
-        //std::cout << observedPosMin << "/" << referencePosMax << "(" << (double)observedPosMin*100/(double)referencePosMax << "%)" << std::endl;
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        //std::cerr << k << std::endl;
+
+        if (stats == true) {
+            double entropy = genotyper.computeEntropy(observedNucleotides[0], observedQualityValues[0]);
+            statsFile << referenceName << ",";
+            statsFile << observedPosMin << ",";
+            statsFile << observedNucleotides[0].length() << ",";
+            statsFile << entropy << ",";
+            statsFile << k << std::endl;
+        }
 
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
@@ -289,9 +297,16 @@ size_t QualEncoder::finishBlock(void)
 {
     // Compute all remaining quantizers
     while (observedPosMin <= observedPosMax) {
-        //std::cerr << referenceName << "," << observedPosMin << ",";
         int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-        //std::cerr << k << std::endl;
+
+        if (stats == true) {
+            double entropy = genotyper.computeEntropy(observedNucleotides[0], observedQualityValues[0]);
+            statsFile << referenceName << ",";
+            statsFile << observedPosMin << ",";
+            statsFile << observedNucleotides[0].length() << ",";
+            statsFile << entropy << ",";
+            statsFile << k << std::endl;
+        }
 
         quantizerIndices.push_back(k);
         quantizerIndicesPosMax = observedPosMin;
@@ -457,16 +472,16 @@ size_t QualEncoder::finishBlock(void)
     // Print statistics for this block
     if (verbose == true) {
         LOG("Block statistics:");
-        LOG("  Block number:       %9lu", (numBlocks-1));
-        LOG("  Uncompressed size:  %9lu", uncompressedSizeOfBlock);
-        LOG("    Mapped:           %9lu", uncompressedMappedSizeOfBlock);
-        LOG("    Unmapped:         %9lu", uncompressedUnmappedSizeOfBlock);
-        LOG("  Compressed size:    %9lu", compressedSizeOfBlock);
-        LOG("    Mapped:           %9lu", compressedMappedSizeOfBlock);
-        LOG("    Unmapped:         %9lu", compressedUnmappedSizeOfBlock);
-        LOG("  Records:            %9lu", numRecordsInBlock);
-        LOG("    Mapped:           %9lu", numMappedRecordsInBlock);
-        LOG("    Unmapped:         %9lu", numUnmappedRecordsInBlock);
+        LOG("  Block number:       %9zu", (numBlocks-1));
+        LOG("  Uncompressed size:  %9zu", uncompressedSizeOfBlock);
+        LOG("    Mapped:           %9zu", uncompressedMappedSizeOfBlock);
+        LOG("    Unmapped:         %9zu", uncompressedUnmappedSizeOfBlock);
+        LOG("  Compressed size:    %9zu", compressedSizeOfBlock);
+        LOG("    Mapped:           %9zu", compressedMappedSizeOfBlock);
+        LOG("    Unmapped:         %9zu", compressedUnmappedSizeOfBlock);
+        LOG("  Records:            %9zu", numRecordsInBlock);
+        LOG("    Mapped:           %9zu", numMappedRecordsInBlock);
+        LOG("    Unmapped:         %9zu", numUnmappedRecordsInBlock);
         LOG("  Compression ratio:  %12.2f%%", (double)compressedSizeOfBlock*100/(double)uncompressedSizeOfBlock);
         LOG("    Mapped:           %12.2f%%", (double)compressedMappedSizeOfBlock*100/(double)uncompressedMappedSizeOfBlock);
         LOG("    Unmapped:         %12.2f%%", (double)compressedUnmappedSizeOfBlock*100/(double)uncompressedUnmappedSizeOfBlock);
@@ -475,7 +490,7 @@ size_t QualEncoder::finishBlock(void)
         LOG("    Unmapped:         %12.2f", (double)uncompressedUnmappedSizeOfBlock/(double)compressedUnmappedSizeOfBlock);
     }
 
-    LOG("Finished block %lu (contains %lu record(s))", (numBlocks-1), numRecordsInBlock);
+    LOG("Finished block %zu (contains %zu record(s))", (numBlocks-1), numRecordsInBlock);
     LOG("Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
     LOG("Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSizeOfBlock/MB))/(double)((double)diffTimeMs/1000));
     LOG("Bits per quality value: %.4f", ((double)compressedSizeOfBlock * 8)/(double)uncompressedSizeOfBlock);
@@ -632,17 +647,17 @@ void QualDecoder::printStats(void) const
 {
     if (verbose == true) {
         LOG("QualDecoder statistics:");
-        LOG("  Blocks:             %9lu", numBlocks);
-        LOG("  Uncompressed size:  %9lu", uncompressedSize);
-        LOG("  Compressed size:    %9lu", compressedSize);
-        LOG("  Records:            %9lu", numRecords);
-        LOG("    Mapped:           %9lu", numMappedRecords);
-        LOG("    Unmapped:         %9lu", numUnmappedRecords);
+        LOG("  Blocks:             %9zu", numBlocks);
+        LOG("  Uncompressed size:  %9zu", uncompressedSize);
+        LOG("  Compressed size:    %9zu", compressedSize);
+        LOG("  Records:            %9zu", numRecords);
+        LOG("    Mapped:           %9zu", numMappedRecords);
+        LOG("    Unmapped:         %9zu", numUnmappedRecords);
         LOG("  Compression ratio:  %12.2f%%", (double)compressedSize*100/(double)uncompressedSize);
         LOG("  Compression factor: %12.2f", (double)uncompressedSize/(double)compressedSize);
     }
 
-    LOG("Decoded %lu record(s) in %lu block(s)", numRecords, numBlocks);
+    LOG("Decoded %zu record(s) in %zu block(s)", numRecords, numBlocks);
     LOG("Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
 }
 
@@ -650,7 +665,7 @@ size_t QualDecoder::decodeBlock(void)
 {
     size_t ret = 0;
 
-    LOG("Decoding block %lu", numBlocks);
+    LOG("Decoding block %zu", numBlocks);
     auto startTime = std::chrono::steady_clock::now();
 
     // Reset all variables in block scope
@@ -703,7 +718,7 @@ size_t QualDecoder::decodeBlock(void)
         size_t qiSize = 0;
         unsigned char *qi = rle_decode((unsigned char *)qiRLEString.c_str(), qiRLEString.length(), &qiSize, QUANTIZER_NUM, (unsigned int)'0');
         //std::string qiString((char *)qi, qiSize);
-        //std::cout << ME << "Decoded quantizer indices: " << qiString << std::endl;
+        //std::cout << "Decoded quantizer indices: " << qiString << std::endl;
         free(qi);
     }
 
@@ -737,7 +752,7 @@ size_t QualDecoder::decodeBlock(void)
         size_t qviSize = 0;
         unsigned char *qvi = rle_decode((unsigned char *)qviRLEString.c_str(), qviRLEString.length(), &qviSize, QUANTIZER_STEP_MAX, (unsigned int)'0');
         //std::string qviString((char *)qvi, qviSize);
-        //std::cout << ME << "Decoded quality value indices: " << qviString << std::endl;
+        //std::cout << "Decoded quality value indices: " << qviString << std::endl;
         free(qvi);
     }
 
@@ -767,7 +782,7 @@ size_t QualDecoder::decodeBlock(void)
             free(uqv);
             //uqvString += uqvStringTmp;
         }
-        //std::cout << ME << "Decoded unmapped quality values: " << uqvString << std::endl;
+        //std::cout << "Decoded unmapped quality values: " << uqvString << std::endl;
     }
 
     // Update sizes & counters
@@ -787,17 +802,17 @@ size_t QualDecoder::decodeBlock(void)
     // Print statistics for this block
     if (verbose == true) {
         LOG("Block statistics:");
-        LOG("  Block number:       %9lu", blockNumber);
-        LOG("  Uncompressed size:  %9lu", uncompressedSizeOfBlock);
-        LOG("  Compressed size:    %9lu", compressedSizeOfBlock);
-        LOG("  Records:            %9lu", numRecordsInBlock);
-        LOG("    Mapped:           %9lu", numMappedRecordsInBlock);
-        LOG("    Unmapped:         %9lu", numUnmappedRecordsInBlock);
+        LOG("  Block number:       %9zu", blockNumber);
+        LOG("  Uncompressed size:  %9zu", uncompressedSizeOfBlock);
+        LOG("  Compressed size:    %9zu", compressedSizeOfBlock);
+        LOG("  Records:            %9zu", numRecordsInBlock);
+        LOG("    Mapped:           %9zu", numMappedRecordsInBlock);
+        LOG("    Unmapped:         %9zu", numUnmappedRecordsInBlock);
         LOG("  Compression ratio:  %12.2f%%", (double)compressedSizeOfBlock*100/(double)uncompressedSizeOfBlock);
         LOG("  Compression factor: %12.2f", (double)uncompressedSizeOfBlock/(double)compressedSizeOfBlock);
     }
 
-    LOG("Finished block %lu (contains %lu records)", blockNumber, numRecordsInBlock);
+    LOG("Finished block %zu (contains %zu records)", blockNumber, numRecordsInBlock);
     LOG("Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
     LOG("Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSizeOfBlock/MB))/(double)((double)diffTimeMs/1000));
     LOG("Bits per quality value: %.4f", ((double)compressedSizeOfBlock * 8)/(double)uncompressedSizeOfBlock);

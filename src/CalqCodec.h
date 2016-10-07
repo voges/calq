@@ -35,7 +35,7 @@ protected:
 
 class CalqEncoder: public CalqCodec {
 public:
-    CalqEncoder(const CLIOptions &cliOptions);
+    explicit CalqEncoder(const CLIOptions &cliOptions);
     ~CalqEncoder(void);
 
     void encode(void);
@@ -53,7 +53,7 @@ private:
 
 class CalqDecoder: public CalqCodec {
 public:
-    CalqDecoder(const CLIOptions &cliOptions);
+    explicit CalqDecoder(const CLIOptions &cliOptions);
     ~CalqDecoder(void);
 
     void decode(void);

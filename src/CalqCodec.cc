@@ -75,7 +75,7 @@ CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
         LOG("No reference file name(s) given - operating without reference sequence(s)");
     } else {
         // Get reference sequences
-        LOG("Looking in %lu reference file(s) for reference sequence(s)", cliOptions.refFileNames.size());
+        LOG("Looking in %zu reference file(s) for reference sequence(s)", cliOptions.refFileNames.size());
         FASTAParser fastaParser;
         for (auto const &fastaFileName : cliOptions.refFileNames) {
             LOG("  Parsing reference file: %s", fastaFileName.c_str());
@@ -165,13 +165,16 @@ void CalqEncoder::encode(void)
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
+    qualEncoder.printStats();
+
     LOG("COMPRESSION STATISTICS");
-    LOG("  Took %ld ms ~= %ld s ~= %d h", diffTimeMs, diffTimeS, diffTimeH);
-    LOG("  Compressed %lu mapped + %lu unmapped = %lu record(s) in %lu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
-    LOG("  Uncompressed size: %lu", uncompressedSize);
-    LOG("  Compressed size: %lu (+ file header size: %lu)", compressedSize, fileHeaderSize);
+    LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
+    LOG("  Uncompressed size: %zu", uncompressedSize);
+    LOG("  Compressed size: %zu (+ file header size: %zu)", compressedSize, fileHeaderSize);
     LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
     LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
     LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
@@ -244,12 +247,15 @@ void CalqDecoder::decode(void)
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
+    qualDecoder.printStats();
+
     LOG("DECOMPRESSION STATISTICS");
-    LOG("  Took %ld ms ~= %ld s ~= %d h", diffTimeMs, diffTimeS, diffTimeH);
-    LOG("  Decoded %lu block(s)", numBlocks);
-    LOG("  Compressed size: %lu (+ file header size: %lu)", compressedSize, fileHeaderSize);
+    LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Decoded %zu block(s)", numBlocks);
+    LOG("  Compressed size: %zu (+ file header size: %zu)", compressedSize, fileHeaderSize);
     LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 
@@ -274,7 +280,7 @@ size_t CalqDecoder::readFileHeader(void)
 
     LOG("Magic: %s", magic);
     LOG("Version: %s",  version);
-    LOG("Polyploidy: %d",  polyploidy);
+    LOG("Polyploidy: %u",  polyploidy);
 
     return ret;
 }

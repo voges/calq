@@ -20,13 +20,13 @@
 static const std::vector<char> GENOTYPER_ALLELE_ALPHABET = {'A','C','G','T'};
 static const size_t GENOTYPER_ALLELE_ALPHABET_SIZE = 4;
 
-static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &genotypeAlphabet,
-                                                   const std::vector<char> &alleleAlphabet,
-                                                   int *got,
-                                                   int nChosen,
-                                                   int len,
-                                                   int at,
-                                                   int maxTypes)
+static unsigned int combinationsWithRepetitions(std::vector<std::string> &genotypeAlphabet,
+                                                const std::vector<char> &alleleAlphabet,
+                                                int *got,
+                                                int nChosen,
+                                                int len,
+                                                int at,
+                                                int maxTypes)
 {
     if (nChosen == len) {
         if (!got) { return 1; }
@@ -41,7 +41,7 @@ static unsigned int combinationsWithoutRepetitions(std::vector<std::string> &gen
     long count = 0;
     for (int i = at; i < maxTypes; i++) {
         if (got) { got[nChosen] = i; }
-        count += combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, got, nChosen+1, len, i, maxTypes);
+        count += combinationsWithRepetitions(genotypeAlphabet, alleleAlphabet, got, nChosen+1, len, i, maxTypes);
     }
 
     return count;
@@ -155,20 +155,16 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
     }
 }
 
-int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
-                                     const std::string &observedQualityValues)
+double Genotyper::computeEntropy(const std::string &observedNucleotides,
+                                 const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
-    //std::cerr << depth << ",";
-    //std::cerr << observedNucleotides << ",";
-    //std::cerr << observedQualityValues << ",";
+
     if (depth == 0) {
-        //std::cerr << 0 << ",";
-        return -1; // computation of quantizer index not possible
+        return -1.0; // computation of entropy not possible
     }
     if (depth == 1) {
-        //std::cerr << 0 << ",";
-        return quantizerIdxMax;
+        return 0.0; // no information content for one symbol
     }
 
     computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
@@ -179,7 +175,23 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
             entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
         }
     }
-    //std::cerr << entropy << ",";
+
+    return entropy;
+}
+
+int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
+                                     const std::string &observedQualityValues)
+{
+    const size_t depth = observedNucleotides.length();
+
+    if (depth == 0) {
+        return -1; // computation of quantizer index not possible
+    }
+    if (depth == 1) {
+        return quantizerIdxMax;
+    }
+
+    computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
 
     double largestGenotypeLikelihood = 0.0;
     double secondLargestGenotypeLikelihood = 0.0;
@@ -195,17 +207,16 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
 
-    //if (confidence == 1) return quantizerIdxMin;
     return (int)((1-confidence)*(numQuantizers-1));
 }
 
-void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
-                                             const std::string &observedNucleotides,
-                                             const std::string &observedQualityValues)
-{
-    //haploid: base N has Q and P -- select max as new QV
-    //diploid: base N has Q and P1,2,3,4 -- select max as new QV
-
+// void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
+//                                              const std::string &observedNucleotides,
+//                                              const std::string &observedQualityValues)
+// {
+//     //haploid: base N has Q and P -- select max as new QV
+//     //diploid: base N has Q and P1,2,3,4 -- select max as new QV
+// 
 //     for (auto &genotypeLikelihood : genotypeLikelihoods) {
 //         if (genotypeLikelihood.second > largestGenotypeLikelihood) {
 //             largestGenotypeLikelihood = genotypeLikelihood.second;
@@ -213,7 +224,7 @@ void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
 //     }
 //     // Convert the probability to phred score
 //     double gtLLPhred = -log10(1-largestGenotypeLikelihood);
-    
+// 
 //     adjustedQualityValues = "";
 //     const size_t depth = observedNucleotides.length();
 // 
@@ -222,7 +233,7 @@ void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
 //     }
 // 
 //     computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
-//     
+// 
 //     // Get likelihoods for the alleles
 //     std::map<char,std::vector<double>> nucleotideQualityValues;
 //     for (auto const &allele : alleleAlphabet) {
@@ -232,10 +243,10 @@ void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
 //             }
 //         }
 //     }
-//     
+// 
 //     // Get the largest likelihood
 //     for (auto const &nucleotideQualityValue : nucleotideQualityValues) {
-//         
+//         //
 //     }
-}
+// }
 

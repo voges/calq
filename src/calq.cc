@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
             if (cliOptions.refFileNames.empty() == true) {
                 LOG("Operating without reference file(s)");
             } else {
-                LOG("Operating with %lu reference file(s):", cliOptions.refFileNames.size());
+                LOG("Operating with %zu reference file(s):", cliOptions.refFileNames.size());
                 for (auto const &refFileName : cliOptions.refFileNames) {
                     LOG("  %s", refFileName.c_str());
                     if (   fileNameExtension(refFileName) != std::string("fa")
