@@ -159,15 +159,15 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
                                      const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
-    std::cerr << depth << ",";
+    //std::cerr << depth << ",";
     //std::cerr << observedNucleotides << ",";
     //std::cerr << observedQualityValues << ",";
     if (depth == 0) {
-        std::cerr << 0 << ",";
+        //std::cerr << 0 << ",";
         return -1; // computation of quantizer index not possible
     }
     if (depth == 1) {
-        std::cerr << 0 << ",";
+        //std::cerr << 0 << ",";
         return quantizerIdxMax;
     }
 
@@ -179,7 +179,7 @@ int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
             entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
         }
     }
-    std::cerr << entropy << ",";
+    //std::cerr << entropy << ",";
 
     double largestGenotypeLikelihood = 0.0;
     double secondLargestGenotypeLikelihood = 0.0;

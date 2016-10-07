@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+###############################################################################
+#      Get the minimum and maximum quality values from a SAM file             #
+###############################################################################
+
 import sys
 
 if len(sys.argv) != 2:

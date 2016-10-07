@@ -126,6 +126,7 @@ resourceSNPs4="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_VCF
 # Added -mG 4 (default: 8) and -minNumBad 5000 (default: 1000)
 recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum -mG 4 -minNumBad 5000"
 filterLevel="99.0"
+# Argument -tranche is MPEG's theta
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.filtered.vcf
 rm -f $root.snps.recal

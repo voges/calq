@@ -71,21 +71,22 @@ CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     if (cliOptions.polyploidy < 1) {
         throwErrorException("Polyploidy must be greater than zero");
     }
-    if (cliOptions.refFileNames.size() == 0) {
-        throwErrorException("No reference file names given");
-    }
+    if (cliOptions.refFileNames.empty() == true) {
+        LOG("No reference file name(s) given - operating without reference sequence(s)");
+    } else {
+        // Get reference sequences
+        LOG("Looking in %lu reference file(s) for reference sequence(s)", cliOptions.refFileNames.size());
+        FASTAParser fastaParser;
+        for (auto const &fastaFileName : cliOptions.refFileNames) {
+            LOG("  Parsing reference file: %s", fastaFileName.c_str());
+            fastaParser.parseFile(fastaFileName, fastaReferences);
+        }
 
-    // Get reference sequences
-    FASTAParser fastaParser;
-    for (auto const &fastaFileName : cliOptions.refFileNames) {
-        LOG("Parsing reference file: %s", fastaFileName.c_str());
-        fastaParser.parseFile(fastaFileName, fastaReferences);
-    }
-
-    // Print info about found reference sequences
-    LOG("Found the following reference sequence(s):");
-    for (auto const &fastaReference : fastaReferences) {
-        LOG("  %s (sequence length: %lu)", fastaReference.header.c_str(), fastaReference.sequence.size());
+        // Print info about found reference sequences
+        LOG("  Found the following reference sequence(s):");
+        for (auto const &fastaReference : fastaReferences) {
+            LOG("    %s (sequence length: %lu)", fastaReference.header.c_str(), fastaReference.sequence.size());
+        }
     }
 
     // Now pass the FASTA references to the qualEncoder

@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
 
         // Check for sanity in compression mode
         if (decompressSwitch.isSet() == false) {
-            if (referenceArg.isSet() == false) {
-                throwErrorException("Argument 'r' required in compression mode");
-            }
+            //if (referenceArg.isSet() == false) {
+            //    throwErrorException("Argument 'r' required in compression mode");
+            //}
             if (samfileArg.isSet() == true) {
                 throwErrorException("Argument 's' forbidden in compression mode");
             }
@@ -178,14 +178,19 @@ int main(int argc, char *argv[])
                 LOG("Printing quantized quality values");
             }
 
-            for (auto const &refFileName : cliOptions.refFileNames) {
-                LOG("Reference file: %s", refFileName.c_str());
-                if (   fileNameExtension(refFileName) != std::string("fa")
-                    && fileNameExtension(refFileName) != std::string("fasta")) {
-                    throwErrorException("Reference file extension must be 'fa' or 'fasta'");
-                }
-                if (!fileExists(refFileName)) {
-                    throwErrorException("Cannot access reference file");
+            if (cliOptions.refFileNames.empty() == true) {
+                LOG("Operating without reference file(s)");
+            } else {
+                LOG("Operating with %lu reference file(s):", cliOptions.refFileNames.size());
+                for (auto const &refFileName : cliOptions.refFileNames) {
+                    LOG("  %s", refFileName.c_str());
+                    if (   fileNameExtension(refFileName) != std::string("fa")
+                        && fileNameExtension(refFileName) != std::string("fasta")) {
+                        throwErrorException("Reference file extension must be 'fa' or 'fasta'");
+                    }
+                    if (!fileExists(refFileName)) {
+                        throwErrorException("Cannot access reference file");
+                    }
                 }
             }
 

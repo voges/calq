@@ -2,16 +2,11 @@
 
 ## To-do's ##
 
-* Print statistics not to stderr but to a separate logfile
-* Add command line argument to be able to modify the number of quantizers
-* Print compression ratio for mapped as well as unmapped reads
-* Add options to VariantRecalibrator: mg 4 (default is 9); -minNumBad 5000 (default is 1000)
-* Option --tranche is MPEG's theta (90, 99, 99.9, 100)
-* Try maximum mean discrepancy instead  of 1st- minus  2nd-largest likelihood
+* Currently nothing ;)
 
 ## What is this repository for? ##
 
-* Adaptive lossy compression of next-generation sequencing quality values
+* Adaptive lossy compression of high-throughput sequencing quality values
 * Current version: 1.0.0
 
 ## Build instructions

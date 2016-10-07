@@ -48,8 +48,6 @@ private:
 
     // Generic
     bool quantizedPrintout;
-    //std::chrono::time_point<std::chrono::steady_clock> startTime;
-    //std::chrono::time_point<std::chrono::steady_clock> stopTime;
     bool verbose;
     int qvMin;
     int qvMax;
@@ -73,6 +71,10 @@ private:
     // The following member variables are used per block; all of them are reset
     // by startBlock.
     ////////////////////////////////////////////////////////////////////////////
+
+    // Start and stop times for a block
+    std::chrono::time_point<std::chrono::steady_clock> blockStartTime;
+    std::chrono::time_point<std::chrono::steady_clock> blockStopTime;
 
     // Sizes & counters
     size_t uncompressedSizeOfBlock;
