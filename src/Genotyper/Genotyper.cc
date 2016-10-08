@@ -120,7 +120,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
         char y = (char)observedNucleotides[d];
         double q = (double)(observedQualityValues[d] - qualityValueMin);
         if ((q > qualityValueMax-qualityValueMin) || q < 0) {
-            LOG("min,curr,max=%d,%d,%d", 0, (int)q, qualityValueMax-qualityValueMin);
+            //LOG("min,curr,max=%d,%d,%d", 0, (int)q, qualityValueMax-qualityValueMin);
             throwErrorException("Quality value out of range");
         }
         double pStrike = 1 - pow(10.0, -q/10.0);
