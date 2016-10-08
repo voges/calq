@@ -38,4 +38,5 @@ We provide a CMakeLists.txt to build the program with CMake.
 ## Who do I talk to? ##
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
+
 Mikel Hernaez <[mhernaez@stanford.edu](mailto:mhernaez@stanford.edu)>
