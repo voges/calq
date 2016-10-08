@@ -60,8 +60,8 @@ rm -f $root.bowtie2_idx*
 #                             Sorting & indexing                              #
 ###############################################################################
 
-### Convert SAM to BAM
-date; $samtools view -@ $num_threads -bh $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
+### Convert SAM to BAM; added: -F 4 to remove unmapped reads
+date; $samtools view -@ $num_threads -bh -F 4 $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
 rm -f $root.aln_bowtie2.sam
 
 ### Sort and index BAM file

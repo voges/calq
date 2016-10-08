@@ -21,11 +21,15 @@
 static bool samRecordIsMapped(const SAMRecord &samRecord)
 {
     if (   ((samRecord.flag & 0x4) != 0)
-        || (strlen(samRecord.rname) == 0 || samRecord.rname[0] == '*')
+        || (strlen(samRecord.rname) == 0)
+        || ((samRecord.rname[0] == '*') && (strlen(samRecord.rname) == 1))
         || (samRecord.pos == 0)
-        || (strlen(samRecord.cigar) == 0 || samRecord.cigar[0] == '*')
-        || (strlen(samRecord.seq) == 0 || samRecord.seq[0] == '*')
-        || (strlen(samRecord.qual) == 0 || samRecord.qual[0] == '*')) {
+        || (strlen(samRecord.cigar) == 0)
+        || ((samRecord.cigar[0] == '*') && (strlen(samRecord.rname) == 1))
+        || (strlen(samRecord.seq) == 0)
+        || ((samRecord.seq[0] == '*') && (strlen(samRecord.rname) == 1))
+        || (strlen(samRecord.qual) == 0)
+        || ((samRecord.qual[0] == '*') && (strlen(samRecord.rname) == 1))) {
         return false;
     }
 

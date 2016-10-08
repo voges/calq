@@ -7,7 +7,7 @@
 import sys
 
 if len(sys.argv) != 3:
-    sys.exit("Usage: python replace_qual.py file.sam new_qual.qual")
+    sys.exit("Usage: python replace_qual.py file.sam new.qual")
 
 samFileName = sys.argv[1]
 samFile = open(samFileName, 'r')
@@ -17,7 +17,7 @@ newSAMFileName = samFileName + '.new_qual.sam'
 newSAMFile = open(newSAMFileName, 'w')
 
 print "SAM file: {}".format(samFileName)
-print "New QUAL file: {}".format(newQualFileName)
+print "QUAL file: {}".format(newQualFileName)
 print "New SAM file: {}".format(newSAMFileName)
 
 idx = 0

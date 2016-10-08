@@ -55,7 +55,8 @@ private:
     int qvMin;
     int qvMax;
 
-    std::ofstream qualFile;
+    std::ofstream qualMappedFile;
+    std::ofstream qualUnmappedFile;
     std::ofstream statsFile;
 
     File &cqFile;

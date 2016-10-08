@@ -82,7 +82,7 @@ void Genotyper::initLikelihoods(void)
 
     // Init map containing the genotype likelihoods
     int chosen[GENOTYPER_ALLELE_ALPHABET_SIZE];
-    combinationsWithoutRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, GENOTYPER_ALLELE_ALPHABET_SIZE);
+    combinationsWithRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, GENOTYPER_ALLELE_ALPHABET_SIZE);
 
     LOG("Initializing genotype alphabet with %lu possible genotypes", genotypeAlphabet.size());
     for (auto &genotype : genotypeAlphabet) {

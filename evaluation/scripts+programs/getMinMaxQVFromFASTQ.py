@@ -75,3 +75,4 @@ print "Processed {} FASTQ record(s) (i.e. {} lines)".format(recordCnt, lineCnt)
 print "qMin:qMax = {}:{}".format(minQualityScore, maxQualityScore)
 
 sys.exit()
+

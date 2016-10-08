@@ -38,7 +38,8 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
     , verbose(false)
     , qvMin(cliOptions.qvMin)
     , qvMax(cliOptions.qvMax)
-    , qualFile()
+    , qualMappedFile()
+    , qualUnmappedFile()
     , statsFile()
     , cqFile(cqFile)
     , genotyper(cliOptions.polyploidy, QUANTIZER_NUM, QUANTIZER_IDX_MIN, QUANTIZER_IDX_MAX, qvMin, qvMax)
@@ -86,13 +87,20 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
     }
 
     if (cliOptions.quantizedPrintout == true) {
-        std::string qualFileName(cliOptions.outFileName);
-        qualFileName += ".qual";
-        LOG("Printing quantized quality values to file: %s", qualFileName.c_str());
-        if ((fileExists(qualFileName) == true) && (cliOptions.force == false)) {
-            throwErrorException("Quantized quality values file already exists (use option 'f' to force overwriting)");
+        std::string qualMappedFileName(cliOptions.outFileName);
+        std::string qualUnmappedFileName(cliOptions.outFileName);
+        qualMappedFileName += ".mapped.qual";
+        qualUnmappedFileName += ".unmapped.qual";
+        LOG("Printing mapped quantized quality values to file: %s", qualMappedFileName.c_str());
+        if ((fileExists(qualMappedFileName) == true) && (cliOptions.force == false)) {
+            throwErrorException("Mapped quantized quality values file already exists (use option 'f' to force overwriting)");
         }
-        qualFile.open(qualFileName);
+        LOG("Printing unmapped quantized quality values to file: %s", qualUnmappedFileName.c_str());
+        if ((fileExists(qualUnmappedFileName) == true) && (cliOptions.force == false)) {
+            throwErrorException("Unmapped quantized quality values file already exists (use option 'f' to force overwriting)");
+        }
+        qualMappedFile.open(qualMappedFileName);
+        qualUnmappedFile.open(qualUnmappedFileName);
         quantizedPrintout = true;
     }
 
@@ -127,8 +135,12 @@ QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
 
 QualEncoder::~QualEncoder(void)
 {
-    if (qualFile.is_open() == true) {
-        qualFile.close();
+    if (qualMappedFile.is_open() == true) {
+        qualMappedFile.close();
+    }
+
+    if (qualUnmappedFile.is_open() == true) {
+        qualUnmappedFile.close();
     }
 
     if (statsFile.is_open() == true) {
@@ -555,6 +567,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
             opLen = opLen*10 + (size_t)mappedRecord.cigar[cigarIdx] - (size_t)'0';
             continue;
         }
+
         switch (mappedRecord.cigar[cigarIdx]) {
         case 'M':
         case '=':
@@ -568,7 +581,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 qvi += std::to_string(qualityValueIndex);
                 if (quantizedPrintout == true) {
                     int qualityValueQuantized = uniformQuantizers.at(quantizerIndex).valueToReconstructionValue(qualityValue);
-                    qualFile << (char)qualityValueQuantized;
+                    qualMappedFile << (char)qualityValueQuantized;
                 }
             }
             break;
@@ -582,7 +595,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
                 qvi += std::to_string(qualityValueIndex);
                 if (quantizedPrintout == true) {
                     int qualityValueQuantized = uniformQuantizers.at(QUANTIZER_IDX_MAX).valueToReconstructionValue(qualityValue);
-                    qualFile << (char)qualityValueQuantized;
+                    qualMappedFile << (char)qualityValueQuantized;
                 }
             }
             break;
@@ -601,7 +614,7 @@ void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
     }
 
     if (quantizedPrintout == true) {
-        qualFile << std::endl;
+        qualMappedFile << std::endl;
     }
 }
 
@@ -610,7 +623,7 @@ void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
     uqv += qualityValues;
 
     if (quantizedPrintout == true) {
-        qualFile << qualityValues << std::endl;
+        qualUnmappedFile << qualityValues << std::endl;
     }
 }
 
