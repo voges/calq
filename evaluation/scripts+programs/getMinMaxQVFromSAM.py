@@ -14,8 +14,8 @@ samFile = open(samFileName, 'r')
 
 print "SAM file: {}".format(samFileName)
 
-minQualityScore = 1000
-maxQualityScore = 0
+minQualityScore = sys.maxint
+maxQualityScore = -sys.maxint - 1
 
 lineCnt = 0
 headerLines = 0

@@ -8,7 +8,7 @@ import sys
 
 
 if len(sys.argv) != 2:
-    sys.exit("Usage: python validate_fastq.py file.fastq")
+    sys.exit("Usage: python getMinMaxQVFromFASTQ.py file.fastq")
 
 # Get FASTQ file
 fastqFileName = sys.argv[1]

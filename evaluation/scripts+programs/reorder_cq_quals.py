@@ -7,7 +7,7 @@
 import sys
 
 if len(sys.argv) != 4:
-    sys.exit("Usage: python reorder_cq_qual.py file.sam mapped.qual unmapped.qual")
+    sys.exit("Usage: python reorder_cq_quals.py file.sam mapped.qual unmapped.qual")
 
 samFileName = sys.argv[1]
 samFile = open(samFileName, 'r')

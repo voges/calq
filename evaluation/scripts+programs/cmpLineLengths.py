@@ -19,8 +19,9 @@ print "2nd file: {}".format(secondFileName)
 
 lineCnt = 0
 
+print "Comparing line lengths"
 while 1:
-    print "\rLine: {}".format(lineCnt),
+    print "\r{}".format(lineCnt),
     sys.stdout.flush()
 
     line1 = firstFile.readline()

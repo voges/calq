@@ -47,7 +47,6 @@ GenomeAnalysisTK_jar="$install_path/gatk-3.6/GenomeAnalysisTK.jar"
 
 ### Temporary directories
 javaIOTmpDir="$root/javaIOTmp.dir/"
-samtoolsTmpDir="$root/samtoolsTmp.dir/"
 
 ###############################################################################
 #                           Alignment with Bowtie2                            #
@@ -123,8 +122,8 @@ resourceSNPs1="hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap_VC
 resourceSNPs2="omni,known=false,training=true,truth=true,prior=12.0 $omni_VCF"
 resourceSNPs3="1000G,known=false,training=true,truth=false,prior=10.0 $KG_VCF"
 resourceSNPs4="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_VCF"
-# Added -mG 4 (default: 8) and -minNumBad 5000 (default: 1000)
-recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum -mG 4 -minNumBad 5000"
+# Add -mG 4 (default: 8) and -minNumBad 5000 (default: 1000) if needed
+recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum"
 filterLevel="99.0"
 # Argument -tranche is MPEG's theta
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r

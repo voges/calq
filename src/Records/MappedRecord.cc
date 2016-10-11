@@ -46,7 +46,8 @@ MappedRecord::MappedRecord(const SAMRecord &samRecord)
         case 'H':
         case 'P':
             break; // these have been clipped
-        default: 
+        default:
+            LOG("CIGAR string: %s", mappedRecord.cigar.c_str());
             throwErrorException("Bad CIGAR string");
         }
         opLen = 0;
@@ -99,7 +100,8 @@ void MappedRecord::extractObservations(const uint32_t &observedPosMin,
         case 'H':
         case 'P':
             break; // these have been clipped
-        default: 
+        default:
+            LOG("CIGAR string: %s", mappedRecord.cigar.c_str());
             throwErrorException("Bad CIGAR string");
         }
 
