@@ -51,9 +51,10 @@ plt.figure(1)
 for i in range(0, numDatasets):
     plt.plot(columns[0], columns[i+1], label=ids[i]+", AUC="+aucs[i])
 
-plt.title("ROC plot")
+#plt.title("ROC plot")
 plt.xlabel('False positive rate')
 plt.ylabel('True positive rate')
+plt.grid()
 plt.legend(loc='lower right')
 plt.savefig(pngFileName, format='png', dpi=900)
 

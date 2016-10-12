@@ -64,7 +64,7 @@ date; $samtools view -@ $num_threads -bh -F 4 $root.aln_bowtie2.sam > $root.aln_
 rm -f $root.aln_bowtie2.sam
 
 ### Sort and index BAM file
-date; $samtools sort -@ $num_threads -T $samtoolsTmpDir -O bam $root.aln_bowtie2.bam > $root.aln_bowtie2.sorted.bam
+date; $samtools sort -@ $num_threads -O bam $root.aln_bowtie2.bam > $root.aln_bowtie2.sorted.bam
 rm -f $root.aln_bowtie2.bam
 date; $samtools index $root.aln_bowtie2.sorted.bam
 
