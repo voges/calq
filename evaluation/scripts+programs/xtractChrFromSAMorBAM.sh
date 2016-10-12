@@ -20,12 +20,12 @@ if [[ $1 == *.sam ]]; then
     $samtools view -bh $1 > $root.bam
 fi
 
-if [ -f $root.bam.bai ]; then
-    date; echo "BAM index file $root.bam.bai already exists. Not reproducing it."
-    touch $root.bam.bai
+if [ -f $root.bai ]; then
+    date; echo "BAM index file $root.bai already exists. Not reproducing it."
+    touch $root.bai
 else
-    date; echo "Constructing BAM index file $root.bam.bai"
-    $samtools index $root.bam
+    date; echo "Constructing BAM index file $root.bai"
+    $samtools index $root.bam $root.bai
 fi
 
 date; echo "Extracting chromosome $chromosome from $root.bam"
