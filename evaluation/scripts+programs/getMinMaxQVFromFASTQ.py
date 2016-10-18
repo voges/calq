@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ###############################################################################
-#      Get the minimum and maximum quality values from a FASTA file           #
+#      Get the minimum and maximum quality values from a FASTQ file           #
 ###############################################################################
 
 import sys
