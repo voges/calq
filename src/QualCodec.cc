@@ -697,9 +697,9 @@ size_t QualDecoder::decodeBlock(void)
     }
 
     // Read record numbers for this block
-    ret += cqFile.readUint64(&numRecordsInBlock);
-    ret += cqFile.readUint64(&numMappedRecordsInBlock);
-    ret += cqFile.readUint64(&numUnmappedRecordsInBlock);
+    ret += cqFile.readUint64((uint64_t *)&numRecordsInBlock);
+    ret += cqFile.readUint64((uint64_t *)&numMappedRecordsInBlock);
+    ret += cqFile.readUint64((uint64_t *)&numUnmappedRecordsInBlock);
 
     std::string qiRLEString("");
     uint64_t numQiBlocks = 0;

@@ -24,7 +24,7 @@ We provide a CMakeLists.txt to build the program with CMake.
 
     TBD
 
-### Apple + AppleClang ###
+### Mac OS + AppleClang ###
 
     TBD
 

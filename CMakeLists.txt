@@ -58,7 +58,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
     # C compiler flags
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -02")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -02")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
 
