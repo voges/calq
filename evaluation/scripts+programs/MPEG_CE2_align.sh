@@ -1,35 +1,36 @@
 #!/bin/bash
 
 ###############################################################################
-#     Script for performing the MPEG lossy compression framework for          #
-#                  genome data (document no. N16324/N100)                     #
-#                                                                             #
-#                            Bowtie2 + GATK HC                                #
+#   Script for performing the ISO/IEC JTC 1/SC 29/WG 11 and ISO/TC 276/WG 5   #
+#   Benchmark framework for lossy compression of sequencing quality values    #
+#                       (document no. N16525/N119)                            #
+#                                    -                                        #
+#                                Alignment                                    #
 ###############################################################################
 
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 num_threads reads.fastq sample"
+    echo "Usage: $0 num_threads reads platform"
     exit -1
 fi
 
 ###############################################################################
 #                               Command line                                  #
 ###############################################################################
+
 date
 set -x
 script_name=$0
 num_threads=$1
-reads_FASTQ=$2
-sample=$3
-root=$(echo $reads_FASTQ | sed 's/\.[^.]*$//') # strip .fastq
-root="$root.$script_name-$sample"
+reads=$2
+platform=$3 # ILLUMINA,SLX,SOLEXA,SOLID,454,LS454,COMPLETE,PACBIO,IONTORRENT,CAPILLARY,HELICOS,UNKNOWN
+root="$reads"
 
 ###############################################################################
 #                          Data and programs                                  #
 ###############################################################################
 
 ### GATK bundle
-gatk_bundle_path="/data/gidb/GATK_bundle-2.8-b37"
+gatk_bundle_path="/phys/intern2/tmp/data_gidb/MPEG/GATK_bundle-2.8-b37"
 ref_FASTA="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_VCF="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_VCF="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
@@ -51,15 +52,17 @@ javaIOTmpDir="$root/javaIOTmp.dir/"
 ###############################################################################
 #                           Alignment with Bowtie2                            #
 ###############################################################################
+
 date; $bowtie2-build $ref_FASTA $root.bowtie2_idx
-date; $bowtie2 -x $root.bowtie2_idx -U $reads_FASTQ -S $root.aln_bowtie2.sam --threads $num_threads
+#date; $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
+date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_R1.fastq -2 $reads\_R2.fastq -S $root.aln_bowtie2.sam --threads $num_threads
 rm -f $root.bowtie2_idx*
 
 ###############################################################################
 #                             Sorting & indexing                              #
 ###############################################################################
 
-### Convert SAM to BAM; added: -F 4 to remove unmapped reads
+### Convert SAM to BAM; added '-F 4' to remove unmapped reads
 date; $samtools view -@ $num_threads -bh -F 4 $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
 rm -f $root.aln_bowtie2.sam
 
@@ -83,13 +86,14 @@ date; $samtools view -@ $num_threads -bh -F 0xF40 $root.aln_bowtie2.sorted.dupma
 rm -f $root.aln_bowtie2.sorted.dupmark.bam
 
 ### Label the BAM headers and index the resulting file
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.dedup.bam O=$root.aln_bowtie2.sorted.dupmark.dedup.rg.bam RGID=1 RGLB=Library RGPL=Illumina RGPU=PlatformUnit RGSM=$sample
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.dedup.bam O=$root.aln_bowtie2.sorted.dupmark.dedup.rg.bam RGID=1 RGLB=Library RGPL=$platform RGPU=PlatformUnit RGSM=$root
 rm -f $root.aln_bowtie2.sorted.dupmark.dedup.bam
 date; $samtools index $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam
 
 ###############################################################################
 #                              Indel realignment                              #
 ###############################################################################
+
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -nt $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam --known $mills_VCF -o $root.realigner_target.intervals
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
 rm -f $root.realigner_target.intervals
@@ -99,37 +103,10 @@ rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam.bai
 ###############################################################################
 #                      Base quality score recalibration                       #
 ###############################################################################
+
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T BaseRecalibrator -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
 date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T PrintReads -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam
 rm -f $root.bqsr.table
-# Keep the BAM file without BQSR!
-#rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
-
-###############################################################################
-#                          Variant calling with GATK                          #
-###############################################################################
-
-### Call variants using Haplotype Caller
-SEC=10
-SCC=30
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam --dbsnp $dbsnps_VCF --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.raw_variants.vcf
-
-### SNP extraction
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T SelectVariants -R $ref_FASTA -V $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.raw_variants.vcf -selectType SNP -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf
-
-### Fiter the variants using VQSR
-resourceSNPs1="hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap_VCF"
-resourceSNPs2="omni,known=false,training=true,truth=true,prior=12.0 $omni_VCF"
-resourceSNPs3="1000G,known=false,training=true,truth=false,prior=10.0 $KG_VCF"
-resourceSNPs4="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_VCF"
-# Add -mG 4 (default: 8) and -minNumBad 5000 (default: 1000) if needed
-recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum"
-filterLevel="99.0"
-# Argument -tranche is MPEG's theta
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.filtered.vcf
-rm -f $root.snps.recal
-rm -f $root.snps.recal.idx
-rm -f $root.snps.tranches
-rm -f $root.snps.r
+rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
+rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bai
 
