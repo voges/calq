@@ -1,5 +1,7 @@
 /** @file CLIOptions.h
- *  @brief This file contains the CLIOptions class.
+ *  @brief This file contains the CLIOptions class which is used to store
+ *         command line interface options provided by the user or computed
+ *         from user input.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -18,41 +20,40 @@
 class CLIOptions {
 public:
     CLIOptions(void)
-        : alignmentsFileName("")
+        // Options for both compression and decompression
+        : force(false)
+        , inputFile("")
+        , outputFile("")
+        // Options for only compression
         , blockSize(0)
-        , decompress(false)
-        , force(false)
-        , inFileName("")
-        , outFileName("")
         , polyploidy(0)
-        , quantizedPrintout(false)
-        , qvMin(0)
-        , qvMax(0)
-        , refFileNames()
-        , stats(false)
-        , type("")
-        , verbose(false)
+        , qualityValueMax(0)
+        , qualityValueMin(0)
+        , qualityValueType("")
+        , referenceFiles()
+        // Options for only decompression
+        , decompress(false)
+        , sideInformationFile("")
+
     {}
     ~CLIOptions(void) {}
 
 public:
-    std::string alignmentsFileName;
-    int blockSize;
-    bool decompress;
+    // Options for both compression and decompression
     bool force;
-    std::string inFileName;
-    std::string outFileName;
+    std::string inputFile;
+    std::string outputFile;
+    // Options for only compression
+    int blockSize;
     int polyploidy;
-    bool quantizedPrintout;
-    int qvMin;
-    int qvMax;
-    std::vector<std::string> refFileNames;
-    bool stats;
-    std::string type;
-    bool verbose;
+    int qualityValueMax;
+    int qualityValueMin;
+    std::string qualityValueType;
+    std::vector<std::string> referenceFiles;
+    // Options for only decompression
+    bool decompress;
+    std::string sideInformationFile;
 };
-
-//extern CLIOptions cliOptions; // this instance is globally accessible
 
 #endif // CLIOPTIONS_H
 

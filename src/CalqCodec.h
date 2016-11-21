@@ -15,25 +15,14 @@
 
 #include "Common/CLIOptions.h"
 #include "Common/File.h"
-#include "Parsers/FASTAParser.h"
-#include "Parsers/SAMParser.h"
-#include "QualCodec.h"
+//#include "FASTAReader/FASTAReader.h"
+//#include "SAMReader/SAMReader.h"
+//#include "QualCodec.h"
 #include <fstream>
 #include <string>
 #include <vector>
 
-class CalqCodec {
-public:
-    CalqCodec(const std::string &inFileName,
-              const std::string &outFileName);
-    virtual ~CalqCodec(void);
-
-protected:
-    const std::string inFileName;
-    const std::string outFileName;
-};
-
-class CalqEncoder: public CalqCodec {
+class CalqEncoder {
 public:
     explicit CalqEncoder(const CLIOptions &cliOptions);
     ~CalqEncoder(void);
@@ -43,15 +32,15 @@ public:
 private:
     unsigned int blockSize;
     File cqFile;
-    std::vector<FASTAReference> fastaReferences;
+    //std::vector<FASTAReference> fastaReferences;
     unsigned int polyploidy;
-    QualEncoder qualEncoder;
-    SAMParser samParser;
+    //QualEncoder qualEncoder;
+    //SAMParser samParser;
 
     size_t writeFileHeader(void);
 };
 
-class CalqDecoder: public CalqCodec {
+class CalqDecoder {
 public:
     explicit CalqDecoder(const CLIOptions &cliOptions);
     ~CalqDecoder(void);
@@ -61,8 +50,8 @@ public:
 private:
     File cqFile;
     File qualFile;
-    QualDecoder qualDecoder;
-    SAMParser samParser;
+    //QualDecoder qualDecoder;
+    //SAMParser samParser;
 
     size_t readFileHeader(void);
 };

@@ -1,5 +1,5 @@
 /** @file File.h
- *  @brief This file contains the definitions of the File class.
+ *  @brief This file contains the definition of the File class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */

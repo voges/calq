@@ -56,10 +56,9 @@ std::string removeFileNameExtension(const std::string &path);
     do {\
         fflush(stderr); \
         fprintf(stderr, \
-                "ERROR  %s\nERROR  " c"\n", \
+                "ERROR  %s " c"\n", \
                 currentDateAndTime().c_str(), \
                 ##__VA_ARGS__); \
-        fprintf(stderr, "ERROR  Please report bugs to voges@tnt.uni-hannover.de\n"); \
     } while (false)
 
 #endif // HELPERS_H
