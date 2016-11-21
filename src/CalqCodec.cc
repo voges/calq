@@ -125,9 +125,9 @@ void CalqEncoder::encode(void)
 
         if (numRecordsInBlock == blockSize) {
             // Start a new block
-            compressedSize += qualEncoder.finishBlock();
+            //compressedSize += qualEncoder.finishBlock();
             numBlocks++;
-            qualEncoder.startBlock();
+            //qualEncoder.startBlock();
             numRecordsInBlock = 0;
             rnamePrev = "";
             posPrev = 0;
@@ -137,9 +137,9 @@ void CalqEncoder::encode(void)
             if (rnamePrev.empty() == false) {
                 if (samParser.curr.rname != rnamePrev) {
                     // Start a new block
-                    compressedSize += qualEncoder.finishBlock();
+                    //compressedSize += qualEncoder.finishBlock();
                     numBlocks++;
-                    qualEncoder.startBlock();
+                    //qualEncoder.startBlock();
                     numRecordsInBlock = 0;
                     rnamePrev = "";
                     posPrev = 0;
@@ -151,10 +151,10 @@ void CalqEncoder::encode(void)
             }
             posPrev = samParser.curr.pos;
             rnamePrev = samParser.curr.rname;
-            qualEncoder.addMappedRecordToBlock(samParser.curr);
+            //qualEncoder.addMappedRecordToBlock(samParser.curr);
             numMappedRecords++;
         } else {
-            qualEncoder.addUnmappedRecordToBlock(samParser.curr);
+            //qualEncoder.addUnmappedRecordToBlock(samParser.curr);
             numUnmappedRecords++;
         }
 
