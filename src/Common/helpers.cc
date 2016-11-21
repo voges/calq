@@ -17,30 +17,31 @@
 #include "helpers.h"
 #include "Common/Exceptions.h"
 #include "Common/os_config.h"
-#include <ctime>
+//#include <ctime>
+#include <time.h>
 #include <fstream>
 
 std::string currentDateAndTime(void)
 {
-    time_t t = std::time(NULL);
-    std::tm *ttm = NULL;
+    time_t rawtime = time(NULL);
+    struct tm timeinfo;
 
     // Convert to UTC ('Zulu') time
 #ifdef OS_WINDOWS
-    gmtime_s(ttm, &t); 
-    if (ttm == NULL) {
+    gmtime_s(&timeinfo, &rawtime); 
+    if (&timeinfo == NULL) {
         throwErrorException("gmtime_s failed");
     }
 #else
-    ttm = gmtime(&t);
-    if (ttm == NULL) {
+    timeinfo = gmtime(&rawtime);
+    if (timeinfo == NULL) {
         throwErrorException("gmtime failed");
     }
 #endif
 
     // ISO 8601: 2007-04-05T14:30:21Z
     char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
-    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", ttm) == 0) {
+    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", &timeinfo) == 0) {
         throwErrorException("strftime failed");
     }
     std::string result(timeString);
