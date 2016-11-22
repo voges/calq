@@ -41,7 +41,7 @@
 
 CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     : force(cliOptions.force)
-    , samFile(cliOptions.inputFileName, "r", cliOptions.blockSize)
+    , samFile(cliOptions.inputFileName, "rb", cliOptions.blockSize)
     , cqFile(cliOptions.outputFileName, "w")
     , blockSize(cliOptions.blockSize)
     , polyploidy(cliOptions.polyploidy)

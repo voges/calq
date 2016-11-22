@@ -20,6 +20,12 @@ SAMFile::SAMFile(const std::string &path, const char *mode, const size_t &blockS
     , line(NULL)
     , lineSize(sizeof(char) * (1 * MB))
 {
+    // For fgets and (f)seek to work together properly, a SAMFile instance
+    // has to be opened in binary mode
+    if (strcmp(mode, "rb") != 0) {
+        throwErrorException("rb mode required");
+    }
+
     // 1 million chars should be enough
     line = (char *)malloc(lineSize);
 
@@ -40,7 +46,7 @@ SAMFile::SAMFile(const std::string &path, const char *mode, const size_t &blockS
             throwErrorException("Could not read SAM header");
         }
     }
-    seek(alignmentSectionBegin+1);
+    seek(alignmentSectionBegin);
     if (header.empty() == true) {
         throwErrorException("SAM header is missing");
     }
