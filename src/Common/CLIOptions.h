@@ -22,18 +22,18 @@ public:
     CLIOptions(void)
         // Options for both compression and decompression
         : force(false)
-        , inputFile("")
-        , outputFile("")
+        , inputFileName("")
+        , outputFileName("")
         // Options for only compression
         , blockSize(0)
         , polyploidy(0)
         , qualityValueMax(0)
         , qualityValueMin(0)
         , qualityValueType("")
-        , referenceFiles()
+        , referenceFileNames()
         // Options for only decompression
         , decompress(false)
-        , sideInformationFile("")
+        , sideInformationFileName("")
 
     {}
     ~CLIOptions(void) {}
@@ -41,18 +41,18 @@ public:
 public:
     // Options for both compression and decompression
     bool force;
-    std::string inputFile;
-    std::string outputFile;
+    std::string inputFileName;
+    std::string outputFileName;
     // Options for only compression
     int blockSize;
     int polyploidy;
     int qualityValueMax;
     int qualityValueMin;
     std::string qualityValueType;
-    std::vector<std::string> referenceFiles;
+    std::vector<std::string> referenceFileNames;
     // Options for only decompression
     bool decompress;
-    std::string sideInformationFile;
+    std::string sideInformationFileName;
 };
 
 #endif // CLIOPTIONS_H

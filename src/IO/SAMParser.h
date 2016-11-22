@@ -12,7 +12,7 @@
 #ifndef SAMPARSER_H
 #define SAMPARSER_H
 
-#include "Records/SAMRecord.h"
+#include "IO/SAMRecord.h"
 #include <fstream>
 #include <string>
 

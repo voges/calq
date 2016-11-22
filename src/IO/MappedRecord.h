@@ -12,7 +12,7 @@
 #ifndef MAPPEDRECORD_H
 #define MAPPEDRECORD_H
 
-#include "Records/SAMRecord.h"
+#include "IO/SAMRecord.h"
 #include <deque>
 #include <string>
 #include <vector>

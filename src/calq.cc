@@ -32,8 +32,6 @@
 #include "tclap/CmdLine.h"
 #include <cctype>
 
-CLIOptions cliOptions;
-
 static void printVersionAndCopyright(void)
 {
     printf("-----------------------------------------------\n");
@@ -56,52 +54,44 @@ static void checkAndProcessCLIOptions(CLIOptions &cliOptions)
     // force
     if (cliOptions.force == true) {
         LOG("Force switch set - overwriting output file(s)");
-    } else {
-        LOG("Force switch not set - NOT overwriting output file(s)");
     }
 
     // inputFile
-    if (cliOptions.inputFile.empty() == false) {
-        LOG("Input file: %s", cliOptions.inputFile.c_str());
-    } else {
-        throwErrorException("No input file provided");
+    LOG("Input file name: %s", cliOptions.inputFileName.c_str());
+    if (cliOptions.inputFileName.empty() == true) {
+        throwErrorException("No input file name provided");
     }
     if (cliOptions.decompress == false) {
-        if (fileNameExtension(cliOptions.inputFile) != std::string("sam")) {
-            throwErrorException("Input file extension must be 'sam'");
+        if (fileNameExtension(cliOptions.inputFileName) != std::string("sam")) {
+            throwErrorException("Input file name extension must be 'sam'");
         }
     } else {
-        if (fileNameExtension(cliOptions.inputFile) != std::string("cq")) {
-            throwErrorException("Input file extension must be 'cq'");
+        if (fileNameExtension(cliOptions.inputFileName) != std::string("cq")) {
+            throwErrorException("Input file name extension must be 'cq'");
         }
     }
-    if (fileExists(cliOptions.inputFile) == false) {
+    if (fileExists(cliOptions.inputFileName) == false) {
         throwErrorException("Cannot access input file");
     }
 
     // outputFile
     if (cliOptions.decompress == false) {
-        if (cliOptions.outputFile.empty() == true) {
-            LOG("No output file provided - constructing output file name from input file name");
-            cliOptions.outputFile += cliOptions.inputFile + ".cq";
+        if (cliOptions.outputFileName.empty() == true) {
+            LOG("No output file name provided - constructing output file name from input file name");
+            cliOptions.outputFileName += cliOptions.inputFileName + ".cq";
+            LOG("Output file name: %s", cliOptions.outputFileName.c_str());
         }
     } else {
-        if (cliOptions.outputFile.empty() == true) {
-            LOG("No output file provided - constructing output file name from input file name");
-            cliOptions.outputFile += cliOptions.inputFile + ".qual";
-            LOG("Output file: %s", cliOptions.outputFile.c_str());
+        if (cliOptions.outputFileName.empty() == true) {
+            LOG("No output file name provided - constructing output file name from input file name");
+            cliOptions.outputFileName += cliOptions.inputFileName + ".qual";
+            LOG("Output file name: %s", cliOptions.outputFileName.c_str());
         }
     }
-    LOG("Output file: %s", cliOptions.outputFile.c_str());
-    if (fileExists(cliOptions.outputFile) == true) {
-        LOG("Output file already exists: %s", cliOptions.outputFile.c_str());
-        if (cliOptions.force == true) {
-            LOG("Force switch set - overwriting output file");
-        } else {
+    if (fileExists(cliOptions.outputFileName) == true) {
+        if (cliOptions.force == false) {
             throwErrorException("Not overwriting output file (use option 'f' to force overwriting)");
         }
-    } else {
-        LOG("Output file does not already exist - will be created");
     }
 
     // blockSize
@@ -127,9 +117,8 @@ static void checkAndProcessCLIOptions(CLIOptions &cliOptions)
         //   Illumina 1.3+ Phred+64 [0,40]
         //   Illumina 1.5+ Phred+64 [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
         //   Illumina 1.8+ Phred+33 [0,41]
-        if (cliOptions.inputFile.empty() == false) {
-            LOG("Quality value type: %s", cliOptions.qualityValueType.c_str());
-        } else {
+        LOG("Quality value type: %s", cliOptions.qualityValueType.c_str());
+        if (cliOptions.qualityValueType.empty() == true) {
             throwErrorException("No quality value type provided");
         }
         if (cliOptions.qualityValueType == "sanger") {
@@ -165,6 +154,10 @@ static void checkAndProcessCLIOptions(CLIOptions &cliOptions)
 
                 cliOptions.qualityValueMin = std::stoi(min);
                 cliOptions.qualityValueMax = std::stoi(max);
+
+                if (cliOptions.qualityValueMin > cliOptions.qualityValueMax) {
+                    throwErrorException("Quality value minimum is larger than quality value maximum");
+                }
             } else {
                 throwErrorException("Quality value type not supported");
             }
@@ -174,22 +167,21 @@ static void checkAndProcessCLIOptions(CLIOptions &cliOptions)
 
     // referenceFiles
     if (cliOptions.decompress == false) {
-        if (cliOptions.referenceFiles.empty() == true) {
+        if (cliOptions.referenceFileNames.empty() == true) {
             LOG("Operating without reference file(s)");
         } else {
-            LOG("Operating with %zu reference file(s):", cliOptions.referenceFiles.size());
-            for (std::string const &referenceFile : cliOptions.referenceFiles) {
-                if (referenceFile.empty() == false) {
-                    LOG("  %s", referenceFile.c_str());
-                } else {
+            LOG("Operating with %zu reference file(s):", cliOptions.referenceFileNames.size());
+            for (std::string const &referenceFileName : cliOptions.referenceFileNames) {
+                LOG("  %s", referenceFileName.c_str());
+                if (referenceFileName.empty() == true) {
                     throwErrorException("Reference file name not proviced");
                 }
-                if (fileExists(referenceFile) == false) {
+                if (fileExists(referenceFileName) == false) {
                     throwErrorException("Cannot access reference file");
                 }
-                if (fileNameExtension(referenceFile) != std::string("fa")
-                        && fileNameExtension(referenceFile) != std::string("fasta")) {
-                    throwErrorException("Reference file extension must be 'fa' or 'fasta'");
+                if (fileNameExtension(referenceFileName) != std::string("fa")
+                    && fileNameExtension(referenceFileName) != std::string("fasta")) {
+                    throwErrorException("Reference file name extension must be 'fa' or 'fasta'");
                 }
             }
         }
@@ -204,15 +196,14 @@ static void checkAndProcessCLIOptions(CLIOptions &cliOptions)
 
     // sideInformationFile
     if (cliOptions.decompress == true) {
-        if (cliOptions.sideInformationFile.empty() == false) {
-        LOG("Side information file: %s", cliOptions.sideInformationFile.c_str());
-        } else {
-            throwErrorException("No side information file file provided");
+        LOG("Side information file name: %s", cliOptions.sideInformationFileName.c_str());
+        if (cliOptions.sideInformationFileName.empty() == true) {
+            throwErrorException("No side information file name provided");
         }
-        if (fileNameExtension(cliOptions.sideInformationFile) != std::string("si")) {
-            throwErrorException("Side information file extension must be 'si'");
+        if (fileNameExtension(cliOptions.sideInformationFileName) != std::string("si")) {
+            throwErrorException("Side information file name extension must be 'si'");
         }
-        if (fileExists(cliOptions.sideInformationFile) == false) {
+        if (fileExists(cliOptions.sideInformationFileName) == false) {
             throwErrorException("Cannot access side information file");
         }
     }
@@ -226,32 +217,32 @@ int main(int argc, char *argv[])
         CLIOptions cliOptions;
 
         // TCLAP class
-        TCLAP::CmdLine cmd("calq", ' ', VERSION);
+        TCLAP::CmdLine cmd("CALQ", ' ', VERSION);
 
         // TCLAP arguments (both compression and decompression)
         TCLAP::SwitchArg forceSwitch("f", "force", "Force overwriting of output files etc.", cmd, false);
-        TCLAP::UnlabeledValueArg<std::string> inputFileArg("inputFile", "Input file", true, "", "string", cmd);
-        TCLAP::ValueArg<std::string> outputFileArg("o", "outputFile", "Output file", false, "", "string", cmd);
+        TCLAP::UnlabeledValueArg<std::string> inputFileNameArg("inputFileName", "Input file name", true, "", "string", cmd);
+        TCLAP::ValueArg<std::string> outputFileNameArg("o", "outputFileName", "Output file name", false, "", "string", cmd);
 
         // TCLAP arguments (only compression)
         TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
         TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (sanger, illumina-1.3+, illumina-1.5+, illumina-1.8+, min:max)", false, "illumina-1.8+", "string", cmd);
-        TCLAP::MultiArg<std::string> referenceFilesArg("r", "referenceFiles", "Reference file(s) (FASTA format)", false, "string", cmd);
+        TCLAP::MultiArg<std::string> referenceFileNamesArg("r", "referenceFileNames", "Reference file name(s) (FASTA format)", false, "string", cmd);
 
         // TCLAP arguments (only decompression)
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress", cmd, false);
-        TCLAP::ValueArg<std::string> sideInformationFileArg("s", "sideInformationFile", "Side information file", false, "", "string", cmd);
+        TCLAP::ValueArg<std::string> sideInformationFileNameArg("s", "sideInformationFilName", "Side information file name", false, "", "string", cmd);
 
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
 
         // Check for sanity in compression mode
         if (decompressSwitch.isSet() == false) {
-            if (referenceFilesArg.isSet() == false) {
+            if (referenceFileNamesArg.isSet() == false) {
                 throwErrorException("Argument 'r' required in compression mode");
             }
-            if (sideInformationFileArg.isSet() == true) {
+            if (sideInformationFileNameArg.isSet() == true) {
                 throwErrorException("Argument 's' forbidden in compression mode");
             }
         }
@@ -264,27 +255,27 @@ int main(int argc, char *argv[])
             if (polyploidyArg.isSet() == true) {
                 throwErrorException("Argument 'p' forbidden in decompression mode");
             }
-            if (referenceFilesArg.isSet() == true) {
+            if (referenceFileNamesArg.isSet() == true) {
                 throwErrorException("Argument 'r' forbidden in decompression mode");
             }
             if (qualityValueTypeArg.isSet() == true) {
                 throwErrorException("Argument 'q' forbidden in decompression mode");
             }
-            if (sideInformationFileArg.isSet() == false) {
+            if (sideInformationFileNameArg.isSet() == false) {
                 throwErrorException("Argument 's' required in decompression mode");
             }
         }
 
         // Get the value parsed by each arg
         cliOptions.force = forceSwitch.getValue();
-        cliOptions.inputFile = inputFileArg.getValue();
-        cliOptions.outputFile = outputFileArg.getValue();
+        cliOptions.inputFileName = inputFileNameArg.getValue();
+        cliOptions.outputFileName = outputFileNameArg.getValue();
         cliOptions.blockSize = blockSizeArg.getValue();
         cliOptions.polyploidy = polyploidyArg.getValue();
         cliOptions.qualityValueType = qualityValueTypeArg.getValue();
-        cliOptions.referenceFiles = referenceFilesArg.getValue();
+        cliOptions.referenceFileNames = referenceFileNamesArg.getValue();
         cliOptions.decompress = decompressSwitch.getValue();
-        cliOptions.sideInformationFile = sideInformationFileArg.getValue();
+        cliOptions.sideInformationFileName = sideInformationFileNameArg.getValue();
 
         // Check CLIOptions
         checkAndProcessCLIOptions(cliOptions);

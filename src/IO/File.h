@@ -45,7 +45,7 @@ public:
     size_t writeUint32(const uint32_t &dword);
     size_t writeUint64(const uint64_t &qword);
 
-private:
+protected:
     FILE *fp;
     size_t fsize;
     bool isOpen;

@@ -1,6 +1,6 @@
 /** @file CalqCodec.cc
  *  @brief This file contains the implementations of the CalqEncoder and
- *         CalqDecoder class.
+ *         CalqDecoder classes.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -12,11 +12,14 @@
 
 #include "CalqCodec.h"
 #include "cmake_config.h"
+#include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/helpers.h"
 #include <chrono>
 #include <iostream>
 #include <string.h>
+
+#include "IO/FASTAFile.h"
 
 // static bool samRecordIsMapped(const SAMRecord &samRecord)
 // {
@@ -37,45 +40,49 @@
 // }
 
 CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
-    :  blockSize(cliOptions.blockSize)
-    //, cqFile(cliOptions.outFileName, "w")
-    //, fastaReferences()
+    : force(cliOptions.force)
+    , samFile(cliOptions.inputFileName, "r", cliOptions.blockSize)
+    , cqFile(cliOptions.outputFileName, "w")
+    , blockSize(cliOptions.blockSize)
     , polyploidy(cliOptions.polyploidy)
+    , qualityValueMax(cliOptions.qualityValueMax)
+    , qualityValueMin(cliOptions.qualityValueMin)
+    , referenceFileNames(cliOptions.referenceFileNames)
+
+
     //, qualEncoder(cqFile, cliOptions)
-    //, samParser(cliOptions.inFileName)
 {
-//     if (cliOptions.inFileName.empty() == true) {
-//         throwErrorException("No input file name given");
-//     }
-//     if (cliOptions.outFileName.empty() == true) {
-//         throwErrorException("No output file name given");
-//     }
-//     if (cliOptions.blockSize < 1) {
-//         throwErrorException("Block size must be greater than zero");
-//     }
-//     if (cliOptions.polyploidy < 1) {
-//         throwErrorException("Polyploidy must be greater than zero");
-//     }
-//     if (cliOptions.refFileNames.empty() == true) {
-//         LOG("No reference file name(s) given - operating without reference sequence(s)");
-//     } else {
-//         // Get reference sequences
-//         LOG("Looking in %zu reference file(s) for reference sequence(s)", cliOptions.refFileNames.size());
-//         FASTAParser fastaParser;
-//         for (auto const &fastaFileName : cliOptions.refFileNames) {
-//             LOG("  Parsing reference file: %s", fastaFileName.c_str());
-//             fastaParser.parseFile(fastaFileName, fastaReferences);
-//         }
-// 
-//         // Print info about found reference sequences
-//         LOG("  Found the following reference sequence(s):");
-//         for (auto const &fastaReference : fastaReferences) {
-//             LOG("    %s (sequence length: %lu)", fastaReference.header.c_str(), fastaReference.sequence.size());
-//         }
-//     }
-// 
-//     // Now pass the FASTA references to the qualEncoder
-//     qualEncoder.fastaReferences = fastaReferences;
+    // Check class initialization
+    if (cliOptions.inputFileName.empty() == true) {
+        throwErrorException("inputFileName is empty");
+    }
+    if (cliOptions.outputFileName.empty() == true) {
+        throwErrorException("outputFileName is empty");
+    }
+    if (blockSize < 1) {
+        throwErrorException("blockSize must be greater than zero");
+    }
+    if (polyploidy < 1) {
+        throwErrorException("polyploidy must be greater than zero");
+    }
+    if (referenceFileNames.empty() == true) {
+        throwErrorException("referenceFileNames is empty");
+    }
+
+    // Check and, in case they are provided, get reference sequences
+    if (referenceFileNames.empty() == true) {
+        LOG("No reference file name(s) given - operating without reference sequence(s)");
+    } else {
+        LOG("Looking in %zu reference file(s) for reference sequence(s)", referenceFileNames.size());
+        for (std::string const &referenceFileName : referenceFileNames) {
+            LOG("  Parsing reference file: %s", referenceFileName.c_str());
+            FASTAFile fastaFile(referenceFileName, "r");
+            LOG("  Found %zu reference(s):", fastaFile.references.size());
+            for (auto const &reference : fastaFile.references) {
+                LOG("    %s (length: %zu)", reference.first.c_str(), reference.second.length());
+            }
+        }
+    }
 }
 
 CalqEncoder::~CalqEncoder(void)
@@ -85,15 +92,15 @@ CalqEncoder::~CalqEncoder(void)
 
 void CalqEncoder::encode(void)
 {
-//     auto startTime = std::chrono::steady_clock::now();
-// 
-//     size_t uncompressedSize = 0;
-//     size_t compressedSize = 0;
-//     size_t numBlocks = 0;
-//     size_t numRecords = 0;
-//     size_t numMappedRecords = 0;
-//     size_t numUnmappedRecords = 0;
-//     size_t numRecordsInBlock = 0;
+    auto startTime = std::chrono::steady_clock::now();
+
+    size_t uncompressedSize = 0;
+    size_t compressedSize = 0;
+    size_t numBlocks = 0;
+    size_t numRecords = 0;
+    size_t numMappedRecords = 0;
+    size_t numUnmappedRecords = 0;
+    size_t numRecordsInBlock = 0;
 // 
 //     size_t fileHeaderSize = writeFileHeader();
 // 
@@ -146,24 +153,24 @@ void CalqEncoder::encode(void)
 //     compressedSize += qualEncoder.finishBlock();
 //     numBlocks++;
 // 
-//     auto stopTime = std::chrono::steady_clock::now();
-//     auto diffTime = stopTime - startTime;
-//     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
-//     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-//     auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
-//     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
-// 
-//     qualEncoder.printStats();
-// 
-//     LOG("COMPRESSION STATISTICS");
-//     LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
-//     LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
-//     LOG("  Uncompressed size: %zu", uncompressedSize);
-//     LOG("  Compressed size: %zu (+ file header size: %zu)", compressedSize, fileHeaderSize);
-//     LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
-//     LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
-//     LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
-//     LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
+    auto stopTime = std::chrono::steady_clock::now();
+    auto diffTime = stopTime - startTime;
+    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
+    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
+    auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
+
+    //qualEncoder.printStats();
+
+    LOG("COMPRESSION STATISTICS");
+    LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
+    LOG("  Uncompressed size: %zu", uncompressedSize);
+    //LOG("  Compressed size: %zu (+ file header size: %zu)", compressedSize, fileHeaderSize);
+    LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
+    LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
+    LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
+    LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 
 size_t CalqEncoder::writeFileHeader(void)

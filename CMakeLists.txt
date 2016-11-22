@@ -23,8 +23,8 @@ set(PROJECT_SOURCE_FILES ${C_SOURCE_FILES} ${CC_SOURCE_FILES} ${CPP_SOURCE_FILES
 set(PROJECT_HEADER_FILES ${H_HEADER_FILES} ${HH_HEADER_FILES} ${HPP_HEADER_FILES})
 
 # Group the source and header files
-source_group(src FILES ${PROJECT_SOURCE_FILES})
-source_group(include FILES ${PROJECT_HEADER_FILES})
+source_group("Source files" FILES ${PROJECT_SOURCE_FILES})
+source_group("Header files" FILES ${PROJECT_HEADER_FILES})
 
 # Set compiler flags
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -166,7 +166,7 @@ endif ()
 # Includes, targets, and dependencies
 include_directories(${PROJECT_BUILD_DIR})
 include_directories(${PROJECT_INCLUDE_DIR})
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES} ${PROJECT_HEADER_FILES})
 add_dependencies(${PROJECT_NAME} timestamp)
 add_dependencies(${PROJECT_NAME} git)
 #add_dependencies(${PROJECT_NAME} doc)
