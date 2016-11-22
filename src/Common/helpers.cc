@@ -24,12 +24,12 @@
 std::string currentDateAndTime(void)
 {
     time_t rawtime = time(NULL);
-    struct tm timeinfo;
+    struct tm *timeinfo;
 
     // Convert to UTC ('Zulu') time
 #ifdef OS_WINDOWS
-    gmtime_s(&timeinfo, &rawtime); 
-    if (&timeinfo == NULL) {
+    gmtime_s(timeinfo, &rawtime); 
+    if (timeinfo == NULL) {
         throwErrorException("gmtime_s failed");
     }
 #else
@@ -41,7 +41,7 @@ std::string currentDateAndTime(void)
 
     // ISO 8601: 2007-04-05T14:30:21Z
     char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
-    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", &timeinfo) == 0) {
+    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", timeinfo) == 0) {
         throwErrorException("strftime failed");
     }
     std::string result(timeString);

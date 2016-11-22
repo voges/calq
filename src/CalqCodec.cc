@@ -76,11 +76,25 @@ CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
         LOG("Looking in %zu reference file(s) for reference sequence(s)", referenceFileNames.size());
         for (std::string const &referenceFileName : referenceFileNames) {
             LOG("  Parsing reference file: %s", referenceFileName.c_str());
-            FASTAFile fastaFile(referenceFileName, "r");
-            LOG("  Found %zu reference(s):", fastaFile.references.size());
-            for (auto const &reference : fastaFile.references) {
-                LOG("    %s (length: %zu)", reference.first.c_str(), reference.second.length());
-            }
+            //FASTAFile fastaFile(referenceFileName, "r");
+            //LOG("  Found %zu reference(s):", fastaFile.references.size());
+            //for (auto const &reference : fastaFile.references) {
+            //    LOG("    %s (length: %zu)", reference.first.c_str(), reference.second.length());
+            //}
+        }
+    }
+    
+    // TODO: check first read block
+    LOG("1st block contains %d SAM records", samFile.block.size());
+    for (SAMRecord const &samRecord : samFile.block) {
+        //samRecord.print();
+    }
+    
+    while (samFile.eof() == false) {
+        samFile.readBlock();
+        LOG("\nREAD BLOCK\n");
+        for (SAMRecord const &samRecord : samFile.block) {
+            //samRecord.print();
         }
     }
 }
