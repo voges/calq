@@ -18,7 +18,7 @@
 
 //#include "QualCodec.h"
 
-#include "IO/File.h"
+#include "IO/CQFile.h"
 #include "IO/SAMFile.h"
 
 #include <fstream>
@@ -45,7 +45,7 @@ private:
 
     // Internal
     SAMFile samFile;
-    File cqFile;
+    CQFile cqFile;
     //std:vector<FASTAReference> fastaReferences;
 
     //QualEncoder qualEncoder;
@@ -62,10 +62,10 @@ public:
     void decode(void);
 
 private:
-    File cqFile;
+    CQFile cqFile;
     File qualFile;
     //QualDecoder qualDecoder;
-    //SAMParser samParser;
+    SAMFile samFile;
 
     size_t readFileHeader(void);
 };

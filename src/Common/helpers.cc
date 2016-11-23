@@ -17,9 +17,8 @@
 #include "helpers.h"
 #include "Common/Exceptions.h"
 #include "Common/os_config.h"
-//#include <ctime>
-#include <time.h>
 #include <fstream>
+#include <time.h>
 
 std::string currentDateAndTime(void)
 {

@@ -12,22 +12,47 @@
 #include "FASTAFile.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
-#include <algorithm>
-#include <stdio.h>
+#include <string.h>
 
-FASTAFile::FASTAFile(const std::string &path, const char *mode)
+FASTAFile::FASTAFile(const std::string &path,
+                     const FASTAFile::Mode &mode)
     : File(path, mode)
     , line(NULL)
-    , lineSize(sizeof(char) * (4 * KB))
+    , lineSize(sizeof(char) * (4*KB))
 {
+    // Check constructor arguments
+    if (path.empty() == true) {
+        throwErrorException("path is empty");
+    }
+    if (mode != FASTAFile::MODE_READ) {
+        throwErrorException("Currently only MODE_READ supported");
+    }
+
     // Usually, lines in a FASTA file should be limited to 80 chars, so 4 KB
     // should be enough
     line = (char *)malloc(lineSize);
 
+    // Parse the complete FASTA file
+    parse();
+}
+
+FASTAFile::~FASTAFile(void)
+{
+    free(line);
+}
+
+void FASTAFile::parse(void)
+{
     std::string currentHeader("");
     std::string currentSequence("");
 
     while (fgets(line, lineSize, fp) != NULL) {
+        // Trim line
+        size_t l = strlen(line) - 1;
+        while (l && (line[l] == '\r' || line[l] == '\n')) { line[l--] = '\0'; }
+
+        //DEBUG("Processed %.2f%%", (double)tell()*100/(double)size());
+
         if (line[0] == '>') {
             if (currentSequence.empty() == false) {
                 // We have a sequence, check if we have a header
@@ -46,28 +71,19 @@ FASTAFile::FASTAFile(const std::string &path, const char *mode)
                 references.insert(std::pair<std::string, std::string>(currentHeader, currentSequence));
             }
 
-            // Store the header and trim it: remove the leading '>',
-            // newline(s), and everything after the first space
-            currentHeader = line;
-            currentHeader.erase(0, 1);
-            currentHeader.erase(std::remove(currentHeader.begin(), currentHeader.end(), '\n'), currentHeader.end());
-            currentHeader = currentHeader.substr(0, currentHeader.find_first_of("\n"));
+            // Store the header and trim it: do not take the leading '>' and
+            // remove everything after the first space
+            currentHeader = line + 1;
+            currentHeader = currentHeader.substr(0, currentHeader.find_first_of(" "));
 
             // Reset sequence
             currentSequence = "";
         }
         else {
-            // Append sequence part and remove newline(s)
             currentSequence += line;
-            currentSequence.erase(std::remove(currentSequence.begin(), currentSequence.end(), '\n'), currentSequence.end());
         }
     }
 
     references.insert(std::pair<std::string, std::string>(currentHeader, currentSequence));
-}
-
-FASTAFile::~FASTAFile(void)
-{
-    free(line);
 }
 

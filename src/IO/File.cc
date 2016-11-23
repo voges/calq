@@ -13,8 +13,6 @@
 #include "Common/Exceptions.h"
 #include "Common/os_config.h"
 #include <limits.h>
-#include <stdio.h>
-#include <string.h>
 
 File::File(void)
     : fp(NULL)
@@ -24,11 +22,15 @@ File::File(void)
     // empty
 }
 
-File::File(const std::string &path, const char *mode)
+File::File(const std::string &path, const File::Mode &mode)
     : fp(NULL)
     , fsize(0)
     , isOpen(false)
 {
+    if (path.empty() == true) {
+        throwErrorException("path is empty");
+    }
+
     open(path, mode);
 }
 
@@ -37,25 +39,31 @@ File::~File(void)
     close();
 }
 
-void File::open(const std::string &path, const char *mode)
+void File::open(const std::string &path, const File::Mode &mode)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
-    }
-    if (strlen(mode) == 0) {
-        throwErrorException("mode is empty");
     }
     if (fp != NULL) { 
         throwErrorException("File pointer already in use");
     }
 
+    const char *m;
+    if (mode == File::MODE_READ) {
+        m = "rb";
+    } else if (mode == File::MODE_WRITE) {
+        m = "wb";
+    } else {
+        throwErrorException("Unkown mode");
+    }
+
 #ifdef OS_WINDOWS
-    int err = fopen_s(&fp, path.c_str(), mode);
+    int err = fopen_s(&fp, path.c_str(), m);
     if (err != 0) {
         throwErrorException("Failed to open file");
     }
 #else
-    fp = fopen(path.c_str(), mode);
+    fp = fopen(path.c_str(), m);
     if (fp == NULL) {
         throwErrorException("Failed to open file");
     }

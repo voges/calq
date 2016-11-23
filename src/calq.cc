@@ -239,9 +239,9 @@ int main(int argc, char *argv[])
 
         // Check for sanity in compression mode
         if (decompressSwitch.isSet() == false) {
-            if (referenceFileNamesArg.isSet() == false) {
-                throwErrorException("Argument 'r' required in compression mode");
-            }
+            //if (referenceFileNamesArg.isSet() == false) {
+            //    throwErrorException("Argument 'r' required in compression mode");
+            //}
             if (sideInformationFileNameArg.isSet() == true) {
                 throwErrorException("Argument 's' forbidden in compression mode");
             }

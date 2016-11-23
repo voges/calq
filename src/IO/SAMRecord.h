@@ -1,5 +1,5 @@
 /** @file SAMRecord.h
- *  @brief This file constains the definition of the SAMRecord class.
+ *  @brief This file contains the definition of the SAMRecord class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -12,32 +12,41 @@
 #ifndef SAMRECORD_H
 #define SAMRECORD_H
 
-#include "Common/constants.h"
-#include <stdint.h>
+#include <string>
 
-/** @brief Class: SAMRecord
-*
-*  Structure of a SAM alignment line: The 11 mandatory fields are
-*  TAB-delimited. Optional information is stored as 12th field.
-*  Data types have been selected according to the SAM format specification.
-*/
 class SAMRecord {
 public:
-    char     line[1*MB]; // buffer for current line (1 million chars should be enough)
+    static const unsigned int NUM_FIELDS = 12;
 
-    char     *qname; // Query template NAME
-    uint16_t flag;   // bitwise FLAG (uint16_t)
-    char     *rname; // Reference sequence NAME
-    uint32_t pos;    // 1-based leftmost mapping POSition (uint32_t)
-    uint8_t  mapq;   // MAPping Quality (uint8_t)
-    char     *cigar; // CIGAR string
-    char     *rnext; // Ref. name of the mate/NEXT read
-    uint32_t pnext;  // Position of the mate/NEXT read (uint32_t)
-    int64_t  tlen;   // observed Template LENgth (int64_t)
-    char     *seq;   // segment SEQuence
-    char     *qual;  // QUALity scores
-    char     *opt;   // OPTional information
+public:
+    SAMRecord(char *fields[SAMRecord::NUM_FIELDS]);
+    ~SAMRecord(void);
+
+    bool isMapped(void) const;
+    void print(void) const;
+
+private:
+    void check(void);
+
+public:
+    std::string qname; // Query template NAME
+    uint16_t    flag;  // bitwise FLAG (uint16_t)
+    std::string rname; // Reference sequence NAME
+    uint32_t    pos;   // 1-based leftmost mapping POSition (uint32_t)
+    uint8_t     mapq;  // MAPping Quality (uint8_t)
+    std::string cigar; // CIGAR string
+    std::string rnext; // Ref. name of the mate/NEXT read
+    uint32_t    pnext; // Position of the mate/NEXT read (uint32_t)
+    int64_t     tlen;  // observed Template LENgth (int64_t)
+    std::string seq;   // segment SEQuence
+    std::string qual;  // QUALity scores
+    std::string opt;   // OPTional information
+
+    uint32_t posMin; // 0-based leftmost mapping position
+    uint32_t posMax; // 0-based rightmost mapping position
+
+private:
+    bool mapped;
 };
 
 #endif // SAMRECORD_H
-

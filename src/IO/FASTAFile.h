@@ -17,10 +17,15 @@
 
 class FASTAFile : public File {
 public:
-    FASTAFile(const std::string &path, const char *mode);
+    FASTAFile(const std::string &path,
+              const FASTAFile::Mode &mode = FASTAFile::MODE_READ);
     ~FASTAFile(void);
 
+public:
     std::map<std::string, std::string> references;
+
+private:
+    void parse(void);
 
 private:
     char *line;

@@ -16,11 +16,15 @@
 
 class File {
 public:
+    enum Mode { MODE_READ = 0, MODE_WRITE = 1 };
+
+public:
     File(void);
-    File(const std::string &path, const char *mode);
+    File(const std::string &path, const File::Mode &mode);
     ~File(void);
 
-    void open(const std::string &path, const char *mode);
+public:
+    void open(const std::string &path, const File::Mode &mode);
     void close(void);
 
     void advance(const size_t &offset);
@@ -49,6 +53,7 @@ protected:
     FILE *fp;
     size_t fsize;
     bool isOpen;
+    File::Mode mode;
 };
 
 #endif // FILE_H
