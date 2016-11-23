@@ -49,7 +49,7 @@ static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line)
 SAMFile::SAMFile(const std::string &path,
                  const SAMFile::Mode &mode)
     : File(path, mode)
-    , block()
+    , currentBlock()
     , header("")
     , line(NULL)
     , lineSize(sizeof(char) * (1*MB))
@@ -95,34 +95,66 @@ SAMFile::~SAMFile(void)
     free(line);
 }
 
-size_t SAMFile::readBlock(const size_t &blockSize)
+void SAMFile::readBlock(const size_t &blockSize)
 {
     if (blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
 
-    block.clear();
+    currentBlock.reset();
 
-    size_t lineCnt = 0;
+    std::string rnamePrev("");
+    uint32_t posPrev = 0;
+
     for (size_t i = 0; i < blockSize; i++) {
+        size_t fpos = tell();
         if (fgets(line, lineSize, fp) != NULL) {
             // Trim line
             size_t l = strlen(line) - 1;
             while (l && (line[l] == '\r' || line[l] == '\n')) { line[l--] = '\0'; }
 
-            // Parse line, construct SAMRecord and push it to the current block
+            // Parse line and construct samRecord
             char *fields[SAMRecord::NUM_FIELDS];
             parseLine(fields, line);
             SAMRecord samRecord(fields);
-            block.push_back(samRecord);
 
-            lineCnt++;
+            if (samRecord.isMapped() == true) {
+                if (rnamePrev.empty() == true) {
+                    // This is the first mapped record in this block; just store
+                    // its RNAME and POS and add it to the current block
+                    rnamePrev = samRecord.rname;
+                    posPrev = samRecord.pos;
+                    currentBlock.records.push_back(samRecord);
+                    currentBlock.numMappedRecords++;
+                } else {
+                    // We already have a mapped record in this block
+                    if (rnamePrev == samRecord.rname) {
+                        // RNAME didn't change, check POS
+                        if (samRecord.pos >= posPrev) {
+                            // Everything fits, just update posPrev and push
+                            // the samRecord to the current block
+                            posPrev = samRecord.pos;
+                            currentBlock.records.push_back(samRecord);
+                            currentBlock.numMappedRecords++;
+                        } else {
+                            throwErrorException("SAM file is not sorted");
+                        }
+                    } else {
+                        // RNAME changed, seek back and break
+                        seek(fpos);
+                        LOG("RNAME changed - read only %zu lines (%zu were requested)", currentBlock.numRecords, blockSize);
+                        break;
+                    }
+                }
+            } else {
+                currentBlock.records.push_back(samRecord);
+                currentBlock.numUnmappedRecords++;
+            }
         } else {
-            LOG("Truncated block - only read %d lines (%d were requested)", lineCnt, blockSize);
+            LOG("Truncated block - read only %zu lines (%zu were requested)", currentBlock.numRecords, blockSize);
             break;
         }
+        currentBlock.numRecords++;
     }
-
-    return lineCnt;
 }
 

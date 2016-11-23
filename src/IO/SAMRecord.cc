@@ -31,43 +31,45 @@ SAMRecord::SAMRecord(char *fields[SAMRecord::NUM_FIELDS])
 {
     check();
 
-    // Compute 0-based first position and 0-based last position this record is
-    // to on the reference used for alignment
-    posMin = pos - 1;
-    posMax = pos - 1;
+    if (mapped == true) {
+        // Compute 0-based first position and 0-based last position this record is
+        // to on the reference used for alignment
+        posMin = pos - 1;
+        posMax = pos - 1;
 
-    size_t cigarIdx = 0;
-    size_t cigarLen = cigar.length();
-    uint32_t opLen = 0; // length of current CIGAR operation
+        size_t cigarIdx = 0;
+        size_t cigarLen = cigar.length();
+        uint32_t opLen = 0; // length of current CIGAR operation
 
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-        if (isdigit(cigar[cigarIdx])) {
-            opLen = opLen*10 + (uint32_t)cigar[cigarIdx] - (uint32_t)'0';
-            continue;
+        for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+            if (isdigit(cigar[cigarIdx])) {
+                opLen = opLen*10 + (uint32_t)cigar[cigarIdx] - (uint32_t)'0';
+                continue;
+            }
+            switch (cigar[cigarIdx]) {
+            case 'M':
+            case '=':
+            case 'X':
+                posMax += opLen;
+                break;
+            case 'I':
+            case 'S':
+                break;
+            case 'D':
+            case 'N':
+                posMax += opLen;
+                break;
+            case 'H':
+            case 'P':
+                break; // these have been clipped
+            default:
+                throwErrorException("Bad CIGAR string");
+            }
+            opLen = 0;
         }
-        switch (cigar[cigarIdx]) {
-        case 'M':
-        case '=':
-        case 'X':
-            posMax += opLen;
-            break;
-        case 'I':
-        case 'S':
-            break;
-        case 'D':
-        case 'N':
-            posMax += opLen;
-            break;
-        case 'H':
-        case 'P':
-            break; // these have been clipped
-        default:
-            throwErrorException("Bad CIGAR string");
-        }
-        opLen = 0;
+
+        posMax -= 1;
     }
-
-    posMax -= 1;
 }
 
 SAMRecord::~SAMRecord(void)
@@ -90,7 +92,7 @@ void SAMRecord::print(void) const
     printf("cigar:    %s\n", cigar.c_str());
     printf("rnext:    %s\n", rnext.c_str());
     printf("pnext:    %d\n", pnext);
-    printf("tlen:     %d\n", tlen);
+    printf("tlen:     %ld\n", tlen);
     printf("seq:      %s\n", seq.c_str());
     printf("qual:     %s\n", qual.c_str());
     printf("opt:      %s\n", opt.c_str());
@@ -117,7 +119,7 @@ void SAMRecord::check(void)
     if (opt.empty() == true) { LOG("opt is empty"); }
 
     // Check if this record is mapped
-    if (flag & 0x4 != 0) {
+    if ((flag & 0x4) != 0) {
         mapped = false;
     } else {
         mapped = true;

@@ -14,16 +14,9 @@
 #define CALQCODEC_H
 
 #include "Common/CLIOptions.h"
-
-
-//#include "QualCodec.h"
-
 #include "IO/CQFile.h"
 #include "IO/SAMFile.h"
-
-#include <fstream>
-#include <string>
-#include <vector>
+//#include "QualCodec.h"
 
 class CalqEncoder {
 public:
@@ -33,25 +26,15 @@ public:
     void encode(void);
 
 private:
-    // From CLIOptions
+    size_t blockSize;
+    CQFile cqFile;
     bool force;
-    std::string inputFileName;
-    std::string outputFileName;
-    int blockSize;
-    int polyploidy;
+    unsigned int polyploidy;
+    //QualEncoder qualEncoder;
+    std::vector<std::string> referenceFileNames;
+    SAMFile samFile;
     int qualityValueMax;
     int qualityValueMin;
-    std::vector<std::string> referenceFileNames;
-
-    // Internal
-    SAMFile samFile;
-    CQFile cqFile;
-    //std:vector<FASTAReference> fastaReferences;
-
-    //QualEncoder qualEncoder;
-
-
-    size_t writeFileHeader(void);
 };
 
 class CalqDecoder {
@@ -65,9 +48,7 @@ private:
     CQFile cqFile;
     File qualFile;
     //QualDecoder qualDecoder;
-    SAMFile samFile;
-
-    size_t readFileHeader(void);
+    SAMFile sideInformationFile;
 };
 
 #endif // CALQCODEC_H

@@ -70,17 +70,13 @@
 #include "IO/FASTAFile.h"
 
 CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
-    : force(cliOptions.force)
-    , samFile(cliOptions.inputFileName)
+    : blockSize(cliOptions.blockSize)
     , cqFile(cliOptions.outputFileName, CQFile::MODE_WRITE)
-    , blockSize(cliOptions.blockSize)
+    , force(cliOptions.force)
     , polyploidy(cliOptions.polyploidy)
-    , qualityValueMax(cliOptions.qualityValueMax)
-    , qualityValueMin(cliOptions.qualityValueMin)
-    , referenceFileNames(cliOptions.referenceFileNames)
-
-
     //, qualEncoder(cqFile, cliOptions)
+    , referenceFileNames(cliOptions.referenceFileNames)
+    , samFile(cliOptions.inputFileName)
 {
     // Check arguments
     if (cliOptions.inputFileName.empty() == true) {
@@ -134,73 +130,34 @@ void CalqEncoder::encode(void)
     compressedSize += cqFile.writeHeader();
 
     while (samFile.eof() == false) {
+        // Read one block
         samFile.readBlock(blockSize);
-        LOG("Read block %zu with %zu record(s)", numBlocks, samFile.block.size());
+        //LOG("Read block %zu with %zu record(s)", numBlocks, samFile.block.size());
 
+        // 1st iteration
         LOG("Training Lloyd-Max quantizer(s)");
-        for (auto const &samRecord : samFile.block) {
+        for (auto const &samRecord : samFile.currentBlock.records) {
             uncompressedSize += samRecord.qual.length();
         }
 
+        // 2nd iteration
         LOG("Encoding quality values");
-        for (auto const &samRecord : samFile.block) {
-            //samRecord.print();
+        //qualEncoder.startBlock();
+        for (auto const &samRecord : samFile.currentBlock.records) {
+            if (samRecord.isMapped() == true) {
+                //qualEncoder.addMappedRecordToBlock(samRecord);
+            } else {
+                //qualEncoder.addUnmappedRecordToBlock(samRecord);
+            }
         }
+        //qualEncoder.finishBlock();
 
-        numRecords += samFile.block.size();
+        numMappedRecords += samFile.currentBlock.numUnmappedRecords;
+        numUnmappedRecords += samFile.currentBlock.numMappedRecords;
+        numRecords += samFile.currentBlock.numRecords;
         numBlocks++;
     }
 
-// 
-//     std::string rnamePrev("");
-//     uint32_t posPrev = 0;
-//     //qualEncoder.startBlock();
-// 
-//     do {
-//         uncompressedSize += strlen(samParser.curr.qual);
-// 
-//         if (numRecordsInBlock == blockSize) {
-//             // Start a new block
-//             //compressedSize += qualEncoder.finishBlock();
-//             numBlocks++;
-//             //qualEncoder.startBlock();
-//             numRecordsInBlock = 0;
-//             rnamePrev = "";
-//             posPrev = 0;
-//         }
-// 
-//         if (samRecordIsMapped(samParser.curr) == true) {
-//             if (rnamePrev.empty() == false) {
-//                 if (samParser.curr.rname != rnamePrev) {
-//                     // Start a new block
-//                     //compressedSize += qualEncoder.finishBlock();
-//                     numBlocks++;
-//                     //qualEncoder.startBlock();
-//                     numRecordsInBlock = 0;
-//                     rnamePrev = "";
-//                     posPrev = 0;
-//                 } else {
-//                     if (samParser.curr.pos < posPrev) {
-//                         throwErrorException("SAM file is not sorted");
-//                     }
-//                 }
-//             }
-//             posPrev = samParser.curr.pos;
-//             rnamePrev = samParser.curr.rname;
-//             //qualEncoder.addMappedRecordToBlock(samParser.curr);
-//             numMappedRecords++;
-//         } else {
-//             //qualEncoder.addUnmappedRecordToBlock(samParser.curr);
-//             numUnmappedRecords++;
-//         }
-// 
-//         numRecords++;
-//         numRecordsInBlock++;
-//     } while (samParser.next());
-// 
-//     compressedSize += qualEncoder.finishBlock();
-//     numBlocks++;
-// 
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
@@ -227,7 +184,7 @@ CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
     : cqFile(cliOptions.inputFileName, CQFile::MODE_READ)
     , qualFile(cliOptions.outputFileName, File::MODE_WRITE)
     //, qualDecoder(cqFile, qualFile, cliOptions)
-    , samFile(cliOptions.sideInformationFileName)
+    , sideInformationFile(cliOptions.sideInformationFileName)
 {
     // Check arguments
     if (cliOptions.inputFileName.empty() == true) {
@@ -253,24 +210,14 @@ void CalqDecoder::decode(void)
     size_t compressedSize = 0;
 
     compressedSize += cqFile.readHeader();
-// 
+
     size_t numBlocks = 0;
-//     while (cqFile.tell() < cqFile.size()) {
-//         //std::cout << ME << "Decoding block " << numBlocks << std::endl;
-//         compressedSize += qualDecoder.decodeBlock();
-// 
-//         // Get numRecordsInBlock from SAM file
-// //         do {
-// //             if (samRecordIsMapped(samParser.curr) == true) {
-// //
-// //             } else {
-// //
-// //             }
-// //         } while (samParser.next());
-// 
-//         numBlocks++;
-//     }
-// 
+
+    //while (cqFile.eof() == false) {
+        //
+        //numBlocks++;
+    //}
+
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
@@ -278,7 +225,7 @@ void CalqDecoder::decode(void)
     auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
-//     qualDecoder.printStats();
+    //qualDecoder.printStats();
 
     LOG("DECOMPRESSION STATISTICS");
     LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);

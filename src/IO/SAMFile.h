@@ -22,10 +22,34 @@ public:
             const SAMFile::Mode &mode = SAMFile::MODE_READ);
     ~SAMFile(void);
 
-    size_t readBlock(const size_t &blockSize);
+    void readBlock(const size_t &blockSize);
 
 public:
-    std::deque<SAMRecord> block;
+    class Block {
+    public:
+        Block(void)
+            : records()
+            , numMappedRecords(0)
+            , numUnmappedRecords(0)
+            , numRecords(0) { }
+        ~Block(void) { };
+
+        void reset(void)
+        {
+            records.clear();
+            numUnmappedRecords = 0;
+            numMappedRecords = 0;
+            numRecords = 0;
+        }
+
+    public:
+        std::deque<SAMRecord> records;
+        size_t numMappedRecords;
+        size_t numUnmappedRecords;
+        size_t numRecords;
+    };
+
+    Block currentBlock;
     std::string header;
 
 private:
