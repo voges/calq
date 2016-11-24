@@ -130,9 +130,7 @@ void CalqEncoder::encode(void)
     compressedSize += cqFile.writeHeader();
 
     while (samFile.eof() == false) {
-        // Read one block
         samFile.readBlock(blockSize);
-        //LOG("Read block %zu with %zu record(s)", numBlocks, samFile.block.size());
 
         // 1st iteration
         LOG("Training Lloyd-Max quantizer(s)");
