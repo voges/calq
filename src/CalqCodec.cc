@@ -16,6 +16,7 @@
 #include "Common/helpers.h"
 #include "IO/FASTA.h"
 #include <chrono>
+#include <limits>
 
 cq::CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     : m_blockSize(cliOptions.blockSize)
@@ -75,10 +76,20 @@ void cq::CalqEncoder::encode(void)
 
     while (m_samFile.readBlock(m_blockSize) != 0) {
         LOG("Training Lloyd-Max quantizer(s)");
+
+        int qMin = std::numeric_limits<int>::max();
+        int qMax = std::numeric_limits<int>::min();
+
         for (auto const &samRecord : m_samFile.currentBlock.records) {
             uncompressedSize += samRecord.qual.length();
-            samRecord.print();
+
+            for (auto const &q : samRecord.qual) {
+                if ((int)q < qMin) qMin = q;
+                if ((int)q > qMax) qMax = q;
+            }
         }
+
+        LOG("qMin: %d, qMax: %d", qMin, qMax);
 
         LOG("Encoding quality values");
         //qualEncoder.startBlock();
@@ -102,7 +113,7 @@ void cq::CalqEncoder::encode(void)
     //qualEncoder.printStats();
 
     LOG("COMPRESSION STATISTICS");
-    LOG("  Took %lld ms ~= %lld s ~= %ld m ~= %ld h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
     LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", m_samFile.numMappedRecordsRead(), m_samFile.numUnmappedRecordsRead(), m_samFile.numRecordsRead(), m_samFile.numBlocksRead());
     LOG("  Uncompressed size: %zu", uncompressedSize);
     LOG("  Compressed size: %zu", compressedSize);
@@ -160,7 +171,7 @@ void cq::CalqDecoder::decode(void)
     //qualDecoder.printStats();
 
     LOG("DECOMPRESSION STATISTICS");
-    LOG("  Took %lld ms ~= %lld s ~= %ld m ~= %ld h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
     LOG("  Decoded %zu block(s)", numBlocks);
     LOG("  Compressed size: %zu", compressedSize);
     LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));

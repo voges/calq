@@ -13,6 +13,7 @@
 #include "IO/SAM.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
+#include <inttypes.h>
 #include <string.h>
 
 cq::SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
@@ -95,7 +96,7 @@ void cq::SAMRecord::print(void) const
     printf("%s\t", cigar.c_str());
     printf("%s\t", rnext.c_str());
     printf("%d\t", pnext);
-    printf("%lld\t", tlen);
+    printf("%" PRId64 "\n", tlen);
     printf("%s\t", seq.c_str());
     printf("%s\t", qual.c_str());
     printf("%s\t", opt.c_str());
