@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "FASTAFile.h"
+#include "IO/FASTAFile.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include <string.h>

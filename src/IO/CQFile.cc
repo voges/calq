@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "CQFile.h"
+#include "IO/CQFile.h"
 #include "Common/Exceptions.h"
 #include <string.h>
 

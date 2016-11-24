@@ -1,5 +1,5 @@
 /** @file definitions.h
- *  @brief This file contains several common defines.
+ *  @brief This file contains several common definitions.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */

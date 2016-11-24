@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "SAMRecord.h"
+#include "IO/SAMRecord.h"
 #include "Common/Exceptions.h"
 
 SAMRecord::SAMRecord(char *fields[SAMRecord::NUM_FIELDS])
@@ -84,22 +84,22 @@ bool SAMRecord::isMapped(void) const
 
 void SAMRecord::print(void) const
 {
-    printf("qname:    %s\n", qname.c_str());
-    printf("flag:     %d\n", flag);
-    printf("rname:    %s\n", rname.c_str());
-    printf("pos:      %d\n", pos);
-    printf("mapq:     %d\n", mapq);
-    printf("cigar:    %s\n", cigar.c_str());
-    printf("rnext:    %s\n", rnext.c_str());
-    printf("pnext:    %d\n", pnext);
-    printf("tlen:     %ld\n", tlen);
-    printf("seq:      %s\n", seq.c_str());
-    printf("qual:     %s\n", qual.c_str());
-    printf("opt:      %s\n", opt.c_str());
-    printf("--\n");
-    printf("isMapped: %d\n", mapped);
-    printf("posMin:   %d\n", posMin);
-    printf("posMax:   %d\n", posMax);
+    printf("%s\t", qname.c_str());
+    printf("%d\t", flag);
+    printf("%s\t", rname.c_str());
+    printf("%d\t", pos);
+    printf("%d\t", mapq);
+    printf("%s\t", cigar.c_str());
+    printf("%s\t", rnext.c_str());
+    printf("%d\t", pnext);
+    printf("%ld\t", tlen);
+    printf("%s\t", seq.c_str());
+    printf("%s\t", qual.c_str());
+    printf("%s\t", opt.c_str());
+    printf("\n");
+    printf("isMapped: %d, ", mapped);
+    printf("posMin: %d, ", posMin);
+    printf("posMax: %d\n", posMax);
 }
 
 void SAMRecord::check(void)

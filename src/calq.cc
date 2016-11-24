@@ -13,8 +13,13 @@
  *              on Windows) (voges)
  */
 
+#include "CalqCodec.h"
+#include "cmake_config.h"
+#include "Common/CLIOptions.h"
+#include "Common/Exceptions.h"
 #include "Common/helpers.h"
 #include "Common/os_config.h"
+#include "tclap/CmdLine.h"
 
 #ifdef OS_WINDOWS
     #define TCLAP_NAMESTARTSTRING "~~"
@@ -23,14 +28,6 @@
     #define TCLAP_NAMESTARTSTRING "--"
     #define TCLAP_FLAGSTARTSTRING "-"
 #endif
-
-#include "CalqCodec.h"
-#include "cmake_config.h"
-#include "Common/CLIOptions.h"
-#include "Common/Exceptions.h"
-#include "Common/helpers.h"
-#include "tclap/CmdLine.h"
-#include <cctype>
 
 static void printVersionAndCopyright(void)
 {

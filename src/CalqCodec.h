@@ -16,7 +16,7 @@
 #include "Common/CLIOptions.h"
 #include "IO/CQFile.h"
 #include "IO/SAMFile.h"
-//#include "QualCodec.h"
+//#include "QualCodec/QualCodec.h"
 
 class CalqEncoder {
 public:
@@ -33,8 +33,6 @@ private:
     //QualEncoder qualEncoder;
     std::vector<std::string> referenceFileNames;
     SAMFile samFile;
-    int qualityValueMax;
-    int qualityValueMin;
 };
 
 class CalqDecoder {

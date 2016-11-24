@@ -53,7 +53,7 @@ protected:
     FILE *fp;
     size_t fsize;
     bool isOpen;
-    File::Mode mode;
+    File::Mode m_mode;
 };
 
 #endif // FILE_H

@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "File.h"
+#include "IO/File.h"
 #include "Common/Exceptions.h"
 #include "Common/os_config.h"
 #include <limits.h>
@@ -18,6 +18,7 @@ File::File(void)
     : fp(NULL)
     , fsize(0)
     , isOpen(false)
+    , m_mode(File::MODE_READ)
 {
     // empty
 }
@@ -26,6 +27,7 @@ File::File(const std::string &path, const File::Mode &mode)
     : fp(NULL)
     , fsize(0)
     , isOpen(false)
+    , m_mode(mode)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -51,8 +53,10 @@ void File::open(const std::string &path, const File::Mode &mode)
     const char *m;
     if (mode == File::MODE_READ) {
         m = "rb";
+        m_mode = mode;
     } else if (mode == File::MODE_WRITE) {
         m = "wb";
+        m_mode = mode;
     } else {
         throwErrorException("Unkown mode");
     }

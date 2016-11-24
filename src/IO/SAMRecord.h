@@ -19,7 +19,7 @@ public:
     static const unsigned int NUM_FIELDS = 12;
 
 public:
-    SAMRecord(char *fields[SAMRecord::NUM_FIELDS]);
+    explicit SAMRecord(char *fields[SAMRecord::NUM_FIELDS]);
     ~SAMRecord(void);
 
     bool isMapped(void) const;

@@ -63,11 +63,8 @@
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/helpers.h"
-#include <chrono>
-#include <iostream>
-#include <string.h>
-
 #include "IO/FASTAFile.h"
+#include <chrono>
 
 CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     : blockSize(cliOptions.blockSize)

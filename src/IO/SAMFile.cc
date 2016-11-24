@@ -9,10 +9,9 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "SAMFile.h"
+#include "IO/SAMFile.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
-#include "IO/SAMRecord.h"
 #include <string.h>
 
 static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line)
