@@ -72,7 +72,6 @@ public:
 private:
     size_t m_numMappedRecords;
     size_t m_numUnmappedRecords;
-    size_t m_numRecords;
 };
 
 class SAMFile : public File {
@@ -80,7 +79,11 @@ public:
     SAMFile(const std::string &path, const Mode &mode = MODE_READ);
     ~SAMFile(void);
 
-    void readBlock(const size_t &blockSize);
+    size_t numBlocksRead(void) const;
+    size_t numMappedRecordsRead(void) const;
+    size_t numUnmappedRecordsRead(void) const;
+    size_t numRecordsRead(void) const;
+    size_t readBlock(const size_t &blockSize);
 
 public:
     SAMBlock currentBlock;
@@ -91,6 +94,9 @@ private:
 
 private:
     char *m_line;
+    size_t m_numBlocksRead;
+    size_t m_numMappedRecordsRead;
+    size_t m_numUnmappedRecordsRead;
 };
 
 }

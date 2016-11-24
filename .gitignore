@@ -2,8 +2,8 @@
 *.o
 *.a
 *.so
-.directory # created by Dolphin file manager
-.DS_Store # created by Finder
+.directory
+.DS_Store
 *kdev4*
 build
 

@@ -95,14 +95,14 @@ void cq::SAMRecord::print(void) const
     printf("%s\t", cigar.c_str());
     printf("%s\t", rnext.c_str());
     printf("%d\t", pnext);
-    printf("%ld\t", tlen);
+    printf("%lld\t", tlen);
     printf("%s\t", seq.c_str());
     printf("%s\t", qual.c_str());
     printf("%s\t", opt.c_str());
     printf("\n");
-    printf("isMapped: %d, ", m_mapped);
-    printf("posMin: %d, ", posMin);
-    printf("posMax: %d\n", posMax);
+    //printf("isMapped: %d, ", m_mapped);
+    //printf("posMin: %d, ", posMin);
+    //printf("posMax: %d\n", posMax);
 }
 
 void cq::SAMRecord::check(void)
@@ -136,7 +136,6 @@ cq::SAMBlock::SAMBlock(void)
     : records()
     , m_numMappedRecords(0)
     , m_numUnmappedRecords(0)
-    , m_numRecords(0)
 {
     // empty
 }
@@ -158,15 +157,14 @@ size_t cq::SAMBlock::numUnmappedRecords(void) const
 
 size_t cq::SAMBlock::numRecords(void) const
 {
-    return m_numRecords;
+    return (m_numMappedRecords + m_numUnmappedRecords);
 }
 
 void cq::SAMBlock::reset(void)
 {
     records.clear();
-    m_numUnmappedRecords = 0;
     m_numMappedRecords = 0;
-    m_numRecords = 0;
+    m_numUnmappedRecords = 0;
 }
 
 static void parseLine(char *fields[cq::SAMRecord::NUM_FIELDS], char *line)
@@ -205,6 +203,9 @@ cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
     , currentBlock()
     , header("")
     , m_line(NULL)
+    , m_numBlocksRead(0)
+    , m_numMappedRecordsRead(0)
+    , m_numUnmappedRecordsRead(0)
 {
     // Check arguments
     if (path.empty() == true) {
@@ -249,7 +250,27 @@ cq::SAMFile::~SAMFile(void)
     free(m_line);
 }
 
-void cq::SAMFile::readBlock(const size_t &blockSize)
+size_t cq::SAMFile::numBlocksRead(void) const
+{
+    return m_numBlocksRead;
+}
+
+size_t cq::SAMFile::numMappedRecordsRead() const
+{
+    return m_numMappedRecordsRead;
+}
+
+size_t cq::SAMFile::numUnmappedRecordsRead() const
+{
+    return m_numUnmappedRecordsRead;
+}
+
+size_t cq::SAMFile::numRecordsRead() const
+{
+    return (m_numMappedRecordsRead + m_numUnmappedRecordsRead);
+}
+
+size_t cq::SAMFile::readBlock(const size_t &blockSize)
 {
     if (blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
@@ -298,7 +319,7 @@ void cq::SAMFile::readBlock(const size_t &blockSize)
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        LOG("RNAME changed - read only %zu lines (%zu were requested)", currentBlock.numRecords(), blockSize);
+                        LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.numRecords(), blockSize);
                         break;
                     }
                 }
@@ -307,10 +328,17 @@ void cq::SAMFile::readBlock(const size_t &blockSize)
                 currentBlock.m_numUnmappedRecords++;
             }
         } else {
-            LOG("Truncated block - read only %zu lines (%zu were requested)", currentBlock.numRecords(), blockSize);
+            LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.numRecords(), blockSize);
             break;
         }
-        currentBlock.m_numRecords++;
     }
+
+    if (currentBlock.numRecords() > 0) {
+        m_numBlocksRead++;
+        m_numMappedRecordsRead += currentBlock.numMappedRecords();
+        m_numUnmappedRecordsRead += currentBlock.numUnmappedRecords();
+    }
+    
+    return currentBlock.numRecords();
 }
 

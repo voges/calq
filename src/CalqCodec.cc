@@ -70,23 +70,16 @@ void cq::CalqEncoder::encode(void)
 
     size_t uncompressedSize = 0;
     size_t compressedSize = 0;
-    size_t numBlocks = 0;
-    size_t numRecords = 0;
-    size_t numMappedRecords = 0;
-    size_t numUnmappedRecords = 0;
 
     compressedSize += m_cqFile.writeHeader();
 
-    while (m_samFile.eof() == false) {
-        m_samFile.readBlock(m_blockSize);
-
-        // 1st iteration
+    while (m_samFile.readBlock(m_blockSize) != 0) {
         LOG("Training Lloyd-Max quantizer(s)");
         for (auto const &samRecord : m_samFile.currentBlock.records) {
             uncompressedSize += samRecord.qual.length();
+            samRecord.print();
         }
 
-        // 2nd iteration
         LOG("Encoding quality values");
         //qualEncoder.startBlock();
         for (auto const &samRecord : m_samFile.currentBlock.records) {
@@ -97,11 +90,6 @@ void cq::CalqEncoder::encode(void)
             }
         }
         //qualEncoder.finishBlock();
-
-        numMappedRecords += m_samFile.currentBlock.numUnmappedRecords();
-        numUnmappedRecords += m_samFile.currentBlock.numMappedRecords();
-        numRecords += m_samFile.currentBlock.numRecords();
-        numBlocks++;
     }
 
     auto stopTime = std::chrono::steady_clock::now();
@@ -114,8 +102,8 @@ void cq::CalqEncoder::encode(void)
     //qualEncoder.printStats();
 
     LOG("COMPRESSION STATISTICS");
-    LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
-    LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", numMappedRecords, numUnmappedRecords, numRecords, numBlocks);
+    LOG("  Took %lld ms ~= %lld s ~= %ld m ~= %ld h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", m_samFile.numMappedRecordsRead(), m_samFile.numUnmappedRecordsRead(), m_samFile.numRecordsRead(), m_samFile.numBlocksRead());
     LOG("  Uncompressed size: %zu", uncompressedSize);
     LOG("  Compressed size: %zu", compressedSize);
     LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
@@ -123,8 +111,6 @@ void cq::CalqEncoder::encode(void)
     LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
     LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
-
-
 
 cq::CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
     : m_cqFile(cliOptions.inputFileName, CQFile::MODE_READ)
@@ -174,7 +160,7 @@ void cq::CalqDecoder::decode(void)
     //qualDecoder.printStats();
 
     LOG("DECOMPRESSION STATISTICS");
-    LOG("  Took %ld ms ~= %ld s ~= %d m ~= %d h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
+    LOG("  Took %lld ms ~= %lld s ~= %ld m ~= %ld h", diffTimeMs, diffTimeS, diffTimeM, diffTimeH);
     LOG("  Decoded %zu block(s)", numBlocks);
     LOG("  Compressed size: %zu", compressedSize);
     LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
