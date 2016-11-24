@@ -10,13 +10,15 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef CALQCODEC_H
-#define CALQCODEC_H
+#ifndef CQ_CALQCODEC_H
+#define CQ_CALQCODEC_H
 
 #include "Common/CLIOptions.h"
-#include "IO/CQFile.h"
-#include "IO/SAMFile.h"
+#include "IO/CQ.h"
+#include "IO/SAM.h"
 //#include "QualCodec/QualCodec.h"
+
+namespace cq {
 
 class CalqEncoder {
 public:
@@ -26,13 +28,13 @@ public:
     void encode(void);
 
 private:
-    size_t blockSize;
-    CQFile cqFile;
-    bool force;
-    unsigned int polyploidy;
-    //QualEncoder qualEncoder;
-    std::vector<std::string> referenceFileNames;
-    SAMFile samFile;
+    size_t m_blockSize;
+    CQFile m_cqFile;
+    bool m_force;
+    unsigned int m_polyploidy;
+    //QualEncoder m_qualEncoder;
+    std::vector<std::string> m_referenceFileNames;
+    SAMFile m_samFile;
 };
 
 class CalqDecoder {
@@ -43,11 +45,13 @@ public:
     void decode(void);
 
 private:
-    CQFile cqFile;
-    File qualFile;
-    //QualDecoder qualDecoder;
-    SAMFile sideInformationFile;
+    CQFile m_cqFile;
+    File m_qualFile;
+    //QualDecoder m_qualDecoder;
+    SAMFile m_sideInformationFile;
 };
 
-#endif // CALQCODEC_H
+}
+
+#endif // CQ_CALQCODEC_H
 

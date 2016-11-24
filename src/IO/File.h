@@ -9,10 +9,12 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef CQ_FILE_H
+#define CQ_FILE_H
 
 #include <string>
+
+namespace cq {
 
 class File {
 public:
@@ -20,19 +22,18 @@ public:
 
 public:
     File(void);
-    File(const std::string &path, const File::Mode &mode);
-    ~File(void);
+    File(const std::string &path, const Mode &mode);
+    virtual ~File(void);
 
-public:
-    void open(const std::string &path, const File::Mode &mode);
+    void open(const std::string &path, const Mode &mode);
     void close(void);
 
     void advance(const size_t &offset);
-    bool eof(void);
-    void * handle(void);
+    bool eof(void) const;
+    void * handle(void) const;
     void seek(const size_t &pos);
-    size_t size(void);
-    size_t tell(void);
+    size_t size(void) const;
+    size_t tell(void) const;
 
     size_t read(void *buffer, const size_t &size);
     size_t write(void *buffer, const size_t &size);
@@ -50,11 +51,13 @@ public:
     size_t writeUint64(const uint64_t &qword);
 
 protected:
-    FILE *fp;
-    size_t fsize;
-    bool isOpen;
-    File::Mode m_mode;
+    FILE *m_fp;
+    size_t m_fsize;
+    bool m_isOpen;
+    Mode m_mode;
 };
 
-#endif // FILE_H
+}
+
+#endif // CQ_FILE_H
 

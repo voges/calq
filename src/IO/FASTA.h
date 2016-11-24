@@ -1,4 +1,4 @@
-/** @file FASTAFile.h
+/** @file FASTA.h
  *  @brief This file contains the definition of the FASTAFile class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -9,28 +9,34 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef FASTAFILE_H
-#define FASTAFILE_H
+#ifndef CQ_FASTA_H
+#define CQ_FASTA_H
 
+#include "Common/constants.h"
 #include "IO/File.h"
 #include <map>
 
+namespace cq {
+
 class FASTAFile : public File {
 public:
-    FASTAFile(const std::string &path,
-              const FASTAFile::Mode &mode = FASTAFile::MODE_READ);
+    FASTAFile(const std::string &path, const FASTAFile::Mode &mode = FASTAFile::MODE_READ);
     ~FASTAFile(void);
 
 public:
     std::map<std::string, std::string> references;
 
 private:
+    static const size_t LINE_SIZE = sizeof(char) * (4*KB);
+
+private:
     void parse(void);
 
 private:
-    char *line;
-    size_t lineSize;
+    char *m_line;
 };
 
-#endif // FASTAFILE_H
+}
+
+#endif // CQ_FASTA_H
 

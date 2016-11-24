@@ -1,4 +1,4 @@
-/** @file FASTAFile.cc
+/** @file FASTA.cc
  *  @brief This file contains the implementation of the FASTAFile class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -9,16 +9,14 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "IO/FASTAFile.h"
+#include "IO/FASTA.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include <string.h>
 
-FASTAFile::FASTAFile(const std::string &path,
-                     const FASTAFile::Mode &mode)
+cq::FASTAFile::FASTAFile(const std::string &path, const FASTAFile::Mode &mode)
     : File(path, mode)
-    , line(NULL)
-    , lineSize(sizeof(char) * (4*KB))
+    , m_line(NULL)
 {
     // Check constructor arguments
     if (path.empty() == true) {
@@ -30,30 +28,32 @@ FASTAFile::FASTAFile(const std::string &path,
 
     // Usually, lines in a FASTA file should be limited to 80 chars, so 4 KB
     // should be enough
-    line = (char *)malloc(lineSize);
+    m_line = (char *)malloc(LINE_SIZE);
 
     // Parse the complete FASTA file
     parse();
 }
 
-FASTAFile::~FASTAFile(void)
+cq::FASTAFile::~FASTAFile(void)
 {
-    free(line);
+    free(m_line);
 }
 
-void FASTAFile::parse(void)
+void cq::FASTAFile::parse(void)
 {
     std::string currentHeader("");
     std::string currentSequence("");
 
-    while (fgets(line, lineSize, fp) != NULL) {
+    while (fgets(m_line, LINE_SIZE, m_fp) != NULL) {
         // Trim line
-        size_t l = strlen(line) - 1;
-        while (l && (line[l] == '\r' || line[l] == '\n')) { line[l--] = '\0'; }
+        size_t l = strlen(m_line) - 1;
+        while (l && (m_line[l] == '\r' || m_line[l] == '\n')) {
+            m_line[l--] = '\0';
+        }
 
         //DEBUG("Processed %.2f%%", (double)tell()*100/(double)size());
 
-        if (line[0] == '>') {
+        if (m_line[0] == '>') {
             if (currentSequence.empty() == false) {
                 // We have a sequence, check if we have a header
                 if (currentHeader.empty() == true) {
@@ -73,14 +73,14 @@ void FASTAFile::parse(void)
 
             // Store the header and trim it: do not take the leading '>' and
             // remove everything after the first space
-            currentHeader = line + 1;
+            currentHeader = m_line + 1;
             currentHeader = currentHeader.substr(0, currentHeader.find_first_of(" "));
 
             // Reset sequence
             currentSequence = "";
         }
         else {
-            currentSequence += line;
+            currentSequence += m_line;
         }
     }
 

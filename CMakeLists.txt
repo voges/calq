@@ -73,13 +73,13 @@ else ()
 endif ()
 
 # Generate version.h
-file(WRITE ${PROJECT_BUILD_DIR}/version.cmake "file(WRITE version.h \"#ifndef VERSION_H\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION_H\\n\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION \\\"${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}\\\"\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION_MAJOR ${PROJECT_VERSION_MAJOR}\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION_MINOR ${PROJECT_VERSION_MINOR}\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define VERSION_PATCH ${PROJECT_VERSION_PATCH}\\n\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#endif // VERSION_H\\n\\n\")\n")
+file(WRITE ${PROJECT_BUILD_DIR}/version.cmake "file(WRITE version.h \"#ifndef CQ_VERSION_H\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define CQ_VERSION_H\\n\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define CQ_VERSION \\\"${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}\\\"\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define CQ_VERSION_MAJOR ${PROJECT_VERSION_MAJOR}\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define CQ_VERSION_MINOR ${PROJECT_VERSION_MINOR}\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#define CQ_VERSION_PATCH ${PROJECT_VERSION_PATCH}\\n\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/version.cmake "file(APPEND version.h \"#endif // CQ_VERSION_H\\n\\n\")\n")
 add_custom_target(version
     COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BUILD_DIR}/version.cmake
     ADD_DEPENDENCIES ${PROJECT_BUILD_DIR}/version.cmake
@@ -88,10 +88,10 @@ add_custom_target(version
 # Write build time in UTC ISO 8601 to timestamp.h
 message(STATUS "Creating target for ${PROJECT_BUILD_DIR}/timestamp.h")
 file(WRITE ${PROJECT_BUILD_DIR}/timestamp.cmake "STRING(TIMESTAMP TIMESTAMP_UTC UTC)\n")
-file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(WRITE timestamp.h \"#ifndef TIMESTAMP_H\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#define TIMESTAMP_H\\n\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#define TIMESTAMP_UTC \\\"\${TIMESTAMP_UTC}\\\"\\n\\n\")\n")
-file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#endif // TIMESTAMP_H\\n\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(WRITE timestamp.h \"#ifndef CQ_TIMESTAMP_H\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#define CQ_TIMESTAMP_H\\n\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#define CQ_TIMESTAMP_UTC \\\"\${TIMESTAMP_UTC}\\\"\\n\\n\")\n")
+file(APPEND ${PROJECT_BUILD_DIR}/timestamp.cmake "file(APPEND timestamp.h \"#endif // CQ_TIMESTAMP_H\\n\\n\")\n")
 add_custom_target(timestamp
     COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BUILD_DIR}/timestamp.cmake
     ADD_DEPENDENCIES ${PROJECT_BUILD_DIR}/timestamp.cmake
@@ -128,12 +128,12 @@ if (GIT_SCM AND EXISTS ${GIT_DIR})
                     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    file(WRITE ${PROJECT_BUILD_DIR}/git.cmake "file(WRITE git.h \"#ifndef GIT_H\\n\")\n")
-    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define GIT_H\\n\\n\")\n")
-    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define GIT_BRANCH \\\"${GIT_BRANCH}\\\"\\n\")\n")
-    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define GIT_COMMIT_HASH_SHORT \\\"${GIT_COMMIT_HASH_SHORT}\\\"\\n\")\n")
-    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define GIT_COMMIT_HASH_LONG \\\"${GIT_COMMIT_HASH_LONG}\\\"\\n\\n\")\n")
-    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#endif // GIT_H\\n\\n\")\n")
+    file(WRITE ${PROJECT_BUILD_DIR}/git.cmake "file(WRITE git.h \"#ifndef CQ_GIT_H\\n\")\n")
+    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define CQ_GIT_H\\n\\n\")\n")
+    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define CQ_GIT_BRANCH \\\"${GIT_BRANCH}\\\"\\n\")\n")
+    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define CQ_GIT_COMMIT_HASH_SHORT \\\"${GIT_COMMIT_HASH_SHORT}\\\"\\n\")\n")
+    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#define CQ_GIT_COMMIT_HASH_LONG \\\"${GIT_COMMIT_HASH_LONG}\\\"\\n\\n\")\n")
+    file(APPEND ${PROJECT_BUILD_DIR}/git.cmake "file(APPEND git.h \"#endif // CQ_GIT_H\\n\\n\")\n")
     add_custom_target(git
         COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BUILD_DIR}/git.cmake
         ADD_DEPENDENCIES ${GIT_DIR}/logs/HEAD

@@ -12,22 +12,22 @@
 
 #include "Common/Exceptions.h"
 
-Exception::Exception(const std::string &msg): msg(msg)
+cq::Exception::Exception(const std::string &msg): msg(msg)
 {
     // empty
 }
 
-Exception::~Exception(void) throw () 
+cq::Exception::~Exception(void) throw () 
 {
     // empty
 }
 
-std::string Exception::getMessage(void) const 
+std::string cq::Exception::getMessage(void) const 
 {
     return msg;
 }
 
-const char * Exception::what(void) const throw() 
+const char * cq::Exception::what(void) const throw() 
 {
     return msg.c_str();
 }

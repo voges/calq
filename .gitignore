@@ -6,5 +6,4 @@
 .DS_Store # created by Finder
 *kdev4*
 build
-evaluation/scripts+programs/compute_genotype_metrics
 

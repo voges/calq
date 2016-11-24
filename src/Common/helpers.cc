@@ -20,13 +20,13 @@
 #include <fstream>
 #include <time.h>
 
-std::string currentDateAndTime(void)
+std::string cq::currentDateAndTime(void)
 {
     time_t rawtime = time(NULL);
     struct tm *timeinfo;
 
     // Convert to UTC ('Zulu') time
-#ifdef OS_WINDOWS
+#ifdef CQ_OS_WINDOWS
     gmtime_s(timeinfo, &rawtime); 
     if (timeinfo == NULL) {
         throwErrorException("gmtime_s failed");
@@ -48,7 +48,7 @@ std::string currentDateAndTime(void)
     return result;
 }
 
-bool fileExists(const std::string &path)
+bool cq::fileExists(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -57,7 +57,7 @@ bool fileExists(const std::string &path)
     return ifs.good();
 }
 
-std::string fileBaseName(const std::string &path)
+std::string cq::fileBaseName(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -66,7 +66,7 @@ std::string fileBaseName(const std::string &path)
     return path.substr(path.find_last_of(delims) + 1);
 }
 
-std::string fileNameExtension(const std::string &path)
+std::string cq::fileNameExtension(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -77,7 +77,7 @@ std::string fileNameExtension(const std::string &path)
     return "";
 }
 
-std::string removeFileNameExtension(const std::string &path)
+std::string cq::removeFileNameExtension(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");

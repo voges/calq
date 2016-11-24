@@ -9,8 +9,8 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef CQ_CONSTANTS_H
+#define CQ_CONSTANTS_H
 
 #define KB 1000LL
 #define MB (KB*1000LL)
@@ -20,5 +20,5 @@
 #define MiB (KB*1024LL)
 #define GiB (MB*1024LL)
 
-#endif // CONSTANTS_H
+#endif // CQ_CONSTANTS_H
 

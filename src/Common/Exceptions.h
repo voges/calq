@@ -10,13 +10,15 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef EXCEPTIONS_H
-#define EXCEPTIONS_H
+#ifndef CQ_EXCEPTIONS_H
+#define CQ_EXCEPTIONS_H
 
 #include "Common/helpers.h"
 #include <exception>
 #include <iostream>
 #include <string>
+
+namespace cq {
 
 class Exception : public std::exception {
 public:
@@ -53,7 +55,7 @@ public:
     void operator()(const std::string &msg)
     {
         //std::cerr << file << ":" << function << ":" << line << ": ";
-        std::string tmp = fileBaseName(file) + ":" + function + ":" + std::to_string(line) + ": " + msg;
+        std::string tmp = cq::fileBaseName(file) + ":" + function + ":" + std::to_string(line) + ": " + msg;
         // Can use the original name here, as it is still defined
         throwErrorException(tmp);
     }
@@ -68,7 +70,9 @@ private:
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
+#define throwErrorException cq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
-#endif // EXCEPTIONS_H
+}
+
+#endif // CQ_EXCEPTIONS_H
 
