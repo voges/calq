@@ -22,30 +22,34 @@
 
 std::string cq::currentDateAndTime(void)
 {
-    time_t rawtime = time(NULL);
-    struct tm timeinfo;
+    // ISO 8601: 2007-04-05T14:30:21Z
+    char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
 
     // Convert to UTC ('Zulu') time
 #ifdef CQ_OS_WINDOWS
+    time_t rawtime = time(NULL);
+    struct tm timeinfo;
     errno_t err;
     err = gmtime_s(&timeinfo, &rawtime); 
     if (err != 0) {
         throwErrorException("gmtime_s failed");
     }
+    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", &timeinfo) == 0) {
+        throwErrorException("strftime failed");
+    }
 #else
+    time_t rawtime = time(NULL);
+    struct tm *timeinfo;
     timeinfo = gmtime(&rawtime);
     if (timeinfo == NULL) {
         throwErrorException("gmtime failed");
     }
-#endif
-
-    // ISO 8601: 2007-04-05T14:30:21Z
-    char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
-    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", &timeinfo) == 0) {
+    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%SZ", timeinfo) == 0) {
         throwErrorException("strftime failed");
     }
-    std::string result(timeString);
+#endif
 
+    std::string result(timeString);
     return result;
 }
 

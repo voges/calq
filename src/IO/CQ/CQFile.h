@@ -26,7 +26,7 @@ public:
 
 private:
     static constexpr const char *MAGIC = "CQ";
-    static const size_t MAGIC_LEN = 3;
+    const size_t MAGIC_LEN = 3;
 };
 
 }

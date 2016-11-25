@@ -11,6 +11,7 @@
 
 #include "IO/SAM/SAMFile.h"
 #include "Common/Exceptions.h"
+#include <string.h>
 
 static void parseLine(char *fields[cq::SAMRecord::NUM_FIELDS], char *line)
 {
