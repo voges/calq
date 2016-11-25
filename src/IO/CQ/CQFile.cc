@@ -27,7 +27,7 @@ cq::CQFile::~CQFile(void)
     //empty 
 }
 
-size_t cq::CQFile::readHeader(void)
+size_t cq::CQFile::readHeader(size_t *blockSize)
 {
     size_t ret = 0;
 
@@ -37,13 +37,18 @@ size_t cq::CQFile::readHeader(void)
         throwErrorException("magic does not match");
     }
 
+    ret += readUint64((uint64_t *)blockSize);
+
     return ret;
 }
 
-size_t cq::CQFile::writeHeader(void)
+size_t cq::CQFile::writeHeader(const size_t &blockSize)
 {
     size_t ret = 0;
+
     ret += write((char *)MAGIC, MAGIC_LEN);
+    ret += writeUint64((uint64_t)blockSize);
+
     return ret;
 }
 

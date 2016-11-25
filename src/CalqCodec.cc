@@ -68,39 +68,36 @@ void cq::CalqEncoder::encode(void)
 {
     auto startTime = std::chrono::steady_clock::now();;
     size_t uncompressedSize = 0;
-    size_t compressedSize = 0;
+    size_t compressedSize = m_cqFile.writeHeader(m_blockSize);
 
-    compressedSize += m_cqFile.writeHeader();
-
-    QualEncoder qualEncoder(m_cqFile, m_polyploidy);
+    
 
     while (m_samFile.readBlock(m_blockSize) != 0) {
-        CQ_LOG("Training Lloyd-Max quantizer(s)");
-
+        // Compute min and max QV for the current block
+        CQ_LOG("Computing [qMin,qMax]");
         int qMin = std::numeric_limits<int>::max();
         int qMax = std::numeric_limits<int>::min();
-
         for (auto const &samRecord : m_samFile.currentBlock.records) {
             uncompressedSize += samRecord.qual.length();
-
             for (auto const &q : samRecord.qual) {
                 if ((int)q < qMin) qMin = q;
                 if ((int)q > qMax) qMax = q;
             }
         }
+        CQ_LOG("[qMin,qMax] = [%d,%d]", qMin, qMax);
 
-        CQ_LOG("qMin: %d, qMax: %d", qMin, qMax);
-
+        // Encode the quality values
         CQ_LOG("Encoding quality values");
-        //qualEncoder.startBlock();
+        QualEncoder qualEncoder(m_polyploidy, qMin, qMax);
+        qualEncoder.startBlock();
         for (auto const &samRecord : m_samFile.currentBlock.records) {
             if (samRecord.isMapped() == true) {
-                //qualEncoder.addMappedRecordToBlock(samRecord);
+                qualEncoder.addMappedRecordToBlock(samRecord);
             } else {
-                //qualEncoder.addUnmappedRecordToBlock(samRecord);
+                qualEncoder.addUnmappedRecordToBlock(samRecord);
             }
         }
-        //qualEncoder.finishBlock();
+        qualEncoder.finishAndWriteBlock(m_cqFile);
     }
 
     auto stopTime = std::chrono::steady_clock::now();
@@ -109,8 +106,6 @@ void cq::CalqEncoder::encode(void)
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
     auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
-
-    //qualEncoder.printStats();
 
     CQ_LOG("COMPRESSION STATISTICS");
     CQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
@@ -148,17 +143,14 @@ cq::CalqDecoder::~CalqDecoder(void)
 void cq::CalqDecoder::decode(void)
 {
     auto startTime = std::chrono::steady_clock::now();
+    size_t blockSize = 0;
+    size_t compressedSize = m_cqFile.readHeader(&blockSize);
 
-    size_t compressedSize = 0;
-
-    compressedSize += m_cqFile.readHeader();
-
-    size_t numBlocks = 0;
-
-    //while (cqFile.eof() == false) {
-        //
-        //numBlocks++;
-    //}
+    while (m_sideInformationFile.readBlock(blockSize) != 0) {
+//         for (auto const &samRecord : m_sideInformationFile.currentBlock.records) {
+//             // empty
+//         }
+    }
 
     auto stopTime = std::chrono::steady_clock::now();
     auto diffTime = stopTime - startTime;
@@ -167,60 +159,10 @@ void cq::CalqDecoder::decode(void)
     auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
-    //qualDecoder.printStats();
-
     CQ_LOG("DECOMPRESSION STATISTICS");
     CQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CQ_LOG("  Decoded %zu block(s)", numBlocks);
+    CQ_LOG("  Decoded %zu block(s)", m_sideInformationFile.numBlocksRead());
     CQ_LOG("  Compressed size: %zu", compressedSize);
     CQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
-
-// void MappedRecord::extractObservations(const uint32_t &observedPosMin,
-//                                        std::deque<std::string> &observedNucleotides,
-//                                        std::deque<std::string> &observedQualityValues)
-// {
-//     size_t cigarIdx = 0;
-//     size_t cigarLen = cigar.length();
-//     size_t opLen = 0; // length of current CIGAR operation
-//     size_t idx = 0;
-//     size_t observedIdx = posMin - observedPosMin;
-// 
-//     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-//         if (isdigit(cigar[cigarIdx])) {
-//             opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
-//             continue;
-//         }
-// 
-//         switch (cigar[cigarIdx]) {
-//         case 'M':
-//         case '=':
-//         case 'X':
-//             // Add matching parts
-//             for (size_t i = 0; i < opLen; i++) {
-//                 observedNucleotides[observedIdx] += nucleotides[idx];
-//                 observedQualityValues[observedIdx] += qualityValues[idx];
-//                 idx++;
-//                 observedIdx++;
-//             }
-//             break;
-//         case 'I':
-//         case 'S':
-//             idx += opLen;
-//             break;
-//         case 'D':
-//         case 'N':
-//             observedIdx += opLen;
-//             break;
-//         case 'H':
-//         case 'P':
-//             break; // these have been clipped
-//         default:
-//             LOG("CIGAR string: %s", cigar.c_str());
-//             throwErrorException("Bad CIGAR string");
-//         }
-// 
-//         opLen = 0;
-//     }
-// }
 

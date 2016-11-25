@@ -134,8 +134,8 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
         if (cliOptions.sideInformationFileName.empty() == true) {
             throwErrorException("No side information file name provided");
         }
-        if (cq::fileNameExtension(cliOptions.sideInformationFileName) != std::string("si")) {
-            throwErrorException("Side information file name extension must be 'si'");
+        if (cq::fileNameExtension(cliOptions.sideInformationFileName) != std::string("sam")) {
+            throwErrorException("Side information file name extension must be 'sam'");
         }
         if (cq::fileExists(cliOptions.sideInformationFileName) == false) {
             throwErrorException("Cannot access side information file");

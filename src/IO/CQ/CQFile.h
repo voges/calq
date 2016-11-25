@@ -21,8 +21,8 @@ public:
     CQFile(const std::string &path, const Mode &mode);
     ~CQFile(void);
 
-    size_t readHeader(void);
-    size_t writeHeader(void);
+    size_t readHeader(size_t *blockSize);
+    size_t writeHeader(const size_t &blockSize);
 
 private:
     static constexpr const char *MAGIC = "CQ";

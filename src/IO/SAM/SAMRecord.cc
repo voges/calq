@@ -78,6 +78,62 @@ cq::SAMRecord::~SAMRecord(void)
     // empty
 }
 
+void cq::SAMRecord::extractPileup(const uint32_t &pileupPosMin,
+                                  const uint32_t &pileupPosMax,
+                                  std::deque<std::string> &seqPileup,
+                                  std::deque<std::string> &qualPileup) const
+{
+    if ((seqPileup.size() == 0) || (qualPileup.size() == 0)) {
+        throwErrorException("Pileups are empty");
+    }
+    if (seqPileup.size() != qualPileup.size()) {
+        throwErrorException("Pileup sizes differ");
+    }
+    if ((pileupPosMin > posMin) || (pileupPosMax < posMax)) {
+        throwErrorException("Pileup does not overlap record");
+    }
+
+    size_t cigarIdx = 0;
+    size_t cigarLen = cigar.length();
+    size_t opLen = 0; // length of current CIGAR operation
+    size_t idx = 0;
+    size_t pileupIdx = posMin - pileupPosMin;
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
+            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+            continue;
+        }
+
+        switch (cigar[cigarIdx]) {
+        case 'M':
+        case '=':
+        case 'X':
+            for (size_t i = 0; i < opLen; i++) {
+                seqPileup[pileupIdx] += seq[idx];
+                qualPileup[pileupIdx] += qual[idx];
+                idx++; pileupIdx++;
+            }
+            break;
+        case 'I':
+        case 'S':
+            idx += opLen;
+            break;
+        case 'D':
+        case 'N':
+            pileupIdx += opLen;
+            break;
+        case 'H':
+        case 'P':
+            break; // these have been clipped
+        default:
+            throwErrorException("Bad CIGAR string");
+        }
+
+        opLen = 0;
+    }
+}
+
 bool cq::SAMRecord::isMapped(void) const
 {
     return m_mapped;

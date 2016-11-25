@@ -13,29 +13,35 @@
 #ifndef CQ_QUALCODEC_H
 #define CQ_QUALCODEC_H
 
-#include "IO/File.h"
-//#include "Genotyper/Genotyper.h"
-//#include "Quantizers/UniformQuantizer.h"
+#include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMRecord.h"
+#include "QualCodec/Genotyper.h"
+//#include "QualCodec/UniformQuantizer.h"
 #include <chrono>
-//#include <fstream>
-//#include <map>
-//#include <math.h>
-//#include <queue>
-//#include <vector>
-//
+#include <deque>
 
 namespace cq {
 
 class QualEncoder {
 public:
-    QualEncoder(File &cqFile, const unsigned int &polyploidy);
+    const unsigned int QUANTIZER_STEPS_MIN = 2;
+    const unsigned int QUANTIZER_STEPS_MAX = 8;
+    const unsigned int NUM_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
+    const unsigned int QUANTIZER_IDX_MIN = 0;
+    const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
+
+public:
+    explicit QualEncoder(const unsigned int &polyploidy,
+                         const int &qMin,
+                         const int &qMax
+    );
     ~QualEncoder(void);
 
     void startBlock(void);
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
-    //void addMappedRecordToBlock(const SAMRecord &samRecord);
-    size_t finishBlock(void);
+    void addMappedRecordToBlock(const SAMRecord &samRecord);
+    size_t finishAndWriteBlock(CQFile &cqFile);
+    void printBlockStatistics(void) const;
 
     size_t compressedMappedQualSize(void) const;
     size_t compressedUnmappedQualSize(void) const;
@@ -48,157 +54,51 @@ public:
     size_t uncompressedQualSize(void) const;
 
 private:
+    void encodeMappedQual(const SAMRecord &samRecord);
     void encodeUnmappedQual(const std::string &qual);
 
 private:
+    // Timekeeping
     std::chrono::time_point<std::chrono::steady_clock> m_blockStartTime;
     std::chrono::time_point<std::chrono::steady_clock> m_blockStopTime;
 
+    // Sizes & counters
     size_t m_compressedMappedQualSize;
     size_t m_compressedUnmappedQualSize;
     size_t m_numMappedRecords;
     size_t m_numUnmappedRecords;
     size_t m_uncompressedMappedQualSize;
     size_t m_uncompressedUnmappedQualSize;
-    
+
+    // Buffers
     std::string m_unmappedQual;
-    std::string m_mappedQuantizerIndices;
-    std::string m_mappedQualIndices;
+    std::deque<int> m_mappedQuantizerIndices;
+    uint32_t m_mappedQuantizerIndicesPosMin;
+    uint32_t m_mappedQuantizerIndicesPosMax;
+    std::deque<int> m_mappedQualIndices;
 
-//    void printStats(void) const;
-//
-    
-    
-//
-//
-//private:
-//    void encodeMappedQualityValues(const MappedRecord &mappedRecord);
-//    
+    // Pileup
+    std::deque<std::string> m_seqPileup;
+    std::deque<std::string> m_qualPileup;
+    uint32_t m_pileupPosMin;
+    uint32_t m_pileupPosMax;
 
-private:
-//    ////////////////////////////////////////////////////////////////////////////
-//    // Class scope:
-//    // These member variables are used throughout coding multiple blocks
-//    ////////////////////////////////////////////////////////////////////////////
-//
-//    // Generic
-//    bool quantizedPrintout;
-//    bool stats;
-//    bool verbose;
-//    int qvMin;
-//    int qvMax;
-//
-//    std::ofstream qualMappedFile;
-//    std::ofstream qualUnmappedFile;
-//    std::ofstream statsFile;
-//
-//    File &cqFile;
-//    Genotyper genotyper;
-//    std::map<int,UniformQuantizer> uniformQuantizers;
-//
-//    // Sizes & counters
-//    size_t uncompressedSize;
-//    size_t uncompressedMappedSize;
-//    size_t uncompressedUnmappedSize;
-//    size_t compressedSize;
-//    size_t compressedMappedSize;
-//    size_t compressedUnmappedSize;
-//    size_t numRecords;
-//    size_t numMappedRecords;
-//    size_t numUnmappedRecords;
-//
-//    ////////////////////////////////////////////////////////////////////////////
-//    // Block scope:
-//    // The following member variables are used per block; all of them are reset
-//    // by startBlock.
-//    ////////////////////////////////////////////////////////////////////////////
-//
-//    // Start and stop times for a block
-//    std::chrono::time_point<std::chrono::steady_clock> blockStartTime;
-//    std::chrono::time_point<std::chrono::steady_clock> blockStopTime;
-//
-//    // Sizes & counters
-//    size_t uncompressedSizeOfBlock;
-//    size_t uncompressedMappedSizeOfBlock;
-//    size_t uncompressedUnmappedSizeOfBlock;
-//    size_t compressedSizeOfBlock;
-//    size_t compressedMappedSizeOfBlock;
-//    size_t compressedUnmappedSizeOfBlock;
-//    size_t numRecordsInBlock;
-//    size_t numMappedRecordsInBlock;
-//    size_t numUnmappedRecordsInBlock;
-//
-//    // Strings to buffer the data to be transmitted
-//    std::string qi; // quantizer indices
-//    std::string qvi; // quality value indices
-//    std::string uqv; // unmapped quality values
-//
-//    // Reference loaded for the current block
-//    std::string referenceName;
-//    std::string reference;
-//    uint32_t referencePosMin;
-//    uint32_t referencePosMax;
-//
-//    // Queue holding the mapped records; records get popped when they are
-//    // finally encoded
-//    std::queue<MappedRecord> mappedRecordQueue;
-//
-//    // Current observed nucleotides and quality values; when a quantizer index
-//    // is computed for a certain position, the vectors are shrinked
-//    std::deque<std::string> observedNucleotides;
-//    std::deque<std::string> observedQualityValues;
-//    uint32_t observedPosMin;
-//    uint32_t observedPosMax;
-//
-//    // Computed quantizer indices; when the indices are not needed anymore; the
-//    // vector is shrinked
-//    std::vector<int> quantizerIndices;
-//    uint32_t quantizerIndicesPosMin;
-//    uint32_t quantizerIndicesPosMax;
-//
+    // Genotyper
+    Genotyper m_genotyper;
+
+    // Quantizers
+    //std::map<int,Quantizer> m_quantizers;
+
+    // Double-ended queue holding the SAM records; records get popped when they
+    // are finally encoded
+    std::deque<SAMRecord> m_samRecordQueue;
 };
-//
-//class QualDecoder {
-//public:
-//    QualDecoder(File &cqFile, File &qualFile, const CLIOptions &cliOptions);
-//    ~QualDecoder(void);
-//
-//    void printStats(void) const;
-//
-//    size_t decodeBlock(void);
-//
-//private:
-//    ////////////////////////////////////////////////////////////////////////////
-//    // Class scope:
-//    // These member variables are used throughout decoding multiple blocks
-//    ////////////////////////////////////////////////////////////////////////////
-//
-//    // Generic
-//    bool verbose;
-//    File &cqFile;
-//    File &qualFile;
-//
-//    // Sizes & counters
-//    size_t uncompressedSize;
-//    size_t compressedSize;
-//    size_t numBlocks;
-//    size_t numRecords;
-//    size_t numMappedRecords;
-//    size_t numUnmappedRecords;
-//
-//    ////////////////////////////////////////////////////////////////////////////
-//    // Block scope:
-//    // The following member variables are used per block; all of them are reset
-//    // by decodeBlock.
-//    ////////////////////////////////////////////////////////////////////////////
-//
-//    // Sizes & counters
-//    size_t uncompressedSizeOfBlock;
-//    size_t compressedSizeOfBlock;
-//    size_t numRecordsInBlock;
-//    size_t numMappedRecordsInBlock;
-//    size_t numUnmappedRecordsInBlock;
-//};
+
+class QualDecoder {
+public:
+   explicit QualDecoder(void);
+   ~QualDecoder(void);
+};
 
 }
 
