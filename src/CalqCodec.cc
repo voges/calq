@@ -22,7 +22,6 @@
 cq::CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     : m_blockSize(cliOptions.blockSize)
     , m_cqFile(cliOptions.outputFileName, CQFile::MODE_WRITE)
-    , m_force(cliOptions.force)
     , m_polyploidy(cliOptions.polyploidy)
     , m_referenceFileNames(cliOptions.referenceFileNames)
     , m_samFile(cliOptions.inputFileName)

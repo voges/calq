@@ -30,7 +30,6 @@ public:
 private:
     size_t m_blockSize;
     CQFile m_cqFile;
-    bool m_force;
     unsigned int m_polyploidy;
     std::vector<std::string> m_referenceFileNames;
     SAMFile m_samFile;
