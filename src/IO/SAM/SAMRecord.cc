@@ -139,7 +139,15 @@ bool cq::SAMRecord::isMapped(void) const
     return m_mapped;
 }
 
-void cq::SAMRecord::print(void) const
+void cq::SAMRecord::printLong(void) const
+{
+    printShort();
+    printf("isMapped: %d, ", m_mapped);
+    printf("posMin: %d, ", posMin);
+    printf("posMax: %d\n", posMax);
+}
+
+void cq::SAMRecord::printShort(void) const
 {
     printf("%s\t", qname.c_str());
     printf("%d\t", flag);
@@ -154,9 +162,13 @@ void cq::SAMRecord::print(void) const
     printf("%s\t", qual.c_str());
     printf("%s\t", opt.c_str());
     printf("\n");
-    //printf("isMapped: %d, ", m_mapped);
-    //printf("posMin: %d, ", posMin);
-    //printf("posMax: %d\n", posMax);
+}
+
+void cq::SAMRecord::printSeqWithPositionOffset(void) const
+{
+    printf("%6d-%6d|", posMin, posMax);
+    for (unsigned int i = 0; i < posMin; i++) { printf(" "); }
+    printf("%s\n", seq.c_str());
 }
 
 void cq::SAMRecord::check(void)

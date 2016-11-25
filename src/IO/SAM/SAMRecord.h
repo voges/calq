@@ -32,7 +32,9 @@ public:
                        std::deque<std::string> &qualPileup) const;
 
     bool isMapped(void) const;
-    void print(void) const;
+    void printLong(void) const;
+    void printShort(void) const;
+    void printSeqWithPositionOffset(void) const;
 
 public:
     std::string qname; // Query template NAME

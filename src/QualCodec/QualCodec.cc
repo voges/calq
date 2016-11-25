@@ -131,17 +131,7 @@ void cq::QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 
     while (m_samRecordQueue.front().posMax < m_pileupPosMin) {
         encodeMappedQual(m_samRecordQueue.front());
-        uint32_t currFirstPosition = m_samRecordQueue.front().posMin;
         m_samRecordQueue.pop_front();
-
-        // Check if we can shrink the quantizer indices vector
-        if (m_samRecordQueue.empty() == false) {
-            uint32_t nextFirstPosition = m_samRecordQueue.front().posMin;
-            if (nextFirstPosition > currFirstPosition) {
-                m_mappedQuantizerIndices.erase(m_mappedQuantizerIndices.begin(), m_mappedQuantizerIndices.begin()+nextFirstPosition-currFirstPosition);
-                m_mappedQuantizerIndicesPosMin += nextFirstPosition-currFirstPosition;
-            }
-        }
     }
 
     m_numMappedRecords++;
@@ -149,42 +139,25 @@ void cq::QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 
 size_t cq::QualEncoder::finishAndWriteBlock(CQFile &cqFile)
 {
-//    // Compute all remaining quantizers
-//    while (observedPosMin <= observedPosMax) {
-//        int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
-//
-//        if (stats == true) {
-//            double entropy = genotyper.computeEntropy(observedNucleotides[0], observedQualityValues[0]);
-//            statsFile << referenceName << ",";
-//            statsFile << observedPosMin << ",";
-//            statsFile << observedNucleotides[0].length() << ",";
-//            statsFile << entropy << ",";
-//            statsFile << k << std::endl;
-//        }
-//
-//        quantizerIndices.push_back(k);
-//        quantizerIndicesPosMax = observedPosMin;
-//        observedNucleotides.pop_front();
-//        observedQualityValues.pop_front();
-//        observedPosMin++;
-//    }
-//
-//    // Process all remaining records from queue
-//    while (mappedRecordQueue.empty() == false) {
-//        encodeMappedQualityValues(mappedRecordQueue.front());
-//        uint32_t currFirstPosition = mappedRecordQueue.front().posMin;
-//        mappedRecordQueue.pop();
-//
-//        // Check if we can shrink the quantizerIndices vector
-//        if (mappedRecordQueue.empty() == false) {
-//            uint32_t nextFirstPosition = mappedRecordQueue.front().posMin;
-//            if (nextFirstPosition > currFirstPosition) {
-//                quantizerIndices.erase(quantizerIndices.begin(), quantizerIndices.begin()+nextFirstPosition-currFirstPosition);
-//                quantizerIndicesPosMin += nextFirstPosition-currFirstPosition;
-//            }
-//        }
-//    }
-//
+    CQ_LOG("Finishing and writing block");
+
+    // Compute all remaining quantizers
+    while (m_pileupPosMin <= m_pileupPosMax) {
+        int k = m_genotyper.computeQuantizerIndex(m_seqPileup[0], m_qualPileup[0]);
+
+        m_mappedQuantizerIndices.push_back(k);
+        m_mappedQuantizerIndicesPosMax = m_pileupPosMin;
+        m_seqPileup.pop_front();
+        m_qualPileup.pop_front();
+        m_pileupPosMin++;
+    }
+
+    // Process all remaining records from queue
+    while (m_samRecordQueue.empty() == false) {
+        encodeMappedQual(m_samRecordQueue.front());
+        m_samRecordQueue.pop_front();
+    }
+
 //    // Write block number and numbers of records to output file
 //    compressedMappedSizeOfBlock += cqFile.writeUint64(numBlocks);
 //    compressedMappedSizeOfBlock += cqFile.writeUint64(numRecordsInBlock);
