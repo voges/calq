@@ -14,8 +14,9 @@
 #define CQ_CALQCODEC_H
 
 #include "Common/CLIOptions.h"
-#include "IO/CQ.h"
-#include "IO/SAM.h"
+#include "IO/CQ/CQFile.h"
+#include "IO/File.h"
+#include "IO/SAM/SAMFile.h"
 //#include "QualCodec/QualCodec.h"
 
 namespace cq {

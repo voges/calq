@@ -30,7 +30,6 @@ public:
     // Options for only compression
     int blockSize;
     int polyploidy;
-    std::string qualityValueType;
     std::vector<std::string> referenceFileNames;
     // Options for only decompression
     bool decompress;

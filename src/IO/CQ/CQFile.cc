@@ -1,4 +1,4 @@
-/** @file CQ.cc
+/** @file CQFile.cc
  *  @brief This file contains the implementation of the CQFile class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "IO/CQ.h"
+#include "IO/CQ/CQFile.h"
 #include "Common/Exceptions.h"
 #include <string.h>
 
@@ -31,9 +31,9 @@ size_t cq::CQFile::readHeader(void)
 {
     size_t ret = 0;
 
-    char magic[strlen(MAGIC)];
-    ret += read(magic, strlen(MAGIC));
-    if (strncmp(magic, MAGIC, strlen(MAGIC)) != 0) {
+    char magic[MAGIC_LEN];
+    ret += read(magic, MAGIC_LEN);
+    if (strncmp(magic, MAGIC, MAGIC_LEN) != 0) {
         throwErrorException("magic does not match");
     }
 
@@ -43,7 +43,7 @@ size_t cq::CQFile::readHeader(void)
 size_t cq::CQFile::writeHeader(void)
 {
     size_t ret = 0;
-    ret += write((char *)MAGIC, strlen(MAGIC));
+    ret += write((char *)MAGIC, MAGIC_LEN);
     return ret;
 }
 

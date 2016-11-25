@@ -1,4 +1,4 @@
-/** @file UniformQuantizers.h
+/** @file UniformQuantizer.h
  *  @brief This file contains the definitions of the UniformQuantizer class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -9,17 +9,15 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef UNIFORMQUANTIZER_H
-#define UNIFORMQUANTIZER_H
+#ifndef CQ_UNIFORMQUANTIZER_H
+#define CQ_UNIFORMQUANTIZER_H
 
 #include <map>
 #include <string>
 #include <vector>
 
-/** @brief Class: UniformQuantizer
- *
- *  The UniformQuantizer class quantizes integer values.
- */
+namespace cq {
+
 class UniformQuantizer {
 public:
     UniformQuantizer(const int &minimumValue,
@@ -38,5 +36,7 @@ private:
     std::map<int,int> inverseLut; // index->reconstructionValue
 };
 
-#endif // UNIFORMQUANTIZER_H
+}
+
+#endif // CQ_UNIFORMQUANTIZER_H
 

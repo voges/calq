@@ -29,7 +29,7 @@ std::string removeFileNameExtension(const std::string &path);
 // C-style debug macro
 #define DBG
 #ifdef DBG
-    #define DEBUG(c,...) \
+    #define CQ_DEBUG(c,...) \
         do { \
             fflush(stderr); \
             fprintf(stderr, \
@@ -45,7 +45,7 @@ std::string removeFileNameExtension(const std::string &path);
 #endif
 
 // C-style log macro
-#define LOG(c,...) \
+#define CQ_LOG(c,...) \
     do {\
         fflush(stdout); \
         fprintf(stdout, \
@@ -56,7 +56,7 @@ std::string removeFileNameExtension(const std::string &path);
     } while (false)
 
 // C-style error macro
-#define ERROR(c,...) \
+#define CQ_ERROR(c,...) \
     do {\
         fflush(stderr); \
         fprintf(stderr, \

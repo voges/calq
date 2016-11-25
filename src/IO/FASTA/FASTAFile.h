@@ -1,4 +1,4 @@
-/** @file FASTA.h
+/** @file FASTAFile.h
  *  @brief This file contains the definition of the FASTAFile class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -9,8 +9,8 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef CQ_FASTA_H
-#define CQ_FASTA_H
+#ifndef CQ_FASTAFILE_H
+#define CQ_FASTAFILE_H
 
 #include "Common/constants.h"
 #include "IO/File.h"
@@ -20,7 +20,7 @@ namespace cq {
 
 class FASTAFile : public File {
 public:
-    FASTAFile(const std::string &path, const FASTAFile::Mode &mode = FASTAFile::MODE_READ);
+    FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
     ~FASTAFile(void);
 
 public:
@@ -38,5 +38,5 @@ private:
 
 }
 
-#endif // CQ_FASTA_H
+#endif // CQ_FASTAFILE_H
 

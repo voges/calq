@@ -9,7 +9,7 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "Genotyper.h"
+#include "QualCodec/Genotyper.h"
 #include "Common/CLIOptions.h"
 #include "Common/helpers.h"
 #include "Common/Exceptions.h"
@@ -84,7 +84,7 @@ void Genotyper::initLikelihoods(void)
     int chosen[GENOTYPER_ALLELE_ALPHABET_SIZE];
     combinationsWithRepetitions(genotypeAlphabet, alleleAlphabet, chosen, 0, polyploidy, 0, GENOTYPER_ALLELE_ALPHABET_SIZE);
 
-    LOG("Initializing genotype alphabet with %lu possible genotypes", genotypeAlphabet.size());
+    CQ_LOG("Initializing genotype alphabet with %zu possible genotypes", genotypeAlphabet.size());
     for (auto &genotype : genotypeAlphabet) {
         genotypeLikelihoods.insert(std::pair<std::string,double>(genotype, 0.0));
     }

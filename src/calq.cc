@@ -1,5 +1,5 @@
 /** @file calq.cc
- *  @brief This file contains the main function of the calq compression tool.
+ *  @brief This file contains the main function of the CALQ compression tool.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -20,14 +20,6 @@
 #include "Common/helpers.h"
 #include "Common/os_config.h"
 #include "tclap/CmdLine.h"
-
-#ifdef CQ_OS_WINDOWS
-    #define TCLAP_NAMESTARTSTRING "~~"
-    #define TCLAP_FLAGSTARTSTRING "/"
-#else
-    #define TCLAP_NAMESTARTSTRING "--"
-    #define TCLAP_FLAGSTARTSTRING "-"
-#endif
 
 static void printVersionAndCopyright(void)
 {
@@ -50,11 +42,11 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
 {
     // force
     if (cliOptions.force == true) {
-        LOG("Force switch set - overwriting output file(s)");
+        CQ_LOG("Force switch set - overwriting output file(s)");
     }
 
     // inputFile
-    LOG("Input file name: %s", cliOptions.inputFileName.c_str());
+    CQ_LOG("Input file name: %s", cliOptions.inputFileName.c_str());
     if (cliOptions.inputFileName.empty() == true) {
         throwErrorException("No input file name provided");
     }
@@ -74,15 +66,15 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
     // outputFile
     if (cliOptions.decompress == false) {
         if (cliOptions.outputFileName.empty() == true) {
-            LOG("No output file name provided - constructing output file name from input file name");
+            CQ_LOG("No output file name provided - constructing output file name from input file name");
             cliOptions.outputFileName += cliOptions.inputFileName + ".cq";
-            LOG("Output file name: %s", cliOptions.outputFileName.c_str());
+            CQ_LOG("Output file name: %s", cliOptions.outputFileName.c_str());
         }
     } else {
         if (cliOptions.outputFileName.empty() == true) {
-            LOG("No output file name provided - constructing output file name from input file name");
+            CQ_LOG("No output file name provided - constructing output file name from input file name");
             cliOptions.outputFileName += cliOptions.inputFileName + ".qual";
-            LOG("Output file name: %s", cliOptions.outputFileName.c_str());
+            CQ_LOG("Output file name: %s", cliOptions.outputFileName.c_str());
         }
     }
     if (cq::fileExists(cliOptions.outputFileName) == true) {
@@ -93,7 +85,7 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
 
     // blockSize
     if (cliOptions.decompress == false) {
-        LOG("Block size: %d", cliOptions.blockSize);
+        CQ_LOG("Block size: %d", cliOptions.blockSize);
         if (cliOptions.blockSize < 1) {
             throwErrorException("Block size must be greater than 0");
         }
@@ -101,7 +93,7 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
 
     // polyploidy
     if (cliOptions.decompress == false) {
-        LOG("Polyploidy: %d", cliOptions.polyploidy);
+        CQ_LOG("Polyploidy: %d", cliOptions.polyploidy);
         if (cliOptions.polyploidy < 1) {
             throwErrorException("Polyploidy must be greater than 0");
         }
@@ -110,11 +102,11 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
     // referenceFiles
     if (cliOptions.decompress == false) {
         if (cliOptions.referenceFileNames.empty() == true) {
-            LOG("Operating without reference file(s)");
+            CQ_LOG("Operating without reference file(s)");
         } else {
-            LOG("Operating with %zu reference file(s):", cliOptions.referenceFileNames.size());
+            CQ_LOG("Operating with %zu reference file(s):", cliOptions.referenceFileNames.size());
             for (std::string const &referenceFileName : cliOptions.referenceFileNames) {
-                LOG("  %s", referenceFileName.c_str());
+                CQ_LOG("  %s", referenceFileName.c_str());
                 if (referenceFileName.empty() == true) {
                     throwErrorException("Reference file name not proviced");
                 }
@@ -131,14 +123,14 @@ static void checkAndProcessCLIOptions(cq::CLIOptions &cliOptions)
 
     // decompress
     if (cliOptions.decompress == false) {
-        LOG("Compressing");
+        CQ_LOG("Compressing");
     } else {
-        LOG("Decompressing");
+        CQ_LOG("Decompressing");
     }
 
     // sideInformationFile
     if (cliOptions.decompress == true) {
-        LOG("Side information file name: %s", cliOptions.sideInformationFileName.c_str());
+        CQ_LOG("Side information file name: %s", cliOptions.sideInformationFileName.c_str());
         if (cliOptions.sideInformationFileName.empty() == true) {
             throwErrorException("No side information file name provided");
         }
@@ -227,16 +219,16 @@ int main(int argc, char *argv[])
         }
 
     } catch (TCLAP::ArgException &tclapException) {
-        ERROR("%s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());
+        CQ_ERROR("%s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());
         return EXIT_FAILURE;
     } catch (const cq::ErrorException &errorException) {
-        ERROR("%s", errorException.what());
+        CQ_ERROR("%s", errorException.what());
         return EXIT_FAILURE;
     } catch (const std::exception &stdException) {
-        ERROR("Fatal: %s", stdException.what());
+        CQ_ERROR("Fatal: %s", stdException.what());
         return EXIT_FAILURE;
     } catch (...) {
-        ERROR("Unkown error occured");
+        CQ_ERROR("Unkown error occured");
         return EXIT_FAILURE;
     }
 

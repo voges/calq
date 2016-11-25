@@ -62,7 +62,7 @@ void cq::File::open(const std::string &path, const Mode &mode)
     }
 
 #ifdef CQ_OS_WINDOWS
-    int err = fopen_s(&fp, path.c_str(), m);
+    int err = fopen_s(&m_fp, path.c_str(), m);
     if (err != 0) {
         throwErrorException("Failed to open file");
     }

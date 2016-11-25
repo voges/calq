@@ -1,6 +1,5 @@
-/** @file SAM.cc
- *  @brief This file contains the implementation of the classes defined in
- *         SAM.h.
+/** @file SAMFile.cc
+ *  @brief This file contains the implementation of the SAMFile class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -10,163 +9,8 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "IO/SAM.h"
-#include "Common/constants.h"
+#include "IO/SAM/SAMFile.h"
 #include "Common/Exceptions.h"
-#include <inttypes.h>
-#include <string.h>
-
-cq::SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
-    : qname(fields[0])
-    , flag((uint16_t)atoi(fields[1]))
-    , rname(fields[2])
-    , pos((uint32_t)atoi(fields[3]))
-    , mapq((uint8_t)atoi(fields[4]))
-    , cigar(fields[5])
-    , rnext(fields[6])
-    , pnext((uint32_t)atoi(fields[7]))
-    , tlen((int64_t)atoi(fields[8]))
-    , seq(fields[9])
-    , qual(fields[10])
-    , opt(fields[11])
-    , posMin(0)
-    , posMax(0)
-    , m_mapped(false)
-{
-    check();
-
-    if (m_mapped == true) {
-        // Compute 0-based first position and 0-based last position this record
-        // is mapped to on the reference used for alignment
-        posMin = pos - 1;
-        posMax = pos - 1;
-
-        size_t cigarIdx = 0;
-        size_t cigarLen = cigar.length();
-        uint32_t opLen = 0; // length of current CIGAR operation
-
-        for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-            if (isdigit(cigar[cigarIdx])) {
-                opLen = opLen*10 + (uint32_t)cigar[cigarIdx] - (uint32_t)'0';
-                continue;
-            }
-            switch (cigar[cigarIdx]) {
-            case 'M':
-            case '=':
-            case 'X':
-                posMax += opLen;
-                break;
-            case 'I':
-            case 'S':
-                break;
-            case 'D':
-            case 'N':
-                posMax += opLen;
-                break;
-            case 'H':
-            case 'P':
-                break; // these have been clipped
-            default:
-                throwErrorException("Bad CIGAR string");
-            }
-            opLen = 0;
-        }
-
-        posMax -= 1;
-    }
-}
-
-cq::SAMRecord::~SAMRecord(void)
-{
-    // empty
-}
-
-bool cq::SAMRecord::isMapped(void) const
-{
-    return m_mapped;
-}
-
-void cq::SAMRecord::print(void) const
-{
-    printf("%s\t", qname.c_str());
-    printf("%d\t", flag);
-    printf("%s\t", rname.c_str());
-    printf("%d\t", pos);
-    printf("%d\t", mapq);
-    printf("%s\t", cigar.c_str());
-    printf("%s\t", rnext.c_str());
-    printf("%d\t", pnext);
-    printf("%" PRId64 "\n", tlen);
-    printf("%s\t", seq.c_str());
-    printf("%s\t", qual.c_str());
-    printf("%s\t", opt.c_str());
-    printf("\n");
-    //printf("isMapped: %d, ", m_mapped);
-    //printf("posMin: %d, ", posMin);
-    //printf("posMax: %d\n", posMax);
-}
-
-void cq::SAMRecord::check(void)
-{
-    // Check all fields
-    if (qname.empty() == true) { throwErrorException("qname is empty"); }
-    // flag
-    if (rname.empty() == true) { throwErrorException("rname is empty"); }
-    // pos
-    // mapq
-    if (cigar.empty() == true) { throwErrorException("cigar is empty"); }
-    if (rnext.empty() == true) { throwErrorException("rnext is empty"); }
-    // pnext
-    // tlen
-    if (seq.empty() == true) { throwErrorException("seq is empty"); }
-    if (qual.empty() == true) { throwErrorException("qual is empty"); }
-    if (opt.empty() == true) { LOG("opt is empty"); }
-
-    // Check if this record is mapped
-    if ((flag & 0x4) != 0) {
-        m_mapped = false;
-    } else {
-        m_mapped = true;
-        if (rname == "*" || pos == 0 || cigar == "*" || seq == "*" || qual == "*") {
-            throwErrorException("Corrupted record");
-        }
-    }
-}
-
-cq::SAMBlock::SAMBlock(void)
-    : records()
-    , m_numMappedRecords(0)
-    , m_numUnmappedRecords(0)
-{
-    // empty
-}
-
-cq::SAMBlock::~SAMBlock(void)
-{
-    // empty
-}
-
-size_t cq::SAMBlock::numMappedRecords(void) const
-{
-    return m_numMappedRecords;
-}
-
-size_t cq::SAMBlock::numUnmappedRecords(void) const
-{
-    return m_numUnmappedRecords;
-}
-
-size_t cq::SAMBlock::numRecords(void) const
-{
-    return (m_numMappedRecords + m_numUnmappedRecords);
-}
-
-void cq::SAMBlock::reset(void)
-{
-    records.clear();
-    m_numMappedRecords = 0;
-    m_numUnmappedRecords = 0;
-}
 
 static void parseLine(char *fields[cq::SAMRecord::NUM_FIELDS], char *line)
 {
@@ -242,7 +86,7 @@ cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
     }
     seek(fpos); // rewind to the begin of the alignment section
     if (header.empty() == true) {
-        LOG("No SAM header found");
+        CQ_LOG("No SAM header found");
     }
 }
 
@@ -320,7 +164,7 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.numRecords(), blockSize);
+                        CQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.numRecords(), blockSize);
                         break;
                     }
                 }
@@ -329,7 +173,7 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
                 currentBlock.m_numUnmappedRecords++;
             }
         } else {
-            LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.numRecords(), blockSize);
+            CQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.numRecords(), blockSize);
             break;
         }
     }

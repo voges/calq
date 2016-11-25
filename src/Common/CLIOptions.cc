@@ -19,7 +19,6 @@ cq::CLIOptions::CLIOptions(void)
     // Options for only compression
     , blockSize(0)
     , polyploidy(0)
-    , qualityValueType("")
     , referenceFileNames()
     // Options for only decompression
     , decompress(false)

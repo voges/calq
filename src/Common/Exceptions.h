@@ -66,13 +66,13 @@ private:
     int line;
 };
 
+}
+
 // Remove the symbol for the function, then define a new version that instead
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
 #define throwErrorException cq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
-
-}
 
 #endif // CQ_EXCEPTIONS_H
 

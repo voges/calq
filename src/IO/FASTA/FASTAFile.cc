@@ -1,4 +1,4 @@
-/** @file FASTA.cc
+/** @file FASTAFile.cc
  *  @brief This file contains the implementation of the FASTAFile class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
@@ -9,12 +9,11 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "IO/FASTA.h"
-#include "Common/constants.h"
+#include "IO/FASTA/FASTAFile.h"
 #include "Common/Exceptions.h"
 #include <string.h>
 
-cq::FASTAFile::FASTAFile(const std::string &path, const FASTAFile::Mode &mode)
+cq::FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
     : File(path, mode)
     , m_line(NULL)
 {
@@ -50,8 +49,6 @@ void cq::FASTAFile::parse(void)
         while (l && (m_line[l] == '\r' || m_line[l] == '\n')) {
             m_line[l--] = '\0';
         }
-
-        //DEBUG("Processed %.2f%%", (double)tell()*100/(double)size());
 
         if (m_line[0] == '>') {
             if (currentSequence.empty() == false) {

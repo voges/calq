@@ -9,8 +9,8 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef GENOTYPER_H
-#define GENOTYPER_H
+#ifndef CQ_GENOTYPER_H
+#define CQ_GENOTYPER_H
 
 #include <map>
 #include <string>
@@ -62,5 +62,5 @@ private:
     bool stats;
 };
 
-#endif // GENOTYPER_H
+#endif // CQ_GENOTYPER_H
 

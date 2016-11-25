@@ -12,7 +12,8 @@
 
 #include "Common/Exceptions.h"
 
-cq::Exception::Exception(const std::string &msg): msg(msg)
+cq::Exception::Exception(const std::string &msg)
+    : msg(msg)
 {
     // empty
 }

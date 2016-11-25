@@ -9,21 +9,21 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "rice.h"
+#include "Compressors/rice/rice.h"
 #include "Common/os_config.h"
 #include <stdbool.h>
 #include <string.h>
 
-#if defined(OS_WINDOWS)
+#if defined(CQ_OS_WINDOWS)
     #include <windows.h>
-#elif defined(OS_APPLE) || defined(OS_LINUX)
+#elif defined(CQ_OS_APPLE) || defined(CQ_OS_LINUX)
     #include <unistd.h> /* sysconf(3) */
 #else
     #error "Operating system not supported"
 #endif
 
 // TODO: Let pointers returned by malloc point to addresses at the start of a
-//       page and verify, that realloc just extends the continuous memory
+//       page and verify that realloc just extends the continuous memory
 //       block
 
 #ifndef SIZE_MAX
@@ -164,11 +164,11 @@ unsigned char * rice_decompress(unsigned char *in,
                                 const size_t  in_sz,
                                 size_t        *out_sz)
 {
-#if defined(OS_WINDOWS)
+#if defined(CQ_OS_WINDOWS)
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     const unsigned long pageSize = (unsigned long)si.dwPageSize;
-#elif defined(OS_APPLE) || defined(OS_LINUX)
+#elif defined(CQ_OS_APPLE) || defined(CQ_OS_LINUX)
     const long pageSize = sysconf(_SC_PAGESIZE); // _SC_PAGE_SIZE is OK, too
 #else
     #error "Operating system not supported"

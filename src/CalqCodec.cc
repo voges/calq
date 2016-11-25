@@ -14,7 +14,7 @@
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/helpers.h"
-#include "IO/FASTA.h"
+#include "IO/FASTA/FASTAFile.h"
 #include <chrono>
 #include <limits>
 
@@ -46,15 +46,15 @@ cq::CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
 
     // Check and, in case they are provided, get reference sequences
     if (m_referenceFileNames.empty() == true) {
-        LOG("No reference file name(s) given - operating without reference sequence(s)");
+        CQ_LOG("No reference file name(s) given - operating without reference sequence(s)");
     } else {
-        LOG("Looking in %zu reference file(s) for reference sequence(s)", m_referenceFileNames.size());
+        CQ_LOG("Looking in %zu reference file(s) for reference sequence(s)", m_referenceFileNames.size());
         for (auto const &referenceFileName : m_referenceFileNames) {
-            LOG("  Parsing reference file: %s", referenceFileName.c_str());
+            CQ_LOG("  Parsing reference file: %s", referenceFileName.c_str());
             FASTAFile fastaFile(referenceFileName);
-            LOG("  Found %zu reference(s):", fastaFile.references.size());
+            CQ_LOG("  Found %zu reference(s):", fastaFile.references.size());
             for (auto const &reference : fastaFile.references) {
-                LOG("    %s (length: %zu)", reference.first.c_str(), reference.second.length());
+                CQ_LOG("    %s (length: %zu)", reference.first.c_str(), reference.second.length());
             }
         }
     }
@@ -75,7 +75,7 @@ void cq::CalqEncoder::encode(void)
     compressedSize += m_cqFile.writeHeader();
 
     while (m_samFile.readBlock(m_blockSize) != 0) {
-        LOG("Training Lloyd-Max quantizer(s)");
+        CQ_LOG("Training Lloyd-Max quantizer(s)");
 
         int qMin = std::numeric_limits<int>::max();
         int qMax = std::numeric_limits<int>::min();
@@ -89,9 +89,9 @@ void cq::CalqEncoder::encode(void)
             }
         }
 
-        LOG("qMin: %d, qMax: %d", qMin, qMax);
+        CQ_LOG("qMin: %d, qMax: %d", qMin, qMax);
 
-        LOG("Encoding quality values");
+        CQ_LOG("Encoding quality values");
         //qualEncoder.startBlock();
         for (auto const &samRecord : m_samFile.currentBlock.records) {
             if (samRecord.isMapped() == true) {
@@ -112,15 +112,15 @@ void cq::CalqEncoder::encode(void)
 
     //qualEncoder.printStats();
 
-    LOG("COMPRESSION STATISTICS");
-    LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", m_samFile.numMappedRecordsRead(), m_samFile.numUnmappedRecordsRead(), m_samFile.numRecordsRead(), m_samFile.numBlocksRead());
-    LOG("  Uncompressed size: %zu", uncompressedSize);
-    LOG("  Compressed size: %zu", compressedSize);
-    LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
-    LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
-    LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
-    LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
+    CQ_LOG("COMPRESSION STATISTICS");
+    CQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
+    CQ_LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", m_samFile.numMappedRecordsRead(), m_samFile.numUnmappedRecordsRead(), m_samFile.numRecordsRead(), m_samFile.numBlocksRead());
+    CQ_LOG("  Uncompressed size: %zu", uncompressedSize);
+    CQ_LOG("  Compressed size: %zu", compressedSize);
+    CQ_LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
+    CQ_LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
+    CQ_LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
+    CQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 
 cq::CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
@@ -170,11 +170,11 @@ void cq::CalqDecoder::decode(void)
 
     //qualDecoder.printStats();
 
-    LOG("DECOMPRESSION STATISTICS");
-    LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    LOG("  Decoded %zu block(s)", numBlocks);
-    LOG("  Compressed size: %zu", compressedSize);
-    LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
+    CQ_LOG("DECOMPRESSION STATISTICS");
+    CQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
+    CQ_LOG("  Decoded %zu block(s)", numBlocks);
+    CQ_LOG("  Compressed size: %zu", compressedSize);
+    CQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 
 // void MappedRecord::extractObservations(const uint32_t &observedPosMin,
