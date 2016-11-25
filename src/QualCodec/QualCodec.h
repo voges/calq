@@ -13,36 +13,69 @@
 #ifndef CQ_QUALCODEC_H
 #define CQ_QUALCODEC_H
 
-//#include "Common/CLIOptions.h"
-//#include "IO/File.h"
+#include "IO/File.h"
 //#include "Genotyper/Genotyper.h"
-//#include "Parsers/FASTAReference.h"
 //#include "Quantizers/UniformQuantizer.h"
-//#include "Records/SAMRecord.h"
-//#include "Records/MappedRecord.h"
-//#include <chrono>
+#include "IO/SAM/SAMRecord.h"
+#include <chrono>
 //#include <fstream>
 //#include <map>
 //#include <math.h>
 //#include <queue>
 //#include <vector>
 //
-//class QualEncoder {
-//public:
-//    QualEncoder(File &cqFile, const CLIOptions &cliOptions);
-//    ~QualEncoder(void);
-//
+
+namespace cq {
+
+class QualEncoder {
+public:
+    QualEncoder(File &cqFile, const unsigned int &polyploidy);
+    ~QualEncoder(void);
+
+    void startBlock(void);
+    void addUnmappedRecordToBlock(const SAMRecord &samRecord);
+    //void addMappedRecordToBlock(const SAMRecord &samRecord);
+    size_t finishBlock(void);
+
+    size_t compressedMappedQualSize(void) const;
+    size_t compressedUnmappedQualSize(void) const;
+    size_t compressedQualSize(void) const;
+    size_t numMappedRecords(void) const;
+    size_t numUnmappedRecords(void) const;
+    size_t numRecords(void) const;
+    size_t uncompressedMappedQualSize(void) const;
+    size_t uncompressedUnmappedQualSize(void) const;
+    size_t uncompressedQualSize(void) const;
+
+private:
+    void encodeUnmappedQual(const std::string &qual);
+
+private:
+    std::chrono::time_point<std::chrono::steady_clock> m_blockStartTime;
+    std::chrono::time_point<std::chrono::steady_clock> m_blockStopTime;
+
+    size_t m_compressedMappedQualSize;
+    size_t m_compressedUnmappedQualSize;
+    size_t m_numMappedRecords;
+    size_t m_numUnmappedRecords;
+    size_t m_uncompressedMappedQualSize;
+    size_t m_uncompressedUnmappedQualSize;
+    
+    std::string m_unmappedQual;
+    std::string m_mappedQuantizerIndices;
+    std::string m_mappedQualIndices;
+
 //    void printStats(void) const;
 //
-//    void startBlock(void);
-//    void addUnmappedRecordToBlock(const SAMRecord &samRecord);
-//    void addMappedRecordToBlock(const SAMRecord &samRecord);
-//    size_t finishBlock(void);
+    
+    
 //
-//public:
-//    std::vector<FASTAReference> fastaReferences;
 //
 //private:
+//    void encodeMappedQualityValues(const MappedRecord &mappedRecord);
+//    
+
+private:
 //    ////////////////////////////////////////////////////////////////////////////
 //    // Class scope:
 //    // These member variables are used throughout coding multiple blocks
@@ -70,7 +103,6 @@
 //    size_t compressedSize;
 //    size_t compressedMappedSize;
 //    size_t compressedUnmappedSize;
-//    size_t numBlocks;
 //    size_t numRecords;
 //    size_t numMappedRecords;
 //    size_t numUnmappedRecords;
@@ -124,11 +156,7 @@
 //    uint32_t quantizerIndicesPosMin;
 //    uint32_t quantizerIndicesPosMax;
 //
-//private:
-//    void loadFastaReference(const std::string &rname);
-//    void encodeMappedQualityValues(const MappedRecord &mappedRecord);
-//    void encodeUnmappedQualityValues(const std::string &qualityValues);
-//};
+};
 //
 //class QualDecoder {
 //public:
@@ -171,6 +199,8 @@
 //    size_t numMappedRecordsInBlock;
 //    size_t numUnmappedRecordsInBlock;
 //};
+
+}
 
 #endif // CQ_QUALCODEC_H
 

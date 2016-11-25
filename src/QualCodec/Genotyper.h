@@ -16,11 +16,8 @@
 #include <string>
 #include <vector>
 
-/** @brief Class: Genotyper
- *
- *  The Genotyper class provides methods for computing quantizer indices for
- *  genomic positions given the observed data.
- */
+namespace cq {
+
 class Genotyper {
 public:
     Genotyper(const unsigned int &polyploidy, 
@@ -61,6 +58,8 @@ private:
     const unsigned int quantizerIdxMax;
     bool stats;
 };
+
+}
 
 #endif // CQ_GENOTYPER_H
 

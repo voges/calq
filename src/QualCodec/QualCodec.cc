@@ -10,11 +10,10 @@
  *  YYYY-MM-DD: What (who)
  */
 
-//#include "QualCodec.h"
-//#include "Common/CLIOptions.h"
+#include "QualCodec/QualCodec.h"
 //#include "Common/constants.h"
 //#include "Common/Exceptions.h"
-//#include "Common/helpers.h"
+#include "Common/helpers.h"
 //#include "Compressors/range/range.h"
 //#include "Compressors/rle/rle.h"
 //#include <chrono>
@@ -30,12 +29,17 @@
 //static const unsigned int QUANTIZER_IDX_MIN = 0;
 //static const unsigned int QUANTIZER_IDX_MAX = QUANTIZER_NUM-1;
 //
-//QualEncoder::QualEncoder(File &cqFile, const CLIOptions &cliOptions)
+cq::QualEncoder::QualEncoder(File &cqFile, const unsigned int &polyploidy)
+    : m_compressedMappedQualSize(0)
+    , m_compressedUnmappedQualSize(0)
+    , m_numMappedRecords(0)
+    , m_numUnmappedRecords(0)
+    , m_uncompressedMappedQualSize(0)
+    , m_uncompressedUnmappedQualSize(0)
+    , m_unmappedQual("")
+    , m_mappedQuantizerIndices("")
+    , m_mappedQualIndices("")
 //    // Class scope
-//    : fastaReferences()
-//    , quantizedPrintout(false)
-//    , stats(false)
-//    , verbose(false)
 //    , qvMin(cliOptions.qvMin)
 //    , qvMax(cliOptions.qvMax)
 //    , qualMappedFile()
@@ -81,7 +85,7 @@
 //    , quantizerIndices()
 //    , quantizerIndicesPosMin(std::numeric_limits<uint32_t>::max())
 //    , quantizerIndicesPosMax(std::numeric_limits<uint32_t>::min())
-//{
+{
 //    if (cliOptions.polyploidy == 0) {
 //        throwErrorException("Polyploidy must be greater than zero");
 //    }
@@ -131,10 +135,10 @@
 //        //uniformQuantizer.print();
 //        uniformQuantizers.insert(std::pair<int,UniformQuantizer>(i, uniformQuantizer));
 //    }
-//}
-//
-//QualEncoder::~QualEncoder(void)
-//{
+}
+
+cq::QualEncoder::~QualEncoder(void)
+{
 //    if (qualMappedFile.is_open() == true) {
 //        qualMappedFile.close();
 //    }
@@ -146,8 +150,8 @@
 //    if (statsFile.is_open() == true) {
 //        statsFile.close();
 //    }
-//}
-//
+}
+
 //void QualEncoder::printStats(void) const
 //{
 //    if (verbose == true) {
@@ -176,13 +180,26 @@
 //    LOG("  Unmapped: %.4f", ((double)compressedUnmappedSize * 8)/(double)uncompressedUnmappedSize);
 //}
 //
-//void QualEncoder::startBlock(void)
-//{
-//    LOG("Starting block %zu", numBlocks);
+void cq::QualEncoder::startBlock(void)
+{
+    CQ_LOG("Starting block");
+
+    m_blockStartTime = std::chrono::steady_clock::now();
+    m_blockStopTime = std::chrono::steady_clock::now();
+
+    m_compressedMappedQualSize = 0;
+    m_compressedUnmappedQualSize = 0;
+    m_numMappedRecords = 0;
+    m_numUnmappedRecords = 0;
+    m_uncompressedMappedQualSize = 0;
+    m_uncompressedUnmappedQualSize = 0;
+
+    m_unmappedQual = "";
+    m_mappedQuantizerIndices = "";
+    m_mappedQualIndices = "";
 //
 //    // Reset all variables in block scope
-//    blockStartTime = std::chrono::steady_clock::now();
-//    blockStopTime = std::chrono::steady_clock::now();
+
 //    uncompressedSizeOfBlock = 0;
 //    uncompressedMappedSizeOfBlock = 0;
 //    uncompressedUnmappedSizeOfBlock = 0;
@@ -207,24 +224,14 @@
 //    quantizerIndices.clear();
 //    quantizerIndicesPosMin = std::numeric_limits<uint32_t>::max();
 //    quantizerIndicesPosMax = std::numeric_limits<uint32_t>::min(); 
-//}
-//
-//void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
-//{
-//    size_t qualSize = strlen(samRecord.qual);
-//    uncompressedSizeOfBlock += qualSize;
-//    uncompressedUnmappedSizeOfBlock += qualSize;
-//    uncompressedSize += qualSize;
-//    uncompressedUnmappedSize += qualSize;
-//
-//    encodeUnmappedQualityValues(std::string(samRecord.qual));
-//
-//    numRecordsInBlock++;
-//    numUnmappedRecordsInBlock++;
-//    numRecords++;
-//    numUnmappedRecords++;
-//
-//}
+}
+
+void cq::QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
+{
+    m_uncompressedUnmappedQualSize = samRecord.qual.length();
+    encodeUnmappedQual(samRecord.qual);
+    m_numUnmappedRecords++;
+}
 //
 //void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 //{
@@ -305,8 +312,8 @@
 //    numMappedRecords++;
 //}
 //
-//size_t QualEncoder::finishBlock(void)
-//{
+size_t cq::QualEncoder::finishBlock(void)
+{
 //    // Compute all remaining quantizers
 //    while (observedPosMin <= observedPosMax) {
 //        int k = genotyper.computeQuantizerIndex(observedNucleotides[0], observedQualityValues[0]);
@@ -476,10 +483,10 @@
 //    numBlocks++;
 //
 //    // Take time
-//    blockStopTime = std::chrono::steady_clock::now();
-//    auto diffTime = blockStopTime - blockStartTime;
-//    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
-//    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    m_blockStopTime = std::chrono::steady_clock::now();
+    auto diffTime = m_blockStopTime - m_blockStartTime;
+    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
+    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
 //
 //    // Print statistics for this block
 //    if (verbose == true) {
@@ -509,47 +516,19 @@
 //    LOG("  Mapped: %.4f", ((double)compressedMappedSizeOfBlock * 8)/(double)uncompressedMappedSizeOfBlock);
 //    LOG("  Unmapped: %.4f", ((double)compressedUnmappedSizeOfBlock * 8)/(double)uncompressedUnmappedSizeOfBlock);
 //
-//    return compressedSizeOfBlock;
-//}
-//
-//void QualEncoder::loadFastaReference(const std::string &rname)
-//{
-//    if (rname.empty() == true) {
-//        throwErrorException("rname is empty");
-//    }
-//
-//    if (fastaReferences.empty() == true) {
-//        //LOG("Operating without FASTA reference(s) - not loading external FASTA reference");
-//        referenceName = rname;
-//        reference = "dummy";
-//        referencePosMin = 0;
-//        referencePosMax = 0;
-//    } else {
-//        // Find FASTA reference for this RNAME
-//        LOG("Searching FASTA reference for: %s", rname.c_str());
-//        bool foundFastaReference = false;
-//
-//        for (auto const &fastaReference : fastaReferences) {
-//            if (fastaReference.header == rname) {
-//                if (foundFastaReference == true) {
-//                    throwErrorException("Found multiple FASTA references");
-//                }
-//                foundFastaReference = true;
-//                referenceName = fastaReference.header;
-//                reference = fastaReference.sequence;
-//                referencePosMin = 0;
-//                referencePosMax = (uint32_t)reference.size() - 1;
-//            }
-//        }
-//
-//        if (foundFastaReference == true) {
-//            LOG("Found FASTA reference %s with loci %d-%d", referenceName.c_str(), referencePosMin, referencePosMax);
-//        } else {
-//            throwErrorException("Could not find FASTA reference");
-//        }
-//    }
-//}
-//
+    return compressedQualSize();
+}
+
+size_t cq::QualEncoder::compressedMappedQualSize(void) const { return m_compressedMappedQualSize; }
+size_t cq::QualEncoder::compressedUnmappedQualSize(void) const { return m_compressedUnmappedQualSize; }
+size_t cq::QualEncoder::compressedQualSize(void) const { return m_compressedMappedQualSize + m_compressedUnmappedQualSize; }
+size_t cq::QualEncoder::numMappedRecords(void) const { return m_numMappedRecords; }
+size_t cq::QualEncoder::numUnmappedRecords(void) const { return m_numUnmappedRecords; }
+size_t cq::QualEncoder::numRecords(void) const { return m_numMappedRecords + m_numUnmappedRecords; }
+size_t cq::QualEncoder::uncompressedMappedQualSize(void) const { return m_uncompressedMappedQualSize; }
+size_t cq::QualEncoder::uncompressedUnmappedQualSize(void) const { return m_uncompressedUnmappedQualSize; }
+size_t cq::QualEncoder::uncompressedQualSize(void) const { return m_uncompressedMappedQualSize + m_uncompressedUnmappedQualSize; }
+
 //void QualEncoder::encodeMappedQualityValues(const MappedRecord &mappedRecord)
 //{
 //    // Iterators
@@ -618,14 +597,10 @@
 //    }
 //}
 //
-//void QualEncoder::encodeUnmappedQualityValues(const std::string &qualityValues)
-//{
-//    uqv += qualityValues;
-//
-//    if (quantizedPrintout == true) {
-//        qualUnmappedFile << qualityValues << std::endl;
-//    }
-//}
+void cq::QualEncoder::encodeUnmappedQual(const std::string &qual)
+{
+    m_unmappedQual += qual;
+}
 //
 //QualDecoder::QualDecoder(File &cqFile, File &qualFile, const CLIOptions &cliOptions)
 //    // Class scope

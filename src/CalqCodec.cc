@@ -15,6 +15,7 @@
 #include "Common/Exceptions.h"
 #include "Common/helpers.h"
 #include "IO/FASTA/FASTAFile.h"
+#include "QualCodec/QualCodec.h"
 #include <chrono>
 #include <limits>
 
@@ -23,7 +24,6 @@ cq::CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     , m_cqFile(cliOptions.outputFileName, CQFile::MODE_WRITE)
     , m_force(cliOptions.force)
     , m_polyploidy(cliOptions.polyploidy)
-    //, m_qualEncoder(cqFile, cliOptions)
     , m_referenceFileNames(cliOptions.referenceFileNames)
     , m_samFile(cliOptions.inputFileName)
 {
@@ -67,12 +67,13 @@ cq::CalqEncoder::~CalqEncoder(void)
 
 void cq::CalqEncoder::encode(void)
 {
-    auto startTime = std::chrono::steady_clock::now();
-
+    auto startTime = std::chrono::steady_clock::now();;
     size_t uncompressedSize = 0;
     size_t compressedSize = 0;
 
     compressedSize += m_cqFile.writeHeader();
+
+    QualEncoder qualEncoder(m_cqFile, m_polyploidy);
 
     while (m_samFile.readBlock(m_blockSize) != 0) {
         CQ_LOG("Training Lloyd-Max quantizer(s)");
@@ -126,7 +127,6 @@ void cq::CalqEncoder::encode(void)
 cq::CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
     : m_cqFile(cliOptions.inputFileName, CQFile::MODE_READ)
     , m_qualFile(cliOptions.outputFileName, File::MODE_WRITE)
-    //, m_qualDecoder(cqFile, qualFile, cliOptions)
     , m_sideInformationFile(cliOptions.sideInformationFileName)
 {
     // Check arguments

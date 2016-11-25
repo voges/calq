@@ -17,7 +17,6 @@
 #include "IO/CQ/CQFile.h"
 #include "IO/File.h"
 #include "IO/SAM/SAMFile.h"
-//#include "QualCodec/QualCodec.h"
 
 namespace cq {
 
@@ -33,7 +32,6 @@ private:
     CQFile m_cqFile;
     bool m_force;
     unsigned int m_polyploidy;
-    //QualEncoder m_qualEncoder;
     std::vector<std::string> m_referenceFileNames;
     SAMFile m_samFile;
 };
@@ -48,7 +46,6 @@ public:
 private:
     CQFile m_cqFile;
     File m_qualFile;
-    //QualDecoder m_qualDecoder;
     SAMFile m_sideInformationFile;
 };
 

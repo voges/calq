@@ -18,8 +18,8 @@
 cq::UniformQuantizer::UniformQuantizer(const int &minimumValue,
                                        const int &maximumValue,
                                        const unsigned int &numberOfSteps)
-    : lut()
-    , inverseLut()
+    : m_lut()
+    , m_inverseLut()
 {
     // Sanity checks
     if ((minimumValue >= maximumValue) || (numberOfSteps <= 1)) {
@@ -57,8 +57,8 @@ cq::UniformQuantizer::UniformQuantizer(const int &minimumValue,
             currentBorder = borders.front();
         }
         std::pair<int,int> curr(currentIndex, currentReconstructionValue);
-        lut.insert(std::pair<int,std::pair<int,int>>(value, curr));
-        inverseLut.insert(curr);
+        m_lut.insert(std::pair<int,std::pair<int,int>>(value, curr));
+        m_inverseLut.insert(curr);
     }
 }
 
@@ -67,44 +67,44 @@ cq::UniformQuantizer::~UniformQuantizer(void)
     // empty
 }
 
-int cq::UniformQuantizer::valueToIndex(const int &value)
+int cq::UniformQuantizer::valueToIndex(const int &value) const
 {
-    if (lut.find(value) == lut.end()) {
+    if (m_lut.find(value) == m_lut.end()) {
         throwErrorException("Value out of range for quantizer");
     }
 
-    return lut[value].first;
+    return m_lut.at(value).first;
 }
 
-int cq::UniformQuantizer::indexToReconstructionValue(const int &index)
+int cq::UniformQuantizer::indexToReconstructionValue(const int &index) const
 {
-    if (inverseLut.find(index) == inverseLut.end()) {
+    if (m_inverseLut.find(index) == m_inverseLut.end()) {
         throwErrorException("Quantization index not found");
     }
 
-    return inverseLut[index];
+    return m_inverseLut.at(index);
 }
 
-int cq::UniformQuantizer::valueToReconstructionValue(const int &value)
+int cq::UniformQuantizer::valueToReconstructionValue(const int &value) const
 {
-    if (lut.find(value) == lut.end()) {
+    if (m_lut.find(value) == m_lut.end()) {
         throwErrorException("Value out of range for quantizer");
     }
 
-    return lut[value].second;
+    return m_lut.at(value).second;
 }
 
 void cq::UniformQuantizer::print(void) const
 {
     std::cout << "LUT:" << std::endl;
-    for (auto const &lutEntry : lut) {
+    for (auto const &lutEntry : m_lut) {
         std::cout << "  " << lutEntry.first << ": ";
         std::cout << lutEntry.second.first << ",";
         std::cout << lutEntry.second.second << std::endl;
     }
 
     std::cout << "Inverse LUT:" << std::endl;
-    for (auto const &inverseLutEntry : inverseLut) {
+    for (auto const &inverseLutEntry : m_inverseLut) {
         std::cout << "  " << inverseLutEntry.first << ": ";
         std::cout << inverseLutEntry.second << std::endl;
     }

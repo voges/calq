@@ -47,7 +47,7 @@ static unsigned int combinationsWithRepetitions(std::vector<std::string> &genoty
     return count;
 }
 
-Genotyper::Genotyper(const unsigned int &polyploidy, 
+cq::Genotyper::Genotyper(const unsigned int &polyploidy, 
                      const unsigned int &numQuantizers,
                      const unsigned int &quantizerIdxMin,
                      const unsigned int &quantizerIdxMax,
@@ -68,12 +68,12 @@ Genotyper::Genotyper(const unsigned int &polyploidy,
     initLikelihoods();
 }
 
-Genotyper::~Genotyper(void)
+cq::Genotyper::~Genotyper(void)
 {
     // empty
 }
 
-void Genotyper::initLikelihoods(void)
+void cq::Genotyper::initLikelihoods(void)
 {
     // Init map containing the allele likelihoods
     for (auto const &allele : alleleAlphabet) {
@@ -90,7 +90,7 @@ void Genotyper::initLikelihoods(void)
     }
 }
 
-void Genotyper::resetLikelihoods(void)
+void cq::Genotyper::resetLikelihoods(void)
 {
     for (auto &genotypeLikelihood : genotypeLikelihoods) {
         genotypeLikelihood.second = 0.0;
@@ -101,7 +101,7 @@ void Genotyper::resetLikelihoods(void)
     }
 }
 
-void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotides,
+void cq::Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotides,
                                            const std::string &observedQualityValues)
 {
     resetLikelihoods();
@@ -155,7 +155,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &observedNucleotide
     }
 }
 
-double Genotyper::computeEntropy(const std::string &observedNucleotides,
+double cq::Genotyper::computeEntropy(const std::string &observedNucleotides,
                                  const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
@@ -179,7 +179,7 @@ double Genotyper::computeEntropy(const std::string &observedNucleotides,
     return entropy;
 }
 
-int Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
+int cq::Genotyper::computeQuantizerIndex(const std::string &observedNucleotides,
                                      const std::string &observedQualityValues)
 {
     const size_t depth = observedNucleotides.length();
