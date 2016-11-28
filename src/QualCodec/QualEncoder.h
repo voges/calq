@@ -1,6 +1,5 @@
-/** @file QualCodec.h
- *  @brief This file contains the definitions of the QualEncoder and
- *         QualDecoder classes.
+/** @file QualEncoder.h
+ *  @brief This file contains the definition of the QualEncoder class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -10,12 +9,13 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef CQ_QUALCODEC_H
-#define CQ_QUALCODEC_H
+#ifndef CQ_QUALENCODER_H
+#define CQ_QUALENCODER_H
 
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
+#include "QualCodec/Pileup.h"
 //#include "QualCodec/UniformQuantizer.h"
 #include <chrono>
 #include <deque>
@@ -24,11 +24,11 @@ namespace cq {
 
 class QualEncoder {
 public:
-    const unsigned int QUANTIZER_STEPS_MIN = 2;
-    const unsigned int QUANTIZER_STEPS_MAX = 8;
-    const unsigned int NUM_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
-    const unsigned int QUANTIZER_IDX_MIN = 0;
-    const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
+    static const unsigned int QUANTIZER_STEPS_MIN = 2;
+    static const unsigned int QUANTIZER_STEPS_MAX = 8;
+    static const unsigned int NUM_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
+    static const unsigned int QUANTIZER_IDX_MIN = 0;
+    static const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
 
 public:
     explicit QualEncoder(const unsigned int &polyploidy,
@@ -59,48 +59,39 @@ private:
 
 private:
     // Timekeeping
-    std::chrono::time_point<std::chrono::steady_clock> m_blockStartTime;
-    std::chrono::time_point<std::chrono::steady_clock> m_blockStopTime;
+    std::chrono::time_point<std::chrono::steady_clock> blockStartTime_;
+    std::chrono::time_point<std::chrono::steady_clock> blockStopTime_;
 
     // Sizes & counters
-    size_t m_compressedMappedQualSize;
-    size_t m_compressedUnmappedQualSize;
-    size_t m_numMappedRecords;
-    size_t m_numUnmappedRecords;
-    size_t m_uncompressedMappedQualSize;
-    size_t m_uncompressedUnmappedQualSize;
+    size_t compressedMappedQualSize_;
+    size_t compressedUnmappedQualSize_;
+    size_t numMappedRecords_;
+    size_t numUnmappedRecords_;
+    size_t uncompressedMappedQualSize_;
+    size_t uncompressedUnmappedQualSize_;
 
     // Buffers
-    std::string m_unmappedQual;
-    std::deque<int> m_mappedQuantizerIndices;
-    uint32_t m_mappedQuantizerIndicesPosMin;
-    uint32_t m_mappedQuantizerIndicesPosMax;
-    std::deque<int> m_mappedQualIndices;
+    std::string m_unmappedQual_
+    std::deque<int> mappedQuantizerIndices_;
+    uint32_t mappedQuantizerIndicesPosMin_;
+    uint32_t mappedQuantizerIndicesPosMax_;
+    std::deque<int> mappedQualIndices_;
 
     // Pileup
-    std::deque<std::string> m_seqPileup;
-    std::deque<std::string> m_qualPileup;
-    uint32_t m_pileupPosMin;
-    uint32_t m_pileupPosMax;
+    PileupQueue pileupQueue_;
 
     // Genotyper
-    Genotyper m_genotyper;
+    Genotyper genotyper_;
 
     // Quantizers
-    //std::map<int,Quantizer> m_quantizers;
+    //std::map<int,Quantizer> quantizers_;
 
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded
-    std::deque<SAMRecord> m_samRecordQueue;
-};
-
-class QualDecoder {
-public:
-   explicit QualDecoder(void);
-   ~QualDecoder(void);
+    std::deque<SAMRecord> samRecordQueue_;
 };
 
 }
 
-#endif // CQ_QUALCODEC_H
+#endif // CQ_QUALENCODER_H
 

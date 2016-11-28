@@ -166,7 +166,7 @@ void cq::SAMRecord::printShort(void) const
 
 void cq::SAMRecord::printSeqWithPositionOffset(void) const
 {
-    printf("%6d-%6d|", posMin, posMax);
+    printf("%s %6d-%6d|", rname.c_str(), posMin, posMax);
     for (unsigned int i = 0; i < posMin; i++) { printf(" "); }
     printf("%s\n", seq.c_str());
 }

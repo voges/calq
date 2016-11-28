@@ -13,7 +13,8 @@
  *              on Windows) (voges)
  */
 
-#include "CalqCodec.h"
+#include "CalqEncoder.h"
+#include "CalqDecoder.h"
 #include "cmake_config.h"
 #include "Common/CLIOptions.h"
 #include "Common/Exceptions.h"

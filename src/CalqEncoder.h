@@ -1,6 +1,5 @@
-/** @file CalqCodec.h
- *  @brief This file contains the definitions of the CalqEncoder and
- *         CalqDecoder classes.
+/** @file CalqEncoder.h
+ *  @brief This file contains the definition of the CalqEncoder class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
@@ -10,12 +9,11 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#ifndef CQ_CALQCODEC_H
-#define CQ_CALQCODEC_H
+#ifndef CQ_CALQENCODER_H
+#define CQ_CALQENCODER_H
 
 #include "Common/CLIOptions.h"
 #include "IO/CQ/CQFile.h"
-#include "IO/File.h"
 #include "IO/SAM/SAMFile.h"
 
 namespace cq {
@@ -35,20 +33,7 @@ private:
     SAMFile m_samFile;
 };
 
-class CalqDecoder {
-public:
-    explicit CalqDecoder(const CLIOptions &cliOptions);
-    ~CalqDecoder(void);
-
-    void decode(void);
-
-private:
-    CQFile m_cqFile;
-    File m_qualFile;
-    SAMFile m_sideInformationFile;
-};
-
 }
 
-#endif // CQ_CALQCODEC_H
+#endif // CQ_CALQENCODER_H
 
