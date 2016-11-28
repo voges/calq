@@ -23,19 +23,29 @@ public:
     explicit Pileup(void);
     ~Pileup(void);
 
+    bool empty(void) const;
+    void clear(void);
+
     void print(void) const;
+    void printQual(void) const;
+    void printSeq(void) const;
 
 public:
-    std::string seq;
+    uint32_t pos; // 0-based position of this pileup
     std::string qual;
+    std::string seq;
 };
 
 class PileupQueue {
+    friend class SAMRecord;
+
 public:
     explicit PileupQueue(void);
     ~PileupQueue(void);
 
+    bool empty(void) const;
     void clear(void);
+    const Pileup & front(void) const;
     size_t length(void) const;
     uint32_t posMax(void) const;
     uint32_t posMin(void) const;
@@ -43,10 +53,8 @@ public:
     void setPosMax(const uint32_t &posMax);
     void setPosMin(const uint32_t &posMin);
 
-public:
-    std::deque<Pileup> pileups;
-
 private:
+    std::deque<Pileup> pileups_;
     uint32_t posMax_;
     uint32_t posMin_;
 };

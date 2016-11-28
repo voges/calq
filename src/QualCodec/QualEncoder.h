@@ -13,9 +13,9 @@
 #define CQ_QUALENCODER_H
 
 #include "IO/CQ/CQFile.h"
+#include "IO/SAM/Pileup.h"
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
-#include "QualCodec/Pileup.h"
 //#include "QualCodec/UniformQuantizer.h"
 #include <chrono>
 #include <deque>
@@ -27,8 +27,8 @@ public:
     static const unsigned int QUANTIZER_STEPS_MIN = 2;
     static const unsigned int QUANTIZER_STEPS_MAX = 8;
     static const unsigned int NUM_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
-    static const unsigned int QUANTIZER_IDX_MIN = 0;
-    static const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
+    const unsigned int QUANTIZER_IDX_MIN = 0;
+    const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
 
 public:
     explicit QualEncoder(const unsigned int &polyploidy,
@@ -71,7 +71,7 @@ private:
     size_t uncompressedUnmappedQualSize_;
 
     // Buffers
-    std::string m_unmappedQual_
+    std::string unmappedQual_;
     std::deque<int> mappedQuantizerIndices_;
     uint32_t mappedQuantizerIndicesPosMin_;
     uint32_t mappedQuantizerIndicesPosMax_;

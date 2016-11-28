@@ -12,6 +12,7 @@
 #ifndef CQ_SAMRECORD_H
 #define CQ_SAMRECORD_H
 
+#include "IO/SAM/Pileup.h"
 #include <deque>
 #include <inttypes.h>
 #include <string>
@@ -26,10 +27,7 @@ public:
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);
 
-    void extractPileup(const uint32_t &pileupPosMin,
-                       const uint32_t &pileupPosMax,
-                       std::deque<std::string> &seqPileup,
-                       std::deque<std::string> &qualPileup) const;
+    void addToPileupQueue(PileupQueue &pileupQueue) const;
 
     bool isMapped(void) const;
     void printLong(void) const;

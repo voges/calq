@@ -10,12 +10,13 @@
  *  YYYY-MM-DD: What (who)
  */
 
-#include "QualCodec/Pileup.h"
+#include "IO/SAM/Pileup.h"
 #include "Common/Exceptions.h"
 
 cq::Pileup::Pileup(void)
-    : seq("")
+    : pos(0)
     , qual("")
+    , seq("")
 {
     // empty
 }
@@ -25,14 +26,38 @@ cq::Pileup::~Pileup(void)
     // empty
 }
 
+bool cq::Pileup::empty(void) const
+{
+    if (seq.empty() == true)
+        return true;
+    return false;
+}
+
+void cq::Pileup::clear(void)
+{
+    pos = 0;
+    qual = "";
+    seq = "";
+}
+
 void cq::Pileup::print(void) const
 {
-    printf("seq: %s\n", seq.c_str());
+    printQual();
+    printSeq();
+}
+
+void cq::Pileup::printQual(void) const
+{
     printf("qual: %s\n", qual.c_str());
 }
 
+void cq::Pileup::printSeq(void) const
+{
+    printf("seq: %s\n", seq.c_str());
+}
+
 cq::PileupQueue::PileupQueue(void)
-    : pileups()
+    : pileups_()
     , posMax_(0)
     , posMin_(0)
 {
@@ -44,11 +69,23 @@ cq::PileupQueue::~PileupQueue(void)
     // empty
 }
 
+bool cq::PileupQueue::empty(void) const
+{
+    if (pileups_.empty() == true)
+        return true;
+    return false;
+}
+
 void cq::PileupQueue::clear(void)
 {
-    pileups.clear();
+    pileups_.clear();
     posMax_ = 0;
     posMin_ = 0;
+}
+
+const cq::Pileup& cq::PileupQueue::front(void) const
+{
+    return pileups_.front();
 }
 
 size_t cq::PileupQueue::length(void) const
@@ -68,18 +105,26 @@ uint32_t cq::PileupQueue::posMin(void) const
 
 void cq::PileupQueue::pop_front(void)
 {
-    pileups.pop_front();
+    pileups_.pop_front();
 }
 
 void cq::PileupQueue::setPosMax(const uint32_t &posMax)
 {
-    if (posMax < posMin_) {
-        throwErrorException("posMax is smaller than posMin");
+    if (posMax <= posMax_) {
+        throwErrorException("posMax range");
     }
+
+    posMax_ = posMax;
+    pileups_.resize(length());
 }
 
 void cq::PileupQueue::setPosMin(const uint32_t &posMin)
 {
+    if (posMin <= posMin_) {
+        throwErrorException("posMin range");
+    }
 
+    for (uint32_t i = posMin_; i < posMin ; i++) { pileups_.pop_front(); } 
+    posMin_ = posMin;
 }
 

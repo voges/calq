@@ -10,31 +10,33 @@
  */
 
 #include "QualCodec/QualEncoder.h"
+#include "Common/constants.h"
 #include "Common/Exceptions.h"
-//#include "Compressors/range/range.h"
-//#include "Compressors/rle/rle.h"
+#include "Compressors/range/range.h"
+#include "Compressors/rle/rle.h"
+#include <math.h>
 //#include <chrono>
 //#include <limits>
 //#include <stdlib.h>
 //#include <string.h>
 
-static void rangeEncode(unsigned char *buffer, size_t bufferSize)
+static size_t rangeEncodeAndWrite(cq::CQFile &cqFile, std::string str)
 {
-    if (buffer == NULL) {
-        throwErrorException("buffer is NULL");
-    }
-    if (bufferSize < 1) {
-        throwErrorException("bufferSize must be greater than zero");
+    if (str.empty() == true) {
+        throwErrorException("str is empty");
     }
 
-    size_t numBlocks = (size_t)ceil((double)bufferSize / (double)MB);
-    cqFile.writeUint64(numBlocks);
+    unsigned char *buffer = (unsigned char *)str.c_str();
+    size_t bufferSize = str.length();
+
+    size_t numBlocks = (size_t)ceil((double)bufferSize / (double)1*MB);
+    size_t ret = cqFile.writeUint64(numBlocks);
 
     size_t encodedBytes = 0;
     while (encodedBytes < bufferSize) {
         unsigned int bytesToEncode = 0;
-        if ((bufferSize - encodedBytes) > MB) {
-            bytesToEncode = MB;
+        if ((bufferSize - encodedBytes) > 1*MB) {
+            bytesToEncode = 1*MB;
         } else {
             bytesToEncode = bufferSize - encodedBytes;
         }
@@ -43,18 +45,20 @@ static void rangeEncode(unsigned char *buffer, size_t bufferSize)
         unsigned char *compressed = range_compress_o1(buffer+encodedBytes, (unsigned int)bytesToEncode, &compressedSize);
 
         if (compressedSize >= bytesToEncode) {
-            compressedUnmappedSizeOfBlock += cqFile.writeUint8(0);
-            compressedUnmappedSizeOfBlock += cqFile.writeUint32(bytesToEncode);
-            compressedUnmappedSizeOfBlock += cqFile.write(buffer+encodedBytes, bytesToEncode);
+            ret += cqFile.writeUint8(0);
+            ret += cqFile.writeUint32(bytesToEncode);
+            ret += cqFile.write(buffer+encodedBytes, bytesToEncode);
         } else {
-            compressedUnmappedSizeOfBlock += cqFile.writeUint8(1);
-            compressedUnmappedSizeOfBlock += cqFile.writeUint32(compressedSize);
-            compressedUnmappedSizeOfBlock += cqFile.write(compressed, compressedSize);
+            ret += cqFile.writeUint8(1);
+            ret += cqFile.writeUint32(compressedSize);
+            ret += cqFile.write(compressed, compressedSize);
         }
 
         encodedBytes += bytesToEncode;
         free(compressed);
     }
+
+    return ret;
 }
 
 cq::QualEncoder::QualEncoder(const unsigned int &polyploidy,
@@ -63,7 +67,7 @@ cq::QualEncoder::QualEncoder(const unsigned int &polyploidy,
     : compressedMappedQualSize_(0)
     , compressedUnmappedQualSize_(0)
     , numMappedRecords_(0)
-    , numUnmappedRecords_0)
+    , numUnmappedRecords_(0)
     , uncompressedMappedQualSize_(0)
     , uncompressedUnmappedQualSize_(0)
     , unmappedQual_("")
@@ -100,39 +104,36 @@ void cq::QualEncoder::startBlock(void)
 {
     CQ_LOG("Starting block");
 
-    m_blockStartTime = std::chrono::steady_clock::now();
-    m_blockStopTime = std::chrono::steady_clock::now();
+    blockStartTime_ = std::chrono::steady_clock::now();
+    blockStopTime_ = std::chrono::steady_clock::now();
 
-    m_compressedMappedQualSize = 0;
-    m_compressedUnmappedQualSize = 0;
-    m_numMappedRecords = 0;
-    m_numUnmappedRecords = 0;
-    m_uncompressedMappedQualSize = 0;
-    m_uncompressedUnmappedQualSize = 0;
+    compressedMappedQualSize_ = 0;
+    compressedUnmappedQualSize_ = 0;
+    numMappedRecords_ = 0;
+    numUnmappedRecords_ = 0;
+    uncompressedMappedQualSize_ = 0;
+    uncompressedUnmappedQualSize_ = 0;
 
-    m_unmappedQual = "";
-    m_mappedQuantizerIndices.clear();
-    m_mappedQuantizerIndicesPosMin = std::numeric_limits<uint32_t>::max();
-    m_mappedQuantizerIndicesPosMax = std::numeric_limits<uint32_t>::min();
-    m_mappedQualIndices.clear();
+    unmappedQual_ = "";
+    mappedQuantizerIndices_.clear();
+    mappedQuantizerIndicesPosMin_ = std::numeric_limits<uint32_t>::max();
+    mappedQuantizerIndicesPosMax_ = std::numeric_limits<uint32_t>::min();
+    mappedQualIndices_.clear();
 
-    m_seqPileup.clear();
-    m_qualPileup.clear();
-    m_pileupPosMin = std::numeric_limits<uint32_t>::max();
-    m_pileupPosMax = std::numeric_limits<uint32_t>::min();
+    pileupQueue_.clear();
 
-    // nothing to be resetted for m_genotyper
+    // nothing to be resetted for genotyper_
 
-    // nothing to be resetted for m_quantizers
+    // nothing to be resetted for quantizers_
 
-    m_samRecordQueue.clear();
+    samRecordQueue_.clear();
 }
 
 void cq::QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
 {
-    m_uncompressedUnmappedQualSize += samRecord.qual.length();
+    uncompressedUnmappedQualSize_ += samRecord.qual.length();
     encodeUnmappedQual(samRecord.qual);
-    m_numUnmappedRecords++;
+    numUnmappedRecords_++;
 }
 
 void cq::QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
@@ -140,36 +141,28 @@ void cq::QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     uncompressedMappedQualSize_ += samRecord.qual.length();
 
     if (numMappedRecords() == 0) {
-        m_pileupPosMin = samRecord.posMin;
-        m_mappedQuantizerIndicesPosMin = m_pileupPosMin;
+        pileupQueue_.setPosMin(samRecord.posMin);
     }
 
-    if (samRecord.posMax > m_pileupPosMax) {
-        m_pileupPosMax = samRecord.posMax;
-        size_t pileupLength = m_pileupPosMax - m_pileupPosMin + 1;
-        m_seqPileup.resize(pileupLength);
-        m_qualPileup.resize(pileupLength);
+    if (samRecord.posMax > pileupQueue_.posMax()) {
+        pileupQueue_.setPosMax(samRecord.posMax);
     }
 
-    samRecord.extractPileup(m_pileupPosMin, m_pileupPosMax, m_seqPileup, m_qualPileup);
-    m_samRecordQueue.push_back(samRecord);
+    samRecord.addToPileupQueue(pileupQueue_);
+    samRecordQueue_.push_back(samRecord);
 
-    while (m_pileupPosMin < samRecord.posMin) {
-        int k = m_genotyper.computeQuantizerIndex(m_seqPileup[0], m_qualPileup[0]);
-
-        m_mappedQuantizerIndices.push_back(k);
-        m_mappedQuantizerIndicesPosMax = m_pileupPosMin;
-        m_seqPileup.pop_front();
-        m_qualPileup.pop_front();
-        m_pileupPosMin++;
+    while (pileupQueue_.posMin() < samRecord.posMin) {
+        int k = genotyper_.computeQuantizerIndex(pileupQueue_.front().seq, pileupQueue_.front().qual);
+        mappedQuantizerIndices_.push_back(k);
+        pileupQueue_.pop_front();
     }
 
-    while (m_samRecordQueue.front().posMax < m_pileupPosMin) {
-        encodeMappedQual(m_samRecordQueue.front());
-        m_samRecordQueue.pop_front();
+    while (samRecordQueue_.front().posMax < pileupQueue_.posMin()) {
+        encodeMappedQual(samRecordQueue_.front());
+        samRecordQueue_.pop_front();
     }
 
-    m_numMappedRecords++;
+    numMappedRecords_++;
 }
 
 size_t cq::QualEncoder::finishAndWriteBlock(CQFile &cqFile)
@@ -177,68 +170,24 @@ size_t cq::QualEncoder::finishAndWriteBlock(CQFile &cqFile)
     CQ_LOG("Finishing and writing block");
 
     // Compute all remaining quantizers
-    while (m_pileupPosMin <= m_pileupPosMax) {
-        int k = m_genotyper.computeQuantizerIndex(m_seqPileup[0], m_qualPileup[0]);
-
-        m_mappedQuantizerIndices.push_back(k);
-        m_mappedQuantizerIndicesPosMax = m_pileupPosMin;
-        m_seqPileup.pop_front();
-        m_qualPileup.pop_front();
-        m_pileupPosMin++;
+    while (pileupQueue_.posMin() <= pileupQueue_.posMax()) {
+        int k = genotyper_.computeQuantizerIndex(pileupQueue_.front().seq, pileupQueue_.front().qual);
+        mappedQuantizerIndices_.push_back(k);
+        pileupQueue_.pop_front();
     }
 
     // Process all remaining records from queue
-    while (m_samRecordQueue.empty() == false) {
-        encodeMappedQual(m_samRecordQueue.front());
-        m_samRecordQueue.pop_front();
+    while (samRecordQueue_.empty() == false) {
+        encodeMappedQual(samRecordQueue_.front());
     }
 
 //    // Write block number and numbers of records to output file
 //    compressedMappedSizeOfBlock += cqFile.writeUint64(numBlocks);
 //    compressedMappedSizeOfBlock += cqFile.writeUint64(numRecordsInBlock);
-    m_compressedMappedQualSize += cqFile.writeUint64(m_numMappedRecords);
+    compressedMappedQualSize_ += cqFile.writeUint64(numMappedRecords_);
 //    compressedMappedSizeOfBlock += cqFile.writeUint64(numUnmappedRecordsInBlock);
 //
-    // RLE and range encoding for quantizer indices
-    //std::cout << "Quantizer indices: " << qi << std::endl;
-    unsigned char *qiBuffer = (unsigned char *)qi.c_str();
-    size_t qiBufferSize = qi.length();
-    if (qiBufferSize > 0) {
-        size_t qiRLESize = 0;
-        unsigned char *qiRLE = rle_encode(qiBuffer, qiBufferSize, &qiRLESize, QUANTIZER_NUM, (unsigned char)'0');
 
-       size_t numQiBlocks = (size_t)ceil((double)qiRLESize / (double)MB);
-       compressedMappedSizeOfBlock += cqFile.writeUint64(numQiBlocks);
-
-       size_t encodedQiBytes = 0;
-       while (encodedQiBytes < qiRLESize) {
-           unsigned int bytesToEncode = 0;
-           if ((qiRLESize - encodedQiBytes) > MB) {
-               bytesToEncode = MB;
-           } else {
-               bytesToEncode = qiRLESize - encodedQiBytes;
-           }
-
-           unsigned int qiRangeSize = 0;
-           unsigned char *qiRange = range_compress_o1(qiRLE+encodedQiBytes, (unsigned int)bytesToEncode, &qiRangeSize);
-
-           if (qiRangeSize >= bytesToEncode) {
-               compressedMappedSizeOfBlock += cqFile.writeUint8(0);
-               compressedMappedSizeOfBlock += cqFile.writeUint32(bytesToEncode);
-               compressedMappedSizeOfBlock += cqFile.write(qiRLE+encodedQiBytes, bytesToEncode);
-           } else {
-               compressedMappedSizeOfBlock += cqFile.writeUint8(1);
-               compressedMappedSizeOfBlock += cqFile.writeUint32(qiRangeSize);
-               compressedMappedSizeOfBlock += cqFile.write(qiRange, qiRangeSize);
-           }
-
-           encodedQiBytes += bytesToEncode;
-           free(qiRange);
-       }
-       free(qiRLE);
-    } else {
-        compressedMappedSizeOfBlock += cqFile.writeUint64(0);
-    }
 //
 //    // RLE and range encoding for quality value indices
 //    //std::cout << "Quality value indices: " << qvi << std::endl;
@@ -326,31 +275,11 @@ size_t cq::QualEncoder::finishAndWriteBlock(CQFile &cqFile)
 //    numBlocks++;
 //
 //    // Take time
-    m_blockStopTime = std::chrono::steady_clock::now();
-    auto diffTime = m_blockStopTime - m_blockStartTime;
+    blockStopTime_ = std::chrono::steady_clock::now();
+    auto diffTime = blockStopTime_ - blockStartTime_;
     auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
     auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-//
-//    // Print statistics for this block
-//    if (verbose == true) {
-//        LOG("Block statistics:");
-//        LOG("  Block number:       %9zu", (numBlocks-1));
-//        LOG("  Uncompressed size:  %9zu", uncompressedSizeOfBlock);
-//        LOG("    Mapped:           %9zu", uncompressedMappedSizeOfBlock);
-//        LOG("    Unmapped:         %9zu", uncompressedUnmappedSizeOfBlock);
-//        LOG("  Compressed size:    %9zu", compressedSizeOfBlock);
-//        LOG("    Mapped:           %9zu", compressedMappedSizeOfBlock);
-//        LOG("    Unmapped:         %9zu", compressedUnmappedSizeOfBlock);
-//        LOG("  Records:            %9zu", numRecordsInBlock);
-//        LOG("    Mapped:           %9zu", numMappedRecordsInBlock);
-//        LOG("    Unmapped:         %9zu", numUnmappedRecordsInBlock);
-//        LOG("  Compression ratio:  %12.2f%%", (double)compressedSizeOfBlock*100/(double)uncompressedSizeOfBlock);
-//        LOG("    Mapped:           %12.2f%%", (double)compressedMappedSizeOfBlock*100/(double)uncompressedMappedSizeOfBlock);
-//        LOG("    Unmapped:         %12.2f%%", (double)compressedUnmappedSizeOfBlock*100/(double)uncompressedUnmappedSizeOfBlock);
-//        LOG("  Compression factor: %12.2f", (double)uncompressedSizeOfBlock/(double)compressedSizeOfBlock);
-//        LOG("    Mapped:           %12.2f", (double)uncompressedMappedSizeOfBlock/(double)compressedMappedSizeOfBlock);
-//        LOG("    Unmapped:         %12.2f", (double)uncompressedUnmappedSizeOfBlock/(double)compressedUnmappedSizeOfBlock);
-//    }
+
 //
 //    LOG("Finished block %zu (contains %zu record(s))", (numBlocks-1), numRecordsInBlock);
     CQ_LOG("Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
@@ -385,15 +314,15 @@ void cq::QualEncoder::printBlockStatistics(void) const
     CQ_LOG("    Unmapped: %.4f", ((double)compressedUnmappedQualSize() * 8)/(double)uncompressedUnmappedQualSize());
 }
 
-size_t cq::QualEncoder::compressedMappedQualSize(void) const { return m_compressedMappedQualSize; }
-size_t cq::QualEncoder::compressedUnmappedQualSize(void) const { return m_compressedUnmappedQualSize; }
-size_t cq::QualEncoder::compressedQualSize(void) const { return m_compressedMappedQualSize + m_compressedUnmappedQualSize; }
-size_t cq::QualEncoder::numMappedRecords(void) const { return m_numMappedRecords; }
-size_t cq::QualEncoder::numUnmappedRecords(void) const { return m_numUnmappedRecords; }
-size_t cq::QualEncoder::numRecords(void) const { return m_numMappedRecords + m_numUnmappedRecords; }
-size_t cq::QualEncoder::uncompressedMappedQualSize(void) const { return m_uncompressedMappedQualSize; }
-size_t cq::QualEncoder::uncompressedUnmappedQualSize(void) const { return m_uncompressedUnmappedQualSize; }
-size_t cq::QualEncoder::uncompressedQualSize(void) const { return m_uncompressedMappedQualSize + m_uncompressedUnmappedQualSize; }
+size_t cq::QualEncoder::compressedMappedQualSize(void) const { return compressedMappedQualSize_; }
+size_t cq::QualEncoder::compressedUnmappedQualSize(void) const { return compressedUnmappedQualSize_; }
+size_t cq::QualEncoder::compressedQualSize(void) const { return compressedMappedQualSize_ + compressedUnmappedQualSize_; }
+size_t cq::QualEncoder::numMappedRecords(void) const { return numMappedRecords_; }
+size_t cq::QualEncoder::numUnmappedRecords(void) const { return numUnmappedRecords_; }
+size_t cq::QualEncoder::numRecords(void) const { return numMappedRecords_ + numUnmappedRecords_; }
+size_t cq::QualEncoder::uncompressedMappedQualSize(void) const { return uncompressedMappedQualSize_; }
+size_t cq::QualEncoder::uncompressedUnmappedQualSize(void) const { return uncompressedUnmappedQualSize_; }
+size_t cq::QualEncoder::uncompressedQualSize(void) const { return uncompressedMappedQualSize_ + uncompressedUnmappedQualSize_; }
 
 void cq::QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
@@ -464,6 +393,6 @@ void cq::QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 
 void cq::QualEncoder::encodeUnmappedQual(const std::string &qual)
 {
-    m_unmappedQual += qual;
+    unmappedQual_ += qual;
 }
 
