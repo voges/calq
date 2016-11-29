@@ -15,19 +15,23 @@
 #include <limits.h>
 
 cq::File::File(void)
-    : m_fp(NULL)
-    , m_fsize(0)
-    , m_isOpen(false)
-    , m_mode(File::MODE_READ)
+    : fp_(NULL)
+    , fsize_(0)
+    , isOpen_(false)
+    , mode_(File::MODE_READ)
+    , nrReadBytes_(0)
+    , nrWrittenBytes_(0)
 {
     // empty
 }
 
 cq::File::File(const std::string &path, const Mode &mode)
-    : m_fp(NULL)
-    , m_fsize(0)
-    , m_isOpen(false)
-    , m_mode(mode)
+    : fp_(NULL)
+    , fsize_(0)
+    , isOpen_(false)
+    , mode_(mode)
+    , nrReadBytes_(0)
+    , nrWrittenBytes_(0)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -46,47 +50,47 @@ void cq::File::open(const std::string &path, const Mode &mode)
     if (path.empty() == true) {
         throwErrorException("path is empty");
     }
-    if (m_fp != NULL) { 
+    if (fp_ != NULL) { 
         throwErrorException("File pointer already in use");
     }
 
     const char *m;
     if (mode == MODE_READ) {
         m = "rb";
-        m_mode = mode;
+        mode_ = mode;
     } else if (mode == MODE_WRITE) {
         m = "wb";
-        m_mode = mode;
+        mode_ = mode;
     } else {
         throwErrorException("Unkown mode");
     }
 
 #ifdef CQ_OS_WINDOWS
-    int err = fopen_s(&m_fp, path.c_str(), m);
+    int err = fopen_s(&fp_, path.c_str(), m);
     if (err != 0) {
         throwErrorException("Failed to open file");
     }
 #else
-    m_fp = fopen(path.c_str(), m);
-    if (m_fp == NULL) {
+    fp_ = fopen(path.c_str(), m);
+    if (fp_ == NULL) {
         throwErrorException("Failed to open file");
     }
 #endif
 
     // Compute file size
-    fseek(m_fp, 0, SEEK_END);
-    m_fsize = ftell(m_fp);
-    fseek(m_fp, 0, SEEK_SET);
+    fseek(fp_, 0, SEEK_END);
+    fsize_ = ftell(fp_);
+    fseek(fp_, 0, SEEK_SET);
 
-    m_isOpen = true;
+    isOpen_ = true;
 }
 
 void cq::File::close(void) 
 {
-    if (m_isOpen == true) {
-        if (m_fp != NULL) {
-            fclose(m_fp);
-            m_fp = NULL;
+    if (isOpen_ == true) {
+        if (fp_ != NULL) {
+            fclose(fp_);
+            fp_ = NULL;
         } else {
             throwErrorException("Failed to close file");
         }
@@ -95,7 +99,7 @@ void cq::File::close(void)
 
 void cq::File::advance(const size_t &offset)
 {
-    int ret = fseek(m_fp, (long int)offset, SEEK_CUR);
+    int ret = fseek(fp_, (long int)offset, SEEK_CUR);
     if (ret != 0) {
         throwErrorException("fseek failed");
     }
@@ -103,13 +107,13 @@ void cq::File::advance(const size_t &offset)
 
 bool cq::File::eof(void) const
 {
-    int eof = feof(m_fp);
+    int eof = feof(fp_);
     return eof != 0 ? true : false;
 }
 
 void * cq::File::handle(void) const
 {
-    return m_fp;
+    return fp_;
 }
 
 void cq::File::seek(const size_t &pos)
@@ -117,7 +121,7 @@ void cq::File::seek(const size_t &pos)
     if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
     }
-    int ret = fseek(m_fp, (long)pos, SEEK_SET);
+    int ret = fseek(fp_, (long)pos, SEEK_SET);
     if (ret != 0) {
         throwErrorException("fseek failed");
     }
@@ -125,37 +129,74 @@ void cq::File::seek(const size_t &pos)
 
 size_t cq::File::size(void) const
 {
-    return m_fsize;
+    return fsize_;
 }
 
 size_t cq::File::tell(void) const
 {
-    long int offset = ftell(m_fp);
+    long int offset = ftell(fp_);
     if (offset == -1) {
         throwErrorException("ftell failed");
     }
     return offset;
 }
 
+size_t cq::File::nrReadBytes(void) const
+{
+    if (mode_ != MODE_READ) {
+        throwErrorException("File is not open in read mode");
+    }
+    return nrReadBytes_;
+}
+
+size_t cq::File::nrWrittenBytes(void) const
+{
+    if (mode_ != MODE_WRITE) {
+        throwErrorException("File is not open in write mode");
+    }
+    return nrWrittenBytes_;
+}
+
 size_t cq::File::read(void *buffer, const size_t &size) 
 {
+    if (buffer == NULL) {
+        throwErrorException("buffer is NULL");
+    }
     if (size == 0) {
         throwErrorException("Attempted to read zero bytes");
     }
-    return fread(buffer, 1, size, m_fp); 
+    size_t ret = fread(buffer, 1, size, fp_);
+    if (ret != size) {
+        throwErrorException("fread failed");
+    }
+    nrReadBytes_ += ret;
+    return ret; 
 }
 
 size_t cq::File::write(void *buffer, const size_t &size) 
 {
+    if (buffer == NULL) {
+        throwErrorException("buffer is NULL");
+    }
     if (size == 0) {
         throwErrorException("Attempted to write zero bytes");
     }
-    return fwrite(buffer, 1, size, m_fp); 
+    size_t ret = fwrite(buffer, 1, size, fp_);
+    if (ret != size) {
+        throwErrorException("fread failed");
+    }
+    nrWrittenBytes_ += ret;
+    return ret;
 }
 
 size_t cq::File::readByte(unsigned char *byte)
 {
-    return fread(byte, 1, 1, m_fp);
+    size_t ret = fread(byte, 1, 1, fp_);
+    if (ret != sizeof(unsigned char)) {
+        throwErrorException("fread failed");
+    }
+    nrReadBytes_++;
+    return ret;
 }
 
 size_t cq::File::readUint8(uint8_t *byte)
@@ -235,10 +276,12 @@ size_t cq::File::readUint64(uint64_t *qword)
 
 size_t cq::File::writeByte(const unsigned char &byte)
 {
-    if (fwrite(&byte, 1, 1, m_fp) != 1) {
+    size_t ret = fwrite(&byte, 1, 1, fp_);
+    if (ret != sizeof(unsigned char)) {
         throwErrorException("fwrite failed");
     }
-    return 1;
+    nrWrittenBytes_++;
+    return ret;
 }
 
 size_t cq::File::writeUint8(const uint8_t &byte)

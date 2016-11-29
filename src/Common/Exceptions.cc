@@ -13,7 +13,7 @@
 #include "Common/Exceptions.h"
 
 cq::Exception::Exception(const std::string &msg)
-    : msg(msg)
+    : msg_(msg)
 {
     // empty
 }
@@ -25,11 +25,11 @@ cq::Exception::~Exception(void) throw ()
 
 std::string cq::Exception::getMessage(void) const 
 {
-    return msg;
+    return msg_;
 }
 
 const char * cq::Exception::what(void) const throw() 
 {
-    return msg.c_str();
+    return msg_.c_str();
 }
 

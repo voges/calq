@@ -15,6 +15,8 @@
 
 cq::CQFile::CQFile(const std::string &path, const Mode &mode)
     : File(path, mode)
+    , nrReadHeaderBytes_(0)
+    , nrWrittenHeaderBytes_(0)
 {
     // Check arguments
     if (path.empty() == true) {
@@ -27,8 +29,28 @@ cq::CQFile::~CQFile(void)
     //empty 
 }
 
+size_t cq::CQFile::nrReadHeaderBytes(void) const
+{
+    if (mode_ != MODE_READ) {
+        throwErrorException("File is not open in read mode");
+    }
+    return nrReadHeaderBytes_;
+}
+
+size_t cq::CQFile::nrWrittenHeaderBytes(void) const
+{
+    if (mode_ != MODE_WRITE) {
+        throwErrorException("File is not open in write mode");
+    }
+    return nrWrittenHeaderBytes_;
+}
+
 size_t cq::CQFile::readHeader(size_t *blockSize)
 {
+    if (blockSize == nullptr) {
+        throwErrorException("Received nullptr as argument");
+    }
+
     size_t ret = 0;
 
     char magic[MAGIC_LEN];
@@ -39,16 +61,22 @@ size_t cq::CQFile::readHeader(size_t *blockSize)
 
     ret += readUint64((uint64_t *)blockSize);
 
+    nrReadHeaderBytes_ += ret;
     return ret;
 }
 
 size_t cq::CQFile::writeHeader(const size_t &blockSize)
 {
+    if (blockSize == 0) {
+        throwErrorException("blockSize must be greater than zero");
+    }
+
     size_t ret = 0;
 
     ret += write((char *)MAGIC, MAGIC_LEN);
     ret += writeUint64((uint64_t)blockSize);
 
+    nrWrittenHeaderBytes_ += ret;
     return ret;
 }
 

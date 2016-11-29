@@ -26,11 +26,11 @@ public:
     void encode(void);
 
 private:
-    size_t m_blockSize;
-    CQFile m_cqFile;
-    unsigned int m_polyploidy;
-    std::vector<std::string> m_referenceFileNames;
-    SAMFile m_samFile;
+    size_t blockSize_;
+    CQFile cqFile_;
+    unsigned int polyploidy_;
+    std::vector<std::string> referenceFileNames_;
+    SAMFile samFile_;
 };
 
 }

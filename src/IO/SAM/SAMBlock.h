@@ -24,17 +24,17 @@ public:
     SAMBlock(void);
     ~SAMBlock(void);
 
-    size_t numMappedRecords(void) const;
-    size_t numUnmappedRecords(void) const;
-    size_t numRecords(void) const;
+    size_t nrMappedRecords(void) const;
+    size_t nrUnmappedRecords(void) const;
+    size_t nrRecords(void) const;
     void reset(void);
 
 public:
     std::deque<SAMRecord> records;
 
 private:
-    size_t m_numMappedRecords;
-    size_t m_numUnmappedRecords;
+    size_t nrMappedRecords_;
+    size_t nrUnmappedRecords_;
 };
 
 }

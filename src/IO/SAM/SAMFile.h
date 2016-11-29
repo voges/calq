@@ -23,10 +23,10 @@ public:
     SAMFile(const std::string &path, const Mode &mode = MODE_READ);
     ~SAMFile(void);
 
-    size_t numBlocksRead(void) const;
-    size_t numMappedRecordsRead(void) const;
-    size_t numUnmappedRecordsRead(void) const;
-    size_t numRecordsRead(void) const;
+    size_t nrBlocksRead(void) const;
+    size_t nrMappedRecordsRead(void) const;
+    size_t nrUnmappedRecordsRead(void) const;
+    size_t nrRecordsRead(void) const;
     size_t readBlock(const size_t &blockSize);
 
 public:
@@ -37,10 +37,10 @@ private:
     static const size_t LINE_SIZE = sizeof(char) * (1*MB);
 
 private:
-    char *m_line;
-    size_t m_numBlocksRead;
-    size_t m_numMappedRecordsRead;
-    size_t m_numUnmappedRecordsRead;
+    char *line_;
+    size_t nrBlocksRead_;
+    size_t nrMappedRecordsRead_;
+    size_t nrUnmappedRecordsRead_;
 };
 
 }

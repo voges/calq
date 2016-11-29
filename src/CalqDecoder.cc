@@ -14,11 +14,10 @@
 #include <chrono>
 
 cq::CalqDecoder::CalqDecoder(const CLIOptions &cliOptions)
-    : m_cqFile(cliOptions.inputFileName, CQFile::MODE_READ)
-    , m_qualFile(cliOptions.outputFileName, File::MODE_WRITE)
-    , m_sideInformationFile(cliOptions.sideInformationFileName)
+    : cqFile_(cliOptions.inputFileName, CQFile::MODE_READ)
+    , qualFile_(cliOptions.outputFileName, File::MODE_WRITE)
+    , sideInformationFile_(cliOptions.sideInformationFileName)
 {
-    // Check arguments
     if (cliOptions.inputFileName.empty() == true) {
         throwErrorException("cliOptions.inputFileName is empty");
     }
@@ -39,10 +38,10 @@ void cq::CalqDecoder::decode(void)
 {
     auto startTime = std::chrono::steady_clock::now();
     size_t blockSize = 0;
-    size_t compressedSize = m_cqFile.readHeader(&blockSize);
+    cqFile_.readHeader(&blockSize);
 
-    while (m_sideInformationFile.readBlock(blockSize) != 0) {
-//         for (auto const &samRecord : m_sideInformationFile.currentBlock.records) {
+    while (sideInformationFile_.readBlock(blockSize) != 0) {
+//         for (auto const &samRecord : sideInformationFile_.currentBlock.records) {
 //             // empty
 //         }
     }
@@ -56,8 +55,8 @@ void cq::CalqDecoder::decode(void)
 
     CQ_LOG("DECOMPRESSION STATISTICS");
     CQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CQ_LOG("  Decoded %zu block(s)", m_sideInformationFile.numBlocksRead());
-    CQ_LOG("  Compressed size: %zu", compressedSize);
-    CQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(compressedSize/MB))/(double)((double)diffTimeMs/1000));
+    CQ_LOG("  Decoded %zu block(s)", sideInformationFile_.nrBlocksRead());
+    CQ_LOG("  Compressed size: %zu", cqFile_.nrReadBytes());
+    CQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(cqFile_.nrReadBytes()/MB))/(double)((double)diffTimeMs/1000));
 }
 

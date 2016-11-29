@@ -27,9 +27,9 @@ public:
     void decode(void);
 
 private:
-    CQFile m_cqFile;
-    File m_qualFile;
-    SAMFile m_sideInformationFile;
+    CQFile cqFile_;
+    File qualFile_;
+    SAMFile sideInformationFile_;
 };
 
 }

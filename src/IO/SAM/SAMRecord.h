@@ -12,7 +12,7 @@
 #ifndef CQ_SAMRECORD_H
 #define CQ_SAMRECORD_H
 
-#include "IO/SAM/Pileup.h"
+#include "IO/SAM/SAMPileupDeque.h"
 #include <deque>
 #include <inttypes.h>
 #include <string>
@@ -27,7 +27,7 @@ public:
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);
 
-    void addToPileupQueue(PileupQueue &pileupQueue) const;
+    void addToPileupQueue(SAMPileupDeque &samPileupDeque) const;
 
     bool isMapped(void) const;
     void printLong(void) const;
@@ -55,7 +55,7 @@ private:
     void check(void);
 
 private:
-    bool m_mapped;
+    bool mapped_;
 };
 
 }

@@ -33,7 +33,7 @@ private:
     void parse(void);
 
 private:
-    char *m_line;
+    char *line_;
 };
 
 }

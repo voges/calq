@@ -19,13 +19,12 @@
 #include <limits>
 
 cq::CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
-    : m_blockSize(cliOptions.blockSize)
-    , m_cqFile(cliOptions.outputFileName, CQFile::MODE_WRITE)
-    , m_polyploidy(cliOptions.polyploidy)
-    , m_referenceFileNames(cliOptions.referenceFileNames)
-    , m_samFile(cliOptions.inputFileName)
+    : blockSize_(cliOptions.blockSize)
+    , cqFile_(cliOptions.outputFileName, CQFile::MODE_WRITE)
+    , polyploidy_(cliOptions.polyploidy)
+    , referenceFileNames_(cliOptions.referenceFileNames)
+    , samFile_(cliOptions.inputFileName)
 {
-    // Check arguments
     if (cliOptions.blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
@@ -43,16 +42,16 @@ cq::CalqEncoder::CalqEncoder(const CLIOptions &cliOptions)
     //}
 
     // Check and, in case they are provided, get reference sequences
-    if (m_referenceFileNames.empty() == true) {
+    if (referenceFileNames_.empty() == true) {
         CQ_LOG("No reference file name(s) given - operating without reference sequence(s)");
     } else {
-        CQ_LOG("Looking in %zu reference file(s) for reference sequence(s)", m_referenceFileNames.size());
-        for (auto const &referenceFileName : m_referenceFileNames) {
-            CQ_LOG("  Parsing reference file: %s", referenceFileName.c_str());
+        CQ_LOG("Looking in %zu reference file(s) for reference sequence(s)", referenceFileNames_.size());
+        for (auto const &referenceFileName : referenceFileNames_) {
+            CQ_LOG("Parsing reference file: %s", referenceFileName.c_str());
             FASTAFile fastaFile(referenceFileName);
-            CQ_LOG("  Found %zu reference(s):", fastaFile.references.size());
+            CQ_LOG("Found %zu reference(s):", fastaFile.references.size());
             for (auto const &reference : fastaFile.references) {
-                CQ_LOG("    %s (length: %zu)", reference.first.c_str(), reference.second.length());
+                CQ_LOG("  %s (length: %zu)", reference.first.c_str(), reference.second.length());
             }
         }
     }
@@ -67,34 +66,45 @@ void cq::CalqEncoder::encode(void)
 {
     auto startTime = std::chrono::steady_clock::now();;
     size_t uncompressedSize = 0;
-    size_t compressedSize = m_cqFile.writeHeader(m_blockSize);
+    cqFile_.writeHeader(blockSize_);
 
-    while (m_samFile.readBlock(m_blockSize) != 0) {
+    while (samFile_.readBlock(blockSize_) != 0) {
+        CQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
+        CQ_LOG("  Mapped records: %zu", samFile_.currentBlock.nrMappedRecords());
+        CQ_LOG("  Unmapped records: %zu", samFile_.currentBlock.nrUnmappedRecords());
+
+        // Compute the uncompressed QV size
+        CQ_LOG("  Computing uncompressed QV size");
+        for (auto const &samRecord : samFile_.currentBlock.records) {
+            uncompressedSize += samRecord.qual.length();
+        }
+
         // Compute min and max QV for the current block
-        CQ_LOG("Computing [qMin,qMax]");
+        CQ_LOG("  Computing [qMin,qMax] for mapped records");
         int qMin = std::numeric_limits<int>::max();
         int qMax = std::numeric_limits<int>::min();
-        for (auto const &samRecord : m_samFile.currentBlock.records) {
-            uncompressedSize += samRecord.qual.length();
-            for (auto const &q : samRecord.qual) {
-                if ((int)q < qMin) qMin = q;
-                if ((int)q > qMax) qMax = q;
+        for (auto const &samRecord : samFile_.currentBlock.records) {
+            if (samRecord.isMapped() == true) {
+                for (auto const &q : samRecord.qual) {
+                    if ((int)q < qMin) qMin = q;
+                    if ((int)q > qMax) qMax = q;
+                }
             }
         }
-        CQ_LOG("[qMin,qMax] = [%d,%d]", qMin, qMax);
+        CQ_LOG("    [qMin,qMax] = [%d,%d]", qMin, qMax);
 
-        // Encode the quality values
-        CQ_LOG("Encoding quality values");
-        QualEncoder qualEncoder(m_polyploidy, qMin, qMax);
+        // Encode the QVs
+        CQ_LOG("  Encoding quality values");
+        QualEncoder qualEncoder(polyploidy_, qMin, qMax);
         qualEncoder.startBlock();
-        for (auto const &samRecord : m_samFile.currentBlock.records) {
+        for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
                 qualEncoder.addMappedRecordToBlock(samRecord);
             } else {
                 qualEncoder.addUnmappedRecordToBlock(samRecord);
             }
         }
-        qualEncoder.finishAndWriteBlock(m_cqFile);
+        qualEncoder.finishAndWriteBlock(cqFile_);
     }
 
     auto stopTime = std::chrono::steady_clock::now();
@@ -106,12 +116,12 @@ void cq::CalqEncoder::encode(void)
 
     CQ_LOG("COMPRESSION STATISTICS");
     CQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CQ_LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", m_samFile.numMappedRecordsRead(), m_samFile.numUnmappedRecordsRead(), m_samFile.numRecordsRead(), m_samFile.numBlocksRead());
+    CQ_LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", samFile_.nrMappedRecordsRead(), samFile_.nrUnmappedRecordsRead(), samFile_.nrRecordsRead(), samFile_.nrBlocksRead());
     CQ_LOG("  Uncompressed size: %zu", uncompressedSize);
-    CQ_LOG("  Compressed size: %zu", compressedSize);
-    CQ_LOG("  Compression ratio: %.2f%%", (double)compressedSize*100/(double)uncompressedSize);
-    CQ_LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)compressedSize);
-    CQ_LOG("  Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
+    CQ_LOG("  Compressed size: %zu", cqFile_.nrWrittenBytes());
+    CQ_LOG("  Compression ratio: %.2f%%", (double)cqFile_.nrWrittenBytes()*100/(double)uncompressedSize);
+    CQ_LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)cqFile_.nrWrittenBytes());
+    CQ_LOG("  Bits per quality value: %.4f", ((double)cqFile_.nrWrittenBytes() * 8)/(double)uncompressedSize);
     CQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
 }
 

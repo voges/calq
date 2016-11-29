@@ -13,8 +13,8 @@
 
 cq::SAMBlock::SAMBlock(void)
     : records()
-    , m_numMappedRecords(0)
-    , m_numUnmappedRecords(0)
+    , nrMappedRecords_(0)
+    , nrUnmappedRecords_(0)
 {
     // empty
 }
@@ -24,25 +24,25 @@ cq::SAMBlock::~SAMBlock(void)
     // empty
 }
 
-size_t cq::SAMBlock::numMappedRecords(void) const
+size_t cq::SAMBlock::nrMappedRecords(void) const
 {
-    return m_numMappedRecords;
+    return nrMappedRecords_;
 }
 
-size_t cq::SAMBlock::numUnmappedRecords(void) const
+size_t cq::SAMBlock::nrUnmappedRecords(void) const
 {
-    return m_numUnmappedRecords;
+    return nrUnmappedRecords_;
 }
 
-size_t cq::SAMBlock::numRecords(void) const
+size_t cq::SAMBlock::nrRecords(void) const
 {
-    return (m_numMappedRecords + m_numUnmappedRecords);
+    return (nrMappedRecords_ + nrUnmappedRecords_);
 }
 
 void cq::SAMBlock::reset(void)
 {
     records.clear();
-    m_numMappedRecords = 0;
-    m_numUnmappedRecords = 0;
+    nrMappedRecords_ = 0;
+    nrUnmappedRecords_ = 0;
 }
 

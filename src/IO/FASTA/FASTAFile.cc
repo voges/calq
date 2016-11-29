@@ -15,9 +15,8 @@
 
 cq::FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
     : File(path, mode)
-    , m_line(NULL)
+    , line_(NULL)
 {
-    // Check constructor arguments
     if (path.empty() == true) {
         throwErrorException("path is empty");
     }
@@ -27,7 +26,10 @@ cq::FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
 
     // Usually, lines in a FASTA file should be limited to 80 chars, so 4 KB
     // should be enough
-    m_line = (char *)malloc(LINE_SIZE);
+    line_ = (char *)malloc(LINE_SIZE);
+    if (line_ == NULL) {
+        throwErrorException("malloc failed");
+    }
 
     // Parse the complete FASTA file
     parse();
@@ -35,7 +37,7 @@ cq::FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
 
 cq::FASTAFile::~FASTAFile(void)
 {
-    free(m_line);
+    free(line_);
 }
 
 void cq::FASTAFile::parse(void)
@@ -43,14 +45,14 @@ void cq::FASTAFile::parse(void)
     std::string currentHeader("");
     std::string currentSequence("");
 
-    while (fgets(m_line, LINE_SIZE, m_fp) != NULL) {
+    while (fgets(line_, LINE_SIZE, fp_) != NULL) {
         // Trim line
-        size_t l = strlen(m_line) - 1;
-        while (l && (m_line[l] == '\r' || m_line[l] == '\n')) {
-            m_line[l--] = '\0';
+        size_t l = strlen(line_) - 1;
+        while (l && (line_[l] == '\r' || line_[l] == '\n')) {
+            line_[l--] = '\0';
         }
 
-        if (m_line[0] == '>') {
+        if (line_[0] == '>') {
             if (currentSequence.empty() == false) {
                 // We have a sequence, check if we have a header
                 if (currentHeader.empty() == true) {
@@ -70,14 +72,14 @@ void cq::FASTAFile::parse(void)
 
             // Store the header and trim it: do not take the leading '>' and
             // remove everything after the first space
-            currentHeader = m_line + 1;
+            currentHeader = line_ + 1;
             currentHeader = currentHeader.substr(0, currentHeader.find_first_of(" "));
 
             // Reset sequence
             currentSequence = "";
         }
         else {
-            currentSequence += m_line;
+            currentSequence += line_;
         }
     }
 

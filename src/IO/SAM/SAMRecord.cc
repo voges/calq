@@ -28,11 +28,11 @@ cq::SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
     , opt(fields[11])
     , posMin(0)
     , posMax(0)
-    , m_mapped(false)
+    , mapped_(false)
 {
     check();
 
-    if (m_mapped == true) {
+    if (mapped_ == true) {
         // Compute 0-based first position and 0-based last position this record
         // is mapped to on the reference used for alignment
         posMin = pos - 1;
@@ -78,20 +78,21 @@ cq::SAMRecord::~SAMRecord(void)
     // empty
 }
 
-void cq::SAMRecord::addToPileupQueue(PileupQueue &pileupQueue) const
+void cq::SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
 {
-    if (pileupQueue.empty() == true) {
-        throwErrorException("pileupQueue is empty");
+    if (samPileupDeque_.empty() == true) {
+        throwErrorException("samPileupQueue is empty");
     }
-    if ((pileupQueue.posMin() > posMin) || (pileupQueue.posMax() < posMax)) {
-        throwErrorException("pileupQueue does not overlap record");
+    if ((samPileupDeque_.posMin() > posMin) || (samPileupDeque_.posMax() < posMax)) {
+        CQ_DEBUG("pileup pos minmax: %d %d", samPileupDeque_.posMin(), samPileupDeque_.posMax());
+        throwErrorException("samPileupQueue does not overlap record");
     }
 
     size_t cigarIdx = 0;
     size_t cigarLen = cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
     size_t idx = 0;
-    size_t pileupIdx = posMin - pileupQueue.posMin();
+    size_t pileupIdx = posMin - samPileupDeque_.posMin();
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
@@ -104,8 +105,9 @@ void cq::SAMRecord::addToPileupQueue(PileupQueue &pileupQueue) const
         case '=':
         case 'X':
             for (size_t i = 0; i < opLen; i++) {
-                pileupQueue.pileups_[pileupIdx].seq += seq[idx];
-                pileupQueue.pileups_[pileupIdx].qual += qual[idx];
+                samPileupDeque_.pileups_[pileupIdx].pos = posMin + idx;
+                samPileupDeque_.pileups_[pileupIdx].seq += seq[idx];
+                samPileupDeque_.pileups_[pileupIdx].qual += qual[idx];
                 idx++; pileupIdx++;
             }
             break;
@@ -130,13 +132,13 @@ void cq::SAMRecord::addToPileupQueue(PileupQueue &pileupQueue) const
 
 bool cq::SAMRecord::isMapped(void) const
 {
-    return m_mapped;
+    return mapped_;
 }
 
 void cq::SAMRecord::printLong(void) const
 {
     printShort();
-    printf("isMapped: %d, ", m_mapped);
+    printf("isMapped: %d, ", mapped_);
     printf("posMin: %d, ", posMin);
     printf("posMax: %d\n", posMax);
 }
@@ -183,10 +185,10 @@ void cq::SAMRecord::check(void)
 
     // Check if this record is mapped
     if ((flag & 0x4) != 0) {
-        m_mapped = false;
+        mapped_ = false;
     }
     else {
-        m_mapped = true;
+        mapped_ = true;
         if (rname == "*" || pos == 0 || cigar == "*" || seq == "*" || qual == "*") {
             throwErrorException("Corrupted record");
         }

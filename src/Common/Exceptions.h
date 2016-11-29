@@ -28,7 +28,7 @@ public:
     virtual const char * what(void) const throw();
 
 protected:
-    std::string msg;
+    std::string msg_;
 };
 
 class ErrorException : public Exception {
@@ -47,23 +47,23 @@ public:
     ErrorExceptionReporter(const std::string &file, 
                            const std::string &function,
                            const int line)
-        : file(file)
-        , function(function)
-        , line(line)
+        : file_(file)
+        , function_(function)
+        , line_(line)
     {}
 
     void operator()(const std::string &msg)
     {
         //std::cerr << file << ":" << function << ":" << line << ": ";
-        std::string tmp = cq::fileBaseName(file) + ":" + function + ":" + std::to_string(line) + ": " + msg;
+        std::string tmp = cq::fileBaseName(file_) + ":" + function_ + ":" + std::to_string(line_) + ": " + msg;
         // Can use the original name here, as it is still defined
         throwErrorException(tmp);
     }
 
 private:
-    std::string file;
-    std::string function;
-    int line;
+    std::string file_;
+    std::string function_;
+    int line_;
 };
 
 }

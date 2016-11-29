@@ -21,12 +21,19 @@ public:
     CQFile(const std::string &path, const Mode &mode);
     ~CQFile(void);
 
+    size_t nrReadHeaderBytes(void) const;
+    size_t nrWrittenHeaderBytes(void) const;
+
     size_t readHeader(size_t *blockSize);
     size_t writeHeader(const size_t &blockSize);
 
 private:
     static constexpr const char *MAGIC = "CQ";
     const size_t MAGIC_LEN = 3;
+
+private:
+    size_t nrReadHeaderBytes_;
+    size_t nrWrittenHeaderBytes_;
 };
 
 }

@@ -35,6 +35,9 @@ public:
     size_t size(void) const;
     size_t tell(void) const;
 
+    size_t nrReadBytes(void) const;
+    size_t nrWrittenBytes(void) const;
+
     size_t read(void *buffer, const size_t &size);
     size_t write(void *buffer, const size_t &size);
 
@@ -51,10 +54,12 @@ public:
     size_t writeUint64(const uint64_t &qword);
 
 protected:
-    FILE *m_fp;
-    size_t m_fsize;
-    bool m_isOpen;
-    Mode m_mode;
+    FILE *fp_;
+    size_t fsize_;
+    bool isOpen_;
+    Mode mode_;
+    size_t nrReadBytes_;
+    size_t nrWrittenBytes_;
 };
 
 }

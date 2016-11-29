@@ -48,10 +48,10 @@ cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
     : File(path, mode)
     , currentBlock()
     , header("")
-    , m_line(NULL)
-    , m_numBlocksRead(0)
-    , m_numMappedRecordsRead(0)
-    , m_numUnmappedRecordsRead(0)
+    , line_(NULL)
+    , nrBlocksRead_(0)
+    , nrMappedRecordsRead_(0)
+    , nrUnmappedRecordsRead_(0)
 {
     // Check arguments
     if (path.empty() == true) {
@@ -62,21 +62,24 @@ cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
     }
 
     // 1 million chars should be enough
-    m_line = (char *)malloc(LINE_SIZE);
+    line_ = (char *)malloc(LINE_SIZE);
+    if (line_ == NULL) {
+        throwErrorException("malloc failed");
+    }
 
     // Read SAM header
     size_t fpos = tell();
     for (;;) {
         fpos = tell();
-        if (fgets(m_line, LINE_SIZE, m_fp) != NULL) {
+        if (fgets(line_, LINE_SIZE, fp_) != NULL) {
             // Trim line
-            size_t l = strlen(m_line) - 1;
-            while (l && (m_line[l] == '\r' || m_line[l] == '\n')) {
-                m_line[l--] = '\0';
+            size_t l = strlen(line_) - 1;
+            while (l && (line_[l] == '\r' || line_[l] == '\n')) {
+                line_[l--] = '\0';
             }
 
-            if (m_line[0] == '@') {
-                header += m_line;
+            if (line_[0] == '@') {
+                header += line_;
                 header += "\n";
             } else {
                 break;
@@ -93,27 +96,27 @@ cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
 
 cq::SAMFile::~SAMFile(void)
 {
-    free(m_line);
+    free(line_);
 }
 
-size_t cq::SAMFile::numBlocksRead(void) const
+size_t cq::SAMFile::nrBlocksRead(void) const
 {
-    return m_numBlocksRead;
+    return nrBlocksRead_;
 }
 
-size_t cq::SAMFile::numMappedRecordsRead() const
+size_t cq::SAMFile::nrMappedRecordsRead() const
 {
-    return m_numMappedRecordsRead;
+    return nrMappedRecordsRead_;
 }
 
-size_t cq::SAMFile::numUnmappedRecordsRead() const
+size_t cq::SAMFile::nrUnmappedRecordsRead() const
 {
-    return m_numUnmappedRecordsRead;
+    return nrUnmappedRecordsRead_;
 }
 
-size_t cq::SAMFile::numRecordsRead() const
+size_t cq::SAMFile::nrRecordsRead() const
 {
-    return (m_numMappedRecordsRead + m_numUnmappedRecordsRead);
+    return (nrMappedRecordsRead_ + nrUnmappedRecordsRead_);
 }
 
 size_t cq::SAMFile::readBlock(const size_t &blockSize)
@@ -129,16 +132,16 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
 
     for (size_t i = 0; i < blockSize; i++) {
         size_t fpos = tell();
-        if (fgets(m_line, LINE_SIZE, m_fp) != NULL) {
+        if (fgets(line_, LINE_SIZE, fp_) != NULL) {
             // Trim line
-            size_t l = strlen(m_line) - 1;
-            while (l && (m_line[l] == '\r' || m_line[l] == '\n')) {
-                m_line[l--] = '\0';
+            size_t l = strlen(line_) - 1;
+            while (l && (line_[l] == '\r' || line_[l] == '\n')) {
+                line_[l--] = '\0';
             }
 
             // Parse line and construct samRecord
             char *fields[SAMRecord::NUM_FIELDS];
-            parseLine(fields, m_line);
+            parseLine(fields, line_);
             SAMRecord samRecord(fields);
 
             if (samRecord.isMapped() == true) {
@@ -148,7 +151,7 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
                     rnamePrev = samRecord.rname;
                     posPrev = samRecord.pos;
                     currentBlock.records.push_back(samRecord);
-                    currentBlock.m_numMappedRecords++;
+                    currentBlock.nrMappedRecords_++;
                 } else {
                     // We already have a mapped record in this block
                     if (rnamePrev == samRecord.rname) {
@@ -158,33 +161,33 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
                             // the samRecord to the current block
                             posPrev = samRecord.pos;
                             currentBlock.records.push_back(samRecord);
-                            currentBlock.m_numMappedRecords++;
+                            currentBlock.nrMappedRecords_++;
                         } else {
                             throwErrorException("SAM file is not sorted");
                         }
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        CQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.numRecords(), blockSize);
+                        CQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.nrRecords(), blockSize);
                         break;
                     }
                 }
             } else {
                 currentBlock.records.push_back(samRecord);
-                currentBlock.m_numUnmappedRecords++;
+                currentBlock.nrUnmappedRecords_++;
             }
         } else {
-            CQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.numRecords(), blockSize);
+            CQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.nrRecords(), blockSize);
             break;
         }
     }
 
-    if (currentBlock.numRecords() > 0) {
-        m_numBlocksRead++;
-        m_numMappedRecordsRead += currentBlock.numMappedRecords();
-        m_numUnmappedRecordsRead += currentBlock.numUnmappedRecords();
+    if (currentBlock.nrRecords() > 0) {
+        nrBlocksRead_++;
+        nrMappedRecordsRead_ += currentBlock.nrMappedRecords();
+        nrUnmappedRecordsRead_ += currentBlock.nrUnmappedRecords();
     }
-    
-    return currentBlock.numRecords();
+
+    return currentBlock.nrRecords();
 }
 
