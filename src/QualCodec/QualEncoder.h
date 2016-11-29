@@ -16,6 +16,7 @@
 #include "IO/SAM/SAMPileupDeque.h"
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
+#include "QualCodec/Quantizer.h"
 #include <chrono>
 #include <deque>
 
@@ -23,23 +24,23 @@ namespace cq {
 
 class QualEncoder {
 public:
-    const unsigned int QUANTIZER_STEPS_MIN = 2;
-    const unsigned int QUANTIZER_STEPS_MAX = 8;
-    const unsigned int NUM_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
-    const unsigned int QUANTIZER_IDX_MIN = 0;
-    const unsigned int QUANTIZER_IDX_MAX = NUM_QUANTIZERS-1;
+    static const unsigned int QUANTIZER_STEPS_MIN = 2;
+    static const unsigned int QUANTIZER_STEPS_MAX = 3;
+    static const unsigned int NR_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
+    static const unsigned int QUANTIZER_IDX_MIN = 0;
+    static const unsigned int QUANTIZER_IDX_MAX = NR_QUANTIZERS-1;
 
 public:
     explicit QualEncoder(const unsigned int &polyploidy,
                          const int &qMin,
-                         const int &qMax);
+                         const int &qMax,
+                         const std::map<int,Quantizer> &quantizers);
     ~QualEncoder(void);
 
     void startBlock(void);
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
     size_t finishAndWriteBlock(CQFile &cqFile);
-    void printBlockStatistics(void) const;
 
     size_t compressedMappedQualSize(void) const;
     size_t compressedUnmappedQualSize(void) const;
@@ -57,8 +58,8 @@ private:
 
 private:
     // Timekeeping
-    std::chrono::time_point<std::chrono::steady_clock> blockStartTime_;
-    std::chrono::time_point<std::chrono::steady_clock> blockStopTime_;
+    std::chrono::time_point<std::chrono::steady_clock> startTime_;
+    std::chrono::time_point<std::chrono::steady_clock> stopTime_;
 
     // Sizes & counters
     size_t compressedMappedQualSize_;
@@ -83,7 +84,7 @@ private:
     Genotyper genotyper_;
 
     // Quantizers
-    //std::map<int,Quantizer> quantizers_;
+    std::map<int,Quantizer> quantizers_;
 
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded

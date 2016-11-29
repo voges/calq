@@ -21,10 +21,9 @@ namespace cq {
 class Genotyper {
 public:
     Genotyper(const unsigned int &polyploidy,
-              const unsigned int &quantizerIdxMin,
-              const unsigned int &quantizerIdxMax,
               const unsigned int &qualMin,
-              const unsigned int &qualMax);
+              const unsigned int &qualMax,
+              const unsigned int &nrQuantizers);
     ~Genotyper(void);
 
 //     void computeAdjustedQual(std::string &adjustedQual,
@@ -45,16 +44,14 @@ private:
     const size_t ALLELE_ALPHABET_SIZE = 4;
 
 private:
-    const std::vector<char> m_alleleAlphabet;
-    std::map<char,double> m_alleleLikelihoods;
-    std::vector<std::string> m_genotypeAlphabet;
-    std::map<std::string,double> m_genotypeLikelihoods;
-    const unsigned int m_numQuantizers;
-    const unsigned int m_polyploidy;
-    const unsigned int m_qualMin;
-    const unsigned int m_qualMax;
-    const unsigned int m_quantizerIdxMin;
-    const unsigned int m_quantizerIdxMax;
+    const std::vector<char> alleleAlphabet_;
+    std::map<char,double> alleleLikelihoods_;
+    std::vector<std::string> genotypeAlphabet_;
+    std::map<std::string,double> genotypeLikelihoods_;
+    const unsigned int nrQuantizers_;
+    const unsigned int polyploidy_;
+    const unsigned int qualMin_;
+    const unsigned int qualMax_;
 };
 
 }

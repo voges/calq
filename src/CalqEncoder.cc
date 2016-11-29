@@ -15,6 +15,7 @@
 #include "Common/helpers.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
+#include "QualCodec/UniformQuantizer.h"
 #include <chrono>
 #include <limits>
 
@@ -70,20 +71,12 @@ void cq::CalqEncoder::encode(void)
 
     while (samFile_.readBlock(blockSize_) != 0) {
         CQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
-        CQ_LOG("  Mapped records: %zu", samFile_.currentBlock.nrMappedRecords());
-        CQ_LOG("  Unmapped records: %zu", samFile_.currentBlock.nrUnmappedRecords());
-
-        // Compute the uncompressed QV size
-        CQ_LOG("  Computing uncompressed QV size");
-        for (auto const &samRecord : samFile_.currentBlock.records) {
-            uncompressedSize += samRecord.qual.length();
-        }
 
         // Compute min and max QV for the current block
-        CQ_LOG("  Computing [qMin,qMax] for mapped records");
         int qMin = std::numeric_limits<int>::max();
         int qMax = std::numeric_limits<int>::min();
         for (auto const &samRecord : samFile_.currentBlock.records) {
+            uncompressedSize += samRecord.qual.length();
             if (samRecord.isMapped() == true) {
                 for (auto const &q : samRecord.qual) {
                     if ((int)q < qMin) qMin = q;
@@ -91,11 +84,29 @@ void cq::CalqEncoder::encode(void)
                 }
             }
         }
-        CQ_LOG("    [qMin,qMax] = [%d,%d]", qMin, qMax);
+        CQ_LOG("[qMin,qMax] = [%d,%d]", qMin, qMax);
+
+        // Construct quantizers and store inverse quantization LUTs
+        CQ_LOG("Constructing %u quantizers and storing inverse LUTs", QualEncoder::NR_QUANTIZERS);
+        std::map<int,Quantizer> quantizers;
+        unsigned int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
+        unsigned int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
+        cqFile_.writeUint8((uint8_t)QualEncoder::NR_QUANTIZERS);
+        for (unsigned int i = 0; i < QualEncoder::NR_QUANTIZERS; i++, quantizerIdx++, quantizerSteps++) {
+            Quantizer quantizer = UniformQuantizer(qMin, qMax, quantizerSteps);
+            quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
+
+            cqFile_.writeUint8(quantizerIdx);
+            cqFile_.writeUint8(quantizerSteps);
+            for (auto const &inverseLutEntry : quantizer.inverseLut()) {
+                cqFile_.writeUint8((uint8_t)inverseLutEntry.first);
+                cqFile_.writeUint8((uint8_t)inverseLutEntry.second);
+            }
+        }
 
         // Encode the QVs
-        CQ_LOG("  Encoding quality values");
-        QualEncoder qualEncoder(polyploidy_, qMin, qMax);
+        CQ_LOG("Encoding quality values");
+        QualEncoder qualEncoder(polyploidy_, qMin, qMax, quantizers);
         qualEncoder.startBlock();
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {

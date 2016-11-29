@@ -12,28 +12,14 @@
 #ifndef CQ_UNIFORMQUANTIZER_H
 #define CQ_UNIFORMQUANTIZER_H
 
-#include <map>
-#include <string>
-#include <vector>
+#include "QualCodec/Quantizer.h"
 
 namespace cq {
 
-class UniformQuantizer {
+class UniformQuantizer : public Quantizer {
 public:
-    UniformQuantizer(const int &minimumValue,
-                     const int &maximumValue,
-                     const unsigned int &numberOfSteps);
+    UniformQuantizer(const int &valueMin, const int &valueMax, const unsigned int &nrSteps);
     ~UniformQuantizer(void);
-
-    int valueToIndex(const int &value) const;
-    int indexToReconstructionValue(const int &index) const;
-    int valueToReconstructionValue(const int &value) const;
-
-    void print(void) const;
-
-private:
-    std::map<int,std::pair<int,int>> m_lut; // value->(index,reconstructionValue)
-    std::map<int,int> m_inverseLut; // index->reconstructionValue
 };
 
 }

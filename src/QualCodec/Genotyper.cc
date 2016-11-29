@@ -41,20 +41,17 @@ static unsigned int combinationsWithRepetitions(std::vector<std::string> &genoty
 }
 
 cq::Genotyper::Genotyper(const unsigned int &polyploidy,
-                     const unsigned int &quantizerIdxMin,
-                     const unsigned int &quantizerIdxMax,
-                     const unsigned int &qualMin,
-                     const unsigned int &qualMax)
-    : m_alleleAlphabet(ALLELE_ALPHABET)
-    , m_alleleLikelihoods()
-    , m_genotypeAlphabet()
-    , m_genotypeLikelihoods()
-    , m_numQuantizers(quantizerIdxMax-quantizerIdxMin+1)
-    , m_polyploidy(polyploidy)
-    , m_qualMin(qualMin)
-    , m_qualMax(qualMax)
-    , m_quantizerIdxMin(quantizerIdxMin)
-    , m_quantizerIdxMax(quantizerIdxMax)
+                         const unsigned int &qualMin,
+                         const unsigned int &qualMax,
+                         const unsigned int &nrQuantizers)
+    : alleleAlphabet_(ALLELE_ALPHABET)
+    , alleleLikelihoods_()
+    , genotypeAlphabet_()
+    , genotypeLikelihoods_()
+    , nrQuantizers_(nrQuantizers)
+    , polyploidy_(polyploidy)
+    , qualMin_(qualMin)
+    , qualMax_(qualMax)
 {
     initLikelihoods();
 }
@@ -83,7 +80,7 @@ double cq::Genotyper::computeEntropy(const std::string &seqPileup,
     computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
 
     double entropy = 0.0;
-    for (auto &genotypeLikelihood: m_genotypeLikelihoods) {
+    for (auto &genotypeLikelihood: genotypeLikelihoods_) {
         if (genotypeLikelihood.second != 0) {
             entropy -= genotypeLikelihood.second * log(genotypeLikelihood.second);
         }
@@ -105,14 +102,14 @@ int cq::Genotyper::computeQuantizerIndex(const std::string &seqPileup,
         return -1; // computation of quantizer index not possible
     }
     if (depth == 1) {
-        return m_quantizerIdxMax; // no inference can be made, stay safe
+        return (nrQuantizers_ - 1); // no inference can be made, stay safe
     }
 
     computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
 
     double largestGenotypeLikelihood = 0.0;
     double secondLargestGenotypeLikelihood = 0.0;
-    for (auto &genotypeLikelihood : m_genotypeLikelihoods) {
+    for (auto &genotypeLikelihood : genotypeLikelihoods_) {
         if (genotypeLikelihood.second > secondLargestGenotypeLikelihood) {
             secondLargestGenotypeLikelihood = genotypeLikelihood.second;
         }
@@ -124,7 +121,7 @@ int cq::Genotyper::computeQuantizerIndex(const std::string &seqPileup,
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
 
-    return (int)((1-confidence)*(m_numQuantizers-1));
+    return (int)((1-confidence)*(nrQuantizers_-1));
 }
 
 // void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
@@ -170,27 +167,27 @@ int cq::Genotyper::computeQuantizerIndex(const std::string &seqPileup,
 void cq::Genotyper::initLikelihoods(void)
 {
     // Init map containing the allele likelihoods
-    for (auto const &allele : m_alleleAlphabet) {
-        m_alleleLikelihoods.insert(std::pair<char,double>(allele, 0.0));
+    for (auto const &allele : alleleAlphabet_) {
+        alleleLikelihoods_.insert(std::pair<char,double>(allele, 0.0));
     }
 
     // Init map containing the genotype likelihoods
     int chosen[ALLELE_ALPHABET_SIZE];
-    combinationsWithRepetitions(m_genotypeAlphabet, m_alleleAlphabet, chosen, 0, m_polyploidy, 0, ALLELE_ALPHABET_SIZE);
+    combinationsWithRepetitions(genotypeAlphabet_, alleleAlphabet_, chosen, 0, polyploidy_, 0, ALLELE_ALPHABET_SIZE);
 
-    CQ_LOG("Initializing genotype alphabet with %zu possible genotypes", m_genotypeAlphabet.size());
-    for (auto &genotype : m_genotypeAlphabet) {
-        m_genotypeLikelihoods.insert(std::pair<std::string,double>(genotype, 0.0));
+    CQ_LOG("Initializing genotype alphabet with %zu possible genotypes", genotypeAlphabet_.size());
+    for (auto &genotype : genotypeAlphabet_) {
+        genotypeLikelihoods_.insert(std::pair<std::string,double>(genotype, 0.0));
     }
 }
 
 void cq::Genotyper::resetLikelihoods(void)
 {
-    for (auto &genotypeLikelihood : m_genotypeLikelihoods) {
+    for (auto &genotypeLikelihood : genotypeLikelihoods_) {
         genotypeLikelihood.second = 0.0;
     }
 
-    for (auto &alleleLikelihood : m_alleleLikelihoods) {
+    for (auto &alleleLikelihood : alleleLikelihoods_) {
         alleleLikelihood.second = 0.0;
     }
 }
@@ -201,43 +198,43 @@ void cq::Genotyper::computeGenotypeLikelihoods(const std::string &seqPileup,
 {
     resetLikelihoods();
 
-    double *tempGenotypeLikelihoods = (double *)calloc(m_genotypeAlphabet.size(), sizeof(double));
+    double *tempGenotypeLikelihoods = (double *)calloc(genotypeAlphabet_.size(), sizeof(double));
     unsigned int itr = 0;
     for (size_t d = 0; d < depth; d++) {
         char y = (char)seqPileup[d];
-        double q = (double)(qualPileup[d] - m_qualMin);
-        if ((q > m_qualMax-m_qualMin) || q < 0) {
-            //CQ_LOG("min,curr,max=%d,%d,%d", 0, (int)q, m_qualMax-m_qualMin);
+        double q = (double)(qualPileup[d] - qualMin_);
+        if ((q > qualMax_-qualMin_) || q < 0) {
+            //CQ_LOG("min,curr,max=%d,%d,%d", 0, (int)q, qualMax_-qualMin_);
             throwErrorException("Quality value out of range");
         }
         double pStrike = 1 - pow(10.0, -q/10.0);
 
         double pError = (1-pStrike) / (ALLELE_ALPHABET_SIZE-1);
         itr = 0;
-        for (auto const &genotype : m_genotypeAlphabet) {
+        for (auto const &genotype : genotypeAlphabet_) {
             double p = 0.0;
-            for (unsigned int i = 0; i < m_polyploidy; i++) {
+            for (unsigned int i = 0; i < polyploidy_; i++) {
                 p += (y == genotype[i]) ? pStrike : pError;
             }
-            p /= m_polyploidy;
+            p /= polyploidy_;
 
             // We are using the log likelihood to avoid numerical problems
             tempGenotypeLikelihoods[itr++] += log(p);
         }
     }
     itr = 0;
-    for (auto const &genotype : m_genotypeAlphabet) {
-        m_genotypeLikelihoods[genotype] = tempGenotypeLikelihoods[itr++];
+    for (auto const &genotype : genotypeAlphabet_) {
+        genotypeLikelihoods_[genotype] = tempGenotypeLikelihoods[itr++];
     }
     free(tempGenotypeLikelihoods);
 
     // Normalize the genotype likelihoods
     double cum = 0.0;
-    for (auto &genotypeLikelihood : m_genotypeLikelihoods) {
+    for (auto &genotypeLikelihood : genotypeLikelihoods_) {
         genotypeLikelihood.second = exp(genotypeLikelihood.second);
         cum += genotypeLikelihood.second;
     }
-    for (auto &genotypeLikelihood : m_genotypeLikelihoods) {
+    for (auto &genotypeLikelihood : genotypeLikelihoods_) {
         genotypeLikelihood.second /= cum;
     }
 }
