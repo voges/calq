@@ -4,24 +4,19 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
+#ifndef CALQ_CALQDECODER_H_
+#define CALQ_CALQDECODER_H_
 
-#ifndef CQ_CALQDECODER_H
-#define CQ_CALQDECODER_H
-
-#include "Common/CLIOptions.h"
+#include "Common/Options.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/File.h"
 #include "IO/SAM/SAMFile.h"
 
-namespace cq {
+namespace calq {
 
 class CalqDecoder {
 public:
-    explicit CalqDecoder(const CLIOptions &cliOptions);
+    explicit CalqDecoder(const Options &pptions);
     ~CalqDecoder(void);
 
     void decode(void);
@@ -32,7 +27,7 @@ private:
     SAMFile sideInformationFile_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_CALQDECODER_H
+#endif // CALQ_CALQDECODER_H_
 

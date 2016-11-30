@@ -4,19 +4,12 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  2016-09-22: Added LOG and DEBUG macros (voges)
- *  2016-09-21: Added function currentDateAndTime (voges)
- *  2016-07-14: Added functions fileBaseName and removeFileNameExtension (voges)
- */
-
-#ifndef CQ_HELPERS_H
-#define CQ_HELPERS_H
+#ifndef CALQ_COMMON_HELPERS_H_
+#define CALQ_COMMON_HELPERS_H_
 
 #include <string>
 
-namespace cq {
+namespace calq {
 
 std::string currentDateAndTime(void);
 bool fileExists(const std::string &path);
@@ -24,46 +17,7 @@ std::string fileBaseName(const std::string &path);
 std::string fileNameExtension(const std::string &path);
 std::string removeFileNameExtension(const std::string &path);
 
-}
+} // namespace calq
 
-// C-style debug macro
-#define DBG
-#ifdef DBG
-    #define CQ_DEBUG(c,...) \
-        do { \
-            fflush(stderr); \
-            fprintf(stderr, \
-                    "DEBUG  %s %s:%s:%d: " c"\n", \
-                    cq::currentDateAndTime().c_str(), \
-                    __FILE__, \
-                    __FUNCTION__, \
-                    __LINE__, \
-                    ##__VA_ARGS__); \
-        } while (false)
-#else
-    #define DEBUG(c,...) do { } while (false)
-#endif
-
-// C-style log macro
-#define CQ_LOG(c,...) \
-    do {\
-        fflush(stdout); \
-        fprintf(stdout, \
-                "LOG  %s %s: " c"\n", \
-                cq::currentDateAndTime().c_str(), \
-                cq::removeFileNameExtension(cq::fileBaseName(std::string(__FILE__))).c_str(), \
-                ##__VA_ARGS__); \
-    } while (false)
-
-// C-style error macro
-#define CQ_ERROR(c,...) \
-    do {\
-        fflush(stderr); \
-        fprintf(stderr, \
-                "ERROR  %s " c"\n", \
-                cq::currentDateAndTime().c_str(), \
-                ##__VA_ARGS__); \
-    } while (false)
-
-#endif // CQ_HELPERS_H
+#endif // CALQ_COMMON_HELPERS_H_
 

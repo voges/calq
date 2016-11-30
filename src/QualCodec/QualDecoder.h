@@ -4,23 +4,31 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
+#ifndef CALQ_QUALCODEC_QUALDECODER_H_
+#define CALQ_QUALCODEC_QUALDECODER_H_
 
-#ifndef CQ_QUALDECODER_H
-#define CQ_QUALDECODER_H
+#include <string>
 
-namespace cq {
+#include "IO/CQ/CQFile.h"
+
+namespace calq {
 
 class QualDecoder {
 public:
     explicit QualDecoder(void);
     ~QualDecoder(void);
+
+    size_t readBlock(CQFile &cqFile);
+
+private:
+    void reset(void);
+
+    std::string unmappedQualityValues_;
+    std::string mappedQuantizerIndices_;
+    std::string mappedQualityValueIndices_;
 };
 
 }
 
-#endif // CQ_QUALDECODER_H
+#endif // CALQ_QUALCODEC_QUALDECODER_H_
 

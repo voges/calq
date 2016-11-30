@@ -4,18 +4,17 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/FASTA/FASTAFile.h"
-#include "Common/Exceptions.h"
+
 #include <string.h>
 
-cq::FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
-    : File(path, mode)
-    , line_(NULL)
+#include "Common/Exceptions.h"
+
+namespace calq {
+
+FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
+    : File(path, mode),
+      line_(NULL)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -35,12 +34,12 @@ cq::FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
     parse();
 }
 
-cq::FASTAFile::~FASTAFile(void)
+FASTAFile::~FASTAFile(void)
 {
     free(line_);
 }
 
-void cq::FASTAFile::parse(void)
+void FASTAFile::parse(void)
 {
     std::string currentHeader("");
     std::string currentSequence("");
@@ -85,4 +84,6 @@ void cq::FASTAFile::parse(void)
 
     references.insert(std::pair<std::string, std::string>(currentHeader, currentSequence));
 }
+
+} // namespace calq
 

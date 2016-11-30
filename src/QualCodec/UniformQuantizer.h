@@ -4,17 +4,12 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_UNIFORMQUANTIZER_H
-#define CQ_UNIFORMQUANTIZER_H
+#ifndef CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
+#define CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
 
 #include "QualCodec/Quantizer.h"
 
-namespace cq {
+namespace calq {
 
 class UniformQuantizer : public Quantizer {
 public:
@@ -22,7 +17,7 @@ public:
     ~UniformQuantizer(void);
 };
 
-}
+} // namespace calq
 
-#endif // CQ_UNIFORMQUANTIZER_H
+#endif // CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
 

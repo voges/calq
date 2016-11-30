@@ -3,42 +3,47 @@
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
-
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "QualCodec/QualDecoder.h"
+
 #include "Common/Exceptions.h"
+#include "Common/log.h"
 
-cq::QualDecoder::QualDecoder(void)
+namespace calq {
+
+QualDecoder::QualDecoder(void)
+    : unmappedQualityValues_("")
+    , mappedQuantizerIndices_("")
+    , mappedQualityValueIndices_("") {}
+
+QualDecoder::~QualDecoder(void) {}
+
+size_t QualDecoder::readBlock(CQFile &cqFile)
 {
-   // empty
+    size_t ret = 0;
+
+    //CALQ_LOG("Reading unmapped quality values");
+    //ret += cqFile.readBuffer(&unmappedQualityValues_);
+
+    CALQ_LOG("Reading mapped quantizer indices");
+    ret += cqFile.readBuffer(&mappedQuantizerIndices_);
+    std::cout << mappedQuantizerIndices_ << std::endl;
+
+    CALQ_LOG("Reading mapped quality value indices");
+    ret += cqFile.readBuffer(&mappedQualityValueIndices_);
+
+    return ret;
 }
 
-cq::QualDecoder::~QualDecoder(void)
+void QualDecoder::reset(void)
 {
-   //empty
+    unmappedQualityValues_ = "";
+    mappedQuantizerIndices_ = "";
+    mappedQualityValueIndices_ = "";
 }
 
-//void QualDecoder::printStats(void) const
-//{
-//    if (verbose == true) {
-//        LOG("QualDecoder statistics:");
-//        LOG("  Blocks:             %9zu", numBlocks);
-//        LOG("  Uncompressed size:  %9zu", uncompressedSize);
-//        LOG("  Compressed size:    %9zu", compressedSize);
-//        LOG("  Records:            %9zu", numRecords);
-//        LOG("    Mapped:           %9zu", numMappedRecords);
-//        LOG("    Unmapped:         %9zu", numUnmappedRecords);
-//        LOG("  Compression ratio:  %12.2f%%", (double)compressedSize*100/(double)uncompressedSize);
-//        LOG("  Compression factor: %12.2f", (double)uncompressedSize/(double)compressedSize);
-//    }
-//
-//    LOG("Decoded %zu record(s) in %zu block(s)", numRecords, numBlocks);
-//    LOG("Bits per quality value: %.4f", ((double)compressedSize * 8)/(double)uncompressedSize);
-//}
+
+
+
 //
 //size_t QualDecoder::decodeBlock(void)
 //{
@@ -198,4 +203,6 @@ cq::QualDecoder::~QualDecoder(void)
 //
 //    return ret;
 //}
+
+} // namespace calq
 

@@ -4,26 +4,22 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_SAMRECORD_H
-#define CQ_SAMRECORD_H
+#ifndef CALQ_IO_SAM_SAMRECORD_H_
+#define CALQ_IO_SAM_SAMRECORD_H_
 
 #include "IO/SAM/SAMPileupDeque.h"
-#include <deque>
+
 #include <inttypes.h>
+
+#include <deque>
 #include <string>
 
-namespace cq {
+namespace calq {
 
 class SAMRecord {
 public:
     static const unsigned int NUM_FIELDS = 12;
 
-public:
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);
 
@@ -34,7 +30,6 @@ public:
     void printShort(void) const;
     void printSeqWithPositionOffset(void) const;
 
-public:
     std::string qname; // Query template NAME
     uint16_t    flag;  // bitwise FLAG (uint16_t)
     std::string rname; // Reference sequence NAME
@@ -58,7 +53,7 @@ private:
     bool mapped_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_SAMRECORD_H
+#endif // CALQ_IO_SAM_SAMRECORD_H_
 

@@ -4,31 +4,31 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/SAM/SAMRecord.h"
-#include "Common/Exceptions.h"
+
 #include <string.h>
 
-cq::SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
-    : qname(fields[0])
-    , flag((uint16_t)atoi(fields[1]))
-    , rname(fields[2])
-    , pos((uint32_t)atoi(fields[3]))
-    , mapq((uint8_t)atoi(fields[4]))
-    , cigar(fields[5])
-    , rnext(fields[6])
-    , pnext((uint32_t)atoi(fields[7]))
-    , tlen((int64_t)atoi(fields[8]))
-    , seq(fields[9])
-    , qual(fields[10])
-    , opt(fields[11])
-    , posMin(0)
-    , posMax(0)
-    , mapped_(false)
+#include "Common/Exceptions.h"
+#include "Common/log.h"
+
+namespace calq {
+
+SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
+    : qname(fields[0]),
+      flag((uint16_t)atoi(fields[1])),
+      rname(fields[2]),
+      pos((uint32_t)atoi(fields[3])),
+      mapq((uint8_t)atoi(fields[4])),
+      cigar(fields[5]),
+      rnext(fields[6]),
+      pnext((uint32_t)atoi(fields[7])),
+      tlen((int64_t)atoi(fields[8])),
+      seq(fields[9]),
+      qual(fields[10]),
+      opt(fields[11]),
+      posMin(0),
+      posMax(0),
+      mapped_(false)
 {
     check();
 
@@ -73,18 +73,15 @@ cq::SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
     }
 }
 
-cq::SAMRecord::~SAMRecord(void)
-{
-    // empty
-}
+SAMRecord::~SAMRecord(void) {}
 
-void cq::SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
+void SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
 {
     if (samPileupDeque_.empty() == true) {
         throwErrorException("samPileupQueue is empty");
     }
     if ((samPileupDeque_.posMin() > posMin) || (samPileupDeque_.posMax() < posMax)) {
-        CQ_DEBUG("pileup pos minmax: %d %d", samPileupDeque_.posMin(), samPileupDeque_.posMax());
+        CALQ_DEBUG("pileup pos minmax: %d %d", samPileupDeque_.posMin(), samPileupDeque_.posMax());
         throwErrorException("samPileupQueue does not overlap record");
     }
 
@@ -130,12 +127,12 @@ void cq::SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
     }
 }
 
-bool cq::SAMRecord::isMapped(void) const
+bool SAMRecord::isMapped(void) const
 {
     return mapped_;
 }
 
-void cq::SAMRecord::printLong(void) const
+void SAMRecord::printLong(void) const
 {
     printShort();
     printf("isMapped: %d, ", mapped_);
@@ -143,7 +140,7 @@ void cq::SAMRecord::printLong(void) const
     printf("posMax: %d\n", posMax);
 }
 
-void cq::SAMRecord::printShort(void) const
+void SAMRecord::printShort(void) const
 {
     printf("%s\t", qname.c_str());
     printf("%d\t", flag);
@@ -160,14 +157,14 @@ void cq::SAMRecord::printShort(void) const
     printf("\n");
 }
 
-void cq::SAMRecord::printSeqWithPositionOffset(void) const
+void SAMRecord::printSeqWithPositionOffset(void) const
 {
     printf("%s %6d-%6d|", rname.c_str(), posMin, posMax);
     for (unsigned int i = 0; i < posMin; i++) { printf(" "); }
     printf("%s\n", seq.c_str());
 }
 
-void cq::SAMRecord::check(void)
+void SAMRecord::check(void)
 {
     // Check all fields
     if (qname.empty() == true) { throwErrorException("qname is empty"); }
@@ -181,7 +178,7 @@ void cq::SAMRecord::check(void)
     // tlen
     if (seq.empty() == true) { throwErrorException("seq is empty"); }
     if (qual.empty() == true) { throwErrorException("qual is empty"); }
-    if (opt.empty() == true) { CQ_LOG("opt is empty"); }
+    if (opt.empty() == true) { CALQ_LOG("opt is empty"); }
 
     // Check if this record is mapped
     if ((flag & 0x4) != 0) {
@@ -194,4 +191,6 @@ void cq::SAMRecord::check(void)
         }
     }
 }
+
+} // namespace calq
 

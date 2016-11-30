@@ -8,13 +8,8 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef RICE_H
-#define RICE_H
+#ifndef RICE_H_
+#define RICE_H_
 
 #include <stdlib.h>
 
@@ -33,5 +28,5 @@ unsigned char * rice_decompress(unsigned char *in,
 }
 #endif
 
-#endif // RICE_H
+#endif // RICE_H_
 

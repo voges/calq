@@ -5,20 +5,16 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
+#ifndef CALQ_COMMON_EXCEPTIONS_H_
+#define CALQ_COMMON_EXCEPTIONS_H_
 
-#ifndef CQ_EXCEPTIONS_H
-#define CQ_EXCEPTIONS_H
-
-#include "Common/helpers.h"
 #include <exception>
 #include <iostream>
 #include <string>
 
-namespace cq {
+#include "Common/helpers.h"
+
+namespace calq {
 
 class Exception : public std::exception {
 public:
@@ -55,7 +51,7 @@ public:
     void operator()(const std::string &msg)
     {
         //std::cerr << file << ":" << function << ":" << line << ": ";
-        std::string tmp = cq::fileBaseName(file_) + ":" + function_ + ":" + std::to_string(line_) + ": " + msg;
+        std::string tmp = fileBaseName(file_) + ":" + function_ + ":" + std::to_string(line_) + ": " + msg;
         // Can use the original name here, as it is still defined
         throwErrorException(tmp);
     }
@@ -72,7 +68,7 @@ private:
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException cq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
+#define throwErrorException calq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
-#endif // CQ_EXCEPTIONS_H
+#endif // CALQ_COMMON_EXCEPTIONS_H_
 

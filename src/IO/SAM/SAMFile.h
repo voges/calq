@@ -4,19 +4,14 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_SAMFILE_H
-#define CQ_SAMFILE_H
+#ifndef CALQ_IO_SAM_SAMFILE_H_
+#define CALQ_IO_SAM_SAMFILE_H_
 
 #include "Common/constants.h"
 #include "IO/File.h"
 #include "IO/SAM/SAMBlock.h"
 
-namespace cq {
+namespace calq {
 
 class SAMFile : public File {
 public:
@@ -29,14 +24,12 @@ public:
     size_t nrRecordsRead(void) const;
     size_t readBlock(const size_t &blockSize);
 
-public:
     SAMBlock currentBlock;
     std::string header;
 
 private:
     static const size_t LINE_SIZE = sizeof(char) * (1*MB);
 
-private:
     char *line_;
     size_t nrBlocksRead_;
     size_t nrMappedRecordsRead_;
@@ -45,5 +38,5 @@ private:
 
 }
 
-#endif // CQ_SAMFILE_H
+#endif // CALQ_IO_SAM_SAMFILE_H_
 

@@ -4,17 +4,17 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "QualCodec/UniformQuantizer.h"
-#include "Common/Exceptions.h"
+
 #include <math.h>
+
 #include <queue>
 
-cq::UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const unsigned int &nrSteps)
+#include "Common/Exceptions.h"
+
+namespace calq {
+
+UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const unsigned int &nrSteps)
     : Quantizer()
 {
     if ((valueMin > valueMax) || (nrSteps <= 1)) {
@@ -56,8 +56,7 @@ cq::UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax,
     }
 }
 
-cq::UniformQuantizer::~UniformQuantizer(void)
-{
-    // empty
-}
+UniformQuantizer::~UniformQuantizer(void) {}
+
+} // namespace calq
 

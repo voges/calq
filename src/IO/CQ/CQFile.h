@@ -4,17 +4,12 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_CQFILE_H
-#define CQ_CQFILE_H
+#ifndef CALQ_IO_CQ_CQFILE_H_
+#define CALQ_IO_CQ_CQFILE_H_
 
 #include "IO/File.h"
 
-namespace cq {
+namespace calq {
 
 class CQFile : public File {
 public:
@@ -26,17 +21,18 @@ public:
 
     size_t readHeader(size_t *blockSize);
     size_t writeHeader(const size_t &blockSize);
+    size_t readBuffer(std::string *buffer);
+    size_t writeBuffer(unsigned char *buffer, const size_t &bufferSize);
 
 private:
     static constexpr const char *MAGIC = "CQ";
     const size_t MAGIC_LEN = 3;
 
-private:
     size_t nrReadHeaderBytes_;
     size_t nrWrittenHeaderBytes_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_CQFILE_H
+#endif // CALQ_IO_CQ_CQFILE_H_
 

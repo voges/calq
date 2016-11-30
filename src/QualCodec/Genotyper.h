@@ -4,19 +4,14 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_GENOTYPER_H
-#define CQ_GENOTYPER_H
+#ifndef CALQ_QUALCODEC_GENOTYPER_H_
+#define CALQ_QUALCODEC_GENOTYPER_H_
 
 #include <map>
 #include <string>
 #include <vector>
 
-namespace cq {
+namespace calq {
 
 class Genotyper {
 public:
@@ -39,11 +34,10 @@ private:
     void computeGenotypeLikelihoods(const std::string &seqPileup,
                                     const std::string &qualPileup,
                                     const size_t &depth);
-private:
+
     const std::vector<char> ALLELE_ALPHABET = {'A','C','G','T'};
     const size_t ALLELE_ALPHABET_SIZE = 4;
 
-private:
     const std::vector<char> alleleAlphabet_;
     std::map<char,double> alleleLikelihoods_;
     std::vector<std::string> genotypeAlphabet_;
@@ -56,5 +50,5 @@ private:
 
 }
 
-#endif // CQ_GENOTYPER_H
+#endif // CALQ_QUALCODEC_GENOTYPER_H_
 

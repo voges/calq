@@ -4,23 +4,18 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
+#ifndef CALQ_CALQENCODER_H_
+#define CALQ_CALQENCODER_H_
 
-#ifndef CQ_CALQENCODER_H
-#define CQ_CALQENCODER_H
-
-#include "Common/CLIOptions.h"
+#include "Common/Options.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMFile.h"
 
-namespace cq {
+namespace calq {
 
 class CalqEncoder {
 public:
-    explicit CalqEncoder(const CLIOptions &cliOptions);
+    explicit CalqEncoder(const Options &options);
     ~CalqEncoder(void);
 
     void encode(void);
@@ -28,12 +23,15 @@ public:
 private:
     size_t blockSize_;
     CQFile cqFile_;
-    unsigned int polyploidy_;
+    int polyploidy_;
+    int qualityValueMax_;
+    int qualityValueMin_;
+    int qualityValueOffset_;
     std::vector<std::string> referenceFileNames_;
     SAMFile samFile_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_CALQENCODER_H
+#endif // CALQ_CALQENCODER_H_
 

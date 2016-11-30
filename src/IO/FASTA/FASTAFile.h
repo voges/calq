@@ -4,39 +4,31 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_FASTAFILE_H
-#define CQ_FASTAFILE_H
+#ifndef CALQ_IO_FASTA_FASTAFILE_H_
+#define CALQ_IO_FASTA_FASTAFILE_H_
 
 #include "Common/constants.h"
 #include "IO/File.h"
 #include <map>
 
-namespace cq {
+namespace calq {
 
 class FASTAFile : public File {
 public:
     FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
     ~FASTAFile(void);
 
-public:
     std::map<std::string, std::string> references;
 
 private:
     static const size_t LINE_SIZE = sizeof(char) * (4*KB);
 
-private:
     void parse(void);
 
-private:
     char *line_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_FASTAFILE_H
+#endif // CALQ_IO_FASTA_FASTAFILE_H_
 

@@ -5,28 +5,24 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  2016-09-21: Added function currentDateAndTime (voges)
- *  2016-07-14: Added functions fileBaseName and removeFileNameExtension (voges)
- *  2016-05-29: Moved the implementation of the fileExists function from
- *              access() (which is defined in unistd.h, which is
- *              Linux-specific) to std::ifstream (which is portable). (voges)
- */
-
 #include "Common/helpers.h"
-#include "Common/Exceptions.h"
-#include "Common/os_config.h"
-#include <fstream>
+
 #include <time.h>
 
-std::string cq::currentDateAndTime(void)
+#include <fstream>
+
+#include "Common/Exceptions.h"
+#include "Common/os.h"
+
+namespace calq {
+
+std::string currentDateAndTime(void)
 {
     // ISO 8601: 2007-04-05T14:30:21Z
     char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
 
     // Convert to UTC ('Zulu') time
-#ifdef CQ_OS_WINDOWS
+#ifdef OS_WINDOWS
     time_t rawtime = time(NULL);
     struct tm timeinfo;
     errno_t err;
@@ -53,7 +49,7 @@ std::string cq::currentDateAndTime(void)
     return result;
 }
 
-bool cq::fileExists(const std::string &path)
+bool fileExists(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -62,7 +58,7 @@ bool cq::fileExists(const std::string &path)
     return ifs.good();
 }
 
-std::string cq::fileBaseName(const std::string &path)
+std::string fileBaseName(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -71,7 +67,7 @@ std::string cq::fileBaseName(const std::string &path)
     return path.substr(path.find_last_of(delims) + 1);
 }
 
-std::string cq::fileNameExtension(const std::string &path)
+std::string fileNameExtension(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -82,7 +78,7 @@ std::string cq::fileNameExtension(const std::string &path)
     return "";
 }
 
-std::string cq::removeFileNameExtension(const std::string &path)
+std::string removeFileNameExtension(const std::string &path)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -90,4 +86,6 @@ std::string cq::removeFileNameExtension(const std::string &path)
     std::string::size_type const p(path.find_last_of('.'));
     return p > 0 && p != std::string::npos ? path.substr(0, p) : path;
 }
+
+} // namespace calq
 

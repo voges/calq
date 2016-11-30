@@ -4,42 +4,31 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/SAM/SAMPileupDeque.h"
+
 #include "Common/Exceptions.h"
 
-cq::SAMPileupDeque::SAMPileupDeque(void)
-    : pileups_()
-    , posMax_(0)
-    , posMin_(0)
-{
-    // empty
-}
+namespace calq {
 
-cq::SAMPileupDeque::~SAMPileupDeque(void)
-{
-    // empty
-}
+SAMPileupDeque::SAMPileupDeque(void) : pileups_() , posMax_(0) , posMin_(0) {}
 
-bool cq::SAMPileupDeque::empty(void) const
+SAMPileupDeque::~SAMPileupDeque(void) {}
+
+bool SAMPileupDeque::empty(void) const
 {
     if (pileups_.empty() == true)
         return true;
     return false;
 }
 
-void cq::SAMPileupDeque::clear(void)
+void SAMPileupDeque::clear(void)
 {
     pileups_.clear();
     posMax_ = 0;
     posMin_ = 0;
 }
 
-const cq::SAMPileup& cq::SAMPileupDeque::back(void) const
+const SAMPileup& SAMPileupDeque::back(void) const
 {
     if (pileups_.empty() == true) {
         throwErrorException("Deque is empty");
@@ -48,7 +37,7 @@ const cq::SAMPileup& cq::SAMPileupDeque::back(void) const
 }
 
 
-const cq::SAMPileup & cq::SAMPileupDeque::front(void) const
+const SAMPileup & SAMPileupDeque::front(void) const
 {
     if (pileups_.empty() == true) {
         throwErrorException("Deque is empty");
@@ -56,22 +45,22 @@ const cq::SAMPileup & cq::SAMPileupDeque::front(void) const
     return pileups_.front();
 }
 
-size_t cq::SAMPileupDeque::length(void) const
+size_t SAMPileupDeque::length(void) const
 {
     return posMax_ - posMin_ + 1;
 }
 
-uint32_t cq::SAMPileupDeque::posMax(void) const
+uint32_t SAMPileupDeque::posMax(void) const
 {
     return posMax_;
 }
 
-uint32_t cq::SAMPileupDeque::posMin(void) const
+uint32_t SAMPileupDeque::posMin(void) const
 {
     return posMin_;
 }
 
-void cq::SAMPileupDeque::pop_back(void)
+void SAMPileupDeque::pop_back(void)
 {
     if (pileups_.empty() == true) {
         throwErrorException("Deque is empty");
@@ -80,7 +69,7 @@ void cq::SAMPileupDeque::pop_back(void)
     posMax_--;
 }
 
-void cq::SAMPileupDeque::pop_front(void)
+void SAMPileupDeque::pop_front(void)
 {
     if (pileups_.empty() == true) {
         throwErrorException("Deque is empty");
@@ -89,7 +78,7 @@ void cq::SAMPileupDeque::pop_front(void)
     posMin_++;
 }
 
-void cq::SAMPileupDeque::print(void) const
+void SAMPileupDeque::print(void) const
 {
     if (pileups_.empty() == true) {
         throwErrorException("Deque is empty");
@@ -100,7 +89,7 @@ void cq::SAMPileupDeque::print(void) const
     }
 }
 
-void cq::SAMPileupDeque::setPosMax(const uint32_t &posMax)
+void SAMPileupDeque::setPosMax(const uint32_t &posMax)
 {
     if (posMax < posMax_) {
         throwErrorException("posMax range");
@@ -109,7 +98,7 @@ void cq::SAMPileupDeque::setPosMax(const uint32_t &posMax)
     pileups_.resize(length());
 }
 
-void cq::SAMPileupDeque::setPosMin(const uint32_t &posMin)
+void SAMPileupDeque::setPosMin(const uint32_t &posMin)
 {
     if (posMin < posMin_) {
         throwErrorException("posMin range");
@@ -121,4 +110,6 @@ void cq::SAMPileupDeque::setPosMin(const uint32_t &posMin)
         for (uint32_t i = posMin_; i < posMin ; i++) { pop_front(); } 
     }
 }
+
+} // namespace calq
 

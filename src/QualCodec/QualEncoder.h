@@ -4,40 +4,35 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
+#ifndef CALQ_QUALCODEC_QUALENCODER_H_
+#define CALQ_QUALCODEC_QUALENCODER_H_
 
-#ifndef CQ_QUALENCODER_H
-#define CQ_QUALENCODER_H
+#include <chrono>
+#include <deque>
 
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMPileupDeque.h"
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
 #include "QualCodec/Quantizer.h"
-#include <chrono>
-#include <deque>
 
-namespace cq {
+namespace calq {
 
 class QualEncoder {
 public:
     static const unsigned int QUANTIZER_STEPS_MIN = 2;
-    static const unsigned int QUANTIZER_STEPS_MAX = 3;
-    static const unsigned int NR_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
+    static const unsigned int QUANTIZER_STEPS_MAX = 5;
+    static const int NR_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
     static const unsigned int QUANTIZER_IDX_MIN = 0;
     static const unsigned int QUANTIZER_IDX_MAX = NR_QUANTIZERS-1;
 
-public:
     explicit QualEncoder(const unsigned int &polyploidy,
-                         const int &qMin,
-                         const int &qMax,
+                         const int &qualityValueMax,
+                         const int &qualityValueMin,
+                         const int &qualityValueOffset,
                          const std::map<int,Quantizer> &quantizers);
     ~QualEncoder(void);
 
-    void startBlock(void);
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
     size_t finishAndWriteBlock(CQFile &cqFile);
@@ -56,7 +51,6 @@ private:
     void encodeMappedQual(const SAMRecord &samRecord);
     void encodeUnmappedQual(const std::string &qual);
 
-private:
     // Timekeeping
     std::chrono::time_point<std::chrono::steady_clock> startTime_;
     std::chrono::time_point<std::chrono::steady_clock> stopTime_;
@@ -69,13 +63,15 @@ private:
     size_t uncompressedMappedQualSize_;
     size_t uncompressedUnmappedQualSize_;
 
+    int qualityValueOffset_;
+
     // 0-based position offset of this block
-    uint32_t posOff_;
+    uint32_t posOffset_;
 
     // Buffers
     std::string unmappedQual_;
-    std::string mappedQuantizerIndices_;
-    std::string mappedQualIndices_;
+    std::deque<int> mappedQuantizerIndices_;
+    std::deque<int> mappedQualIndices_;
 
     // Pileup
     SAMPileupDeque samPileupDeque_;
@@ -91,7 +87,7 @@ private:
     std::deque<SAMRecord> samRecordDeque_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_QUALENCODER_H
+#endif // CALQ_QUALCODEC_QUALENCODER_H_
 

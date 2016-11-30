@@ -5,31 +5,23 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "Common/Exceptions.h"
 
-cq::Exception::Exception(const std::string &msg)
-    : msg_(msg)
-{
-    // empty
-}
+namespace calq {
 
-cq::Exception::~Exception(void) throw () 
-{
-    // empty
-}
+Exception::Exception(const std::string &msg) : msg_(msg) {}
 
-std::string cq::Exception::getMessage(void) const 
+Exception::~Exception(void) throw () {}
+
+std::string Exception::getMessage(void) const
 {
     return msg_;
 }
 
-const char * cq::Exception::what(void) const throw() 
+const char * Exception::what(void) const throw()
 {
     return msg_.c_str();
 }
+
+} // namespace calq
 

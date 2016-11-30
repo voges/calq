@@ -4,19 +4,16 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "Compressors/rice/rice.h"
-#include "Common/os_config.h"
+
 #include <stdbool.h>
 #include <string.h>
 
-#if defined(CQ_OS_WINDOWS)
+#include "Common/os.h"
+
+#if defined(OS_WINDOWS)
     #include <windows.h>
-#elif defined(CQ_OS_APPLE) || defined(CQ_OS_LINUX)
+#elif defined(OS_APPLE) || defined(OS_LINUX)
     #include <unistd.h> /* sysconf(3) */
 #else
     #error "Operating system not supported"
@@ -164,11 +161,11 @@ unsigned char * rice_decompress(unsigned char *in,
                                 const size_t  in_sz,
                                 size_t        *out_sz)
 {
-#if defined(CQ_OS_WINDOWS)
+#if defined(OS_WINDOWS)
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     const unsigned long pageSize = (unsigned long)si.dwPageSize;
-#elif defined(CQ_OS_APPLE) || defined(CQ_OS_LINUX)
+#elif defined(OS_APPLE) || defined(OS_LINUX)
     const long pageSize = sysconf(_SC_PAGESIZE); // _SC_PAGE_SIZE is OK, too
 #else
     #error "Operating system not supported"

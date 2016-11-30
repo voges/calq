@@ -4,45 +4,38 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/SAM/SAMBlock.h"
 
-cq::SAMBlock::SAMBlock(void)
-    : records()
-    , nrMappedRecords_(0)
-    , nrUnmappedRecords_(0)
-{
-    // empty
-}
+namespace calq {
 
-cq::SAMBlock::~SAMBlock(void)
-{
-    // empty
-}
+SAMBlock::SAMBlock(void)
+    : records(),
+      nrMappedRecords_(0),
+      nrUnmappedRecords_(0) {}
 
-size_t cq::SAMBlock::nrMappedRecords(void) const
+SAMBlock::~SAMBlock(void) {}
+
+size_t SAMBlock::nrMappedRecords(void) const
 {
     return nrMappedRecords_;
 }
 
-size_t cq::SAMBlock::nrUnmappedRecords(void) const
+size_t SAMBlock::nrUnmappedRecords(void) const
 {
     return nrUnmappedRecords_;
 }
 
-size_t cq::SAMBlock::nrRecords(void) const
+size_t SAMBlock::nrRecords(void) const
 {
     return (nrMappedRecords_ + nrUnmappedRecords_);
 }
 
-void cq::SAMBlock::reset(void)
+void SAMBlock::reset(void)
 {
     records.clear();
     nrMappedRecords_ = 0;
     nrUnmappedRecords_ = 0;
 }
+
+} // namespace calq
 

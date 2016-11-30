@@ -4,17 +4,12 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_SAMPILEUP_H
-#define CQ_SAMPILEUP_H
+#ifndef CALQ_IO_SAM_SAMPILEUP_H_
+#define CALQ_IO_SAM_SAMPILEUP_H_
 
 #include <string>
 
-namespace cq {
+namespace calq {
 
 class SAMPileup {
 public:
@@ -23,18 +18,16 @@ public:
 
     bool empty(void) const;
     void clear(void);
-
     void print(void) const;
     void printQual(void) const;
     void printSeq(void) const;
 
-public:
     uint32_t pos; // 0-based position of this pileup
     std::string qual;
     std::string seq;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_SAMPILEUP_H
+#endif // CALQ_IO_SAM_SAMPILEUP_H_
 

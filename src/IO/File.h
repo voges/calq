@@ -4,23 +4,17 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_FILE_H
-#define CQ_FILE_H
+#ifndef CALQ_IO_FILE_H_
+#define CALQ_IO_FILE_H_
 
 #include <string>
 
-namespace cq {
+namespace calq {
 
 class File {
 public:
     enum Mode { MODE_READ = 0, MODE_WRITE = 1 };
 
-public:
     File(void);
     File(const std::string &path, const Mode &mode);
     virtual ~File(void);
@@ -62,7 +56,7 @@ protected:
     size_t nrWrittenBytes_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_FILE_H
+#endif // CALQ_IO_FILE_H_
 

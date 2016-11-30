@@ -4,16 +4,16 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/SAM/SAMFile.h"
 #include "Common/Exceptions.h"
+
 #include <string.h>
 
-static void parseLine(char *fields[cq::SAMRecord::NUM_FIELDS], char *line)
+#include "Common/log.h"
+
+namespace calq {
+
+static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line)
 {
     char *c = line;
     char *pc = c;
@@ -44,16 +44,15 @@ static void parseLine(char *fields[cq::SAMRecord::NUM_FIELDS], char *line)
     if (f == 11) { fields[f] = pc; }
 }
 
-cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
-    : File(path, mode)
-    , currentBlock()
-    , header("")
-    , line_(NULL)
-    , nrBlocksRead_(0)
-    , nrMappedRecordsRead_(0)
-    , nrUnmappedRecordsRead_(0)
+SAMFile::SAMFile(const std::string &path, const Mode &mode)
+    : File(path, mode),
+      currentBlock(),
+      header(""),
+      line_(NULL),
+      nrBlocksRead_(0),
+      nrMappedRecordsRead_(0),
+      nrUnmappedRecordsRead_(0)
 {
-    // Check arguments
     if (path.empty() == true) {
         throwErrorException("path is empty");
     }
@@ -90,36 +89,36 @@ cq::SAMFile::SAMFile(const std::string &path, const Mode &mode)
     }
     seek(fpos); // rewind to the begin of the alignment section
     if (header.empty() == true) {
-        CQ_LOG("No SAM header found");
+        CALQ_LOG("No SAM header found");
     }
 }
 
-cq::SAMFile::~SAMFile(void)
+SAMFile::~SAMFile(void)
 {
     free(line_);
 }
 
-size_t cq::SAMFile::nrBlocksRead(void) const
+size_t SAMFile::nrBlocksRead(void) const
 {
     return nrBlocksRead_;
 }
 
-size_t cq::SAMFile::nrMappedRecordsRead() const
+size_t SAMFile::nrMappedRecordsRead() const
 {
     return nrMappedRecordsRead_;
 }
 
-size_t cq::SAMFile::nrUnmappedRecordsRead() const
+size_t SAMFile::nrUnmappedRecordsRead() const
 {
     return nrUnmappedRecordsRead_;
 }
 
-size_t cq::SAMFile::nrRecordsRead() const
+size_t SAMFile::nrRecordsRead() const
 {
     return (nrMappedRecordsRead_ + nrUnmappedRecordsRead_);
 }
 
-size_t cq::SAMFile::readBlock(const size_t &blockSize)
+size_t SAMFile::readBlock(const size_t &blockSize)
 {
     if (blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
@@ -168,7 +167,7 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        CQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.nrRecords(), blockSize);
+                        CALQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.nrRecords(), blockSize);
                         break;
                     }
                 }
@@ -177,7 +176,7 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
                 currentBlock.nrUnmappedRecords_++;
             }
         } else {
-            CQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.nrRecords(), blockSize);
+            CALQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.nrRecords(), blockSize);
             break;
         }
     }
@@ -190,4 +189,6 @@ size_t cq::SAMFile::readBlock(const size_t &blockSize)
 
     return currentBlock.nrRecords();
 }
+
+} // namespace calq
 

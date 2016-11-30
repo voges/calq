@@ -4,34 +4,30 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/File.h"
-#include "Common/Exceptions.h"
-#include "Common/os_config.h"
+
 #include <limits.h>
 
-cq::File::File(void)
-    : fp_(NULL)
-    , fsize_(0)
-    , isOpen_(false)
-    , mode_(File::MODE_READ)
-    , nrReadBytes_(0)
-    , nrWrittenBytes_(0)
-{
-    // empty
-}
+#include "Common/Exceptions.h"
+#include "Common/os.h"
 
-cq::File::File(const std::string &path, const Mode &mode)
-    : fp_(NULL)
-    , fsize_(0)
-    , isOpen_(false)
-    , mode_(mode)
-    , nrReadBytes_(0)
-    , nrWrittenBytes_(0)
+namespace calq {
+
+File::File(void)
+    : fp_(NULL),
+      fsize_(0),
+      isOpen_(false),
+      mode_(File::MODE_READ),
+      nrReadBytes_(0),
+      nrWrittenBytes_(0) {}
+
+File::File(const std::string &path, const Mode &mode)
+    : fp_(NULL),
+      fsize_(0),
+      isOpen_(false),
+      mode_(mode),
+      nrReadBytes_(0),
+      nrWrittenBytes_(0)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -40,12 +36,12 @@ cq::File::File(const std::string &path, const Mode &mode)
     open(path, mode);
 }
 
-cq::File::~File(void)
+File::~File(void)
 {
     close();
 }
 
-void cq::File::open(const std::string &path, const Mode &mode)
+void File::open(const std::string &path, const Mode &mode)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -85,7 +81,7 @@ void cq::File::open(const std::string &path, const Mode &mode)
     isOpen_ = true;
 }
 
-void cq::File::close(void) 
+void File::close(void) 
 {
     if (isOpen_ == true) {
         if (fp_ != NULL) {
@@ -97,7 +93,7 @@ void cq::File::close(void)
     }
 }
 
-void cq::File::advance(const size_t &offset)
+void File::advance(const size_t &offset)
 {
     int ret = fseek(fp_, (long int)offset, SEEK_CUR);
     if (ret != 0) {
@@ -105,18 +101,18 @@ void cq::File::advance(const size_t &offset)
     }
 }
 
-bool cq::File::eof(void) const
+bool File::eof(void) const
 {
     int eof = feof(fp_);
     return eof != 0 ? true : false;
 }
 
-void * cq::File::handle(void) const
+void * File::handle(void) const
 {
     return fp_;
 }
 
-void cq::File::seek(const size_t &pos)
+void File::seek(const size_t &pos)
 {
     if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
@@ -127,12 +123,12 @@ void cq::File::seek(const size_t &pos)
     }
 }
 
-size_t cq::File::size(void) const
+size_t File::size(void) const
 {
     return fsize_;
 }
 
-size_t cq::File::tell(void) const
+size_t File::tell(void) const
 {
     long int offset = ftell(fp_);
     if (offset == -1) {
@@ -141,7 +137,7 @@ size_t cq::File::tell(void) const
     return offset;
 }
 
-size_t cq::File::nrReadBytes(void) const
+size_t File::nrReadBytes(void) const
 {
     if (mode_ != MODE_READ) {
         throwErrorException("File is not open in read mode");
@@ -149,7 +145,7 @@ size_t cq::File::nrReadBytes(void) const
     return nrReadBytes_;
 }
 
-size_t cq::File::nrWrittenBytes(void) const
+size_t File::nrWrittenBytes(void) const
 {
     if (mode_ != MODE_WRITE) {
         throwErrorException("File is not open in write mode");
@@ -157,7 +153,7 @@ size_t cq::File::nrWrittenBytes(void) const
     return nrWrittenBytes_;
 }
 
-size_t cq::File::read(void *buffer, const size_t &size) 
+size_t File::read(void *buffer, const size_t &size) 
 {
     if (buffer == NULL) {
         throwErrorException("buffer is NULL");
@@ -173,7 +169,7 @@ size_t cq::File::read(void *buffer, const size_t &size)
     return ret; 
 }
 
-size_t cq::File::write(void *buffer, const size_t &size) 
+size_t File::write(void *buffer, const size_t &size) 
 {
     if (buffer == NULL) {
         throwErrorException("buffer is NULL");
@@ -189,7 +185,7 @@ size_t cq::File::write(void *buffer, const size_t &size)
     return ret;
 }
 
-size_t cq::File::readByte(unsigned char *byte)
+size_t File::readByte(unsigned char *byte)
 {
     size_t ret = fread(byte, 1, 1, fp_);
     if (ret != sizeof(unsigned char)) {
@@ -199,12 +195,12 @@ size_t cq::File::readByte(unsigned char *byte)
     return ret;
 }
 
-size_t cq::File::readUint8(uint8_t *byte)
+size_t File::readUint8(uint8_t *byte)
 {
     return readByte(byte);
 }
 
-size_t cq::File::readUint16(uint16_t *word)
+size_t File::readUint16(uint16_t *word)
 {
     unsigned char *buffer = (unsigned char *)malloc(sizeof(uint16_t));
     if (buffer == NULL) {
@@ -224,7 +220,7 @@ size_t cq::File::readUint16(uint16_t *word)
     return ret;
 }
 
-size_t cq::File::readUint32(uint32_t *dword)
+size_t File::readUint32(uint32_t *dword)
 {
     unsigned char *buffer = (unsigned char *)malloc(sizeof(uint32_t));
     if (buffer == NULL) {
@@ -247,7 +243,7 @@ size_t cq::File::readUint32(uint32_t *dword)
     return ret;
 }
 
-size_t cq::File::readUint64(uint64_t *qword)
+size_t File::readUint64(uint64_t *qword)
 {
     unsigned char *buffer = (unsigned char *)malloc(sizeof(uint64_t));
     if (buffer == NULL) {
@@ -274,7 +270,7 @@ size_t cq::File::readUint64(uint64_t *qword)
     return ret;
 }
 
-size_t cq::File::writeByte(const unsigned char &byte)
+size_t File::writeByte(const unsigned char &byte)
 {
     size_t ret = fwrite(&byte, 1, 1, fp_);
     if (ret != sizeof(unsigned char)) {
@@ -284,12 +280,12 @@ size_t cq::File::writeByte(const unsigned char &byte)
     return ret;
 }
 
-size_t cq::File::writeUint8(const uint8_t &byte)
+size_t File::writeUint8(const uint8_t &byte)
 {
     return writeByte(byte);
 }
 
-size_t cq::File::writeUint16(const uint16_t &word)
+size_t File::writeUint16(const uint16_t &word)
 {
     size_t ret = 0;
     ret += writeByte((unsigned char)(word >> 8) & 0xFF);
@@ -297,7 +293,7 @@ size_t cq::File::writeUint16(const uint16_t &word)
     return ret;
 }
 
-size_t cq::File::writeUint32(const uint32_t &dword)
+size_t File::writeUint32(const uint32_t &dword)
 {
     size_t ret = 0;
     ret += writeByte((unsigned char)(dword >> 24) & 0xFF);
@@ -307,7 +303,7 @@ size_t cq::File::writeUint32(const uint32_t &dword)
     return ret;
 }
 
-size_t cq::File::writeUint64(const uint64_t &qword)
+size_t File::writeUint64(const uint64_t &qword)
 {
     size_t ret = 0;
     ret += writeByte((unsigned char)(qword >> 56) & 0xFF);
@@ -320,4 +316,6 @@ size_t cq::File::writeUint64(const uint64_t &qword)
     ret += writeByte((unsigned char)(qword      ) & 0xFF);
     return ret;
 }
+
+} // namespace calq
 

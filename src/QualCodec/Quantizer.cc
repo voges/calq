@@ -4,27 +4,17 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "QualCodec/Quantizer.h"
+
 #include "Common/Exceptions.h"
 
-cq::Quantizer::Quantizer(void)
-    : lut_()
-    , inverseLut_()
-{
-    // empty
-}
+namespace calq {
 
-cq::Quantizer::~Quantizer(void)
-{
-    // empty
-}
+Quantizer::Quantizer(void) : lut_() , inverseLut_() {}
 
-int cq::Quantizer::valueToIndex(const int &value) const
+Quantizer::~Quantizer(void) {}
+
+int Quantizer::valueToIndex(const int &value) const
 {
     if (lut_.find(value) == lut_.end()) {
         throwErrorException("Value out of range");
@@ -32,7 +22,7 @@ int cq::Quantizer::valueToIndex(const int &value) const
     return lut_.at(value).first;
 }
 
-int cq::Quantizer::indexToReconstructionValue(const int &index) const
+int Quantizer::indexToReconstructionValue(const int &index) const
 {
     if (inverseLut_.find(index) == inverseLut_.end()) {
         throwErrorException("Index not found");
@@ -40,7 +30,7 @@ int cq::Quantizer::indexToReconstructionValue(const int &index) const
     return inverseLut_.at(index);
 }
 
-int cq::Quantizer::valueToReconstructionValue(const int &value) const
+int Quantizer::valueToReconstructionValue(const int &value) const
 {
     if (lut_.find(value) == lut_.end()) {
         throwErrorException("Value out of range");
@@ -49,12 +39,12 @@ int cq::Quantizer::valueToReconstructionValue(const int &value) const
     return lut_.at(value).second;
 }
 
-const std::map<int, int> & cq::Quantizer::inverseLut(void) const
+const std::map<int, int> & Quantizer::inverseLut(void) const
 {
     return inverseLut_;
 }
 
-void cq::Quantizer::print(void) const
+void Quantizer::print(void) const
 {
     std::cout << "LUT:" << std::endl;
     for (auto const &lutEntry : lut_) {
@@ -69,4 +59,6 @@ void cq::Quantizer::print(void) const
         std::cout << inverseLutEntry.second << std::endl;
     }
 }
+
+} // namespace calq
 

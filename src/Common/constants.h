@@ -4,13 +4,8 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_CONSTANTS_H
-#define CQ_CONSTANTS_H
+#ifndef CALQ_COMMON_CONSTANTS_H_
+#define CALQ_COMMON_CONSTANTS_H_
 
 #define KB 1000LL
 #define MB (KB*1000LL)
@@ -20,5 +15,5 @@
 #define MiB (KB*1024LL)
 #define GiB (MB*1024LL)
 
-#endif // CQ_CONSTANTS_H
+#endif // CALQ_COMMON_CONSTANTS_H_
 

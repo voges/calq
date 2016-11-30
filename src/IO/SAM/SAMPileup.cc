@@ -4,53 +4,43 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
 #include "IO/SAM/SAMPileup.h"
 
-cq::SAMPileup::SAMPileup(void)
-    : pos(0)
-    , qual("")
-    , seq("")
-{
-    // empty
-}
+namespace calq {
 
-cq::SAMPileup::~SAMPileup(void)
-{
-    // empty
-}
+SAMPileup::SAMPileup(void) : pos(0), qual(""), seq("") {}
 
-bool cq::SAMPileup::empty(void) const
+SAMPileup::~SAMPileup(void) {}
+
+bool SAMPileup::empty(void) const
 {
     if (seq.empty() == true)
         return true;
     return false;
 }
 
-void cq::SAMPileup::clear(void)
+void SAMPileup::clear(void)
 {
     pos = 0;
     qual = "";
     seq = "";
 }
 
-void cq::SAMPileup::print(void) const
+void SAMPileup::print(void) const
 {
     printQual();
     printSeq();
 }
 
-void cq::SAMPileup::printQual(void) const
+void SAMPileup::printQual(void) const
 {
     printf("%6d: %s\n", pos, qual.c_str());
 }
 
-void cq::SAMPileup::printSeq(void) const
+void SAMPileup::printSeq(void) const
 {
     printf("%6d: %s\n", pos, seq.c_str());
 }
+
+} // namespace calq
 

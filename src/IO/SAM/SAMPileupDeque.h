@@ -4,18 +4,14 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_SAMPILEUPDEQUE_H
-#define CQ_SAMPILEUPDEQUE_H
+#ifndef CALQ_IO_SAM_SAMPILEUPDEQUE_H_
+#define CALQ_IO_SAM_SAMPILEUPDEQUE_H_
 
 #include "IO/SAM/SAMPileup.h"
+
 #include <deque>
 
-namespace cq {
+namespace calq {
 
 class SAMPileupDeque {
     friend class SAMRecord;
@@ -43,7 +39,7 @@ private:
     uint32_t posMin_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_SAMPILEUPDEQUE_H
+#endif // CALQ_IO_SAM_SAMPILEUPDEQUE_H_
 

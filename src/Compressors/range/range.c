@@ -5,11 +5,6 @@
  */
 
 /*
- *  Changelog
- *  YYYY-MM-DD: what (who)
- */
-
-/*
  * Copyright (c) 2014 Genome Research Ltd.
  * Author(s): James Bonfield, Wellcome Trust Sanger Institute
  *
@@ -57,7 +52,7 @@
  */
 
 #include "range.h"
-#include "Common/os_config.h"
+#include "Common/os.h"
 #include <assert.h>
 #include <float.h>
 #include <stdint.h>

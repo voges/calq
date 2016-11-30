@@ -4,17 +4,12 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_QUANTIZER_H
-#define CQ_QUANTIZER_H
+#ifndef CALQ_QUALCODEC_QUANTIZER_H_
+#define CALQ_QUALCODEC_QUANTIZER_H_
 
 #include <map>
 
-namespace cq {
+namespace calq {
 
 class Quantizer {
 public:
@@ -34,7 +29,7 @@ protected:
     std::map<int,int> inverseLut_; // index->reconstructionValue
 };
 
-}
+} // namespace calq
 
-#endif // CQ_QUANTIZER_H
+#endif // CALQ_QUALCODEC_QUANTIZER_H_
 

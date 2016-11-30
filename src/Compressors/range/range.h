@@ -8,13 +8,8 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: what (who)
- */
-
-#ifndef RANGE_H
-#define RANGE_H
+#ifndef RANGE_H_
+#define RANGE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,5 +32,5 @@ unsigned char * range_decompress_o1(unsigned char *in,
 }
 #endif
 
-#endif // RANGE_H
+#endif // RANGE_H_
 

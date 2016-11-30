@@ -8,13 +8,8 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef RLE_H
-#define RLE_H
+#ifndef RLE_H_
+#define RLE_H_
 
 #include <string>
 
@@ -64,5 +59,5 @@ unsigned char * rle_decode(unsigned char       *in,
                            const unsigned char N,
                            const unsigned char offset = (unsigned char)'0');
 
-#endif // RLE_H
+#endif // RLE_H_
 

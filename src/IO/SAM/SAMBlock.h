@@ -4,18 +4,14 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef CQ_SAMBLOCK_H
-#define CQ_SAMBLOCK_H
+#ifndef CALQ_IO_SAM_SAMBLOCK_H_
+#define SAM_SAMBLOCK_H_
 
 #include "IO/SAM/SAMRecord.h"
+
 #include <deque>
 
-namespace cq {
+namespace calq {
 
 class SAMBlock {
     friend class SAMFile;
@@ -29,7 +25,6 @@ public:
     size_t nrRecords(void) const;
     void reset(void);
 
-public:
     std::deque<SAMRecord> records;
 
 private:
@@ -37,7 +32,7 @@ private:
     size_t nrUnmappedRecords_;
 };
 
-}
+} // namespace calq
 
-#endif // CQ_SAMBLOCK_H
+#endif // SAM_SAMBLOCK_H_
 
