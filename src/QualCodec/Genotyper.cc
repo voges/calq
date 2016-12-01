@@ -40,10 +40,10 @@ static unsigned int combinationsWithRepetitions(std::vector<std::string> &genoty
     return count;
 }
 
-Genotyper::Genotyper(const unsigned int &polyploidy,
-                     const unsigned int &qualMin,
-                     const unsigned int &qualMax,
-                     const unsigned int &nrQuantizers)
+Genotyper::Genotyper(const int &polyploidy,
+                     const int &qualMin,
+                     const int &qualMax,
+                     const int &nrQuantizers)
     : alleleAlphabet_(ALLELE_ALPHABET),
       alleleLikelihoods_(),
       genotypeAlphabet_(),

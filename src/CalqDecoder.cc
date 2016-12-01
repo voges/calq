@@ -34,35 +34,47 @@ CalqDecoder::~CalqDecoder(void) {}
 
 void CalqDecoder::decode(void)
 {
+    // Take time
     auto startTime = std::chrono::steady_clock::now();
 
-    // Read header
+    // Read CQ file header
+    CALQ_LOG("Reading CQ file header");
     size_t blockSize = 0;
     cqFile_.readHeader(&blockSize);
 
-    // Read quantizers
-    uint8_t nrQuantizers = 0;
-    cqFile_.readUint8(&nrQuantizers);
-    CALQ_LOG("Reading %u quantizers", nrQuantizers);
-    for (int i = 0; i < nrQuantizers; ++i) {
-        CALQ_LOG("Reading quantizer %d", i);
-        uint8_t quantizerIdx = 0;
-        cqFile_.readUint8(&quantizerIdx);
-        CALQ_LOG("  Quantizer index: %d", quantizerIdx);
-        uint8_t quantizerSteps = 0;
-        cqFile_.readUint8(&quantizerSteps);
-        CALQ_LOG("  Quantizer steps: %d", quantizerSteps);
-        for (int s = 0; s < quantizerSteps; ++s) {
-            uint8_t index = 0;
-            cqFile_.readUint8(&index);
-            uint8_t reconstructionValue = 0;
-            cqFile_.readUint8(&reconstructionValue);
-            CALQ_LOG("  %u -> %u", index, reconstructionValue);
-        }
-    }
-
     QualDecoder qualDecoder;
     while (sideInformationFile_.readBlock(blockSize) != 0) {
+        CALQ_LOG("Decoding block %zu", sideInformationFile_.nrBlocksRead()-1);
+
+        // Read the inverse quantization LUTs
+        CALQ_LOG("Reading inverse quantization LUTs");
+        std::map<int,Quantizer> quantizers;
+        cqFile_.readQuantizers(quantizers);
+        
+        
+        uint8_t nrQuantizers = 0;
+        cqFile_.readUint8(&nrQuantizers);
+        CALQ_LOG("Reading %u quantizers", nrQuantizers);
+        for (int i = 0; i < nrQuantizers; ++i) {
+            CALQ_LOG("Reading quantizer %d", i);
+            uint8_t quantizerIdx = 0;
+            cqFile_.readUint8(&quantizerIdx);
+            CALQ_LOG("  Quantizer index: %d", quantizerIdx);
+            uint8_t quantizerSteps = 0;
+            cqFile_.readUint8(&quantizerSteps);
+            CALQ_LOG("  Quantizer steps: %d", quantizerSteps);
+            for (int s = 0; s < quantizerSteps; ++s) {
+                uint8_t index = 0;
+                cqFile_.readUint8(&index);
+                uint8_t reconstructionValue = 0;
+                cqFile_.readUint8(&reconstructionValue);
+                CALQ_LOG("  %u -> %u", index, reconstructionValue);
+            }
+        }
+        
+        
+        // Decode the QVs
+        CALQ_LOG("Decoding quality values");
         qualDecoder.readBlock(cqFile_);
         for (auto const &samRecord : sideInformationFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {

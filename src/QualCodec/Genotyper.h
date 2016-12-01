@@ -15,10 +15,10 @@ namespace calq {
 
 class Genotyper {
 public:
-    Genotyper(const unsigned int &polyploidy,
-              const unsigned int &qualMin,
-              const unsigned int &qualMax,
-              const unsigned int &nrQuantizers);
+    Genotyper(const int &polyploidy,
+              const int &qualMin,
+              const int &qualMax,
+              const int &nrQuantizers);
     ~Genotyper(void);
 
 //     void computeAdjustedQual(std::string &adjustedQual,
@@ -42,10 +42,10 @@ private:
     std::map<char,double> alleleLikelihoods_;
     std::vector<std::string> genotypeAlphabet_;
     std::map<std::string,double> genotypeLikelihoods_;
-    const unsigned int nrQuantizers_;
-    const unsigned int polyploidy_;
-    const unsigned int qualMin_;
-    const unsigned int qualMax_;
+    const int nrQuantizers_;
+    const int polyploidy_;
+    const int qualMin_;
+    const int qualMax_;
 };
 
 }

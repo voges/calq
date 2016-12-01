@@ -41,9 +41,15 @@ CalqEncoder::CalqEncoder(const Options &options)
         throwErrorException("polyploidy must be greater than zero");
     }
     // TODO: check qualityValue*_
-    if (options.qualityValueMax) {}
-    if (options.qualityValueMin) {}
-    if (options.qualityValueOffset) {}
+    if (options.qualityValueMax < 0) {
+        throwErrorException("qualityValueMax must be zero or greater");
+    }
+    if (options.qualityValueMin < 0) {
+        throwErrorException("qualityValueMin must be zero or greater");
+    }
+    if (options.qualityValueOffset < 1) {
+        throwErrorException("qualityValueOffset must be greater than zero");
+    }
     //if (referenceFileNames.empty() == true) {
     //    throwErrorException("referenceFileNames is empty");
     //}
@@ -68,8 +74,13 @@ CalqEncoder::~CalqEncoder(void) {}
 
 void CalqEncoder::encode(void)
 {
-    auto startTime = std::chrono::steady_clock::now();;
     size_t uncompressedSize = 0;
+
+    // Take time
+    auto startTime = std::chrono::steady_clock::now();
+
+    // Write CQ file header
+    CALQ_LOG("Writing CQ file header");
     cqFile_.writeHeader(blockSize_);
 
     while (samFile_.readBlock(blockSize_) != 0) {
@@ -90,15 +101,30 @@ void CalqEncoder::encode(void)
             }
         }
 
-        // Construct quantizers and store inverse quantization LUTs
-        CALQ_LOG("Constructing %u quantizers and storing inverse LUTs", QualEncoder::NR_QUANTIZERS);
+        // Construct quantizers
+        CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
         std::map<int,Quantizer> quantizers;
+        int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
+        for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
+             quantizerIdx < QualEncoder::QUANTIZER_IDX_MAX;
+             ++quantizerIdx, ++quantizerSteps) {
+            Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
+            quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
+        }
+
+        // Write the inverse quantization LUTs
+        CALQ_LOG("Writing inverse quantization LUTs");
+        cqFile_.writeQuantizers(quantizers);
+        
         unsigned int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
         unsigned int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
         cqFile_.writeUint8((uint8_t)QualEncoder::NR_QUANTIZERS);
+        
+        
+        
         for (unsigned int i = 0; i < QualEncoder::NR_QUANTIZERS; i++, quantizerIdx++, quantizerSteps++) {
-            Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
-            quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
+            
+            
             cqFile_.writeUint8(quantizerIdx);
             cqFile_.writeUint8(quantizerSteps);
             for (auto const &inverseLutEntry : quantizer.inverseLut()) {
