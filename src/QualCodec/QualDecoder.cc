@@ -19,10 +19,16 @@ QualDecoder::~QualDecoder(void) {}
 
 size_t QualDecoder::readBlock(CQFile &cqFile)
 {
+    CALQ_LOG("Reading block");
+
     size_t ret = 0;
 
-    //CALQ_LOG("Reading unmapped quality values");
-    //ret += cqFile.readBuffer(&unmappedQualityValues_);
+    CALQ_LOG("Reading unmapped quality values");
+    uint8_t flag = 0;
+    cqFile.readUint8(&flag);
+    if (flag)
+        ret += cqFile.readBuffer(&unmappedQualityValues_);
+    std::cout << unmappedQualityValues_ << std::endl;
 
     CALQ_LOG("Reading mapped quantizer indices");
     ret += cqFile.readBuffer(&mappedQuantizerIndices_);

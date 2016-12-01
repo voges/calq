@@ -11,6 +11,7 @@
 
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
+#include "Common/log.h"
 #include "Compressors/range/range.h"
 
 namespace calq {
@@ -91,6 +92,7 @@ size_t CQFile::readBuffer(std::string *buffer)
 
     uint64_t nrBlocks = 0;
     ret += readUint64(&nrBlocks);
+    CALQ_LOG("Reading %zu block(s)", nrBlocks);
 
     for (uint64_t i = 0; i < nrBlocks; ++i) {
         uint8_t compressed = 0;
@@ -131,8 +133,9 @@ size_t CQFile::writeBuffer(unsigned char *buffer, const size_t &bufferSize)
 
     size_t ret = 0;
 
-    size_t nrBlocks = (size_t)ceil((double)bufferSize / (double)1*MB);
+    size_t nrBlocks = (size_t)ceil((double)bufferSize / (double)(1*MB));
     ret = writeUint64((uint64_t)nrBlocks);
+    CALQ_LOG("Splitting buffer containing %zu byte(s) into %zu block(s)", bufferSize, nrBlocks);
 
     size_t encodedBytes = 0;
     while (encodedBytes < bufferSize) {

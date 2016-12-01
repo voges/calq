@@ -124,27 +124,23 @@ size_t QualEncoder::finishAndWriteBlock(CQFile &cqFile)
     CALQ_LOG("Finishing and writing unmapped quality values");
     unsigned char *uq = (unsigned char *)unmappedQual_.c_str();
     size_t uqSize = unmappedQual_.length();
-    //compressedUnmappedQualSize_ += cqFile.writeBuffer(uq, uqSize);
+    if (uqSize > 0 ) {
+        cqFile.writeUint8(0x1);
+        compressedUnmappedQualSize_ += cqFile.writeBuffer(uq, uqSize);
+    } else {
+        cqFile.writeUint8(0x0);
+    }
 
     CALQ_LOG("Finishing and writing mapped quantizer indices");
     std::string tmp("");
     for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
-        if (mappedQuantizerIndex < -1) {
-            std::cout << mappedQuantizerIndex << std::endl;
-            throwErrorException("RANGE-1");
-        }
-        if (mappedQuantizerIndex > (NR_QUANTIZERS-1)) {
-            std::cout << mappedQuantizerIndex << std::endl;
-            throwErrorException("RANGE++");
-        }
         tmp += std::to_string(mappedQuantizerIndex+1);
     }
-
-    std::cout << "NRQ_ " << NR_QUANTIZERS << std::endl;
-    std::cout << tmp << std::endl;
-    
     unsigned char *mqi = (unsigned char *)tmp.c_str();
     size_t mqiSize = tmp.length();
+    if (mqiSize == 0) {
+        throwErrorException("No mapped quantizer indices");
+    }
     size_t mqiRLESize = 0;
     unsigned char *mqiRLE = rle_encode(mqi, mqiSize, &mqiRLESize, 5, (unsigned char)'0');
     compressedMappedQualSize_ += cqFile.writeBuffer(mqiRLE, mqiRLESize);
@@ -157,6 +153,9 @@ size_t QualEncoder::finishAndWriteBlock(CQFile &cqFile)
     }
     unsigned char *mq = (unsigned char *)tmp.c_str();
     size_t mqSize = tmp.length();
+    if (mqSize == 0) {
+        throwErrorException("No mapped quality value indices");
+    }
     size_t mqRLESize = 0;
     unsigned char *mqRLE = rle_encode(mq, mqSize, &mqRLESize, QUANTIZER_STEPS_MAX, (unsigned char)'0');
     compressedMappedQualSize_ += cqFile.writeBuffer(mqRLE, mqRLESize);

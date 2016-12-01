@@ -72,15 +72,15 @@ void CalqEncoder::encode(void)
     while (samFile_.readBlock(blockSize_) != 0) {
         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
-        // Compute min and max QV for the current block
+        // Check QV range and compute uncompressed QV size for the current block
         for (auto const &samRecord : samFile_.currentBlock.records) {
             uncompressedSize += samRecord.qual.length();
             if (samRecord.isMapped() == true) {
                 for (auto const &q : samRecord.qual) {
-                    if (q-qualityValueOffset_ < qualityValueMin_) {
+                    if ((q-qualityValueOffset_) < qualityValueMin_) {
                         throwErrorException("Quality value too small");
                     }
-                    if (q-qualityValueOffset_ > qualityValueMax_) {
+                    if ((q-qualityValueOffset_) > qualityValueMax_) {
                         throwErrorException("Quality value too large");
                     }
                 }
@@ -96,7 +96,6 @@ void CalqEncoder::encode(void)
         for (unsigned int i = 0; i < QualEncoder::NR_QUANTIZERS; i++, quantizerIdx++, quantizerSteps++) {
             Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
             quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
-
             cqFile_.writeUint8(quantizerIdx);
             cqFile_.writeUint8(quantizerSteps);
             for (auto const &inverseLutEntry : quantizer.inverseLut()) {
