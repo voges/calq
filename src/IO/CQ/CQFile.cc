@@ -16,10 +16,7 @@
 
 namespace calq {
 
-CQFile::CQFile(const std::string &path, const Mode &mode)
-    : File(path, mode),
-      nrReadHeaderBytes_(0),
-      nrWrittenHeaderBytes_(0)
+CQFile::CQFile(const std::string &path, const Mode &mode) : File(path, mode)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -27,22 +24,6 @@ CQFile::CQFile(const std::string &path, const Mode &mode)
 }
 
 CQFile::~CQFile(void) {}
-
-size_t CQFile::nrReadHeaderBytes(void) const
-{
-    if (mode_ != MODE_READ) {
-        throwErrorException("File is not open in read mode");
-    }
-    return nrReadHeaderBytes_;
-}
-
-size_t CQFile::nrWrittenHeaderBytes(void) const
-{
-    if (mode_ != MODE_WRITE) {
-        throwErrorException("File is not open in write mode");
-    }
-    return nrWrittenHeaderBytes_;
-}
 
 size_t CQFile::readHeader(size_t *blockSize)
 {
@@ -59,8 +40,8 @@ size_t CQFile::readHeader(size_t *blockSize)
     }
 
     ret += readUint64((uint64_t *)blockSize);
+    CALQ_LOG("Block size: %zu", *blockSize);
 
-    nrReadHeaderBytes_ += ret;
     return ret;
 }
 
@@ -75,7 +56,6 @@ size_t CQFile::writeHeader(const size_t &blockSize)
     ret += write((char *)MAGIC, MAGIC_LEN);
     ret += writeUint64((uint64_t)blockSize);
 
-    nrWrittenHeaderBytes_ += ret;
     return ret;
 }
 
@@ -92,7 +72,7 @@ size_t CQFile::readBuffer(std::string *buffer)
 
     uint64_t nrBlocks = 0;
     ret += readUint64(&nrBlocks);
-    CALQ_LOG("Reading %zu block(s)", nrBlocks);
+    CALQ_LOG("Reading %zu block(s)", (size_t)nrBlocks);
 
     for (uint64_t i = 0; i < nrBlocks; ++i) {
         uint8_t compressed = 0;
@@ -104,16 +84,19 @@ size_t CQFile::readBuffer(std::string *buffer)
             ret += read(tmp, tmpSize);
             *buffer += std::string((const char *)tmp);
             free(tmp);
+            CALQ_LOG("Read uncompressed block (%u byte(s))", tmpSize);
         } else if (compressed == 1) {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
             unsigned char *tmp = (unsigned char *)malloc(tmpSize);
             ret += read(tmp, tmpSize);
+            CALQ_LOG("Read compressed block (%u byte(s))", tmpSize);
             unsigned int uncompressedSize = 0;
             unsigned char *uncompressed = range_decompress_o1(tmp, &uncompressedSize);
             free(tmp);
             *buffer += std::string((const char *)uncompressed);
             free(uncompressed);
+            CALQ_LOG("Uncompressed size: %u", uncompressedSize);
         } else {
             throwErrorException("Bitstream error");
         }
@@ -140,8 +123,8 @@ size_t CQFile::writeBuffer(unsigned char *buffer, const size_t &bufferSize)
     size_t encodedBytes = 0;
     while (encodedBytes < bufferSize) {
         unsigned int bytesToEncode = 0;
-        if ((bufferSize - encodedBytes) > 1*MB) {
-            bytesToEncode = 1*MB;
+        if ((bufferSize - encodedBytes) > (1*MB)) {
+            bytesToEncode = (1*MB);
         } else {
             bytesToEncode = bufferSize - encodedBytes;
         }

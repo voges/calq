@@ -41,6 +41,9 @@ CalqEncoder::CalqEncoder(const Options &options)
         throwErrorException("polyploidy must be greater than zero");
     }
     // TODO: check qualityValue*_
+    if (options.qualityValueMax) {}
+    if (options.qualityValueMin) {}
+    if (options.qualityValueOffset) {}
     //if (referenceFileNames.empty() == true) {
     //    throwErrorException("referenceFileNames is empty");
     //}

@@ -10,7 +10,7 @@
 #include "Common/helpers.h"
 
 // C-style debug macro
-#define DBG
+//#define DBG
 #ifdef DBG
     #define CALQ_DEBUG(c,...) \
         do { \

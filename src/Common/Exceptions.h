@@ -42,7 +42,7 @@ class ErrorExceptionReporter {
 public:
     ErrorExceptionReporter(const std::string &file, 
                            const std::string &function,
-                           const int line)
+                           const int &line)
         : file_(file)
         , function_(function)
         , line_(line)
