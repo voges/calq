@@ -10,6 +10,7 @@
 #include <string>
 
 #include "IO/CQ/CQFile.h"
+#include "IO/SAM/SAMRecord.h"
 
 namespace calq {
 
@@ -18,11 +19,11 @@ public:
     explicit QualDecoder(void);
     ~QualDecoder(void);
 
-    size_t readBlock(CQFile &cqFile);
+    size_t decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
+    size_t decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
+    size_t readBlock(CQFile *cqFile);
 
 private:
-    void reset(void);
-
     std::string unmappedQualityValues_;
     std::string mappedQuantizerIndices_;
     std::string mappedQualityValueIndices_;

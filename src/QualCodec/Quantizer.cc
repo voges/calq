@@ -12,6 +12,10 @@ namespace calq {
 
 Quantizer::Quantizer(void) : lut_() , inverseLut_() {}
 
+Quantizer::Quantizer(const std::map<int, int> &inverseLut)
+    : lut_(),
+      inverseLut_(inverseLut) {}
+
 Quantizer::~Quantizer(void) {}
 
 int Quantizer::valueToIndex(const int &value) const

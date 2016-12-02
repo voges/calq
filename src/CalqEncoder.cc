@@ -105,33 +105,14 @@ void CalqEncoder::encode(void)
         CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
         std::map<int,Quantizer> quantizers;
         int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
-        for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
-             quantizerIdx < QualEncoder::QUANTIZER_IDX_MAX;
-             ++quantizerIdx, ++quantizerSteps) {
-            Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
+        for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN; quantizerIdx < QualEncoder::QUANTIZER_IDX_MAX; ++quantizerIdx) {
+            Quantizer quantizer = UniformQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps);
             quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
         }
 
         // Write the inverse quantization LUTs
         CALQ_LOG("Writing inverse quantization LUTs");
         cqFile_.writeQuantizers(quantizers);
-        
-        unsigned int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
-        unsigned int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
-        cqFile_.writeUint8((uint8_t)QualEncoder::NR_QUANTIZERS);
-        
-        
-        
-        for (unsigned int i = 0; i < QualEncoder::NR_QUANTIZERS; i++, quantizerIdx++, quantizerSteps++) {
-            
-            
-            cqFile_.writeUint8(quantizerIdx);
-            cqFile_.writeUint8(quantizerSteps);
-            for (auto const &inverseLutEntry : quantizer.inverseLut()) {
-                cqFile_.writeUint8((uint8_t)inverseLutEntry.first);
-                cqFile_.writeUint8((uint8_t)inverseLutEntry.second);
-            }
-        }
 
         // Encode the QVs
         CALQ_LOG("Encoding quality values");
@@ -143,7 +124,8 @@ void CalqEncoder::encode(void)
                 qualEncoder.addUnmappedRecordToBlock(samRecord);
             }
         }
-        qualEncoder.finishAndWriteBlock(cqFile_);
+        qualEncoder.finishBlock();
+        qualEncoder.writeBlock(&cqFile_);
     }
 
     auto stopTime = std::chrono::steady_clock::now();

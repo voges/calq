@@ -14,6 +14,7 @@ namespace calq {
 class Quantizer {
 public:
     Quantizer(void);
+    Quantizer(const std::map<int,int> &inverseLut);
     virtual ~Quantizer(void);
 
     int valueToIndex(const int &value) const;

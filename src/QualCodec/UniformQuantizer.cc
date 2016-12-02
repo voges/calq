@@ -14,7 +14,7 @@
 
 namespace calq {
 
-UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const unsigned int &nrSteps)
+UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, const unsigned int &nrSteps)
     : Quantizer()
 {
     if ((valueMin > valueMax) || (nrSteps <= 1)) {

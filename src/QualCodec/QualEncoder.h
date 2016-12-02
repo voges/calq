@@ -35,7 +35,8 @@ public:
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
-    size_t finishAndWriteBlock(CQFile &cqFile);
+    size_t finishBlock(void);
+    size_t writeBlock(CQFile *cqFile);
 
     size_t compressedMappedQualSize(void) const;
     size_t compressedUnmappedQualSize(void) const;

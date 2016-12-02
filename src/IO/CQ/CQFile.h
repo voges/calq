@@ -9,6 +9,10 @@
 
 #include "IO/File.h"
 
+#include <map>
+
+#include "QualCodec/Quantizer.h"
+
 namespace calq {
 
 class CQFile : public File {
@@ -17,9 +21,12 @@ public:
     ~CQFile(void);
 
     size_t readHeader(size_t *blockSize);
+    size_t readQuantizers(std::map<int,Quantizer> *quantizers);
+    size_t readQualBlock(std::string *block);
+
     size_t writeHeader(const size_t &blockSize);
-    size_t readBuffer(std::string *buffer);
-    size_t writeBuffer(unsigned char *buffer, const size_t &bufferSize);
+    size_t writeQuantizers(const std::map<int,Quantizer> &quantizers);
+    size_t writeQualBlock(unsigned char *block, const size_t &blockSize);
 
 private:
     static constexpr const char *MAGIC = "CQ";

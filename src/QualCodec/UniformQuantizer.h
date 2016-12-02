@@ -13,7 +13,7 @@ namespace calq {
 
 class UniformQuantizer : public Quantizer {
 public:
-    UniformQuantizer(const int &valueMin, const int &valueMax, const unsigned int &nrSteps);
+    UniformQuantizer(const int &valueMax, const int &valueMin, const unsigned int &nrSteps);
     ~UniformQuantizer(void);
 };
 

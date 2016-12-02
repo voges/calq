@@ -102,7 +102,12 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     nrMappedRecords_++;
 }
 
-size_t QualEncoder::finishAndWriteBlock(CQFile &cqFile)
+size_t QualEncoder::finishBlock(void)
+{
+
+}
+
+size_t QualEncoder::writeBlock(CQFile *cqFile)
 {
     // Compute all remaining quantizers
     while (samPileupDeque_.empty() == false) {
@@ -125,10 +130,10 @@ size_t QualEncoder::finishAndWriteBlock(CQFile &cqFile)
     unsigned char *uq = (unsigned char *)unmappedQual_.c_str();
     size_t uqSize = unmappedQual_.length();
     if (uqSize > 0 ) {
-        cqFile.writeUint8(0x1);
-        compressedUnmappedQualSize_ += cqFile.writeBuffer(uq, uqSize);
+        cqFile->writeUint8(0x1);
+        compressedUnmappedQualSize_ += cqFile->writeQualBlock(uq, uqSize);
     } else {
-        cqFile.writeUint8(0x0);
+        cqFile->writeUint8(0x0);
     }
 
     CALQ_LOG("Finishing and writing mapped quantizer indices");
@@ -143,7 +148,7 @@ size_t QualEncoder::finishAndWriteBlock(CQFile &cqFile)
     }
     size_t mqiRLESize = 0;
     unsigned char *mqiRLE = rle_encode(mqi, mqiSize, &mqiRLESize, 5, (unsigned char)'0');
-    compressedMappedQualSize_ += cqFile.writeBuffer(mqiRLE, mqiRLESize);
+    compressedMappedQualSize_ += cqFile->writeQualBlock(mqiRLE, mqiRLESize);
     free(mqiRLE);
 
     CALQ_LOG("Finishing and writing mapped quality value indices");
@@ -158,7 +163,7 @@ size_t QualEncoder::finishAndWriteBlock(CQFile &cqFile)
     }
     size_t mqRLESize = 0;
     unsigned char *mqRLE = rle_encode(mq, mqSize, &mqRLESize, QUANTIZER_STEPS_MAX, (unsigned char)'0');
-    compressedMappedQualSize_ += cqFile.writeBuffer(mqRLE, mqRLESize);
+    compressedMappedQualSize_ += cqFile->writeQualBlock(mqRLE, mqRLESize);
     free(mqRLE);
 
     stopTime_ = std::chrono::steady_clock::now();
