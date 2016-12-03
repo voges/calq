@@ -20,6 +20,9 @@ public:
     CQFile(const std::string &path, const Mode &mode);
     ~CQFile(void);
 
+    size_t nrReadFileFormatBytes(void) const;
+    size_t nrWrittenFileFormatBytes(void) const;
+
     size_t readHeader(size_t *blockSize);
     size_t readQuantizers(std::map<int,Quantizer> *quantizers);
     size_t readQualBlock(std::string *block);
@@ -31,6 +34,9 @@ public:
 private:
     static constexpr const char *MAGIC = "CQ";
     const size_t MAGIC_LEN = 3;
+
+    size_t nrReadFileFormatBytes_;
+    size_t nrWrittenFileFormatBytes_;
 };
 
 } // namespace calq

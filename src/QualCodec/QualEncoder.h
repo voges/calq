@@ -20,13 +20,13 @@ namespace calq {
 
 class QualEncoder {
 public:
-    static const unsigned int QUANTIZER_STEPS_MIN = 2;
-    static const unsigned int QUANTIZER_STEPS_MAX = 5;
+    static const int QUANTIZER_STEPS_MIN = 2;
+    static const int QUANTIZER_STEPS_MAX = 5;
     static const int NR_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
-    static const unsigned int QUANTIZER_IDX_MIN = 0;
-    static const unsigned int QUANTIZER_IDX_MAX = NR_QUANTIZERS-1;
+    static const int QUANTIZER_IDX_MIN = 0;
+    static const int QUANTIZER_IDX_MAX = NR_QUANTIZERS-1;
 
-    explicit QualEncoder(const unsigned int &polyploidy,
+    explicit QualEncoder(const int &polyploidy,
                          const int &qualityValueMax,
                          const int &qualityValueMin,
                          const int &qualityValueOffset,
@@ -35,7 +35,7 @@ public:
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
     void addMappedRecordToBlock(const SAMRecord &samRecord);
-    size_t finishBlock(void);
+    void finishBlock(void);
     size_t writeBlock(CQFile *cqFile);
 
     size_t compressedMappedQualSize(void) const;

@@ -7,13 +7,15 @@
 
 #include "Common/Exceptions.h"
 #include "Common/log.h"
+#include "Compressors/rle/rle.h"
 
 namespace calq {
 
-QualDecoder::QualDecoder(void)
+QualDecoder::QualDecoder(std::map<int,Quantizer> &quantizers)
     : unmappedQualityValues_(""),
       mappedQuantizerIndices_(""),
-      mappedQualityValueIndices_("") {}
+      mappedQualityValueIndices_(""),
+      quantizers_(quantizers) {}
 
 QualDecoder::~QualDecoder(void) {}
 
@@ -38,18 +40,34 @@ size_t QualDecoder::readBlock(CQFile *cqFile)
     size_t ret = 0;
 
     CALQ_LOG("Reading unmapped quality values");
-    uint8_t flag = 0;
-    cqFile->readUint8(&flag);
-    if (flag)
+    uint8_t uqvFlag = 0;
+    cqFile->readUint8(&uqvFlag);
+    if (uqvFlag & 0x1) {
         ret += cqFile->readQualBlock(&unmappedQualityValues_);
-    std::cout << unmappedQualityValues_ << std::endl;
+    } else {
+        CALQ_LOG("No unmapped quality values in this block");
+    }
+    std::cout << "uqv: " << unmappedQualityValues_ << std::endl;
 
     CALQ_LOG("Reading mapped quantizer indices");
-    ret += cqFile->readQualBlock(&mappedQuantizerIndices_);
-    std::cout << mappedQuantizerIndices_ << std::endl;
+    uint8_t mqiFlag = 0;
+    cqFile->readUint8(&mqiFlag);
+    if (mqiFlag & 0x1) {
+        ret += cqFile->readQualBlock(&mappedQuantizerIndices_);
+    } else {
+        CALQ_LOG("No mapped quantizer indices in this block");
+    }
+    std::cout << "mqi: " << mappedQuantizerIndices_ << std::endl;
 
     CALQ_LOG("Reading mapped quality value indices");
-    ret += cqFile->readQualBlock(&mappedQualityValueIndices_);
+    uint8_t mqviFlag = 0;
+    cqFile->readUint8(&mqviFlag);
+    if (mqviFlag & 0x1) {
+        ret += cqFile->readQualBlock(&mappedQualityValueIndices_);
+    } else {
+        CALQ_LOG("No mapped quality value indices in this block");
+    }
+    std::cout << "mqvi: " << mappedQualityValueIndices_ << std::endl;
 
     return ret;
 }

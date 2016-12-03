@@ -201,7 +201,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &seqPileup,
     resetLikelihoods();
 
     double *tempGenotypeLikelihoods = (double *)calloc(genotypeAlphabet_.size(), sizeof(double));
-    unsigned int itr = 0;
+    int itr = 0;
     for (size_t d = 0; d < depth; d++) {
         char y = (char)seqPileup[d];
         //double q = (double)(qualPileup[d] - qualMin_);
@@ -217,7 +217,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &seqPileup,
         itr = 0;
         for (auto const &genotype : genotypeAlphabet_) {
             double p = 0.0;
-            for (unsigned int i = 0; i < polyploidy_; i++) {
+            for (int i = 0; i < polyploidy_; i++) {
                 p += (y == genotype[i]) ? pStrike : pError;
             }
             p /= polyploidy_;

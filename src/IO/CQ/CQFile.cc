@@ -16,7 +16,10 @@
 
 namespace calq {
 
-CQFile::CQFile(const std::string &path, const Mode &mode) : File(path, mode)
+CQFile::CQFile(const std::string &path, const Mode &mode)
+    : File(path, mode),
+      nrReadFileFormatBytes_(0),
+      nrWrittenFileFormatBytes_(0)
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -24,6 +27,16 @@ CQFile::CQFile(const std::string &path, const Mode &mode) : File(path, mode)
 }
 
 CQFile::~CQFile(void) {}
+
+size_t CQFile::nrReadFileFormatBytes(void) const
+{
+    return nrReadFileFormatBytes_;
+}
+
+size_t CQFile::nrWrittenFileFormatBytes(void) const
+{
+    return nrWrittenFileFormatBytes_;
+}
 
 size_t CQFile::readHeader(size_t *blockSize)
 {
@@ -44,6 +57,7 @@ size_t CQFile::readHeader(size_t *blockSize)
     ret += readUint64((uint64_t *)blockSize);
     CALQ_LOG("Block size: %zu", *blockSize);
 
+    nrReadFileFormatBytes_ += ret;
     return ret;
 }
 
@@ -143,6 +157,7 @@ size_t CQFile::writeHeader(const size_t &blockSize)
     ret += write((char *)MAGIC, MAGIC_LEN);
     ret += writeUint64((uint64_t)blockSize);
 
+    nrWrittenFileFormatBytes_ += ret;
     return ret;
 }
 

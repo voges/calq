@@ -52,7 +52,7 @@ void CalqDecoder::decode(void)
 
         // Decode the QVs
         CALQ_LOG("Decoding quality values");
-        QualDecoder qualDecoder;
+        QualDecoder qualDecoder(quantizers);
         qualDecoder.readBlock(&cqFile_);
         for (auto const &samRecord : sideInformationFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
@@ -74,6 +74,7 @@ void CalqDecoder::decode(void)
     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
     CALQ_LOG("  Decoded %zu block(s)", sideInformationFile_.nrBlocksRead());
     CALQ_LOG("  Compressed size: %zu", cqFile_.nrReadBytes());
+    CALQ_LOG("    Of which file format size: %zu", cqFile_.nrReadFileFormatBytes());
     CALQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(cqFile_.nrReadBytes()/MB))/(double)((double)diffTimeMs/1000));
 }
 

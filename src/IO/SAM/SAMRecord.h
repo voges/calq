@@ -18,7 +18,7 @@ namespace calq {
 
 class SAMRecord {
 public:
-    static const unsigned int NUM_FIELDS = 12;
+    static const int NUM_FIELDS = 12;
 
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);

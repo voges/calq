@@ -140,6 +140,7 @@ void CalqEncoder::encode(void)
     CALQ_LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", samFile_.nrMappedRecordsRead(), samFile_.nrUnmappedRecordsRead(), samFile_.nrRecordsRead(), samFile_.nrBlocksRead());
     CALQ_LOG("  Uncompressed size: %zu", uncompressedSize);
     CALQ_LOG("  Compressed size: %zu", cqFile_.nrWrittenBytes());
+    CALQ_LOG("    Of which file format size: %zu", cqFile_.nrWrittenFileFormatBytes());
     CALQ_LOG("  Compression ratio: %.2f%%", (double)cqFile_.nrWrittenBytes()*100/(double)uncompressedSize);
     CALQ_LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)cqFile_.nrWrittenBytes());
     CALQ_LOG("  Bits per quality value: %.4f", ((double)cqFile_.nrWrittenBytes() * 8)/(double)uncompressedSize);

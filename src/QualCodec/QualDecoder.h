@@ -16,7 +16,7 @@ namespace calq {
 
 class QualDecoder {
 public:
-    explicit QualDecoder(void);
+    explicit QualDecoder(std::map<int,Quantizer> &quantizers);
     ~QualDecoder(void);
 
     size_t decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
@@ -27,6 +27,8 @@ private:
     std::string unmappedQualityValues_;
     std::string mappedQuantizerIndices_;
     std::string mappedQualityValueIndices_;
+
+    std::map<int,Quantizer> quantizers_;
 };
 
 }

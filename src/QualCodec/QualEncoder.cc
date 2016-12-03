@@ -15,7 +15,7 @@
 
 namespace calq {
 
-QualEncoder::QualEncoder(const unsigned int &polyploidy,
+QualEncoder::QualEncoder(const int &polyploidy,
                          const int &qualityValueMax,
                          const int &qualityValueMin,
                          const int &qualityValueOffset,
@@ -102,12 +102,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     nrMappedRecords_++;
 }
 
-size_t QualEncoder::finishBlock(void)
-{
-
-}
-
-size_t QualEncoder::writeBlock(CQFile *cqFile)
+void QualEncoder::finishBlock(void)
 {
     // Compute all remaining quantizers
     while (samPileupDeque_.empty() == false) {
@@ -125,60 +120,69 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
         encodeMappedQual(samRecordDeque_.front());
         samRecordDeque_.pop_front();
     }
+}
 
-    CALQ_LOG("Finishing and writing unmapped quality values");
-    unsigned char *uq = (unsigned char *)unmappedQual_.c_str();
-    size_t uqSize = unmappedQual_.length();
-    if (uqSize > 0 ) {
-        cqFile->writeUint8(0x1);
-        compressedUnmappedQualSize_ += cqFile->writeQualBlock(uq, uqSize);
+size_t QualEncoder::writeBlock(CQFile *cqFile)
+{
+    CALQ_LOG("Writing block");
+
+    size_t ret = 0;
+
+    CALQ_LOG("Writing unmapped quality values");
+    //std::cout << "uqv: " << unmappedQual_ << std::endl;
+    unsigned char *uqv = (unsigned char *)unmappedQual_.c_str();
+    size_t uqvSize = unmappedQual_.length();
+    uint8_t uqvFlag = 0;
+    if (uqvSize > 0) {
+        uqvFlag = 1;
+        cqFile->writeUint8(uqvFlag);
+        ret += cqFile->writeQualBlock(uqv, uqvSize);
     } else {
-        cqFile->writeUint8(0x0);
+        uqvFlag = 0;
+        cqFile->writeUint8(uqvFlag);
+        CALQ_LOG("No unmapped quality values in this block");
     }
 
-    CALQ_LOG("Finishing and writing mapped quantizer indices");
+    CALQ_LOG("Writing mapped quantizer indices");
     std::string tmp("");
     for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
         tmp += std::to_string(mappedQuantizerIndex+1);
     }
+    //std::cout << "mqi: " << tmp << std::endl;
     unsigned char *mqi = (unsigned char *)tmp.c_str();
     size_t mqiSize = tmp.length();
-    if (mqiSize == 0) {
-        throwErrorException("No mapped quantizer indices");
+    uint8_t mqiFlag = 0;
+    if (mqiSize > 0) {
+        mqiFlag = 1;
+        cqFile->writeUint8(mqiFlag);
+        ret += cqFile->writeQualBlock(mqi, mqiSize);
+    } else {
+        mqiFlag = 0;
+        cqFile->writeUint8(mqiFlag);
+        CALQ_LOG("No mapped quantizer indices in this block");
     }
-    size_t mqiRLESize = 0;
-    unsigned char *mqiRLE = rle_encode(mqi, mqiSize, &mqiRLESize, 5, (unsigned char)'0');
-    compressedMappedQualSize_ += cqFile->writeQualBlock(mqiRLE, mqiRLESize);
-    free(mqiRLE);
 
-    CALQ_LOG("Finishing and writing mapped quality value indices");
+    CALQ_LOG("Writing mapped quality value indices");
     tmp = "";
     for (auto const &mappedQualIndex : mappedQualIndices_) {
         tmp += std::to_string(mappedQualIndex);
     }
-    unsigned char *mq = (unsigned char *)tmp.c_str();
-    size_t mqSize = tmp.length();
-    if (mqSize == 0) {
-        throwErrorException("No mapped quality value indices");
+    //std::cout << "mqvi: " << tmp << std::endl;
+    unsigned char *mqvi = (unsigned char *)tmp.c_str();
+    size_t mqviSize = tmp.length();
+    uint8_t mqviFlag = 0;
+    if (mqviSize > 0) {
+        mqviFlag = 1;
+        cqFile->writeUint8(mqviFlag);
+        ret += cqFile->writeQualBlock(mqvi, mqviSize);
+    } else {
+        mqviFlag = 0;
+        cqFile->writeUint8(mqviFlag);
+        CALQ_LOG("No mapped quality value in this block");
     }
-    size_t mqRLESize = 0;
-    unsigned char *mqRLE = rle_encode(mq, mqSize, &mqRLESize, QUANTIZER_STEPS_MAX, (unsigned char)'0');
-    compressedMappedQualSize_ += cqFile->writeQualBlock(mqRLE, mqRLESize);
-    free(mqRLE);
 
-    stopTime_ = std::chrono::steady_clock::now();
-    auto diffTime = stopTime_ - startTime_;
-    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
-    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-
-    CALQ_LOG("Finished block (%zu mapped + %zu unmapped = %zu records)", nrMappedRecords(), nrUnmappedRecords(), nrRecords());
-    CALQ_LOG("Took %ld ms ~= %ld s", diffTimeMs, diffTimeS);
-    CALQ_LOG("Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedQualSize()/MB))/(double)((double)diffTimeMs/1000));
-    CALQ_LOG("Bits per quality value: %.4f", ((double)compressedQualSize() * 8)/(double)uncompressedQualSize());
-    CALQ_LOG("  Mapped: %.4f", ((double)compressedMappedQualSize() * 8)/(double)uncompressedMappedQualSize());
-    CALQ_LOG("  Unmapped: %.4f", ((double)compressedUnmappedQualSize() * 8)/(double)uncompressedUnmappedQualSize());
-
-    return compressedQualSize();
+    compressedMappedQualSize_ += ret;
+    return ret;
 }
 
 size_t QualEncoder::compressedMappedQualSize(void) const { return compressedMappedQualSize_; }
