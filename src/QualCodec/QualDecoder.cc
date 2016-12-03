@@ -27,9 +27,73 @@ QualDecoder::~QualDecoder(void) {}
 
 void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
 {
-    size_t qualityValueIndicesLen = samRecord.seq.length();
-    std::string qualityValueIndicesLen = mappedQualityValueIndices_.substr(mappedQualityValueIndicesPosition_, qualityValueIndicesLen);
+    size_t qualityValueIndicesLen = 0;
+
+    size_t cigarIdx = 0;
+    size_t cigarLen = samRecord.cigar.length();
+    size_t opLen = 0; // length of current CIGAR operation
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+       if (isdigit(samRecord.cigar[cigarIdx])) {
+           opLen = opLen*10 + (size_t)samRecord.cigar[cigarIdx] - (size_t)'0';
+           continue;
+       }
+       qualityValueIndicesLen += opLen;
+    }
+
+    std::string qualityValueIndices = mappedQualityValueIndices_.substr(mappedQualityValueIndicesPosition_, qualityValueIndicesLen);
     mappedQualityValueIndicesPosition_ += qualityValueIndicesLen;
+
+    std::string qual("");
+
+    cigarIdx = 0;
+    cigarLen = samRecord.cigar.length();
+    opLen = 0; // length of current CIGAR operation
+//     size_t qualIdx = 0;
+//     size_t mqiIdx = samRecord.posMin - posOffset_;
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+       if (isdigit(samRecord.cigar[cigarIdx])) {
+           opLen = opLen*10 + (size_t)samRecord.cigar[cigarIdx] - (size_t)'0';
+           continue;
+       }
+
+       switch (samRecord.cigar[cigarIdx]) {
+       case 'M':
+       case '=':
+       case 'X':
+           // Decode opLen quality value indices with computed quantizer indices
+           for (size_t i = 0; i < opLen; i++) {
+//                int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
+//                int mappedQuantizerIndex = mappedQuantizerIndices_[mqiIdx++];
+//                int mappedQualityValueIndex = quantizers_.at(mappedQuantizerIndex).valueToIndex(q);
+//                mappedQualityValueIndices_.push_back(mappedQualityValueIndex);
+           }
+           break;
+       case 'I':
+       case 'S':
+           // Decode opLen quality values with max quantizer index
+           for (size_t i = 0; i < opLen; i++) {
+//                int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
+//                int mappedQualityValueIndex = quantizers_.at(quantizers_.size()-1).valueToIndex(q);
+//                mappedQualityValueIndices_.push_back(mappedQualityValueIndex);
+           }
+           break;
+       case 'D':
+       case 'N':
+//            mqiIdx += opLen;
+           break; // do nothing as these bases are not present
+       case 'H':
+       case 'P':
+           break; // these have been clipped
+       default:
+           throwErrorException("Bad CIGAR string");
+       }
+       opLen = 0;
+    }
+
+    qualFile->write((unsigned char *)qual.c_str(), qual.length());
+    qualFile->writeByte('\n');
 }
 
 void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
