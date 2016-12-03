@@ -40,7 +40,6 @@ CalqEncoder::CalqEncoder(const Options &options)
     if (options.polyploidy < 1) {
         throwErrorException("polyploidy must be greater than zero");
     }
-    // TODO: check qualityValue*_
     if (options.qualityValueMax < 0) {
         throwErrorException("qualityValueMax must be zero or greater");
     }
@@ -50,9 +49,9 @@ CalqEncoder::CalqEncoder(const Options &options)
     if (options.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
     }
-    //if (referenceFileNames.empty() == true) {
-    //    throwErrorException("referenceFileNames is empty");
-    //}
+//     if (referenceFileNames.empty() == true) {
+//        throwErrorException("referenceFileNames is empty");
+//     }
 
     // Check and, in case they are provided, get reference sequences
     if (referenceFileNames_.empty() == true) {
@@ -74,7 +73,10 @@ CalqEncoder::~CalqEncoder(void) {}
 
 void CalqEncoder::encode(void)
 {
-    size_t uncompressedSize = 0;
+    size_t compressedMappedQualSize = 0;
+    size_t compressedUnmappedQualSize= 0;
+    size_t uncompressedMappedQualSize= 0;
+    size_t uncompressedUnmappedQualSize= 0;
 
     // Take time
     auto startTime = std::chrono::steady_clock::now();
@@ -86,9 +88,8 @@ void CalqEncoder::encode(void)
     while (samFile_.readBlock(blockSize_) != 0) {
         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
-        // Check QV range and compute uncompressed QV size for the current block
+        // Check QV range for the current block
         for (auto const &samRecord : samFile_.currentBlock.records) {
-            uncompressedSize += samRecord.qual.length();
             if (samRecord.isMapped() == true) {
                 for (auto const &q : samRecord.qual) {
                     if ((q-qualityValueOffset_) < qualityValueMin_) {
@@ -112,7 +113,7 @@ void CalqEncoder::encode(void)
 
         // Write the inverse quantization LUTs
         CALQ_LOG("Writing inverse quantization LUTs");
-        cqFile_.writeQuantizers(quantizers);
+        compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);
 
         // Encode the QVs
         CALQ_LOG("Encoding quality values");
@@ -126,6 +127,12 @@ void CalqEncoder::encode(void)
         }
         qualEncoder.finishBlock();
         qualEncoder.writeBlock(&cqFile_);
+
+        // Update statistics
+        compressedMappedQualSize += qualEncoder.compressedMappedQualSize();
+        compressedUnmappedQualSize += qualEncoder.compressedUnmappedQualSize();
+        uncompressedMappedQualSize += qualEncoder.uncompressedMappedQualSize();
+        uncompressedUnmappedQualSize += qualEncoder.uncompressedUnmappedQualSize();
     }
 
     auto stopTime = std::chrono::steady_clock::now();
@@ -137,14 +144,27 @@ void CalqEncoder::encode(void)
 
     CALQ_LOG("COMPRESSION STATISTICS");
     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CALQ_LOG("  Compressed %zu mapped + %zu unmapped = %zu record(s) in %zu block(s)", samFile_.nrMappedRecordsRead(), samFile_.nrUnmappedRecordsRead(), samFile_.nrRecordsRead(), samFile_.nrBlocksRead());
-    CALQ_LOG("  Uncompressed size: %zu", uncompressedSize);
-    CALQ_LOG("  Compressed size: %zu", cqFile_.nrWrittenBytes());
-    CALQ_LOG("    Of which file format size: %zu", cqFile_.nrWrittenFileFormatBytes());
-    CALQ_LOG("  Compression ratio: %.2f%%", (double)cqFile_.nrWrittenBytes()*100/(double)uncompressedSize);
-    CALQ_LOG("  Compression factor: %.2f", (double)uncompressedSize/(double)cqFile_.nrWrittenBytes());
-    CALQ_LOG("  Bits per quality value: %.4f", ((double)cqFile_.nrWrittenBytes() * 8)/(double)uncompressedSize);
-    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)(uncompressedSize/MB))/(double)((double)diffTimeMs/1000));
+    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)((uncompressedMappedQualSize+uncompressedUnmappedQualSize)/MB))/(double)((double)diffTimeMs/1000));
+    CALQ_LOG("  Wrote %zu block(s)", samFile_.nrBlocksRead());
+    CALQ_LOG("  Record(s):  %12zu", samFile_.nrRecordsRead());
+    CALQ_LOG("    Mapped:   %12zu", samFile_.nrMappedRecordsRead());
+    CALQ_LOG("    Unmapped: %12zu", samFile_.nrUnmappedRecordsRead());
+    CALQ_LOG("  Uncompressed size: %12zu", uncompressedMappedQualSize+uncompressedUnmappedQualSize);
+    CALQ_LOG("    Mapped:          %12zu", uncompressedMappedQualSize);
+    CALQ_LOG("    Unmapped:        %12zu", uncompressedUnmappedQualSize);
+    CALQ_LOG("  Compressed size: %12zu", cqFile_.nrWrittenBytes());
+    CALQ_LOG("    File format:   %12zu", cqFile_.nrWrittenFileFormatBytes());
+    CALQ_LOG("    Mapped:        %12zu", compressedMappedQualSize);
+    CALQ_LOG("    Unmapped:      %12zu", compressedUnmappedQualSize);
+    CALQ_LOG("  Compression ratio: %4.2f%%", (double)cqFile_.nrWrittenBytes()*100/(double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize));
+    CALQ_LOG("    Mapped:          %4.2f%%", (double)compressedMappedQualSize*100/(double)(uncompressedMappedQualSize));
+    CALQ_LOG("    Unmapped:        %4.2f%%", (double)compressedUnmappedQualSize*100/(double)(uncompressedUnmappedQualSize));
+    CALQ_LOG("  Compression factor: %4.2f", (double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize)/(double)cqFile_.nrWrittenBytes());
+    CALQ_LOG("    Mapped:           %4.2f", (double)(uncompressedMappedQualSize)/(double)compressedMappedQualSize);
+    CALQ_LOG("    Unmapped:         %4.2f", (double)(uncompressedUnmappedQualSize)/(double)compressedUnmappedQualSize);
+    CALQ_LOG("  Bits per quality value: %2.4f", ((double)cqFile_.nrWrittenBytes() * 8)/(double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize));
+    CALQ_LOG("    Mapped:               %2.4f", ((double)compressedMappedQualSize * 8)/(double)(uncompressedMappedQualSize));
+    CALQ_LOG("    Unmapped:             %2.4f", ((double)compressedUnmappedQualSize * 8)/(double)(uncompressedUnmappedQualSize));
 }
 
 } // namespace calq

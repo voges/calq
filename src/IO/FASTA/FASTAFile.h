@@ -7,15 +7,17 @@
 #ifndef CALQ_IO_FASTA_FASTAFILE_H_
 #define CALQ_IO_FASTA_FASTAFILE_H_
 
+#include <map>
+#include <string>
+
 #include "Common/constants.h"
 #include "IO/File.h"
-#include <map>
 
 namespace calq {
 
 class FASTAFile : public File {
 public:
-    FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
+    explicit FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
     ~FASTAFile(void);
 
     std::map<std::string, std::string> references;

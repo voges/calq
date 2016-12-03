@@ -8,10 +8,12 @@
 
 #include <math.h>
 
+#include <map>
+#include <string>
+
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/log.h"
-#include "Compressors/rle/rle.h"
 
 namespace calq {
 
@@ -19,7 +21,7 @@ QualEncoder::QualEncoder(const int &polyploidy,
                          const int &qualityValueMax,
                          const int &qualityValueMin,
                          const int &qualityValueOffset,
-                         const std::map<int,Quantizer> &quantizers)
+                         const std::map<int, Quantizer> &quantizers)
     : startTime_(std::chrono::steady_clock::now()),
       stopTime_(std::chrono::steady_clock::now()),
 
@@ -33,9 +35,9 @@ QualEncoder::QualEncoder(const int &polyploidy,
       qualityValueOffset_(qualityValueOffset),
       posOffset_(0),
 
-      unmappedQual_(""),
+      unmappedQualityValues_(""),
       mappedQuantizerIndices_(),
-      mappedQualIndices_(),
+      mappedQualityValueIndices_(),
 
       samPileupDeque_(),
 
@@ -45,11 +47,17 @@ QualEncoder::QualEncoder(const int &polyploidy,
 
       samRecordDeque_()
 {
-    if (polyploidy == 0) {
-       throwErrorException("Polyploidy must be greater than zero");
+    if (polyploidy < 1) {
+        throwErrorException("polyploidy must be greater than zero");
     }
-    if (qualityValueMin > qualityValueMax) {
-        throwErrorException("qMin is greater than qMax");
+    if (qualityValueMax < 0) {
+        throwErrorException("qualityValueMax must be zero or greater");
+    }
+    if (qualityValueMin < 0) {
+        throwErrorException("qualityValueMin must be zero or greater");
+    }
+    if (qualityValueOffset < 1) {
+        throwErrorException("qualityValueOffset must be greater than zero");
     }
     if (quantizers.empty() == true) {
         throwErrorException("quantizers is empty");
@@ -63,15 +71,14 @@ QualEncoder::~QualEncoder(void)
 
 void QualEncoder::addUnmappedRecordToBlock(const SAMRecord &samRecord)
 {
-    uncompressedUnmappedQualSize_ += samRecord.qual.length();
     encodeUnmappedQual(samRecord.qual);
+
+    uncompressedUnmappedQualSize_ += samRecord.qual.length();
     nrUnmappedRecords_++;
 }
 
 void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
 {
-    uncompressedMappedQualSize_ += samRecord.qual.length();
-
     if (nrMappedRecords() == 0) {
         posOffset_ = samRecord.posMin;
         samPileupDeque_.setPosMin(samRecord.posMin);
@@ -82,7 +89,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
         samPileupDeque_.setPosMax(samRecord.posMax);
     }
 
-    samRecord.addToPileupQueue(samPileupDeque_);
+    samRecord.addToPileupQueue(&samPileupDeque_);
     samRecordDeque_.push_back(samRecord);
 
     while (samPileupDeque_.posMin() < samRecord.posMin) {
@@ -99,6 +106,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
         samRecordDeque_.pop_front();
     }
 
+    uncompressedMappedQualSize_ += samRecord.qual.length();
     nrMappedRecords_++;
 }
 
@@ -108,7 +116,6 @@ void QualEncoder::finishBlock(void)
     while (samPileupDeque_.empty() == false) {
         int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
         mappedQuantizerIndices_.push_back(k);
-        if (k < -1) throwErrorException("here i am");
 //         std::cout << samPileupDeque_.front().pos << " ";
 //         std::cout << samPileupDeque_.front().seq << " ";
 //         std::cout << samPileupDeque_.front().qual << " > " << k << std::endl;
@@ -126,63 +133,67 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
 {
     CALQ_LOG("Writing block");
 
-    size_t ret = 0;
+    compressedMappedQualSize_ = 0;
+    compressedUnmappedQualSize_ = 0;
 
-    CALQ_LOG("Writing unmapped quality values");
-    //std::cout << "uqv: " << unmappedQual_ << std::endl;
-    unsigned char *uqv = (unsigned char *)unmappedQual_.c_str();
-    size_t uqvSize = unmappedQual_.length();
-    uint8_t uqvFlag = 0;
+//     CALQ_LOG("  Writing pos offset and quality value offset");
+    compressedMappedQualSize_ += cqFile->writeUint32(posOffset_);
+    compressedMappedQualSize_ += cqFile->writeUint32((uint32_t)qualityValueOffset_);
+
+//     CALQ_LOG("  Writing unmapped quality values");
+//     std::cout << "uqv: " << unmappedQual_ << std::endl;
+    unsigned char *uqv = (unsigned char *)unmappedQualityValues_.c_str();
+    size_t uqvSize = unmappedQualityValues_.length();
+    uint8_t uqvFlags = 0;
     if (uqvSize > 0) {
-        uqvFlag = 1;
-        cqFile->writeUint8(uqvFlag);
-        ret += cqFile->writeQualBlock(uqv, uqvSize);
+        uqvFlags = 1;
+        compressedUnmappedQualSize_ += cqFile->writeUint8(uqvFlags);
+        compressedUnmappedQualSize_ += cqFile->writeQualBlock(uqv, uqvSize);
     } else {
-        uqvFlag = 0;
-        cqFile->writeUint8(uqvFlag);
-        CALQ_LOG("No unmapped quality values in this block");
+        uqvFlags = 0;
+        compressedUnmappedQualSize_ += cqFile->writeUint8(uqvFlags);
+//         CALQ_LOG("  No unmapped quality values in this block");
     }
 
-    CALQ_LOG("Writing mapped quantizer indices");
+//     CALQ_LOG("  Writing mapped quantizer indices");
     std::string tmp("");
     for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
         tmp += std::to_string(mappedQuantizerIndex+1);
     }
-    //std::cout << "mqi: " << tmp << std::endl;
+//     std::cout << "mqi: " << tmp << std::endl;
     unsigned char *mqi = (unsigned char *)tmp.c_str();
     size_t mqiSize = tmp.length();
-    uint8_t mqiFlag = 0;
+    uint8_t mqiFlags = 0;
     if (mqiSize > 0) {
-        mqiFlag = 1;
-        cqFile->writeUint8(mqiFlag);
-        ret += cqFile->writeQualBlock(mqi, mqiSize);
+        mqiFlags = 1;
+        compressedMappedQualSize_ += cqFile->writeUint8(mqiFlags);
+        compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
     } else {
-        mqiFlag = 0;
-        cqFile->writeUint8(mqiFlag);
-        CALQ_LOG("No mapped quantizer indices in this block");
+        mqiFlags = 0;
+        compressedMappedQualSize_ += cqFile->writeUint8(mqiFlags);
+//         CALQ_LOG("  No mapped quantizer indices in this block");
     }
 
-    CALQ_LOG("Writing mapped quality value indices");
+    //CALQ_LOG("  Writing mapped quality value indices");
     tmp = "";
-    for (auto const &mappedQualIndex : mappedQualIndices_) {
-        tmp += std::to_string(mappedQualIndex);
+    for (auto const &mappedQualityValueIndex : mappedQualityValueIndices_) {
+        tmp += std::to_string(mappedQualityValueIndex);
     }
-    //std::cout << "mqvi: " << tmp << std::endl;
+//     std::cout << "mqvi: " << tmp << std::endl;
     unsigned char *mqvi = (unsigned char *)tmp.c_str();
     size_t mqviSize = tmp.length();
-    uint8_t mqviFlag = 0;
+    uint8_t mqviFlags = 0;
     if (mqviSize > 0) {
-        mqviFlag = 1;
-        cqFile->writeUint8(mqviFlag);
-        ret += cqFile->writeQualBlock(mqvi, mqviSize);
+        mqviFlags = 1;
+        compressedMappedQualSize_ += cqFile->writeUint8(mqviFlags);
+        compressedMappedQualSize_ += cqFile->writeQualBlock(mqvi, mqviSize);
     } else {
-        mqviFlag = 0;
-        cqFile->writeUint8(mqviFlag);
-        CALQ_LOG("No mapped quality value in this block");
+        mqviFlags = 0;
+        compressedMappedQualSize_ += cqFile->writeUint8(mqviFlags);
+//         CALQ_LOG("  No mapped quality value in this block");
     }
 
-    compressedMappedQualSize_ += ret;
-    return ret;
+    return compressedQualSize();
 }
 
 size_t QualEncoder::compressedMappedQualSize(void) const { return compressedMappedQualSize_; }
@@ -217,9 +228,8 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
            for (size_t i = 0; i < opLen; i++) {
                int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
                int mappedQuantizerIndex = mappedQuantizerIndices_[mqiIdx++];
-//                std::cout << "mappedQuantizerIndices_[" <<mqiIdx-1<< "]="<< mappedQuantizerIndex << std::endl;
-               int mappedQualIndex = quantizers_.at(mappedQuantizerIndex).valueToIndex(q);
-               mappedQualIndices_.push_back(mappedQualIndex);
+               int mappedQualityValueIndex = quantizers_.at(mappedQuantizerIndex).valueToIndex(q);
+               mappedQualityValueIndices_.push_back(mappedQualityValueIndex);
            }
            break;
        case 'I':
@@ -227,8 +237,8 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
            // Encode opLen quality values with max quantizer index
            for (size_t i = 0; i < opLen; i++) {
                int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
-               int mappedQualIndex = quantizers_.at(quantizers_.size()-1).valueToIndex(q);
-               mappedQualIndices_.push_back(mappedQualIndex);
+               int mappedQualityValueIndex = quantizers_.at(quantizers_.size()-1).valueToIndex(q);
+               mappedQualityValueIndices_.push_back(mappedQualityValueIndex);
            }
            break;
        case 'D':
@@ -247,7 +257,7 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 
 void QualEncoder::encodeUnmappedQual(const std::string &qual)
 {
-    unmappedQual_ += qual;
+    unmappedQualityValues_ += qual;
 }
 
 } // namespace calq

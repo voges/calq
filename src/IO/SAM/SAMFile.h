@@ -7,6 +7,8 @@
 #ifndef CALQ_IO_SAM_SAMFILE_H_
 #define CALQ_IO_SAM_SAMFILE_H_
 
+#include <string>
+
 #include "Common/constants.h"
 #include "IO/File.h"
 #include "IO/SAM/SAMBlock.h"
@@ -15,7 +17,7 @@ namespace calq {
 
 class SAMFile : public File {
 public:
-    SAMFile(const std::string &path, const Mode &mode = MODE_READ);
+    explicit SAMFile(const std::string &path, const Mode &mode = MODE_READ);
     ~SAMFile(void);
 
     size_t nrBlocksRead(void) const;
@@ -36,7 +38,7 @@ private:
     size_t nrUnmappedRecordsRead_;
 };
 
-}
+} // namespace calq
 
 #endif // CALQ_IO_SAM_SAMFILE_H_
 

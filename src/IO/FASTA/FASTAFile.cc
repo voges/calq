@@ -8,6 +8,9 @@
 
 #include <string.h>
 
+#include <utility>
+#include <string>
+
 #include "Common/Exceptions.h"
 
 namespace calq {
@@ -76,8 +79,7 @@ void FASTAFile::parse(void)
 
             // Reset sequence
             currentSequence = "";
-        }
-        else {
+        } else {
             currentSequence += line_;
         }
     }

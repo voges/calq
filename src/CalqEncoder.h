@@ -7,6 +7,9 @@
 #ifndef CALQ_CALQENCODER_H_
 #define CALQ_CALQENCODER_H_
 
+#include <string>
+#include <vector>
+
 #include "Common/Options.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMFile.h"

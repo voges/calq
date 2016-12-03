@@ -9,12 +9,13 @@
 #include <math.h>
 
 #include <queue>
+#include <utility>
 
 #include "Common/Exceptions.h"
 
 namespace calq {
 
-UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, const unsigned int &nrSteps)
+UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, const int &nrSteps)
     : Quantizer()
 {
     if ((valueMin > valueMax) || (nrSteps <= 1)) {
@@ -30,7 +31,7 @@ UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, con
     double newBorder = valueMin;
     borders.push(valueMin);
     reconstructionValues.push(valueMin + (int)round(stepSize/2));
-    for (unsigned i = 0; i < (nrSteps-1); i++) {
+    for (int i = 0; i < (nrSteps-1); i++) {
         newBorder += stepSize;
         borders.push(newBorder);
         reconstructionValues.push((int)newBorder + (int)round(stepSize/2));
@@ -50,8 +51,8 @@ UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, con
             currentReconstructionValue = reconstructionValues.front();
             currentBorder = borders.front();
         }
-        std::pair<int,int> curr(currentIndex, currentReconstructionValue);
-        lut_.insert(std::pair<int,std::pair<int,int>>(value, curr));
+        std::pair<int, int> curr(currentIndex, currentReconstructionValue);
+        lut_.insert(std::pair<int, std::pair<int, int>>(value, curr));
         inverseLut_.insert(curr);
     }
 }

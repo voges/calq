@@ -13,7 +13,7 @@ namespace calq {
 
 class SAMPileup {
 public:
-    explicit SAMPileup(void);
+    SAMPileup(void);
     ~SAMPileup(void);
 
     bool empty(void) const;

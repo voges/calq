@@ -7,12 +7,12 @@
 #ifndef CALQ_IO_SAM_SAMRECORD_H_
 #define CALQ_IO_SAM_SAMRECORD_H_
 
-#include "IO/SAM/SAMPileupDeque.h"
-
 #include <inttypes.h>
 
 #include <deque>
 #include <string>
+
+#include "IO/SAM/SAMPileupDeque.h"
 
 namespace calq {
 
@@ -23,7 +23,7 @@ public:
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);
 
-    void addToPileupQueue(SAMPileupDeque &samPileupDeque) const;
+    void addToPileupQueue(SAMPileupDeque *samPileupDeque) const;
 
     bool isMapped(void) const;
     void printLong(void) const;

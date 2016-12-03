@@ -25,7 +25,7 @@ std::string currentDateAndTime(void)
 #ifdef OS_WINDOWS
     time_t rawtime = time(NULL);
     struct tm timeinfo;
-    errno_t err = gmtime_s(&timeinfo, &rawtime); 
+    errno_t err = gmtime_s(&timeinfo, &rawtime);
     if (err != 0) {
         throwErrorException("gmtime_s failed");
     }
@@ -34,8 +34,7 @@ std::string currentDateAndTime(void)
     }
 #else
     time_t rawtime = time(NULL);
-    struct tm *timeinfo;
-    timeinfo = gmtime(&rawtime);
+    struct tm *timeinfo = gmtime(&rawtime);
     if (timeinfo == NULL) {
         throwErrorException("gmtime failed");
     }

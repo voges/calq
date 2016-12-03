@@ -62,7 +62,7 @@ private:
     int line_;
 };
 
-}
+} // namespace calq
 
 // Remove the symbol for the function, then define a new version that instead
 // creates a stack temporary instance of ErrorExceptionReporter initialized

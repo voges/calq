@@ -7,10 +7,10 @@
 #ifndef CALQ_IO_CQ_CQFILE_H_
 #define CALQ_IO_CQ_CQFILE_H_
 
-#include "IO/File.h"
-
 #include <map>
+#include <string>
 
+#include "IO/File.h"
 #include "QualCodec/Quantizer.h"
 
 namespace calq {
@@ -24,11 +24,11 @@ public:
     size_t nrWrittenFileFormatBytes(void) const;
 
     size_t readHeader(size_t *blockSize);
-    size_t readQuantizers(std::map<int,Quantizer> *quantizers);
+    size_t readQuantizers(std::map<int, Quantizer> *quantizers);
     size_t readQualBlock(std::string *block);
 
     size_t writeHeader(const size_t &blockSize);
-    size_t writeQuantizers(const std::map<int,Quantizer> &quantizers);
+    size_t writeQuantizers(const std::map<int, Quantizer> &quantizers);
     size_t writeQualBlock(unsigned char *block, const size_t &blockSize);
 
 private:

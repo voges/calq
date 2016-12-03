@@ -7,9 +7,9 @@
 #ifndef CALQ_IO_SAM_SAMPILEUPDEQUE_H_
 #define CALQ_IO_SAM_SAMPILEUPDEQUE_H_
 
-#include "IO/SAM/SAMPileup.h"
-
 #include <deque>
+
+#include "IO/SAM/SAMPileup.h"
 
 namespace calq {
 
@@ -17,7 +17,7 @@ class SAMPileupDeque {
     friend class SAMRecord;
 
 public:
-    explicit SAMPileupDeque(void);
+    SAMPileupDeque(void);
     ~SAMPileupDeque(void);
 
     bool empty(void) const;

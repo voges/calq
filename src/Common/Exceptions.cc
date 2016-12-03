@@ -11,7 +11,7 @@ namespace calq {
 
 Exception::Exception(const std::string &msg) : msg_(msg) {}
 
-Exception::~Exception(void) throw () {}
+Exception::~Exception(void) throw() {}
 
 std::string Exception::getMessage(void) const
 {

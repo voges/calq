@@ -7,12 +7,14 @@
 #ifndef CALQ_COMMON_LOG_H_
 #define CALQ_COMMON_LOG_H_
 
+#include <string>
+
 #include "Common/helpers.h"
 
 // C-style debug macro
 //#define DBG
 #ifdef DBG
-    #define CALQ_DEBUG(c,...) \
+    #define CALQ_DEBUG(c, ...) \
         do { \
             fflush(stderr); \
             fprintf(stderr, \
@@ -28,7 +30,7 @@
 #endif
 
 // C-style log macro
-#define CALQ_LOG(c,...) \
+#define CALQ_LOG(c, ...) \
     do {\
         fflush(stdout); \
         fprintf(stdout, \
@@ -39,7 +41,7 @@
     } while (false)
 
 // C-style error macro
-#define CALQ_ERROR(c,...) \
+#define CALQ_ERROR(c, ...) \
     do {\
         fflush(stderr); \
         fprintf(stderr, \

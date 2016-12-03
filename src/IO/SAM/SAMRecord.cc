@@ -75,13 +75,13 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-void SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
+void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const
 {
-    if (samPileupDeque_.empty() == true) {
+    if (samPileupDeque_->empty() == true) {
         throwErrorException("samPileupQueue is empty");
     }
-    if ((samPileupDeque_.posMin() > posMin) || (samPileupDeque_.posMax() < posMax)) {
-        CALQ_DEBUG("pileup pos minmax: %d %d", samPileupDeque_.posMin(), samPileupDeque_.posMax());
+    if ((samPileupDeque_->posMin() > posMin) || (samPileupDeque_->posMax() < posMax)) {
+        CALQ_DEBUG("pileup pos minmax: %d %d", samPileupDeque_->posMin(), samPileupDeque_->posMax());
         throwErrorException("samPileupQueue does not overlap record");
     }
 
@@ -89,7 +89,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
     size_t cigarLen = cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
     size_t idx = 0;
-    size_t pileupIdx = posMin - samPileupDeque_.posMin();
+    size_t pileupIdx = posMin - samPileupDeque_->posMin();
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
@@ -102,9 +102,9 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque &samPileupDeque_) const
         case '=':
         case 'X':
             for (size_t i = 0; i < opLen; i++) {
-                samPileupDeque_.pileups_[pileupIdx].pos = posMin + idx;
-                samPileupDeque_.pileups_[pileupIdx].seq += seq[idx];
-                samPileupDeque_.pileups_[pileupIdx].qual += qual[idx];
+                samPileupDeque_->pileups_[pileupIdx].pos = posMin + idx;
+                samPileupDeque_->pileups_[pileupIdx].seq += seq[idx];
+                samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
                 idx++; pileupIdx++;
             }
             break;
@@ -183,8 +183,7 @@ void SAMRecord::check(void)
     // Check if this record is mapped
     if ((flag & 0x4) != 0) {
         mapped_ = false;
-    }
-    else {
+    } else {
         mapped_ = true;
         if (rname == "*" || pos == 0 || cigar == "*" || seq == "*" || qual == "*") {
             throwErrorException("Corrupted record");

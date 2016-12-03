@@ -9,6 +9,8 @@
 
 #include <chrono>
 #include <deque>
+#include <map>
+#include <string>
 
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMPileupDeque.h"
@@ -30,7 +32,7 @@ public:
                          const int &qualityValueMax,
                          const int &qualityValueMin,
                          const int &qualityValueOffset,
-                         const std::map<int,Quantizer> &quantizers);
+                         const std::map<int, Quantizer> &quantizers);
     ~QualEncoder(void);
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
@@ -70,9 +72,9 @@ private:
     uint32_t posOffset_;
 
     // Buffers
-    std::string unmappedQual_;
+    std::string unmappedQualityValues_;
     std::deque<int> mappedQuantizerIndices_;
-    std::deque<int> mappedQualIndices_;
+    std::deque<int> mappedQualityValueIndices_;
 
     // Pileup
     SAMPileupDeque samPileupDeque_;
@@ -81,7 +83,7 @@ private:
     Genotyper genotyper_;
 
     // Quantizers
-    std::map<int,Quantizer> quantizers_;
+    std::map<int, Quantizer> quantizers_;
 
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded

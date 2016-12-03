@@ -103,9 +103,11 @@ int main(int argc, char *argv[]) {
         if (options.decompress == false) {
             calq::CalqEncoder calqEncoder(options);
             calqEncoder.encode();
+            CALQ_LOG("Finished encoding");
         } else {
             calq::CalqDecoder calqDecoder(options);
             calqDecoder.decode();
+            CALQ_LOG("Finished decoding");
         }
     } catch (TCLAP::ArgException &tclapException) {
         CALQ_ERROR("%s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());

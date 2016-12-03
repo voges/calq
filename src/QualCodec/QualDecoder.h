@@ -7,6 +7,7 @@
 #ifndef CALQ_QUALCODEC_QUALDECODER_H_
 #define CALQ_QUALCODEC_QUALDECODER_H_
 
+#include <map>
 #include <string>
 
 #include "IO/CQ/CQFile.h"
@@ -16,7 +17,7 @@ namespace calq {
 
 class QualDecoder {
 public:
-    explicit QualDecoder(std::map<int,Quantizer> &quantizers);
+    explicit QualDecoder(const std::map<int, Quantizer> &quantizers);
     ~QualDecoder(void);
 
     size_t decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
@@ -24,14 +25,17 @@ public:
     size_t readBlock(CQFile *cqFile);
 
 private:
+    uint32_t posOffset_;
+    int qualityValueOffset_;
+
     std::string unmappedQualityValues_;
     std::string mappedQuantizerIndices_;
     std::string mappedQualityValueIndices_;
 
-    std::map<int,Quantizer> quantizers_;
+    std::map<int, Quantizer> quantizers_;
 };
 
-}
+} // namespace calq
 
 #endif // CALQ_QUALCODEC_QUALDECODER_H_
 

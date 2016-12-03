@@ -46,7 +46,7 @@ void File::open(const std::string &path, const Mode &mode)
     if (path.empty() == true) {
         throwErrorException("path is empty");
     }
-    if (fp_ != NULL) { 
+    if (fp_ != NULL) {
         throwErrorException("File pointer already in use");
     }
 
@@ -81,7 +81,7 @@ void File::open(const std::string &path, const Mode &mode)
     isOpen_ = true;
 }
 
-void File::close(void) 
+void File::close(void)
 {
     if (isOpen_ == true) {
         if (fp_ != NULL) {
@@ -153,7 +153,7 @@ size_t File::nrWrittenBytes(void) const
     return nrWrittenBytes_;
 }
 
-size_t File::read(void *buffer, const size_t &size) 
+size_t File::read(void *buffer, const size_t &size)
 {
     if (buffer == NULL) {
         throwErrorException("buffer is NULL");
@@ -166,10 +166,10 @@ size_t File::read(void *buffer, const size_t &size)
         throwErrorException("fread failed");
     }
     nrReadBytes_ += ret;
-    return ret; 
+    return ret;
 }
 
-size_t File::write(void *buffer, const size_t &size) 
+size_t File::write(void *buffer, const size_t &size)
 {
     if (buffer == NULL) {
         throwErrorException("buffer is NULL");

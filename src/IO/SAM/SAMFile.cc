@@ -5,10 +5,12 @@
  */
 
 #include "IO/SAM/SAMFile.h"
-#include "Common/Exceptions.h"
 
 #include <string.h>
 
+#include <string>
+
+#include "Common/Exceptions.h"
 #include "Common/log.h"
 
 namespace calq {

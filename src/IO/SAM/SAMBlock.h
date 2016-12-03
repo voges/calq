@@ -5,11 +5,11 @@
  */
 
 #ifndef CALQ_IO_SAM_SAMBLOCK_H_
-#define SAM_SAMBLOCK_H_
-
-#include "IO/SAM/SAMRecord.h"
+#define CALQ_IO_SAM_SAMBLOCK_H_
 
 #include <deque>
+
+#include "IO/SAM/SAMRecord.h"
 
 namespace calq {
 
@@ -34,5 +34,5 @@ private:
 
 } // namespace calq
 
-#endif // SAM_SAMBLOCK_H_
+#endif // CALQ_IO_SAM_SAMBLOCK_H_
 

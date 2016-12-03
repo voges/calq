@@ -5,14 +5,17 @@
  */
 #include "QualCodec/QualDecoder.h"
 
+#include <map>
+
 #include "Common/Exceptions.h"
 #include "Common/log.h"
-#include "Compressors/rle/rle.h"
 
 namespace calq {
 
-QualDecoder::QualDecoder(std::map<int,Quantizer> &quantizers)
-    : unmappedQualityValues_(""),
+QualDecoder::QualDecoder(const std::map<int, Quantizer> &quantizers)
+    : posOffset_(0),
+      qualityValueOffset_(0),
+      unmappedQualityValues_(""),
       mappedQuantizerIndices_(""),
       mappedQualityValueIndices_(""),
       quantizers_(quantizers) {}
@@ -39,35 +42,39 @@ size_t QualDecoder::readBlock(CQFile *cqFile)
 
     size_t ret = 0;
 
-    CALQ_LOG("Reading unmapped quality values");
-    uint8_t uqvFlag = 0;
-    cqFile->readUint8(&uqvFlag);
-    if (uqvFlag & 0x1) {
+//     CALQ_LOG("  Reading pos offset and quality value offset");
+    ret += cqFile->readUint32(&posOffset_);
+    ret += cqFile->readUint32((uint32_t *)&qualityValueOffset_);
+
+//     CALQ_LOG("  Reading unmapped quality values");
+    uint8_t uqvFlags = 0;
+    ret += cqFile->readUint8(&uqvFlags);
+    if (uqvFlags & 0x1) {
         ret += cqFile->readQualBlock(&unmappedQualityValues_);
     } else {
-        CALQ_LOG("No unmapped quality values in this block");
+//         CALQ_LOG("  No unmapped quality values in this block");
     }
-    std::cout << "uqv: " << unmappedQualityValues_ << std::endl;
+//     std::cout << "uqv: " << unmappedQualityValues_ << std::endl;
 
-    CALQ_LOG("Reading mapped quantizer indices");
-    uint8_t mqiFlag = 0;
-    cqFile->readUint8(&mqiFlag);
-    if (mqiFlag & 0x1) {
+//     CALQ_LOG("  Reading mapped quantizer indices");
+    uint8_t mqiFlags = 0;
+    ret += cqFile->readUint8(&mqiFlags);
+    if (mqiFlags & 0x1) {
         ret += cqFile->readQualBlock(&mappedQuantizerIndices_);
     } else {
-        CALQ_LOG("No mapped quantizer indices in this block");
+        CALQ_LOG("  No mapped quantizer indices in this block");
     }
-    std::cout << "mqi: " << mappedQuantizerIndices_ << std::endl;
+//     std::cout << "mqi: " << mappedQuantizerIndices_ << std::endl;
 
-    CALQ_LOG("Reading mapped quality value indices");
-    uint8_t mqviFlag = 0;
-    cqFile->readUint8(&mqviFlag);
-    if (mqviFlag & 0x1) {
+//     CALQ_LOG("  Reading mapped quality value indices");
+    uint8_t mqviFlags = 0;
+    ret += cqFile->readUint8(&mqviFlags);
+    if (mqviFlags & 0x1) {
         ret += cqFile->readQualBlock(&mappedQualityValueIndices_);
     } else {
-        CALQ_LOG("No mapped quality value indices in this block");
+//         CALQ_LOG("  No mapped quality value indices in this block");
     }
-    std::cout << "mqvi: " << mappedQualityValueIndices_ << std::endl;
+//     std::cout << "mqvi: " << mappedQualityValueIndices_ << std::endl;
 
     return ret;
 }
