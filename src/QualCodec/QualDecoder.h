@@ -20,8 +20,8 @@ public:
     explicit QualDecoder(const std::map<int, Quantizer> &quantizers);
     ~QualDecoder(void);
 
-    size_t decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
-    size_t decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
+    void decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
+    void decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
     size_t readBlock(CQFile *cqFile);
 
 private:
@@ -31,6 +31,9 @@ private:
     std::string unmappedQualityValues_;
     std::string mappedQuantizerIndices_;
     std::string mappedQualityValueIndices_;
+
+    size_t unmappedQualityValuesPosition_;
+    size_t mappedQualityValueIndicesPosition_;
 
     std::map<int, Quantizer> quantizers_;
 };

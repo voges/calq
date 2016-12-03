@@ -6,6 +6,7 @@
 #include "QualCodec/QualDecoder.h"
 
 #include <map>
+#include <string>
 
 #include "Common/Exceptions.h"
 #include "Common/log.h"
@@ -18,22 +19,26 @@ QualDecoder::QualDecoder(const std::map<int, Quantizer> &quantizers)
       unmappedQualityValues_(""),
       mappedQuantizerIndices_(""),
       mappedQualityValueIndices_(""),
+      unmappedQualityValuesPosition_(0),
+      mappedQualityValueIndicesPosition_(0),
       quantizers_(quantizers) {}
 
 QualDecoder::~QualDecoder(void) {}
 
-size_t QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
+void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
 {
-    size_t ret = 0;
-
-    return ret;
+    size_t qualityValueIndicesLen = samRecord.seq.length();
+    std::string qualityValueIndicesLen = mappedQualityValueIndices_.substr(mappedQualityValueIndicesPosition_, qualityValueIndicesLen);
+    mappedQualityValueIndicesPosition_ += qualityValueIndicesLen;
 }
 
-size_t QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
+void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
 {
-    size_t ret = 0;
-
-    return ret;
+    size_t qualLen = samRecord.seq.length();
+    std::string qual = unmappedQualityValues_.substr(unmappedQualityValuesPosition_, qualLen);
+    unmappedQualityValuesPosition_ += qualLen;
+    qualFile->write((unsigned char *)qual.c_str(), qual.length());
+    qualFile->writeByte('\n');
 }
 
 size_t QualDecoder::readBlock(CQFile *cqFile)
