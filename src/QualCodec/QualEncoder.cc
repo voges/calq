@@ -141,7 +141,7 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
     compressedMappedQualSize_ += cqFile->writeUint32((uint32_t)qualityValueOffset_);
 
 //     CALQ_LOG("  Writing unmapped quality values");
-//     std::cout << "uqv: " << unmappedQual_ << std::endl;
+//     std::cout << "uqv: " << unmappedQualityValues_ << std::endl;
     unsigned char *uqv = (unsigned char *)unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
     uint8_t uqvFlags = 0;
@@ -208,11 +208,14 @@ size_t QualEncoder::uncompressedQualSize(void) const { return uncompressedMapped
 
 void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
+
+    std::string qual("");
+
     size_t cigarIdx = 0;
     size_t cigarLen = samRecord.cigar.length();
     size_t opLen = 0; // length of current CIGAR operation
     size_t qualIdx = 0;
-    size_t mqiIdx = samRecord.posMin - posOffset_;
+    size_t quantizerIndicesIdx = samRecord.posMin - posOffset_;
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
        if (isdigit(samRecord.cigar[cigarIdx])) {
@@ -227,9 +230,9 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
            // Encode opLen quality values with computed quantizer indices
            for (size_t i = 0; i < opLen; i++) {
                int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
-               int mappedQuantizerIndex = mappedQuantizerIndices_[mqiIdx++];
-               int mappedQualityValueIndex = quantizers_.at(mappedQuantizerIndex).valueToIndex(q);
-               mappedQualityValueIndices_.push_back(mappedQualityValueIndex);
+               int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
+               int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
+               mappedQualityValueIndices_.push_back(qualityValueIndex);
            }
            break;
        case 'I':
@@ -237,13 +240,14 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
            // Encode opLen quality values with max quantizer index
            for (size_t i = 0; i < opLen; i++) {
                int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
-               int mappedQualityValueIndex = quantizers_.at(quantizers_.size()-1).valueToIndex(q);
-               mappedQualityValueIndices_.push_back(mappedQualityValueIndex);
+               int quantizerIndex = quantizers_.size() - 1;
+               int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
+               mappedQualityValueIndices_.push_back(qualityValueIndex);
            }
            break;
        case 'D':
        case 'N':
-           mqiIdx += opLen;
+           quantizerIndicesIdx += opLen;
            break; // do nothing as these bases are not present
        case 'H':
        case 'P':

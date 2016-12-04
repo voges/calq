@@ -32,6 +32,9 @@ public:
     size_t nrReadBytes(void) const;
     size_t nrWrittenBytes(void) const;
 
+    bool isReadable(void) const;
+    bool isWritable(void) const;
+
     size_t read(void *buffer, const size_t &size);
     size_t write(void *buffer, const size_t &size);
 

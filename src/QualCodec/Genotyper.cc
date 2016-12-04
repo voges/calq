@@ -91,8 +91,6 @@ double Genotyper::computeEntropy(const std::string &seqPileup,
 int Genotyper::computeQuantizerIndex(const std::string &seqPileup,
                                      const std::string &qualPileup)
 {
-//     std::cout << "seq:  " << seqPileup << std::endl;
-//     std::cout << "qual: " << qualPileup << std::endl;
     const size_t depth = seqPileup.length();
 
     if (depth != qualPileup.length()) {
@@ -100,11 +98,9 @@ int Genotyper::computeQuantizerIndex(const std::string &seqPileup,
     }
 
     if (depth == 0) {
-//         std::cout << "depth=0" << std::endl;
         return -1; // computation of quantizer index not possible
     }
     if (depth == 1) {
-//         std::cout << "depth=1 " << (nrQuantizers_ - 1) << std::endl;
         return (nrQuantizers_ - 1); // no inference can be made, stay safe
     }
 

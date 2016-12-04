@@ -153,6 +153,20 @@ size_t File::nrWrittenBytes(void) const
     return nrWrittenBytes_;
 }
 
+bool File::isReadable(void) const
+{
+    if (isOpen_ == true && mode_ == MODE_READ)
+        return true;
+    return false;
+}
+
+bool File::isWritable(void) const
+{
+    if (isOpen_ == true && mode_ == MODE_WRITE)
+        return true;
+    return false;
+}
+
 size_t File::read(void *buffer, const size_t &size)
 {
     if (buffer == NULL) {

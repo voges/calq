@@ -106,7 +106,9 @@ void CalqEncoder::encode(void)
         CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
         std::map<int,Quantizer> quantizers;
         int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
-        for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN; quantizerIdx < QualEncoder::QUANTIZER_IDX_MAX; ++quantizerIdx) {
+        for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
+             quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
+             ++quantizerIdx, ++quantizerSteps) {
             Quantizer quantizer = UniformQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps);
             quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
         }

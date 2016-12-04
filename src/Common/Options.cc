@@ -36,7 +36,7 @@ void Options::validate(void)
         CALQ_LOG("Force switch set - overwriting output file(s)");
     }
 
-    // inputFile
+    // inputFileName
     CALQ_LOG("Input file name: %s", inputFileName.c_str());
     if (inputFileName.empty() == true) {
         throwErrorException("No input file name provided");
@@ -54,7 +54,7 @@ void Options::validate(void)
         throwErrorException("Cannot access input file");
     }
 
-    // outputFile
+    // outputFileName
     if (decompress == false) {
         if (outputFileName.empty() == true) {
             CALQ_LOG("No output file name provided - constructing output file name from input file name");
@@ -90,51 +90,53 @@ void Options::validate(void)
     }
 
     // qualityValueType
-    CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
-    if (qualityValueType == "Sanger") {
-        // Sanger: Phred+33 [0,40]
-        qualityValueOffset = 33;
-        qualityValueMin = 0;
-        qualityValueMax = 40;
-    } else if (qualityValueType == "Illumina-1.3+") {
-        // Illumina 1.3+: Phred+64 [0,40]
-        qualityValueOffset = 64;
-        qualityValueMin = 0;
-        qualityValueMax = 40;
-    } else if (qualityValueType == "Illumina-1.5+") {
-        // Illumina 1.5+: Phred+64 [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
-        CALQ_LOG("Warning: Read Segment Quality Control Indicator will not be treated specifically by CALQ");
-        qualityValueOffset = 64;
-        qualityValueMin = 0;
-        qualityValueMax = 40;
-    } else if (qualityValueType == "Illumina-1.8+") {
-        // Illumina 1.8+ Phred+33 [0,41]
-        qualityValueOffset = 33;
-        qualityValueMin = 0;
-        qualityValueMax = 41;
-    } else {
-        throwErrorException("Quality value type not supported");
-    }
-    CALQ_LOG("Quality value offset: %d", qualityValueOffset);
-    CALQ_LOG("Quality value range: [%d,%d]", qualityValueMin, qualityValueMax);
-
-    // referenceFiles
     if (decompress == false) {
-        if (referenceFileNames.empty() == true) {
-            CALQ_LOG("Operating without reference file(s)");
+        CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
+        if (qualityValueType == "Sanger") {
+            // Sanger: Phred+33 [0,40]
+            qualityValueOffset = 33;
+            qualityValueMin = 0;
+            qualityValueMax = 40;
+        } else if (qualityValueType == "Illumina-1.3+") {
+            // Illumina 1.3+: Phred+64 [0,40]
+            qualityValueOffset = 64;
+            qualityValueMin = 0;
+            qualityValueMax = 40;
+        } else if (qualityValueType == "Illumina-1.5+") {
+            // Illumina 1.5+: Phred+64 [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
+            CALQ_LOG("Warning: Read Segment Quality Control Indicator will not be treated specifically by CALQ");
+            qualityValueOffset = 64;
+            qualityValueMin = 0;
+            qualityValueMax = 40;
+        } else if (qualityValueType == "Illumina-1.8+") {
+            // Illumina 1.8+ Phred+33 [0,41]
+            qualityValueOffset = 33;
+            qualityValueMin = 0;
+            qualityValueMax = 41;
         } else {
-            CALQ_LOG("Operating with %zu reference file(s):", referenceFileNames.size());
-            for (auto const &referenceFileName : referenceFileNames) {
-                CALQ_LOG("  %s", referenceFileName.c_str());
-                if (referenceFileName.empty() == true) {
-                    throwErrorException("Reference file name not proviced");
-                }
-                if (fileExists(referenceFileName) == false) {
-                    throwErrorException("Cannot access reference file");
-                }
-                if (fileNameExtension(referenceFileName) != std::string("fa")
-                    && fileNameExtension(referenceFileName) != std::string("fasta")) {
-                    throwErrorException("Reference file name extension must be 'fa' or 'fasta'");
+            throwErrorException("Quality value type not supported");
+        }
+        CALQ_LOG("Quality value offset: %d", qualityValueOffset);
+        CALQ_LOG("Quality value range: [%d,%d]", qualityValueMin, qualityValueMax);
+
+        // referenceFiles
+        if (decompress == false) {
+            if (referenceFileNames.empty() == true) {
+                CALQ_LOG("Operating without reference file(s)");
+            } else {
+                CALQ_LOG("Operating with %zu reference file(s):", referenceFileNames.size());
+                for (auto const &referenceFileName : referenceFileNames) {
+                    CALQ_LOG("  %s", referenceFileName.c_str());
+                    if (referenceFileName.empty() == true) {
+                        throwErrorException("Reference file name not proviced");
+                    }
+                    if (fileExists(referenceFileName) == false) {
+                        throwErrorException("Cannot access reference file");
+                    }
+                    if (fileNameExtension(referenceFileName) != std::string("fa")
+                        && fileNameExtension(referenceFileName) != std::string("fasta")) {
+                        throwErrorException("Reference file name extension must be 'fa' or 'fasta'");
+                    }
                 }
             }
         }
@@ -147,7 +149,7 @@ void Options::validate(void)
         CALQ_LOG("Decompressing");
     }
 
-    // sideInformationFile
+    // sideInformationFileName
     if (decompress == true) {
         CALQ_LOG("Side information file name: %s", sideInformationFileName.c_str());
         if (sideInformationFileName.empty() == true) {
