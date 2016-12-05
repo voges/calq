@@ -28,8 +28,7 @@ void SAMPileup::clear(void)
 
 void SAMPileup::print(void) const
 {
-    printQual();
-    printSeq();
+    printf("%6d: %s %s\n", pos, seq.c_str(), qual.c_str());
 }
 
 void SAMPileup::printQual(void) const

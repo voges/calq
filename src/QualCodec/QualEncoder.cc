@@ -95,9 +95,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     while (samPileupDeque_.posMin() < samRecord.posMin) {
         int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
         mappedQuantizerIndices_.push_back(k);
-//         std::cout << samPileupDeque_.front().pos << " ";
-//         std::cout << samPileupDeque_.front().seq << " ";
-//         std::cout << samPileupDeque_.front().qual << " > " << k << std::endl;
+        samPileupDeque_.front().print();
         samPileupDeque_.pop_front();
     }
 
@@ -116,9 +114,7 @@ void QualEncoder::finishBlock(void)
     while (samPileupDeque_.empty() == false) {
         int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
         mappedQuantizerIndices_.push_back(k);
-//         std::cout << samPileupDeque_.front().pos << " ";
-//         std::cout << samPileupDeque_.front().seq << " ";
-//         std::cout << samPileupDeque_.front().qual << " > " << k << std::endl;
+        samPileupDeque_.front().print();
         samPileupDeque_.pop_front();
     }
 
@@ -127,6 +123,10 @@ void QualEncoder::finishBlock(void)
         encodeMappedQual(samRecordDeque_.front());
         samRecordDeque_.pop_front();
     }
+
+    int i = posOffset_;
+    for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_)
+        printf("%6d: %d\n", i++, mappedQuantizerIndex);
 }
 
 size_t QualEncoder::writeBlock(CQFile *cqFile)
@@ -208,7 +208,6 @@ size_t QualEncoder::uncompressedQualSize(void) const { return uncompressedMapped
 
 void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
-
     std::string qual("");
 
     size_t cigarIdx = 0;
