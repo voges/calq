@@ -72,7 +72,7 @@ void CalqDecoder::decode(void)
 
     CALQ_LOG("DECOMPRESSION STATISTICS");
     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(cqFile_.nrReadBytes()/MB))/(double)((double)diffTimeMs/1000));
+    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)(cqFile_.nrReadBytes()/MB))/((double)diffTimeS));
     CALQ_LOG("  Decoded %zu block(s)", sideInformationFile_.nrBlocksRead());
 }
 

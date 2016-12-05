@@ -6,6 +6,8 @@
 
 #include "IO/SAM/SAMPileup.h"
 
+#include <stdio.h>
+
 namespace calq {
 
 SAMPileup::SAMPileup(void) : pos(0), qual(""), seq("") {}

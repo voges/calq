@@ -4,7 +4,7 @@
  *  @bug No known bugs
  */
 
-#include "QualCodec/UniformQuantizer.h"
+#include "QualCodec/Quantizers/UniformQuantizer.h"
 
 #include <math.h>
 

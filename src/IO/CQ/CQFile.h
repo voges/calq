@@ -11,7 +11,7 @@
 #include <string>
 
 #include "IO/File.h"
-#include "QualCodec/Quantizer.h"
+#include "QualCodec/Quantizers/Quantizer.h"
 
 namespace calq {
 

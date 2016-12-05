@@ -95,7 +95,6 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord)
     while (samPileupDeque_.posMin() < samRecord.posMin) {
         int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
         mappedQuantizerIndices_.push_back(k);
-        samPileupDeque_.front().print();
         samPileupDeque_.pop_front();
     }
 
@@ -114,7 +113,6 @@ void QualEncoder::finishBlock(void)
     while (samPileupDeque_.empty() == false) {
         int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
         mappedQuantizerIndices_.push_back(k);
-        samPileupDeque_.front().print();
         samPileupDeque_.pop_front();
     }
 
@@ -123,10 +121,6 @@ void QualEncoder::finishBlock(void)
         encodeMappedQual(samRecordDeque_.front());
         samRecordDeque_.pop_front();
     }
-
-    int i = posOffset_;
-    for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_)
-        printf("%6d: %d\n", i++, mappedQuantizerIndex);
 }
 
 size_t QualEncoder::writeBlock(CQFile *cqFile)
@@ -208,6 +202,9 @@ size_t QualEncoder::uncompressedQualSize(void) const { return uncompressedMapped
 
 void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
+//     printf("Encoding SAM record");
+//     samRecord.printShort();
+
     std::string qual("");
 
     size_t cigarIdx = 0;
@@ -232,6 +229,7 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
                int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                mappedQualityValueIndices_.push_back(qualityValueIndex);
+//                printf("Encoding %c with k=%d -> %d\n", (char)(q+qualityValueOffset_), quantizerIndex, qualityValueIndex);
            }
            break;
        case 'I':
@@ -242,6 +240,7 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
                int quantizerIndex = quantizers_.size() - 1;
                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                mappedQualityValueIndices_.push_back(qualityValueIndex);
+//                printf("Encoding %c with kmax=%d -> %d\n", (char)(q+qualityValueOffset_), quantizerIndex, qualityValueIndex);
            }
            break;
        case 'D':

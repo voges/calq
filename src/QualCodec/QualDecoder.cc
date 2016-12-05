@@ -14,6 +14,45 @@
 
 namespace calq {
 
+static size_t readLength(const std::string &cigar)
+{
+    size_t readLen = 0;
+    size_t cigarIdx = 0;
+    size_t cigarLen = cigar.length();
+    size_t opLen = 0; // length of current CIGAR operation
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+       if (isdigit(cigar[cigarIdx])) {
+           opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+           continue;
+       }
+
+       switch (cigar[cigarIdx]) {
+       case 'M':
+       case '=':
+       case 'X':
+           readLen += opLen;
+           break;
+       case 'I':
+       case 'S':
+           readLen += opLen;
+           break;
+       case 'D':
+       case 'N':
+           break; // do nothing as these bases are not present
+       case 'H':
+       case 'P':
+           break; // these have been clipped
+       default:
+           throwErrorException("Bad CIGAR string");
+       }
+
+       opLen = 0;
+    }
+
+    return readLen;
+}
+
 QualDecoder::QualDecoder(const std::map<int, Quantizer> &quantizers)
     : posOffset_(0),
       qualityValueOffset_(0),
@@ -31,22 +70,11 @@ QualDecoder::~QualDecoder(void) {}
 
 void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
 {
-    samRecord.printShort();
+//     printf("Decoding SAM record\n");
+//     samRecord.printShort();
+
     // Compute the read length from the CIGAR string
-    size_t qualityValueIndicesLen = 0;
-
-    size_t cigarIdx = 0;
-    size_t cigarLen = samRecord.cigar.length();
-    size_t opLen = 0; // length of current CIGAR operation
-
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-       if (isdigit(samRecord.cigar[cigarIdx])) {
-           opLen = opLen*10 + (size_t)samRecord.cigar[cigarIdx] - (size_t)'0';
-           continue;
-       }
-       qualityValueIndicesLen += opLen;
-       opLen = 0;
-    }
+    size_t qualityValueIndicesLen = readLength(samRecord.cigar);
 
     // Get the quality value indices
     std::string qualityValueIndices = mappedQualityValueIndices_.substr(mappedQualityValueIndicesPosition_, qualityValueIndicesLen);
@@ -58,8 +86,9 @@ void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *
     // Reconstruct the quality values
     std::string qual("");
 
-    cigarIdx = 0;
-    opLen = 0;
+    size_t cigarIdx = 0;
+    size_t cigarLen = samRecord.cigar.length();
+    size_t opLen = 0;
 
     size_t quantizerIndicesIdx = samRecord.posMin - posOffset_;
     size_t qualityValueIndicesIdx = 0;
@@ -79,6 +108,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *
                int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++] - 1 - '0';
                int qualityValueIndex = qualityValueIndices[qualityValueIndicesIdx++] - '0';
                int q = quantizers_.at(quantizerIndex).indexToReconstructionValue(qualityValueIndex);
+//                printf("Decoded %c with k=%d -> %c\n", (char)(qualityValueIndex+'0'), quantizerIndex, (char)(q + qualityValueOffset_));
                qual += q + qualityValueOffset_;
            }
            break;
@@ -87,8 +117,9 @@ void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *
            // Decode opLen quality values with max quantizer index
            for (size_t i = 0; i < opLen; i++) {
                int quantizerIndex = quantizers_.size() - 1;
-               int qualityValueIndex = qualityValueIndices[qualityValueIndicesIdx++] - 1 - '0';
+               int qualityValueIndex = qualityValueIndices[qualityValueIndicesIdx++] - '0';
                int q = quantizers_.at(quantizerIndex).indexToReconstructionValue(qualityValueIndex);
+//                printf("Decoded %c with kmax=%d -> %c\n", (char)(qualityValueIndex+'0'), quantizerIndex, (char)(q + qualityValueOffset_));
                qual += q + qualityValueOffset_;
            }
            break;
@@ -112,20 +143,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *
 void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
 {
     // Compute the read length from the CIGAR string
-    size_t qualLen = 0;
-
-    size_t cigarIdx = 0;
-    size_t cigarLen = samRecord.cigar.length();
-    size_t opLen = 0; // length of current CIGAR operation
-
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-       if (isdigit(samRecord.cigar[cigarIdx])) {
-           opLen = opLen*10 + (size_t)samRecord.cigar[cigarIdx] - (size_t)'0';
-           continue;
-       }
-       qualLen += opLen;
-       opLen = 0;
-    }
+    size_t qualLen = readLength(samRecord.cigar);
 
     // Get the quality values
     std::string qual = unmappedQualityValues_.substr(unmappedQualityValuesPosition_, qualLen);

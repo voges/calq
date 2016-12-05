@@ -81,7 +81,6 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const
         throwErrorException("samPileupQueue is empty");
     }
     if ((samPileupDeque_->posMin() > posMin) || (samPileupDeque_->posMax() < posMax)) {
-        CALQ_DEBUG("pileup pos minmax: %d %d", samPileupDeque_->posMin(), samPileupDeque_->posMax());
         throwErrorException("samPileupQueue does not overlap record");
     }
 
@@ -102,7 +101,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const
         case '=':
         case 'X':
             for (size_t i = 0; i < opLen; i++) {
-                samPileupDeque_->pileups_[pileupIdx].pos = posMin + idx;
+                samPileupDeque_->pileups_[pileupIdx].pos = samPileupDeque_->posMin() + pileupIdx;
                 samPileupDeque_->pileups_[pileupIdx].seq += seq[idx];
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
                 idx++; pileupIdx++;

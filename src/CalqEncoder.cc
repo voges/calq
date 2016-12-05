@@ -14,7 +14,7 @@
 #include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
-#include "QualCodec/UniformQuantizer.h"
+#include "QualCodec/Quantizers/UniformQuantizer.h"
 
 namespace calq {
 
@@ -146,7 +146,7 @@ void CalqEncoder::encode(void)
 
     CALQ_LOG("COMPRESSION STATISTICS");
     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)((uncompressedMappedQualSize+uncompressedUnmappedQualSize)/MB))/(double)((double)diffTimeMs/1000));
+    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)((uncompressedMappedQualSize+uncompressedUnmappedQualSize)/MB))/((double)diffTimeS));
     CALQ_LOG("  Wrote %zu block(s)", samFile_.nrBlocksRead());
     CALQ_LOG("  Record(s):  %12zu", samFile_.nrRecordsRead());
     CALQ_LOG("    Mapped:   %12zu", samFile_.nrMappedRecordsRead());

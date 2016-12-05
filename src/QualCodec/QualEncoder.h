@@ -16,7 +16,7 @@
 #include "IO/SAM/SAMPileupDeque.h"
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
-#include "QualCodec/Quantizer.h"
+#include "QualCodec/Quantizers/Quantizer.h"
 
 namespace calq {
 

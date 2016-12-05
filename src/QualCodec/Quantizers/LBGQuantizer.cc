@@ -4,19 +4,16 @@
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
+#include "QualCodec/Quantizers/LBGQuantizer.h"
 
-#include "KMEANQuantizer.h"
-#include "Common/Exceptions.h"
-#include "Common/helpers.h"
+#include <algorithm>
 #include <cmath>
 #include <queue>
-#include <vector>
-#include <algorithm>
 #include <sstream>
+#include <vector>
+
+#include "Common/Exceptions.h"
+#include "Common/log.h"
 
 KMEANQuantizer::KMEANQuantizer(const int &minimumValue,
                                 const int &maximumValue,
@@ -229,5 +226,5 @@ void KMEANQuantizer::train(const std::string &samplePoints,const int &blockId, c
 
 
 
-    LOG(" Quantizer %d for Block %d trained.",quantId, blockId);
+    CALQ_LOG(" Quantizer %d for Block %d trained.",quantId, blockId);
 }

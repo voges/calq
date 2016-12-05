@@ -4,7 +4,7 @@
  *  @bug No known bugs
  */
 
-#include "QualCodec/Quantizer.h"
+#include "QualCodec/Quantizers/Quantizer.h"
 
 #include "Common/Exceptions.h"
 

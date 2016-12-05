@@ -14,11 +14,12 @@ SAMPileupDeque::SAMPileupDeque(void) : pileups_() , posMax_(0) , posMin_(0) {}
 
 SAMPileupDeque::~SAMPileupDeque(void) {}
 
-bool SAMPileupDeque::empty(void) const
+const SAMPileup& SAMPileupDeque::back(void) const
 {
-    if (pileups_.empty() == true)
-        return true;
-    return false;
+    if (pileups_.empty() == true) {
+        throwErrorException("Deque is empty");
+    }
+    return pileups_.back();
 }
 
 void SAMPileupDeque::clear(void)
@@ -28,14 +29,12 @@ void SAMPileupDeque::clear(void)
     posMin_ = 0;
 }
 
-const SAMPileup& SAMPileupDeque::back(void) const
+bool SAMPileupDeque::empty(void) const
 {
-    if (pileups_.empty() == true) {
-        throwErrorException("Deque is empty");
-    }
-    return pileups_.back();
+    if (pileups_.empty() == true)
+        return true;
+    return false;
 }
-
 
 const SAMPileup & SAMPileupDeque::front(void) const
 {
@@ -50,14 +49,9 @@ size_t SAMPileupDeque::length(void) const
     return posMax_ - posMin_ + 1;
 }
 
-uint32_t SAMPileupDeque::posMax(void) const
+const SAMPileup & SAMPileupDeque::operator[](const size_t &n) const
 {
-    return posMax_;
-}
-
-uint32_t SAMPileupDeque::posMin(void) const
-{
-    return posMin_;
+    return pileups_.at(n);
 }
 
 void SAMPileupDeque::pop_back(void)
@@ -78,6 +72,11 @@ void SAMPileupDeque::pop_front(void)
     posMin_++;
 }
 
+size_t SAMPileupDeque::size(void) const
+{
+    return pileups_.size();
+}
+
 void SAMPileupDeque::print(void) const
 {
     if (pileups_.empty() == true) {
@@ -85,8 +84,18 @@ void SAMPileupDeque::print(void) const
     }
 
     for (auto const &samPileup : pileups_) {
-        samPileup.printSeq();
+        samPileup.print();
     }
+}
+
+uint32_t SAMPileupDeque::posMax(void) const
+{
+    return posMax_;
+}
+
+uint32_t SAMPileupDeque::posMin(void) const
+{
+    return posMin_;
 }
 
 void SAMPileupDeque::setPosMax(const uint32_t &posMax)

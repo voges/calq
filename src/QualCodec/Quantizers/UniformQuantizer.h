@@ -7,7 +7,7 @@
 #ifndef CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
 #define CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
 
-#include "QualCodec/Quantizer.h"
+#include "QualCodec/Quantizers/Quantizer.h"
 
 namespace calq {
 

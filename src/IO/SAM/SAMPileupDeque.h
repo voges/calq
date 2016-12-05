@@ -20,16 +20,21 @@ public:
     SAMPileupDeque(void);
     ~SAMPileupDeque(void);
 
-    bool empty(void) const;
-    void clear(void);
     const SAMPileup & back(void) const;
+    void clear(void);
+    bool empty(void) const;
     const SAMPileup & front(void) const;
     size_t length(void) const;
-    uint32_t posMax(void) const;
-    uint32_t posMin(void) const;
+    const SAMPileup & operator[](const size_t &n) const;
     void pop_back(void);
     void pop_front(void);
+    size_t size(void) const;
+
     void print(void) const;
+
+    uint32_t posMax(void) const;
+    uint32_t posMin(void) const;
+
     void setPosMax(const uint32_t &posMax);
     void setPosMin(const uint32_t &posMin);
 
