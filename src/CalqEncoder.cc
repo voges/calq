@@ -14,6 +14,7 @@
 #include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
+#include "QualCodec/Quantizers/LBGQuantizer.h"
 #include "QualCodec/Quantizers/UniformQuantizer.h"
 
 namespace calq {
@@ -88,9 +89,11 @@ void CalqEncoder::encode(void)
     while (samFile_.readBlock(blockSize_) != 0) {
         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
-        // Check QV range for the current block
+        // Check QV range for the current block and collect mapped QVs
+        std::string mappedQualityValues("");
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
+                mappedQualityValues += samRecord.qual;
                 for (auto const &q : samRecord.qual) {
                     if ((q-qualityValueOffset_) < qualityValueMin_) {
                         throwErrorException("Quality value too small");
@@ -109,10 +112,11 @@ void CalqEncoder::encode(void)
         for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
              quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
              ++quantizerIdx, ++quantizerSteps) {
-            Quantizer quantizer = UniformQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps);
+            //Quantizer quantizer = UniformQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps);
+            Quantizer quantizer = LBGQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps, mappedQualityValues);
             quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
         }
-
+        throwErrorException("Stopping intentionally here");
         // Write the inverse quantization LUTs
         CALQ_LOG("Writing inverse quantization LUTs");
         compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);

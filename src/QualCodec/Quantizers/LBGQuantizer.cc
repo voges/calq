@@ -15,46 +15,45 @@
 #include "Common/Exceptions.h"
 #include "Common/log.h"
 
-KMEANQuantizer::KMEANQuantizer(const int &minimumValue,
-                                const int &maximumValue,
-                                const unsigned int &numberOfSteps)
-    : lut()
-    , inverseLut()
-    , samplePoints()
-    , centers()
-    , minValue(minimumValue)
-    , maxValue(maximumValue)
+namespace calq {
+
+LBGQuantizer::LBGQuantizer(const int &valueMax,
+                           const int &valueMin,
+                           const int &nrSteps,
+                           const std::string &sampleValues)
+    : Quantizer(),
+      centers_(),
+      valueMax_(valueMax),
+      valueMin_(valueMin)
 {
-    // Sanity checks
-    if ((minValue >= maxValue) || (numberOfSteps <= 1)) {
+    if ((valueMin_ >= valueMax_) || (nrSteps <= 1)) {
         throwErrorException("Error in quantizer initialization");
     }
 
     // Compute the step size
-    double stepSize = (maxValue - minValue) / numberOfSteps;
+    double stepSize = (valueMax_ - valueMin_) / nrSteps;
 
     // Compute the borders and the representative values
     std::queue<double> borders;
     std::queue<int> reconstructionValues;
-    double newBorder = minValue;
-
-    borders.push(minValue);
-    reconstructionValues.push(minValue + round(stepSize/2));
-    centers.push_back(newBorder + round(stepSize/2));
-    for (size_t i = 0; i < numberOfSteps-1; i++) {
+    double newBorder = valueMin_;
+    borders.push(valueMin_);
+    reconstructionValues.push(valueMin_ + round(stepSize/2));
+    centers_.push_back(newBorder + round(stepSize/2));
+    for (int i = 0; i < (nrSteps-1); i++) {
         newBorder += stepSize;
         borders.push(newBorder);
         reconstructionValues.push(newBorder + round(stepSize/2));
-        centers.push_back(newBorder + round(stepSize/2));
+        centers_.push_back(newBorder + round(stepSize/2));
     }
-    borders.push(maxValue);
+    borders.push(valueMax_);
 
     // Fill the quantization table
     borders.pop();
     int currentIndex = 0;
     int currentReconstructionValue = reconstructionValues.front();
     double currentBorder = borders.front();
-    for (size_t value = minValue; value <= maxValue; value++) {
+    for (int value = valueMin_; value <= valueMax_; value++) {
         if (value > currentBorder) {
             currentIndex++;
             reconstructionValues.pop();
@@ -62,169 +61,128 @@ KMEANQuantizer::KMEANQuantizer(const int &minimumValue,
             currentReconstructionValue = reconstructionValues.front();
             currentBorder = borders.front();
         }
-        std::pair<int,int> curr(currentIndex, currentReconstructionValue);
-        lut.insert(std::pair<int,std::pair<int,int>>(value, curr));
-        inverseLut.insert(curr);
+        std::pair<int, int> curr(currentIndex, currentReconstructionValue);
+        lut_.insert(std::pair<int, std::pair<int, int>>(value, curr));
+        inverseLut_.insert(curr);
     }
+
+    // Train the quantizer
+    train(sampleValues);
 }
 
-KMEANQuantizer::~KMEANQuantizer(void)
+LBGQuantizer::~LBGQuantizer(void) {}
+
+static double dist(const double &a, const double &b)
 {
-    // empty
-}
-
-int KMEANQuantizer::valueToIndex(const int &value)
-{
-    if (lut.find(value) == lut.end()) {
-        throwErrorException("Value out of range for quantizer");
-    }
-
-    return lut[value].first;
-}
-
-double KMEANQuantizer::indexToReconstructionValue(const int &index)
-{
-    if (inverseLut.find(index) == inverseLut.end()) {
-        throwErrorException("Quantization index not found");
-    }
-
-    return inverseLut[index];
-}
-
-double KMEANQuantizer::valueToReconstructionValue(const int &value)
-{
-    if (lut.find(value) == lut.end()) {
-        throwErrorException("Value out of range for quantizer");
-    }
-
-    return lut[value].second;
-}
-
-void KMEANQuantizer::print(void) const
-{
-    std::cout << "LUT:" << std::endl;
-    for (auto const &lutEntry : lut) {
-        std::cout << "  " << lutEntry.first << ": ";
-        std::cout << lutEntry.second.first << ",";
-        std::cout << lutEntry.second.second << std::endl;
-    }
-
-    std::cout << "Inverse LUT:" << std::endl;
-    for (auto const &inverseLutEntry : inverseLut) {
-        std::cout << "  " << inverseLutEntry.first << ": ";
-        std::cout << inverseLutEntry.second << std::endl;
-    }
-}
-
-
-struct compclass {
-  bool operator() (int i,int j) { return (i<j);}
-} compobj;
-
-
-double dist(double a, double b){
-    if (a>b){
+    if (a > b) {
         return a-b;
-    } else{
+    } else {
         return b-a;
     }
 }
 
-double nearest(std::tuple<size_t,size_t,double> elem, const std::vector<double> &centers){
+static double nearest(const std::tuple<int, size_t, double> &elem, const std::vector<double> &centers)
+{
     double distance = std::numeric_limits<double>::max();
     double newCenter = std::get<2>(elem);
-    for (auto &center : centers){
-        if(dist(center,std::get<0>(elem)) < distance){
-            distance = dist(center,std::get<0>(elem));
+
+    for (double const &center : centers) {
+        double distanceToCenter = dist(center, (double)(std::get<0>(elem)));
+        if (distanceToCenter < distance) {
+            distance = distanceToCenter;
             newCenter = center;
         }
     }
+
     return newCenter;
 }
 
-
-void KMEANQuantizer::train(const std::string &samplePoints,const int &blockId, const int &quantId)
+void LBGQuantizer::train(const std::string &sampleValues)
 {
-    //std::map<int,std::vector<int>> ClusterIDSamplePoints;
-    //std::vector<std::pair<int,double>> samplePointsVec;
-    std::vector<std::tuple<size_t,size_t,double>> sPtupleVec; // dist
-    
-    std::ofstream ofs;
-    std::ostringstream os;
-    os << "Block_" << blockId << "_ID_" << quantId << ".csv";
-    std::string fileName = os.str();
-    ofs.open(fileName,std::ofstream::out);
-    ofs << "Iteration,QV,Anzahl,Center" << std::endl;
-    
+    std::vector<std::tuple<int, size_t, double>> sampleValueDistribution;
+
     // Initialize QV distribution
-    for(size_t i = minValue; i<=maxValue; ++i){
-        sPtupleVec.emplace_back(std::make_tuple(i,0,valueToReconstructionValue(i)));
+    CALQ_LOG("Initializing QV distribution");
+    for(int value = valueMin_; value <= valueMax_; ++value) {
+        sampleValueDistribution.emplace_back(std::make_tuple(value, 0, (double)valueToReconstructionValue(value)));
     }
 
-    // Iterate through all QVs and generate cumulated absolute frequency distribution
-    for(const char& c: samplePoints){
-        for(auto &elem: sPtupleVec){
-            if(c == std::get<0>(elem)){
+    // Generate cumulated absolute frequency distribution
+    CALQ_LOG("Generating cumulated absolute frequency distribution");
+    for (const char &sampleValue : sampleValues) {
+        for (auto &elem : sampleValueDistribution){
+            if(sampleValue == std::get<0>(elem)) {
                 std::get<1>(elem)++;
                 break;
             }
         }
     }
 
-    // ^^^^ std::tuple<int, int, double>
-    //      std::tuple<qv, cumFreq, center>
+    for (auto const &elem : sampleValueDistribution)
+        printf("%d: %zu, %f\n", std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
 
-    size_t changed = 0;
-    size_t iteration = 0;
-    do{ 
-        changed = 0;       
+    // Do the clustering
+    CALQ_LOG("Clustering");
+    bool changed = false;
+    size_t nrIterations = 0;
+
+    do {
+        changed = false;
 
         // Compute new cluster centers
-        for(auto &center: centers){
+        for (double &center : centers_) {
             double newCenter = 0;
-            size_t ctr = 0;
+            size_t freq = 0;
 
-            for(auto const &pt: sPtupleVec){
-                if(std::get<2>(pt) == center){
-                    newCenter += std::get<0>(pt) * std::get<1>(pt);
-                    ctr += std::get<1>(pt);
+            for(auto const &elem : sampleValueDistribution) {
+                if (std::get<2>(elem) == center) {
+                    newCenter += (double)(std::get<0>(elem)) * (double)(std::get<1>(elem));
+                    freq += std::get<1>(elem);
                 }
             }
-            if (ctr != 0){
-                center = (double)newCenter/(double)ctr;
+
+            if (freq != 0) {
+                center = (double)newCenter / (double)freq;
             }
         }
 
         // Assign each QV to new cluster center
-        for(auto &pt: sPtupleVec){
-            ofs << iteration << "," << std::get<0>(pt) << "," << std::get<1>(pt) << "," << std::get<2>(pt) << std::endl;
-            double center = nearest(pt, centers);
-            if(std::get<2>(pt) != center){
-                std::get<2>(pt) = center;
-                changed++;
+        for (auto &elem : sampleValueDistribution){
+            double center = nearest(elem, centers_);
+            if (std::get<2>(elem) != center) {
+                std::get<2>(elem) = center;
+                changed = true;
             }
         }
-        iteration++;
-    }while(changed!=0);
 
-    std::map<double, int> reverseInverseLut;
-    for(auto &elem: inverseLut){
-        elem.second = centers[elem.first];
-        reverseInverseLut.emplace(elem.second,elem.first);
-    }
+        nrIterations++;
+    } while (changed == true);
 
-    for (auto &elem: lut){
-        for(auto &pt: sPtupleVec){
-            if(elem.first == std::get<0>(pt)){
-                elem.second.first = reverseInverseLut[std::get<2>(pt)];
-                elem.second.second = std::get<2>(pt);
-                break;
-            }
-        }
-    }
-    ofs.close();
+    for (auto const &elem : sampleValueDistribution)
+        printf("%d: %zu, %f\n", std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
+    CALQ_LOG("Finished quantizer training after %zu iterations", nrIterations);
+    
 
+    // Fill inverse LUT
+//     std::map<double, int> reverseInverseLut;
+//     for(auto const &inverseLutEntry : inverseLut_){
+//         inverseLutEntry.second = centers_[inverseLutEntry.first];
+//         reverseInverseLut.emplace(inverseLutEntry.second, inverseLutEntry.first);
+//     }
+// 
+//     // Fill LUT
+//     for (auto &lutEntry : lut_) {
+//         for (auto const &elem : sampleValueDistribution) {
+//             if (lutEntry.first == std::get<0>(elem)) {
+//                 lutEntry.second.first = reverseInverseLut[std::get<2>(elem)];
+//                 lutEntry.second.second = std::get<2>(elem);
+//                 break;
+//             }
+//         }
+//     }
 
-
-    CALQ_LOG(" Quantizer %d for Block %d trained.",quantId, blockId);
+//     CALQ_LOG("Finished quantizer training after %zu iterations", nrIterations);
 }
+
+} // namespace calq
+

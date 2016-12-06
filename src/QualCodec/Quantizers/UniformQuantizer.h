@@ -4,8 +4,8 @@
  *  @bug No known bugs
  */
 
-#ifndef CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
-#define CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
+#ifndef CALQ_QUALCODEC_QUANTIZERS_UNIFORMQUANTIZER_H_
+#define CALQ_QUALCODEC_QUANTIZERS_UNIFORMQUANTIZER_H_
 
 #include "QualCodec/Quantizers/Quantizer.h"
 
@@ -19,5 +19,5 @@ public:
 
 } // namespace calq
 
-#endif // CALQ_QUALCODEC_UNIFORMQUANTIZER_H_
+#endif // CALQ_QUALCODEC_QUANTIZERS_UNIFORMQUANTIZER_H_
 

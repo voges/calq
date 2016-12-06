@@ -1,48 +1,37 @@
-/** @file KMEANQuantizers.h
- *  @brief This file contains the definitions of the KMEANQuantizer class.
+/** @file LBGQuantizer.h
+ *  @brief This file contains the definitions of the LBGQuantizer class.
  *  @author Jan Voges (voges)
  *  @bug No known bugs
  */
 
-/*
- *  Changelog
- *  YYYY-MM-DD: What (who)
- */
-
-#ifndef KMEANQUANTIZER_H
-#define KMEANQUANZIZER_H
+#ifndef CALQ_QUALCODEC_QUANTIZERS_LBGQUANTIZER_H_
+#define CALQ_QUALCODEC_QUANTIZERS_LBGQUANTIZER_H_
 
 #include <map>
 #include <string>
 #include <vector>
-#include <fstream>
 
-/** @brief Class: KMEANQuantizer
- *
- *  The KMEANQuantizer class quantizes integer values.
- */
-class KMEANQuantizer {
+#include "QualCodec/Quantizers/Quantizer.h"
+
+namespace calq {
+
+class LBGQuantizer : public Quantizer {
 public:
-    KMEANQuantizer(const int &minimumValue,
-                     const int &maximumValue,
-                     const unsigned int &numberOfSteps);
-    ~KMEANQuantizer(void);
-
-    int valueToIndex(const int &value);
-    double indexToReconstructionValue(const int &index);
-    double valueToReconstructionValue(const int &value);
-
-    void print(void) const;
-    void train(const std::string &samplePoints,const int &blockId, const int &quantId);
+    LBGQuantizer(const int &valueMax,
+                 const int &valueMin,
+                 const int &nrSteps,
+                 const std::string &sampleValues);
+    ~LBGQuantizer(void);
 
 private:
-    std::map<int,std::pair<int,double>> lut; // value->(index,reconstructionValue)
-    std::map<int,double> inverseLut; // index->reconstructionValue
-    std::vector<int> samplePoints;
-    std::vector<double> centers;
-    const size_t minValue;
-    const size_t maxValue;
+    void train(const std::string &sampleValues);
+
+    std::vector<double> centers_;
+    const int valueMax_;
+    const int valueMin_;
 };
 
-#endif // KMEANQUANTIZER_H
+} // namespace calq
+
+#endif // CALQ_QUALCODEC_QUANTIZERS_LBGQUANTIZER_H_
 

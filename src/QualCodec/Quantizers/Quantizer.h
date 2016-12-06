@@ -4,8 +4,8 @@
  *  @bug No known bugs
  */
 
-#ifndef CALQ_QUALCODEC_QUANTIZER_H_
-#define CALQ_QUALCODEC_QUANTIZER_H_
+#ifndef CALQ_QUALCODEC_QUANTIZERS_QUANTIZER_H_
+#define CALQ_QUALCODEC_QUANTIZERS_QUANTIZER_H_
 
 #include <map>
 #include <utility>
@@ -27,11 +27,11 @@ public:
     void print(void) const;
 
 protected:
-    std::map<int,std::pair<int, int>> lut_; // value->(index,reconstructionValue)
+    std::map<int, std::pair<int, int>> lut_; // value->(index,reconstructionValue)
     std::map<int, int> inverseLut_; // index->reconstructionValue
 };
 
 } // namespace calq
 
-#endif // CALQ_QUALCODEC_QUANTIZER_H_
+#endif // CALQ_QUALCODEC_QUANTIZERS_QUANTIZER_H_
 
