@@ -118,9 +118,6 @@ void LBGQuantizer::train(const std::string &sampleValues)
         }
     }
 
-    for (auto const &elem : sampleValueDistribution)
-        printf("%d: %zu, %f\n", std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
-
     // Do the clustering
     CALQ_LOG("Clustering");
     bool changed = false;
@@ -158,30 +155,46 @@ void LBGQuantizer::train(const std::string &sampleValues)
         nrIterations++;
     } while (changed == true);
 
-    for (auto const &elem : sampleValueDistribution)
-        printf("%d: %zu, %f\n", std::get<0>(elem), std::get<1>(elem), std::get<2>(elem));
-    CALQ_LOG("Finished quantizer training after %zu iterations", nrIterations);
-    
+    CALQ_LOG("Finished clustering after %zu iterations", nrIterations);
 
-    // Fill inverse LUT
-//     std::map<double, int> reverseInverseLut;
-//     for(auto const &inverseLutEntry : inverseLut_){
-//         inverseLutEntry.second = centers_[inverseLutEntry.first];
-//         reverseInverseLut.emplace(inverseLutEntry.second, inverseLutEntry.first);
-//     }
-// 
-//     // Fill LUT
-//     for (auto &lutEntry : lut_) {
-//         for (auto const &elem : sampleValueDistribution) {
-//             if (lutEntry.first == std::get<0>(elem)) {
-//                 lutEntry.second.first = reverseInverseLut[std::get<2>(elem)];
-//                 lutEntry.second.second = std::get<2>(elem);
-//                 break;
-//             }
-//         }
-//     }
+    // Fill LUT and inverse LUT
+    CALQ_LOG("Filling LUT and inverse LUT");
+    int index = 0;
+    int reconstructionValuePrev = 0;
+    bool first = true;
 
-//     CALQ_LOG("Finished quantizer training after %zu iterations", nrIterations);
+    for (auto const &elem : sampleValueDistribution) {
+        int value = std::get<0>(elem);
+
+        auto lutIt = lut_.find(value);
+        if (lutIt == lut_.end()) {
+            throwErrorException("Did not find value");
+        }
+
+        int reconstructionValue = round(std::get<2>(elem));
+        if (first == true) {
+            reconstructionValuePrev = reconstructionValue;
+            first = false;
+        }
+
+        if (reconstructionValue != reconstructionValuePrev) {
+            index++;
+        }
+
+        auto inverseLutIt = inverseLut_.find(index);
+        if (inverseLutIt == inverseLut_.end()) {
+            throwErrorException("Did not find value");
+        }
+
+        // Fill LUT
+        lutIt->second.first = index;
+        lutIt->second.second = reconstructionValue;
+
+        // Fill inverse LUT
+        inverseLutIt->second = reconstructionValue;
+
+        reconstructionValuePrev = reconstructionValue;
+    }
 }
 
 } // namespace calq

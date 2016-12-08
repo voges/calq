@@ -1,5 +1,5 @@
 - Create tag for MPEG_CE2
 - Create tag for ISMB/ECCB_2017
-- Finish LBGQuantizer
 - Finish Genotyper::computeAdjustedQualityValues()
 - Draw encoder and decoder in MS Visio
+- Fix computeQualRange and replace_qual scripts

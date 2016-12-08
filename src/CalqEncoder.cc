@@ -116,7 +116,7 @@ void CalqEncoder::encode(void)
             Quantizer quantizer = LBGQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps, mappedQualityValues);
             quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
         }
-        throwErrorException("Stopping intentionally here");
+//         throwErrorException("Stopping intentionally here");
         // Write the inverse quantization LUTs
         CALQ_LOG("Writing inverse quantization LUTs");
         compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);
