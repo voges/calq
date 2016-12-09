@@ -17,18 +17,9 @@ namespace calq {
 
 class LBGQuantizer : public Quantizer {
 public:
-    LBGQuantizer(const int &valueMax,
-                 const int &valueMin,
-                 const int &nrSteps,
-                 const std::string &sampleValues);
+    LBGQuantizer(const int &k,
+                 const std::map<int, size_t> &sampleValueDistribution);
     ~LBGQuantizer(void);
-
-private:
-    void train(const std::string &sampleValues);
-
-    std::vector<double> centers_;
-    const int valueMax_;
-    const int valueMin_;
 };
 
 } // namespace calq

@@ -21,9 +21,9 @@ public:
               const int &nrQuantizers);
     ~Genotyper(void);
 
-//     void computeAdjustedQual(std::string &adjustedQual,
-//                              const std::string &seqPileup,
-//                              const std::string &qualPileup);
+    void computeAdjustedQualityValues(std::string *qualPileupAdjusted,
+                                      const std::string &seqPileup,
+                                      const std::string &qualPileup);
     double computeEntropy(const std::string &seqPileup,
                           const std::string &qualPileup);
     int computeQuantizerIndex(const std::string &seqPileup,

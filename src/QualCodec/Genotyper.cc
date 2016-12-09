@@ -55,10 +55,75 @@ Genotyper::Genotyper(const int &polyploidy,
       qualMin_(qualMin),
       qualMax_(qualMax)
 {
+    if (nrQuantizers < 1) {
+        throwErrorException("");
+    }
+    if (polyploidy < 1) {
+        throwErrorException("Polyploidy must be greater than zero");
+    }
+    if (qualMax <= qualMin) {
+        throwErrorException("qualMax is smaller than or equal to qualMin");
+    }
+    if (qualMin < 1) {
+        throwErrorException("qualMin must be greater than zero");
+    }
+
     initLikelihoods();
 }
 
 Genotyper::~Genotyper(void) {}
+
+void Genotyper::computeAdjustedQualityValues(std::string *qualPileupAdjusted,
+                                             const std::string &seqPileup,
+                                             const std::string &qualPileup)
+{
+    // haploid: base X has Q and P -- select max as new QV
+    // diploid: base X has Q and P1,2,3,4 -- select max as new QV
+
+    if (polyploidy_ > 2) {
+        throwErrorException("No support for polyploidy greater than 2");
+    }
+    if (qualPileupAdjusted->empty() == false) {
+        throwErrorException("qualPileupAdjusted must be empty");
+    }
+
+    const size_t depth = seqPileup.length();
+
+    if (depth != qualPileup.length()) {
+        throwErrorException("Lengths of seqPileup and qualPileup differ");
+    }
+
+    if ((depth == 0) || (depth == 1)) {
+        *qualPileupAdjusted += qualPileup;
+        return;
+    }
+
+    computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
+
+    // Get likelihoods for the alleles
+//     std::map<char,std::vector<double>> baseLikelihoods;
+//     for (auto const &allele : alleleAlphabet_) {
+//         for (auto const &genotype : genotypeAlphabet_) {
+//             if (genotype.find(allele) != std::string::npos) {
+//                 baseLikelihoods[allele].append(genotypeLikelihoods_[genotype]);
+//             }
+//         }
+//     }
+
+    // Get the largest likelihood
+//     double largestBaseLikelihood = 0.0;
+//     for (auto const &baseLikelihood : baseLikelihoods) {
+//         if (baseLikelihood > largestBaseLikelihood) {
+//             largestBaseLikelihood = baseLikelihood;
+//         }
+//     }
+
+    // Convert the probability to phred score
+//     double largestBaseLikelihoodPhred = -log10(1-largestBaseLikelihood);
+
+    // Set new quality values
+//     
+}
 
 double Genotyper::computeEntropy(const std::string &seqPileup,
                                  const std::string &qualPileup)
@@ -123,46 +188,6 @@ int Genotyper::computeQuantizerIndex(const std::string &seqPileup,
 //     std::cout << "k: " << (int)((1-confidence)*(nrQuantizers_-1)) << std::endl;
     return (int)((1-confidence)*(nrQuantizers_-1));
 }
-
-// void Genotyper::computeAdjustedQualityValues(std::string &adjustedQualityValues,
-//                                              const std::string &observedNucleotides,
-//                                              const std::string &observedQualityValues)
-// {
-//     //haploid: base N has Q and P -- select max as new QV
-//     //diploid: base N has Q and P1,2,3,4 -- select max as new QV
-//
-//     for (auto &genotypeLikelihood : genotypeLikelihoods) {
-//         if (genotypeLikelihood.second > largestGenotypeLikelihood) {
-//             largestGenotypeLikelihood = genotypeLikelihood.second;
-//         }
-//     }
-//     // Convert the probability to phred score
-//     double gtLLPhred = -log10(1-largestGenotypeLikelihood);
-//
-//     adjustedQualityValues = "";
-//     const size_t depth = observedNucleotides.length();
-//
-//     if ((depth == 0) || (depth == 1)) {
-//         adjustedQualityValues = observedQualityValues;
-//     }
-//
-//     computeGenotypeLikelihoods(observedNucleotides, observedQualityValues);
-//
-//     // Get likelihoods for the alleles
-//     std::map<char,std::vector<double>> nucleotideQualityValues;
-//     for (auto const &allele : alleleAlphabet) {
-//         for (auto const &genotype : genotypeAlphabet) {
-//             if (genotype.find(allele) != std::string::npos) {
-//                 nucleotideQualityValues[allele].append(genotypeLikelihoods[genotype];
-//             }
-//         }
-//     }
-//
-//     // Get the largest likelihood
-//     for (auto const &nucleotideQualityValue : nucleotideQualityValues) {
-//         //
-//     }
-// }
 
 void Genotyper::initLikelihoods(void)
 {

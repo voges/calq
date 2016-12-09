@@ -89,11 +89,10 @@ void CalqEncoder::encode(void)
     while (samFile_.readBlock(blockSize_) != 0) {
         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
-        // Check QV range for the current block and collect mapped QVs
+        CALQ_LOG("Checking quality value range and collecting mapped quality values");
         std::string mappedQualityValues("");
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
-                mappedQualityValues += samRecord.qual;
                 for (auto const &q : samRecord.qual) {
                     if ((q-qualityValueOffset_) < qualityValueMin_) {
                         throwErrorException("Quality value too small");
@@ -102,26 +101,36 @@ void CalqEncoder::encode(void)
                         throwErrorException("Quality value too large");
                     }
                 }
+                mappedQualityValues += samRecord.qual;
             }
         }
 
-        // Construct quantizers
+        CALQ_LOG("Initializing quality value distribution");
+        std::map<int, size_t> qualityValueDistribution;
+        for(int qualityValue = qualityValueMin_; qualityValue <= qualityValueMax_; ++qualityValue) {
+            qualityValueDistribution.insert(std::pair<int, size_t>(qualityValue, 0));
+        }
+
+        CALQ_LOG("Generating quality value distribution");
+        for (const char &q : mappedQualityValues) {
+            qualityValueDistribution.at((int)q-qualityValueOffset_)++;
+        }
+
         CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
         std::map<int,Quantizer> quantizers;
         int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
         for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
              quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
              ++quantizerIdx, ++quantizerSteps) {
+            CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
             //Quantizer quantizer = UniformQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps);
-            Quantizer quantizer = LBGQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps, mappedQualityValues);
+            Quantizer quantizer = LBGQuantizer(quantizerSteps, qualityValueDistribution);
             quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
         }
-//         throwErrorException("Stopping intentionally here");
-        // Write the inverse quantization LUTs
+
         CALQ_LOG("Writing inverse quantization LUTs");
         compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);
 
-        // Encode the QVs
         CALQ_LOG("Encoding quality values");
         QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_, quantizers);
         for (auto const &samRecord : samFile_.currentBlock.records) {
