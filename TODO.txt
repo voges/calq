@@ -2,4 +2,3 @@
 - Create tag for ISMB/ECCB_2017
 - Finish Genotyper::computeAdjustedQualityValues()
 - Draw encoder and decoder in MS Visio
-- Fix getMinMaxQVFrom*.py and replace_qual.py scripts

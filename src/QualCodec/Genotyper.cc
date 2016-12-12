@@ -64,8 +64,8 @@ Genotyper::Genotyper(const int &polyploidy,
     if (qualMax <= qualMin) {
         throwErrorException("qualMax is smaller than or equal to qualMin");
     }
-    if (qualMin < 1) {
-        throwErrorException("qualMin must be greater than zero");
+    if (qualMin < 0) {
+        throwErrorException("qualMin must be positive");
     }
 
     initLikelihoods();
