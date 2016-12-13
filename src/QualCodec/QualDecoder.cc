@@ -142,8 +142,9 @@ void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *
 
 void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile)
 {
-    // Compute the read length from the CIGAR string
-    size_t qualLen = readLength(samRecord.cigar);
+    // Get the read length from SEQ (CIGAR might be unavailable for an
+    // unmapped record)
+    size_t qualLen = samRecord.seq.length();
 
     // Get the quality values
     std::string qual = unmappedQualityValues_.substr(unmappedQualityValuesPosition_, qualLen);

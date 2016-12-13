@@ -110,8 +110,8 @@ void CalqEncoder::encode(void)
              quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
              ++quantizerIdx, ++quantizerSteps) {
 //             CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
-            Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
-//             Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
+//             Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
+            Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
             quantizers.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
         }
 
