@@ -53,7 +53,8 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
       line_(NULL),
       nrBlocksRead_(0),
       nrMappedRecordsRead_(0),
-      nrUnmappedRecordsRead_(0)
+      nrUnmappedRecordsRead_(0),
+      startTime_(std::chrono::steady_clock::now())
 {
     if (path.empty() == true) {
         throwErrorException("path is empty");
@@ -189,7 +190,16 @@ size_t SAMFile::readBlock(const size_t &blockSize)
         nrUnmappedRecordsRead_ += currentBlock.nrUnmappedRecords();
     }
 
-    CALQ_LOG("@ %.2f%%", ((double)tell()/(double)size())*100);
+    auto elapsedTime = std::chrono::steady_clock::now() - startTime_;
+    auto elapsedTimeS = std::chrono::duration_cast<std::chrono::seconds>(elapsedTime).count();
+    double elapsedTimeM = (double)elapsedTimeS / (double)60;
+    double processedPercentage = ((double)tell() / (double)size()) * 100;
+    auto remainingPercentage = 100 - processedPercentage;
+    CALQ_LOG("Processed: %.2f%% (elapsed: %.2f m), remaining: %.2f%% (~%.2f m)",
+             processedPercentage,
+             elapsedTimeM,
+             remainingPercentage,
+             elapsedTimeM * (remainingPercentage/processedPercentage));
 
     return currentBlock.nrRecords();
 }

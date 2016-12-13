@@ -63,7 +63,7 @@ QualDecoder::QualDecoder(const std::map<int, Quantizer> &quantizers)
       mappedQualityValueIndicesPosition_(0),
       quantizers_(quantizers)
 {
-    CALQ_LOG("Initialized with %zu quantizers", quantizers_.size());
+//     CALQ_LOG("Initialization with %zu quantizers", quantizers_.size());
 }
 
 QualDecoder::~QualDecoder(void) {}
@@ -159,7 +159,7 @@ void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File
 
 size_t QualDecoder::readBlock(CQFile *cqFile)
 {
-    CALQ_LOG("Reading block");
+//     CALQ_LOG("Reading block");
 
     size_t ret = 0;
 

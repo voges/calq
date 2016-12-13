@@ -43,15 +43,13 @@ void CalqDecoder::decode(void)
     cqFile_.readHeader(&blockSize);
 
     while (sideInformationFile_.readBlock(blockSize) != 0) {
-        CALQ_LOG("Decoding block %zu", sideInformationFile_.nrBlocksRead()-1);
+//         CALQ_LOG("Decoding block %zu", sideInformationFile_.nrBlocksRead()-1);
 
-        // Read the inverse quantization LUTs
-        CALQ_LOG("Reading inverse quantization LUTs");
+//         CALQ_LOG("Reading inverse quantization LUTs");
         std::map<int, Quantizer> quantizers;
         cqFile_.readQuantizers(&quantizers);
 
-        // Decode the QVs
-        CALQ_LOG("Decoding quality values");
+//         CALQ_LOG("Decoding quality values");
         QualDecoder qualDecoder(quantizers);
         qualDecoder.readBlock(&cqFile_);
         for (auto const &samRecord : sideInformationFile_.currentBlock.records) {

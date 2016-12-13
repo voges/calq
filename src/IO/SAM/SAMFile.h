@@ -7,6 +7,7 @@
 #ifndef CALQ_IO_SAM_SAMFILE_H_
 #define CALQ_IO_SAM_SAMFILE_H_
 
+#include <chrono>
 #include <string>
 
 #include "Common/constants.h"
@@ -36,6 +37,8 @@ private:
     size_t nrBlocksRead_;
     size_t nrMappedRecordsRead_;
     size_t nrUnmappedRecordsRead_;
+
+    std::chrono::steady_clock::time_point startTime_;
 };
 
 } // namespace calq

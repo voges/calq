@@ -87,16 +87,16 @@ void CalqEncoder::encode(void)
     cqFile_.writeHeader(blockSize_);
 
     while (samFile_.readBlock(blockSize_) != 0) {
-        CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
+//         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
 //         CALQ_LOG("Checking quality value range");
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
                 for (auto const &q : samRecord.qual) {
-                    if ((q-qualityValueOffset_) < qualityValueMin_) {
+                    if (((int)q-qualityValueOffset_) < qualityValueMin_) {
                         throwErrorException("Quality value too small");
                     }
-                    if ((q-qualityValueOffset_) > qualityValueMax_) {
+                    if (((int)q-qualityValueOffset_) > qualityValueMax_) {
                         throwErrorException("Quality value too large");
                     }
                 }

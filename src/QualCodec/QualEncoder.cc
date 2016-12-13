@@ -41,7 +41,7 @@ QualEncoder::QualEncoder(const int &polyploidy,
 
       samPileupDeque_(),
 
-      genotyper_(polyploidy, qualityValueMin, qualityValueMax, quantizers.size()),
+      genotyper_(polyploidy, qualityValueMin, qualityValueMax, qualityValueOffset, quantizers.size()),
 
       quantizers_(quantizers),
 

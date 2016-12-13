@@ -137,9 +137,8 @@ int Genotyper::computeQuantizerIndex(const std::string &seqPileup,
     }
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
-//     std::cout << "confidence: " << confidence << std::endl;
-//     std::cout << "k: " << (int)((1-confidence)*(nrQuantizers_-1)) << std::endl;
-    return (int)((1-confidence)*(nrQuantizers_-1));
+
+    return (int)((1-confidence) * (nrQuantizers_-1));
 }
 
 void Genotyper::initLikelihoods(void)
