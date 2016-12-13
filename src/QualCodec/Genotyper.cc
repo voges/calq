@@ -122,7 +122,7 @@ void Genotyper::computeAdjustedQualityValues(std::string *qualPileupAdjusted,
 //     double largestBaseLikelihoodPhred = -log10(1-largestBaseLikelihood);
 
     // Set new quality values
-//     
+//
 }
 
 double Genotyper::computeEntropy(const std::string &seqPileup,
@@ -200,7 +200,7 @@ void Genotyper::initLikelihoods(void)
     int chosen[ALLELE_ALPHABET_SIZE];
     combinationsWithRepetitions(&genotypeAlphabet_, alleleAlphabet_, chosen, 0, polyploidy_, 0, ALLELE_ALPHABET_SIZE);
 
-    CALQ_LOG("Initializing genotype alphabet with %zu possible genotypes", genotypeAlphabet_.size());
+//     CALQ_LOG("Initializing genotype alphabet with %zu possible genotypes", genotypeAlphabet_.size());
     for (auto &genotype : genotypeAlphabet_) {
         genotypeLikelihoods_.insert(std::pair<std::string, double>(genotype, 0.0));
     }

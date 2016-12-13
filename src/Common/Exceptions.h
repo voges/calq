@@ -40,7 +40,7 @@ inline void throwErrorException(const std::string &msg)
 
 class ErrorExceptionReporter {
 public:
-    ErrorExceptionReporter(const std::string &file, 
+    ErrorExceptionReporter(const std::string &file,
                            const std::string &function,
                            const int &line)
         : file_(file)

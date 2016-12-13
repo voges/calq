@@ -47,7 +47,7 @@ void CalqDecoder::decode(void)
 
         // Read the inverse quantization LUTs
         CALQ_LOG("Reading inverse quantization LUTs");
-        std::map<int,Quantizer> quantizers;
+        std::map<int, Quantizer> quantizers;
         cqFile_.readQuantizers(&quantizers);
 
         // Decode the QVs

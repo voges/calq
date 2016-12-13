@@ -28,6 +28,7 @@ public:
                           const std::string &qualPileup);
     int computeQuantizerIndex(const std::string &seqPileup,
                               const std::string &qualPileup);
+
 private:
     void initLikelihoods(void);
     void resetLikelihoods(void);

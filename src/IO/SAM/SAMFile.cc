@@ -189,7 +189,7 @@ size_t SAMFile::readBlock(const size_t &blockSize)
         nrUnmappedRecordsRead_ += currentBlock.nrUnmappedRecords();
     }
 
-    CALQ_LOG("@ %.1f%%", ((double)tell()/(double)size())*100);
+    CALQ_LOG("@ %.2f%%", ((double)tell()/(double)size())*100);
 
     return currentBlock.nrRecords();
 }

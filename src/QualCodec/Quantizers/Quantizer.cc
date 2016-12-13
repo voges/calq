@@ -51,16 +51,16 @@ const std::map<int, int> & Quantizer::inverseLut(void) const
 void Quantizer::print(void) const
 {
     std::cout << "LUT:" << std::endl;
-    for (auto const &lutEntry : lut_) {
-        std::cout << "  " << lutEntry.first << ": ";
-        std::cout << lutEntry.second.first << ",";
-        std::cout << lutEntry.second.second << std::endl;
+    for (auto const &lutElem : lut_) {
+        std::cout << "  " << lutElem.first << ": ";
+        std::cout << lutElem.second.first << ",";
+        std::cout << lutElem.second.second << std::endl;
     }
 
     std::cout << "Inverse LUT:" << std::endl;
-    for (auto const &inverseLutEntry : inverseLut_) {
-        std::cout << "  " << inverseLutEntry.first << ": ";
-        std::cout << inverseLutEntry.second << std::endl;
+    for (auto const &inverseLutElem : inverseLut_) {
+        std::cout << "  " << inverseLutElem.first << ": ";
+        std::cout << inverseLutElem.second << std::endl;
     }
 }
 

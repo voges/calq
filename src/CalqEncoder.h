@@ -27,8 +27,8 @@ private:
     size_t blockSize_;
     CQFile cqFile_;
     int polyploidy_;
-    int qualityValueMax_;
     int qualityValueMin_;
+    int qualityValueMax_;
     int qualityValueOffset_;
     std::vector<std::string> referenceFileNames_;
     SAMFile samFile_;

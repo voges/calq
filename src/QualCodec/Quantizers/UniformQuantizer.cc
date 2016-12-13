@@ -15,7 +15,7 @@
 
 namespace calq {
 
-UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, const int &nrSteps)
+UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const int &nrSteps)
     : Quantizer()
 {
     if ((valueMin > valueMax) || (nrSteps <= 1)) {
@@ -23,18 +23,18 @@ UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, con
     }
 
     // Compute the step size
-    double stepSize = (valueMax - valueMin) / nrSteps;
+    int stepSize = (int)floor(((double)(valueMax - valueMin)) / ((double)nrSteps));
 
     // Compute the borders and the representative values
-    std::queue<double> borders;
+    std::queue<int> borders;
     std::queue<int> reconstructionValues;
-    double newBorder = valueMin;
+    int newBorder = valueMin;
     borders.push(valueMin);
-    reconstructionValues.push(valueMin + (int)round(stepSize/2));
+    reconstructionValues.push(valueMin + (int)round(((double)stepSize)/((double)2)));
     for (int i = 0; i < (nrSteps-1); i++) {
         newBorder += stepSize;
         borders.push(newBorder);
-        reconstructionValues.push((int)newBorder + (int)round(stepSize/2));
+        reconstructionValues.push(newBorder + (int)round(((double)stepSize)/((double)2)));
     }
     borders.push(valueMax);
 
@@ -42,8 +42,8 @@ UniformQuantizer::UniformQuantizer(const int &valueMax, const int &valueMin, con
     borders.pop();
     int currentIndex = 0;
     int currentReconstructionValue = reconstructionValues.front();
-    double currentBorder = borders.front();
-    for (int value = valueMin; value <= valueMax; value++) {
+    int currentBorder = borders.front();
+    for (int value = valueMin; value <= valueMax; ++value) {
         if (value > currentBorder) {
             currentIndex++;
             reconstructionValues.pop();

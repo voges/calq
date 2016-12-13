@@ -116,7 +116,7 @@ void SAMPileupDeque::setPosMin(const uint32_t &posMin)
     if (empty() == true) {
         posMin_ = posMin;
     } else {
-        for (uint32_t i = posMin_; i < posMin ; i++) { pop_front(); } 
+        for (uint32_t i = posMin_; i < posMin ; i++) { pop_front(); }
     }
 }
 

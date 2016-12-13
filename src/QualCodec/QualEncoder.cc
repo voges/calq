@@ -125,7 +125,7 @@ void QualEncoder::finishBlock(void)
 
 size_t QualEncoder::writeBlock(CQFile *cqFile)
 {
-    CALQ_LOG("Writing block");
+//     CALQ_LOG("Writing block");
 
     compressedMappedQualSize_ = 0;
     compressedUnmappedQualSize_ = 0;
@@ -204,8 +204,6 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
 //     printf("Encoding SAM record");
 //     samRecord.printShort();
-
-    std::string qual("");
 
     size_t cigarIdx = 0;
     size_t cigarLen = samRecord.cigar.length();

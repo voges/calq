@@ -26,7 +26,7 @@
                     ##__VA_ARGS__); \
         } while (false)
 #else
-    #define CALQ_DEBUG(c,...) do { } while (false)
+    #define CALQ_DEBUG(c, ...) do { } while (false)
 #endif
 
 // C-style log macro

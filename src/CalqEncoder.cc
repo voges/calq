@@ -14,8 +14,8 @@
 #include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
-#include "QualCodec/Quantizers/LBGQuantizer.h"
 #include "QualCodec/Quantizers/UniformQuantizer.h"
+#include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
 
 namespace calq {
 
@@ -23,8 +23,8 @@ CalqEncoder::CalqEncoder(const Options &options)
     : blockSize_(options.blockSize),
       cqFile_(options.outputFileName, CQFile::MODE_WRITE),
       polyploidy_(options.polyploidy),
-      qualityValueMax_(options.qualityValueMax),
       qualityValueMin_(options.qualityValueMin),
+      qualityValueMax_(options.qualityValueMax),
       qualityValueOffset_(options.qualityValueOffset),
       referenceFileNames_(options.referenceFileNames),
       samFile_(options.inputFileName)
@@ -41,11 +41,11 @@ CalqEncoder::CalqEncoder(const Options &options)
     if (options.polyploidy < 1) {
         throwErrorException("polyploidy must be greater than zero");
     }
-    if (options.qualityValueMax < 0) {
-        throwErrorException("qualityValueMax must be zero or greater");
-    }
     if (options.qualityValueMin < 0) {
         throwErrorException("qualityValueMin must be zero or greater");
+    }
+    if (options.qualityValueMax < 0) {
+        throwErrorException("qualityValueMax must be zero or greater");
     }
     if (options.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
@@ -75,9 +75,9 @@ CalqEncoder::~CalqEncoder(void) {}
 void CalqEncoder::encode(void)
 {
     size_t compressedMappedQualSize = 0;
-    size_t compressedUnmappedQualSize= 0;
-    size_t uncompressedMappedQualSize= 0;
-    size_t uncompressedUnmappedQualSize= 0;
+    size_t compressedUnmappedQualSize = 0;
+    size_t uncompressedMappedQualSize = 0;
+    size_t uncompressedUnmappedQualSize = 0;
 
     // Take time
     auto startTime = std::chrono::steady_clock::now();
@@ -89,8 +89,7 @@ void CalqEncoder::encode(void)
     while (samFile_.readBlock(blockSize_) != 0) {
         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
-        CALQ_LOG("Checking quality value range and collecting mapped quality values");
-        std::string mappedQualityValues("");
+//         CALQ_LOG("Checking quality value range");
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
                 for (auto const &q : samRecord.qual) {
@@ -101,37 +100,25 @@ void CalqEncoder::encode(void)
                         throwErrorException("Quality value too large");
                     }
                 }
-                mappedQualityValues += samRecord.qual;
             }
         }
 
-        CALQ_LOG("Initializing quality value distribution");
-        std::map<int, size_t> qualityValueDistribution;
-        for(int qualityValue = qualityValueMin_; qualityValue <= qualityValueMax_; ++qualityValue) {
-            qualityValueDistribution.insert(std::pair<int, size_t>(qualityValue, 0));
-        }
-
-        CALQ_LOG("Generating quality value distribution");
-        for (const char &q : mappedQualityValues) {
-            qualityValueDistribution.at((int)q-qualityValueOffset_)++;
-        }
-
-        CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
-        std::map<int,Quantizer> quantizers;
+//         CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
+        std::map<int, Quantizer> quantizers;
         int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
         for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
              quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
              ++quantizerIdx, ++quantizerSteps) {
-            CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
-            //Quantizer quantizer = UniformQuantizer(qualityValueMax_, qualityValueMin_, quantizerSteps);
-            Quantizer quantizer = LBGQuantizer(quantizerSteps, qualityValueDistribution);
-            quantizers.insert(std::pair<int,Quantizer>(quantizerIdx, quantizer));
+//             CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
+            Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
+//             Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
+            quantizers.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
         }
 
-        CALQ_LOG("Writing inverse quantization LUTs");
+//         CALQ_LOG("Writing inverse quantization LUTs");
         compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);
 
-        CALQ_LOG("Encoding quality values");
+//         CALQ_LOG("Encoding quality values");
         QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_, quantizers);
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
