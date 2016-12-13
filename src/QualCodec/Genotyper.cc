@@ -45,6 +45,7 @@ static int combinationsWithRepetitions(std::vector<std::string> *genotypeAlphabe
 Genotyper::Genotyper(const int &polyploidy,
                      const int &qualMin,
                      const int &qualMax,
+                     const int &qualOffset,
                      const int &nrQuantizers)
     : alleleAlphabet_(ALLELE_ALPHABET),
       alleleLikelihoods_(),
@@ -53,7 +54,8 @@ Genotyper::Genotyper(const int &polyploidy,
       nrQuantizers_(nrQuantizers),
       polyploidy_(polyploidy),
       qualMin_(qualMin),
-      qualMax_(qualMax)
+      qualMax_(qualMax),
+      qualOffset_(qualOffset)
 {
     if (nrQuantizers < 1) {
         throwErrorException("");
@@ -67,63 +69,14 @@ Genotyper::Genotyper(const int &polyploidy,
     if (qualMin < 0) {
         throwErrorException("qualMin must be positive");
     }
+    if (qualOffset < 0) {
+        throwErrorException("qualOffset must not be negative");
+    }
 
     initLikelihoods();
 }
 
 Genotyper::~Genotyper(void) {}
-
-void Genotyper::computeAdjustedQualityValues(std::string *qualPileupAdjusted,
-                                             const std::string &seqPileup,
-                                             const std::string &qualPileup)
-{
-    // haploid: base X has Q and P -- select max as new QV
-    // diploid: base X has Q and P1,2,3,4 -- select max as new QV
-
-    if (polyploidy_ > 2) {
-        throwErrorException("No support for polyploidy greater than 2");
-    }
-    if (qualPileupAdjusted->empty() == false) {
-        throwErrorException("qualPileupAdjusted must be empty");
-    }
-
-    const size_t depth = seqPileup.length();
-
-    if (depth != qualPileup.length()) {
-        throwErrorException("Lengths of seqPileup and qualPileup differ");
-    }
-
-    if ((depth == 0) || (depth == 1)) {
-        *qualPileupAdjusted += qualPileup;
-        return;
-    }
-
-    computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
-
-    // Get likelihoods for the alleles
-//     std::map<char,std::vector<double>> baseLikelihoods;
-//     for (auto const &allele : alleleAlphabet_) {
-//         for (auto const &genotype : genotypeAlphabet_) {
-//             if (genotype.find(allele) != std::string::npos) {
-//                 baseLikelihoods[allele].append(genotypeLikelihoods_[genotype]);
-//             }
-//         }
-//     }
-
-    // Get the largest likelihood
-//     double largestBaseLikelihood = 0.0;
-//     for (auto const &baseLikelihood : baseLikelihoods) {
-//         if (baseLikelihood > largestBaseLikelihood) {
-//             largestBaseLikelihood = baseLikelihood;
-//         }
-//     }
-
-    // Convert the probability to phred score
-//     double largestBaseLikelihoodPhred = -log10(1-largestBaseLikelihood);
-
-    // Set new quality values
-//
-}
 
 double Genotyper::computeEntropy(const std::string &seqPileup,
                                  const std::string &qualPileup)
@@ -227,11 +180,8 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &seqPileup,
     int itr = 0;
     for (size_t d = 0; d < depth; d++) {
         char y = (char)seqPileup[d];
-//         double q = (double)(qualPileup[d] - qualMin_);
-        double q = (double)(qualPileup[d] - 33);
-//         std::cout << "qmin, q: " << qualMin_ << "," << q << std::endl;
+        double q = (double)(qualPileup[d] - qualOffset_);
         if ((q > qualMax_-qualMin_) || q < 0) {
-//             CALQ_LOG("min,curr,max=%d,%d,%d", 0, (int)q, qualMax_-qualMin_);
             throwErrorException("Quality value out of range");
         }
         double pStrike = 1 - pow(10.0, -q/10.0);

@@ -18,12 +18,10 @@ public:
     Genotyper(const int &polyploidy,
               const int &qualMin,
               const int &qualMax,
+              const int &qualOffset,
               const int &nrQuantizers);
     ~Genotyper(void);
 
-    void computeAdjustedQualityValues(std::string *qualPileupAdjusted,
-                                      const std::string &seqPileup,
-                                      const std::string &qualPileup);
     double computeEntropy(const std::string &seqPileup,
                           const std::string &qualPileup);
     int computeQuantizerIndex(const std::string &seqPileup,
@@ -47,6 +45,7 @@ private:
     const int polyploidy_;
     const int qualMin_;
     const int qualMax_;
+    const int qualOffset_;
 };
 
 } // namespace calq
