@@ -67,9 +67,9 @@ filterLevel900="90.0"
 filterLevel990="99.0"
 filterLevel999="99.9"
 filterLevel1000="100.0"
-date; java -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
-date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel900 -o $bam_file.snps.filtered900.vcf
-date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel990 -o $bam_file.snps.filtered990.vcf
-date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel999 -o $bam_file.snps.filtered999.vcf
-date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel1000 -o $bam_file.snps.filtered1000.vcf
+date; java -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches -rscriptFile $bam_file.snps.r
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel900 -o $bam_file.snps.filtered900.vcf
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel990 -o $bam_file.snps.filtered990.vcf
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel999 -o $bam_file.snps.filtered999.vcf
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel1000 -o $bam_file.snps.filtered1000.vcf
 
