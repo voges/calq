@@ -23,7 +23,7 @@ namespace calq {
 class QualEncoder {
 public:
     static const int QUANTIZER_STEPS_MIN = 2;
-    static const int QUANTIZER_STEPS_MAX = 5;
+    static const int QUANTIZER_STEPS_MAX = 8;
     static const int NR_QUANTIZERS = QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1;
     static const int QUANTIZER_IDX_MIN = 0;
     static const int QUANTIZER_IDX_MAX = NR_QUANTIZERS-1;
