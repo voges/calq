@@ -9,7 +9,7 @@
 ###############################################################################
 
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 num_threads reads chromosome"
+    echo "Usage: $0 num_threads bam_file chromosome"
     exit -1
 fi
 
@@ -21,9 +21,8 @@ date
 set -x
 script_name=$0
 num_threads=$1
-reads=$2
+bam_file=$2
 chromosome=$3
-root=$reads
 
 ###############################################################################
 #                          Data and programs                                  #
@@ -46,9 +45,6 @@ samtools="$install_path/samtools-1.3/bin/samtools"
 picard_jar="$install_path/picard-tools-2.4.1/picard.jar"
 GenomeAnalysisTK_jar="$install_path/gatk-3.6/GenomeAnalysisTK.jar"
 
-### Temporary directories
-javaIOTmpDir="$root/javaIOTmp.dir/"
-
 ###############################################################################
 #                          Variant calling with GATK                          #
 ###############################################################################
@@ -56,10 +52,10 @@ javaIOTmpDir="$root/javaIOTmp.dir/"
 ### Call variants using Haplotype Caller
 SEC=10
 SCC=30
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_FASTA -L $chromosome -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam --dbsnp $dbsnps_VCF --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.raw_variants.vcf
+date; java -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_FASTA -L $chromosome -I $bam_file --dbsnp $dbsnps_VCF --genotyping_mode DISCOVERY -stand_emit_conf $SEC -stand_call_conf $SCC -o $bam_file.raw_variants.vcf
 
 ### SNP extraction
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T SelectVariants -R $ref_FASTA -L $chromosome -V $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.raw_variants.vcf -selectType SNP -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf
+date; java -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_FASTA -L $chromosome -V $bam_file.raw_variants.vcf -selectType SNP -o $bam_file.snps.vcf
 
 ### Fiter the variants using VQSR
 resourceSNPs1="hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap_VCF"
@@ -67,11 +63,13 @@ resourceSNPs2="omni,known=false,training=true,truth=true,prior=12.0 $omni_VCF"
 resourceSNPs3="1000G,known=false,training=true,truth=false,prior=10.0 $KG_VCF"
 resourceSNPs4="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_VCF"
 recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum"
-filterLevel="99.0"
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -L $chromosome -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.snps.filtered.vcf
-rm -f $root.snps.recal
-rm -f $root.snps.recal.idx
-rm -f $root.snps.tranches
-rm -f $root.snps.r
+filterLevel900="90.0"
+filterLevel990="99.0"
+filterLevel999="99.9"
+filterLevel1000="100.0"
+date; java -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel900 -o $bam_file.snps.filtered900.vcf
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel990 -o $bam_file.snps.filtered990.vcf
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel999 -o $bam_file.snps.filtered999.vcf
+date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel1000 -o $bam_file.snps.filtered1000.vcf
 

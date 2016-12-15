@@ -9,7 +9,7 @@
 ###############################################################################
 
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 num_threads reads platform"
+    echo "Usage: $0 num_threads reads pairing platform"
     exit -1
 fi
 
@@ -22,7 +22,8 @@ set -x
 script_name=$0
 num_threads=$1
 reads=$2
-platform=$3 # ILLUMINA,SLX,SOLEXA,SOLID,454,LS454,COMPLETE,PACBIO,IONTORRENT,CAPILLARY,HELICOS,UNKNOWN
+pairing=$3 # paired or unpaired
+platform=$4 # ILLUMINA,SLX,SOLEXA,SOLID,454,LS454,COMPLETE,PACBIO,IONTORRENT,CAPILLARY,HELICOS,UNKNOWN
 root="$reads"
 
 ###############################################################################
@@ -54,16 +55,24 @@ javaIOTmpDir="$root/javaIOTmp.dir/"
 ###############################################################################
 
 date; $bowtie2-build $ref_FASTA $root.bowtie2_idx
-#date; $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
-date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_R1.fastq -2 $reads\_R2.fastq -S $root.aln_bowtie2.sam --threads $num_threads
+if [ "$pairing" = "unpaired" ]; then
+    date; $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
+else
+    if [ "$pairing" = "paired" ]; then
+        date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fq -2 $reads\_2.fq -S $root.aln_bowtie2.sam --threads $num_threads
+    else
+        echo "pairing argument must be either 'unpaired' or 'paired'"
+        exit -1
+    fi
+fi
 rm -f $root.bowtie2_idx*
 
 ###############################################################################
 #                             Sorting & indexing                              #
 ###############################################################################
 
-### Convert SAM to BAM; added '-F 4' to remove unmapped reads
-date; $samtools view -@ $num_threads -bh -F 4 $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
+### Convert SAM to BAM
+date; $samtools view -@ $num_threads -bh $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
 rm -f $root.aln_bowtie2.sam
 
 ### Sort and index BAM file
@@ -81,32 +90,28 @@ rm -f $root.dedup_metrics.txt
 rm -f $root.aln_bowtie2.sorted.bam
 rm -f $root.aln_bowtie2.sorted.bam.bai
 
-### Remove duplicates
-date; $samtools view -@ $num_threads -bh -F 0xF40 $root.aln_bowtie2.sorted.dupmark.bam > $root.aln_bowtie2.sorted.dupmark.dedup.bam
-rm -f $root.aln_bowtie2.sorted.dupmark.bam
-
 ### Label the BAM headers and index the resulting file
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.dedup.bam O=$root.aln_bowtie2.sorted.dupmark.dedup.rg.bam RGID=1 RGLB=Library RGPL=$platform RGPU=PlatformUnit RGSM=$root
-rm -f $root.aln_bowtie2.sorted.dupmark.dedup.bam
-date; $samtools index $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.bam O=$root.aln_bowtie2.sorted.dupmark.rg.bam RGID=1 RGLB=Library RGPL=$platform RGPU=PlatformUnit RGSM=$root
+rm -f $root.aln_bowtie2.sorted.dupmark.bam
+date; $samtools index $root.aln_bowtie2.sorted.dupmark.rg.bam
 
 ###############################################################################
 #                              Indel realignment                              #
 ###############################################################################
 
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -nt $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam --known $mills_VCF -o $root.realigner_target.intervals
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -nt $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.bam --known $mills_VCF -o $root.realigner_target.intervals
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
 rm -f $root.realigner_target.intervals
-rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam
-rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.bam.bai
+rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam
+rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam.bai
 
 ###############################################################################
 #                      Base quality score recalibration                       #
 ###############################################################################
 
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T BaseRecalibrator -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T PrintReads -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.recal.bam
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T BaseRecalibrator -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
+date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T PrintReads -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.rg.realn.recal.bam
 rm -f $root.bqsr.table
-rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bam
-rm -f $root.aln_bowtie2.sorted.dupmark.dedup.rg.realn.bai
+rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
+rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bai
 
