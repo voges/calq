@@ -4,7 +4,6 @@
 #                    Replace quality values in a SAM file                     #
 ###############################################################################
 
-import os
 import sys
 
 if len(sys.argv) != 3:
@@ -21,17 +20,13 @@ print "SAM file: {}".format(sam_file_name)
 print "QUAL file: {}".format(new_qual_file_name)
 print "New SAM file: {}".format(new_sam_file_name)
 
-sam_file.seek(0, os.SEEK_END)
-sam_file_size = sam_file.tell()
-sam_file.seek(0, os.SEEK_SET)
-
 idx = 0
 header_lines = 0
 alignment_lines = 0
 
 print "Replacing quality values"
 while 1:
-    print "\r{0:.2f}%".format(100*(float(sam_file.tell())/float(sam_file_size))),
+    print "\r{}".format(idx),
     sys.stdout.flush()
 
     line = sam_file.readline()
@@ -57,5 +52,3 @@ while 1:
     idx += 1
 print ""
 print "Processed {} lines ({} header lines, {} alignment lines)".format(idx, header_lines, alignment_lines)
-
-sys.exit()
