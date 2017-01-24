@@ -97,4 +97,3 @@ date; $samtools mpileup -ugf $ref_FASTA $root.aln_bwa.fixmate.sorted.rg.realn.du
 
 ### Index VCF file
 date; $tabix -p vcf $root.raw_variants.vcf.gz
-

@@ -31,4 +31,3 @@ fi
 date; echo "Extracting chromosome $chromosome from $root.bam"
 $samtools view -h $root.bam $chromosome > $root.$chromosome.sam
 date; echo "Wrote chromosome $chromosome to $root.$chromosome.sam"
-

@@ -6,6 +6,7 @@
 
 import sys
 
+
 if len(sys.argv) != 3:
     sys.exit("Usage: python {} file.sam new.qual".format(sys.argv[0]))
 

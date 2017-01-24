@@ -72,4 +72,3 @@ date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $ch
 date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel990 -o $bam_file.snps.filtered990.vcf
 date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel999 -o $bam_file.snps.filtered999.vcf
 date; java -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_FASTA -L $chromosome -input $bam_file.snps.vcf -mode SNP -recalFile $bam_file.snps.recal -tranchesFile $bam_file.snps.tranches --ts_filter_level $filterLevel1000 -o $bam_file.snps.filtered1000.vcf
-

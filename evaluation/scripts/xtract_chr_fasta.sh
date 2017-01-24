@@ -33,4 +33,3 @@ date; echo "Finished constructing FASTA index file $root.$chromosome.fasta.fai"
 date; echo "Constructing FASTA dict file $root.$chromosome.dict"
 java -jar $picard_jar CreateSequenceDictionary R=$root.$chromosome.fasta O=$root.$chromosome.dict
 date; echo "Finished constructing FASTA index file $root.$chromosome.fasta.fai"
-

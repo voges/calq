@@ -39,4 +39,3 @@ if [ -f $root.$chromosome.vcf ]; then
 else
     date; echo "Extracting failed"
 fi
-

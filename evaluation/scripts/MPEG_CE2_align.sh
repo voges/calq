@@ -59,7 +59,7 @@ if [ "$pairing" = "unpaired" ]; then
     date; $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
 else
     if [ "$pairing" = "paired" ]; then
-        date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fq -2 $reads\_2.fq -S $root.aln_bowtie2.sam --threads $num_threads
+        date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fastq -2 $reads\_2.fastq -S $root.aln_bowtie2.sam --threads $num_threads
     else
         echo "pairing argument must be either 'unpaired' or 'paired'"
         exit -1
@@ -114,4 +114,3 @@ date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T PrintRea
 rm -f $root.bqsr.table
 rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
 rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bai
-

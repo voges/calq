@@ -7,6 +7,7 @@
 import os
 import sys
 
+
 if len(sys.argv) != 2:
     sys.exit("Usage: python {} file.sam".format(sys.argv[0]))
 

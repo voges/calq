@@ -19,4 +19,3 @@ else
     grep -P "^$chromosome" $1 > $root.$chromosome.bed
     date; echo "Wrote chromosome $chromosome data to BED file $root.$chromosome.bed"
 fi
-

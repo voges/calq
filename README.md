@@ -1,21 +1,30 @@
-# README #
+# README
 
-## What is this repository for? ##
+## What is this repository for?
 
-* Adaptive lossy compression of high-throughput sequencing quality values (CALQ)
-* Current version: 1.0.0
+Adaptive compression of high-throughput sequencing quality values (CALQ)
 
 ## Build instructions
 
-We provide a CMakeLists.txt to build the program with CMake (https://cmake.org/).
+We provide a CMakeLists.txt to build the program with CMake (https://cmake.org/). CALQ has been tested on Linux and macOS.
 
-## Contribution guidelines ##
+Clone the CALQ repository with either
 
-Please write code conforming to the used coding style
+    git clone https://github.com/voges/calq.git
 
-## Who do I talk to? ##
+or
+
+    git clone https://bitbucket.org/voges/calq.git
+
+Build the executable with e.g. the following commands.
+
+    cd calq
+    mkdir build
+    cd build
+    cmake ..
+
+## Who do I talk to?
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
 
-Mikel Hernaez <[mhernaez@stanford.edu](mailto:mhernaez@stanford.edu)>
-
+Mikel Hernaez <[mikelhernaez@gmail.com](mailto:mikelhernaez@gmail.com)>
