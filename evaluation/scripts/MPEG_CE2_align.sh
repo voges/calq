@@ -8,7 +8,7 @@
 #                                Alignment                                    #
 ###############################################################################
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     echo "Usage: $0 num_threads reads pairing platform"
     exit -1
 fi
@@ -59,7 +59,7 @@ if [ "$pairing" = "unpaired" ]; then
     date; $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
 else
     if [ "$pairing" = "paired" ]; then
-        date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fastq -2 $reads\_2.fastq -S $root.aln_bowtie2.sam --threads $num_threads
+        date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fq -2 $reads\_2.fq -S $root.aln_bowtie2.sam --threads $num_threads
     else
         echo "pairing argument must be either 'unpaired' or 'paired'"
         exit -1
