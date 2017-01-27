@@ -2,7 +2,7 @@
 
 ## What is this repository for?
 
-CALQ: Compression of high-throughput sequencing quality values for aligned data
+CALQ: compression of quality values of aligned sequencing data
 
 ## Build instructions
 
