@@ -28,7 +28,7 @@ time="/usr/bin/time"
 python="/usr/bin/python"
 calq="/project/dna/install/calq-d3965e2/calq"
 calq_string="calq-d3965e2"
-replace_qual_sam_py="/home/voges/git/calq/evaluation/scripts/replace_qual_sam.py"
+replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
 
 printf "Checking executables ... "
 if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
@@ -41,12 +41,20 @@ printf "OK\n"
 #                          Compress and decompress                            #
 ###############################################################################
 
+printf "[1/3] Running CALQ encoder ... "
 $time -v -o $input_sam.$calq_string.enc.time $calq -f -q Illumina-1.8+ -p $polyploidy -b $block_size $input_sam -o $input_sam.cq &> $input_sam.$calq_string.enc.log
+printf "OK\n"
+
+printf "[2/3] Running CALQ decoder ... "
 $time -v -o $input_sam.$calq_string.dec.time $calq -f -d -s $input_sam $input_sam.cq &> $input_sam.$calq_string.dec.log
+printf "OK\n"
+
+printf "[3/3] Constructing SAM file with reconstruced quality values ... "
 mv $input_sam.cq $input_sam.$calq_string
 mv $input_sam.cq.qual $input_sam.$calq_string.qual
-$python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual
+$python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual &> $input_sam.run_calq.log
 mv $input_sam.new_qual.sam $input_sam.$calq_string.sam
+printf "OK\n"
 
 ###############################################################################
 #                                   Cleanup                                   #
