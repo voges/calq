@@ -1,8 +1,5 @@
-*~
-*.o
-*.a
-*.so
 .directory
 .DS_Store
-*kdev4*
-build
+calq.kdev4
+.kdev4/
+build/
