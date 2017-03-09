@@ -1,12 +1,14 @@
-# README
+# CALQ
 
-## What is this repository for?
+**C**overage-**A**daptive **L**ossy **Q**uality value compression
 
-CALQ: compression of quality values of aligned sequencing data
+---
+
+This is the official repository for the development of the CALQ software. It is hosted at GitHub (https://github.com/voges/calq) and Bitbucket (https://bitbucket.org/voges/calq).
 
 ## Build instructions
 
-We provide a CMakeLists.txt to build the program with CMake (https://cmake.org/). CALQ has been tested on Linux and macOS.
+We provide a ``CMakeLists.txt`` to build the CALQ with CMake (https://cmake.org/). CALQ has been tested on openSUSE Leap 42.1 with GCC 4.8.5 and on macOS Sierra (version 10.12.3) with Apple LLVM (i.e., Clang) version 8.0.0.
 
 Clone the CALQ repository with either
 
@@ -16,15 +18,59 @@ or
 
     git clone https://bitbucket.org/voges/calq.git
 
-Build the executable with e.g. the following commands.
+Build the executable from the command line with the following commands; alternatively use the CMake GUI.
 
     cd calq
     mkdir build
     cd build
     cmake ..
+    make
+
+This generates a CALQ executable named ``calq`` in the ``build`` folder.
+
+## Usage examples
+
+As usual, a list of the available command line options can be obtained via ``calq --help`` or ``calq -h``.
+
+### Compression
+
+The CALQ encoder accepts input files in the SAM format (see also https://github.com/samtools/hts-specs).
+
+Basically, the following command can be used to compress the quality values from the SAM file ``input.sam``.
+
+    calq input.sam
+
+By default, the compressed quality values are written to the file ``file.sam.cq``. Furthermore, the CALQ encoder uses the following parameters by default:
+
+* ``-b 10000`` | ``--blockSize 10000`` (block size in number of SAM records, i.e., alignments),
+* ``-p 2`` | ``--polyploidy 2`` (sequence reads from a diploid organism are assumed),
+* ``-q Illumina-1.8+`` | ``--qualityValueType Illumina-1.8+`` (quality values in the Illumina 1.8+ format (Phred+33, i.e., [0, 41] + 33) are assumed).
+
+Thus the above command is equivalent to the following command.
+
+    calq -q Illumina 1.8+ -p 2 -b 10000 file.sam -o file.sam.cq
+
+### Decompression
+
+To perform the decompression of the file ``file.sam.cq``, the CALQ decoder requires the alignment information, namely the mapping positions (POS), the CIGAR strings, and the reference sequence name(s) (RNAME). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The switch ``-d`` invokes the decoder.
+
+    calq -d -s file.sam file.sam.cq
+
+By default, the reconstructed quality values are written to the file ``file.sam.cq.qual``.
+
+Thus the above command is equivalent to the following command.
+
+    calq -d -s file.sam file.sam.cq -o file.sam.cq.qual
+
+Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` from the **ngstools** repository (see https://github.com/voges/ngstools or https://bitbucket.org/voges/ngstools).
+
+    replace_qual_sam.py file.sam file.sam.cq.qual
+
+This produces a new SAM file ``file.sam.new_qual.sam`` containing the reconstructed quality values.
 
 ## Who do I talk to?
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
 
 Mikel Hernaez <[mikelhernaez@gmail.com](mailto:mikelhernaez@gmail.com)>
+
