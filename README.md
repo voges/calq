@@ -8,7 +8,13 @@ This is the official repository for the development of the CALQ software. It is 
 
 ## Build instructions
 
-We provide a ``CMakeLists.txt`` to build the CALQ with CMake (https://cmake.org/). CALQ has been tested on openSUSE Leap 42.1 with GCC 4.8.5 and on macOS Sierra (version 10.12.3) with Apple LLVM (i.e., Clang) version 8.0.0.
+We provide a ``CMakeLists.txt`` to build the CALQ with CMake (https://cmake.org/). At least CMake version 3.1 is required.
+
+CALQ has been tested on the following systems:
+
+* openSUSE Leap 42.1 with GCC 4.8.5
+* openSUSE Tumbleweed 20170308 with GCC 6.3.1
+* macOS Sierra (version 10.12.3) with Apple LLVM (i.e., Clang) version 8.0.0.
 
 Clone the CALQ repository with either
 
@@ -46,7 +52,7 @@ By default, the compressed quality values are written to the file ``file.sam.cq`
 * ``-p 2`` | ``--polyploidy 2`` (sequence reads from a diploid organism are assumed),
 * ``-q Illumina-1.8+`` | ``--qualityValueType Illumina-1.8+`` (quality values in the Illumina 1.8+ format (Phred+33, i.e., [0, 41] + 33) are assumed).
 
-Thus the above command is equivalent to the following command.
+Thus, the above command is equivalent to the following command.
 
     calq -q Illumina 1.8+ -p 2 -b 10000 file.sam -o file.sam.cq
 
@@ -58,7 +64,7 @@ To perform the decompression of the file ``file.sam.cq``, the CALQ decoder requi
 
 By default, the reconstructed quality values are written to the file ``file.sam.cq.qual``.
 
-Thus the above command is equivalent to the following command.
+Thus, the above command is equivalent to the following command.
 
     calq -d -s file.sam file.sam.cq -o file.sam.cq.qual
 
