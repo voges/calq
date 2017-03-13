@@ -47,7 +47,8 @@ void Options::validate(void)
         }
     } else {
         if (fileNameExtension(inputFileName) != std::string("cq")) {
-            throwErrorException("Input file name extension must be 'cq'");
+            CALQ_LOG("Warning: Input file name extension is not 'cq'");
+//             throwErrorException("Input file name extension must be 'cq'");
         }
     }
     if (fileExists(inputFileName) == false) {
