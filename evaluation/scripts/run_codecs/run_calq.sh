@@ -25,20 +25,22 @@ printf "OK\n"
 ###############################################################################
 
 pgrep="/usr/bin/pgrep"
-time="/usr/bin/time"
 python="/usr/bin/python"
-calq="/home/voges/git/calq/build/calq"
-calq_string="calq-d3965e2"
+time="/usr/bin/time"
 
 replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
-ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem_jv.py"
+ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem.py"
+
+calq="/project/dna/install/calq-d3965e2/calq"
+calq_string="calq-d3965e2"
 
 printf "Checking executables ... "
-if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
+if [ ! -x $pgrep ]; then printf "did not find $pgrep\n"; exit -1; fi
 if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
-if [ ! -x $calq ]; then printf "did not find $calq\n"; exit -1; fi
+if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
 if [ ! -e $replace_qual_sam_py ]; then printf "did not find $replace_qual_sam_py\n"; exit -1; fi
 if [ ! -e $ps_mem_py ]; then printf "did not find $ps_mem_py\n"; exit -1; fi
+if [ ! -x $calq ]; then printf "did not find $calq\n"; exit -1; fi
 printf "OK\n"
 
 ###############################################################################

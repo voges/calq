@@ -2,7 +2,7 @@
 
 # Parse ps_mem.py output produced my e.g. the following command:
 #   $ ps_mem.py -p 17449 -t -w 1 --swap
-# The output would look similar to the following output snippet:
+# The output would look similar to the following snippet:
 #   RAM: 119123  Swap: 754370
 #   RAM: 11951616  Swap: 23423
 #   RAM: 3121951616  Swap: 9675450
