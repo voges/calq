@@ -576,7 +576,8 @@ def main():
                     get_memory_usage(pids_to_show, split_args,
                                      discriminate_by_pid)
                 if only_total and have_pss:
-                    sys.stdout.write(human(total, units=1)+'\n')
+                    #sys.stdout.write(human(total, units=1)+'\n')
+                    sys.stdout.write('RAM: '+human(total, units=1)+'  Swap: '+human(total_swap, units=1)+'\n')
                 elif not only_total:
                     print_memory_usage(sorted_cmds, shareds, count, total,
                                        swaps, total_swap, shared_swaps,
@@ -594,7 +595,8 @@ def main():
             total_shared_swap = get_memory_usage(pids_to_show, split_args,
                                                  discriminate_by_pid)
         if only_total and have_pss:
-            sys.stdout.write(human(total, units=1)+'\n')
+            #sys.stdout.write(human(total, units=1)+'\n')
+            sys.stdout.write('RAM: '+human(total, units=1)+'  Swap: '+human(total_swap, units=1)+'\n')
         elif not only_total:
             print_memory_usage(sorted_cmds, shareds, count, total, swaps,
                                total_swap, shared_swaps, total_shared_swap,

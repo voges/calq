@@ -4,17 +4,17 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 3 ]; then
-    printf "Usage: $0 num_threads input_bam ref_fasta\n"
+if [ "$#" -ne 2 ]; then
+    printf "Usage: $0 input_bam ref_fasta num_threads\n"
     exit -1
 fi
 
-num_threads=$1
-printf "Number of threads: $num_threads\n"
-input_bam=$2
+input_bam=$1
 printf "Input BAM file: $input_bam\n"
-ref_fasta=$3
+ref_fasta=$2
 printf "Reference FASTA file: $ref_fasta\n"
+num_threads=$3
+printf "Number of threads: $num_threads\n"
 
 printf "Checking input BAM file $input_bam ... "
 if [ ! -f $input_bam ]; then printf "did not find input BAM file: $input_bam\n"; exit -1; fi
@@ -28,6 +28,8 @@ printf "OK\n"
 #                                Executables                                  #
 ###############################################################################
 
+pgrep="/usr/bin/pgrep"
+python="/usr/bin/python"
 time="/usr/bin/time"
 crumble="/project/dna/install/crumble-0.5/crumble"
 crumble_string="crumble-0.5"
@@ -57,8 +59,12 @@ else
     printf "OK\n"
 fi
 
-printf "[1/2 1/3] Running Crumble BAM-to-BAM encoder with compression level 1 ... "
-$time -v -o $input_bam.$crumble_string-1.time $crumble -v -1 $input_bam $input_bam.$crumble_string-1.bam &> $input_bam.$crumble_string-1.log
+printf "Running Crumble BAM-to-BAM encoder with compression level 1 ... "
+cmd="$crumble -v -1 $input_bam $input_bam.$crumble_string-1.bam"
+$time -v -o $input_bam.$crumble_string-1.time $cmd &> $input_bam.$crumble_string-1.log & time_pid=$!
+cmd_pid=$($pgrep -P $time_pid)
+printf "Command being traced: \"$cmd\"\n" > $input_bam.$crumble_string-1.mem
+$python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_bam.$crumble_string-1.mem
 printf "OK\n"
 
 printf "[1/2 2/3] Running Scramble BAM-to-CRAM encoder ... "

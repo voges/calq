@@ -24,14 +24,12 @@ printf "OK\n"
 #                                Executables                                  #
 ###############################################################################
 
+pgrep="/usr/bin/pgrep"
 time="/usr/bin/time"
 python="/usr/bin/python"
 calq="/home/voges/git/calq/build/calq"
 calq_string="calq-d3965e2"
-grep="/usr/bin/grep"
-ps="/usr/bin/ps"
-awk="/usr/bin/awk"
-pgrep="/usr/bin/pgrep"
+
 replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
 ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem_jv.py"
 
