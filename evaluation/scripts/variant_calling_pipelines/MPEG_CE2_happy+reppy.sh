@@ -21,9 +21,8 @@ golden_VCF_GZ=$4
 golden_BED=$5
 
 ### Programs
-install_path="/project/dna/install"
-hap_py="$install_path/hap.py-0.3.1/bin/hap.py"
-rep_py="$install_path/benchmarking-tools-c458561/reporting/basic/bin/rep.py"
+hap_py="/project/dna/install/hap.py-0.3.1/bin/hap.py"
+rep_py="/project/dna/install/benchmarking-tools-c458561/reporting/basic/bin/rep.py"
 
 ### File names
 base=$(echo $variants_VCF | sed 's/\.[^.]*$//') # strip .vcf

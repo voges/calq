@@ -4,7 +4,7 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     printf "Usage: $0 input_bam ref_fasta num_threads\n"
     exit -1
 fi
@@ -67,7 +67,8 @@ fi
 
 printf "Running Crumble BAM-to-BAM encoder with compression level 1 ... "
 cmd="$crumble -v -1 $input_bam $input_bam.$crumble_string-1.bam"
-$time -v -o $input_bam.$crumble_string-1.time $cmd &> $input_bam.$crumble_string-1.log & time_pid=$!
+$time -v -o $input_bam.$crumble_string-1.time $cmd &> $input_bam.$crumble_string-1.log &
+time_pid=$!
 cmd_pid=$($pgrep -P $time_pid)
 printf "Command being traced: \"$cmd\"\n" > $input_bam.$crumble_string-1.mem
 $python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_bam.$crumble_string-1.mem
@@ -84,7 +85,8 @@ printf "OK\n"
 
 printf "Running Crumble BAM-to-BAM encoder with compression level 9 ... "
 cmd="$crumble -v -9 $input_bam $input_bam.$crumble_string-9.bam"
-$time -v -o $input_bam.$crumble_string-9.time $cmd &> $input_bam.$crumble_string-9.log & time_pid=$!
+$time -v -o $input_bam.$crumble_string-9.time $cmd &> $input_bam.$crumble_string-9.log &
+time_pid=$!
 cmd_pid=$($pgrep -P $time_pid)
 printf "Command being traced: \"$cmd\"\n" > $input_bam.$crumble_string-9.mem
 $python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_bam.$crumble_string-9.mem

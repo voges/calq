@@ -31,7 +31,7 @@ time="/usr/bin/time"
 replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
 ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem.py"
 
-calq="/project/dna/install/calq-d3965e2/calq"
+calq="/home/voges/git/calq/build/calq"
 calq_string="calq-d3965e2"
 
 printf "Checking executables ... "
@@ -49,7 +49,8 @@ printf "OK\n"
 
 printf "Running CALQ encoder ... "
 cmd="$calq -f -q Illumina-1.8+ -p $polyploidy -b $block_size $input_sam -o $input_sam.cq"
-$time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log & time_pid=$!
+$time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log &
+time_pid=$!
 cmd_pid=$($pgrep -P $time_pid)
 printf "Command being traced: \"$cmd\"\n" > $input_sam.$calq_string.enc.mem
 $python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_sam.$calq_string.enc.mem
@@ -58,7 +59,8 @@ printf "OK\n"
 
 printf "Running CALQ decoder ... "
 cmd="$calq -f -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
-$time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log & time_pid=$!
+$time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log &
+time_pid=$!
 cmd_pid=$($pgrep -P $time_pid)
 printf "Command being traced: \"$cmd\"\n" > $input_sam.$calq_string.dec.mem
 $python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_sam.$calq_string.dec.mem

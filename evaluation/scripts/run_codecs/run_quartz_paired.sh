@@ -55,7 +55,8 @@ printf "OK\n"
 
 printf "Running Quartz ... "
 cmd="$quartz $quartz_dictionary "$quartz_string" 8 0 $input_1_fastq $input_2_fastq"
-$time -v -o $root.$quartz_string.time $cmd &> $root.$quartz_string.log & time_pid=$!
+$time -v -o $root.$quartz_string.time $cmd &> $root.$quartz_string.log &
+time_pid=$!
 cmd_pid=$($pgrep -P $time_pid)
 printf "Command being traced: \"$cmd\"\n" > $root.$quartz_string.mem
 $python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $root.$quartz_string.mem

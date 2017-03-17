@@ -17,8 +17,6 @@ fi
 #                               Command line                                  #
 ###############################################################################
 
-date
-set -x
 script_name=$0
 num_threads=$1
 reads=$2
@@ -32,20 +30,19 @@ root="$reads"
 
 ### GATK bundle
 gatk_bundle_path="/phys/intern2/tmp/data_gidb/MPEG/GATK_bundle-2.8-b37"
-ref_FASTA="$gatk_bundle_path/human_g1k_v37.fasta"
-hapmap_VCF="$gatk_bundle_path/hapmap_3.3.b37.vcf"
-omni_VCF="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
-KG_VCF="$gatk_bundle_path/1000G_phase1.snps.high_confidence.b37.vcf"
-dbsnps_VCF="$gatk_bundle_path/dbsnp_138.b37.vcf"
-mills_VCF="$gatk_bundle_path/Mills_and_1000G_gold_standard.indels.b37.vcf"
-indels_VCF="$gatk_bundle_path/1000G_phase1.indels.b37.vcf"
+ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
+hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
+omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
+KG_vcf="$gatk_bundle_path/1000G_phase1.snps.high_confidence.b37.vcf"
+dbsnps_vcf="$gatk_bundle_path/dbsnp_138.b37.vcf"
+mills_vcf="$gatk_bundle_path/Mills_and_1000G_gold_standard.indels.b37.vcf"
+indels_vcf="$gatk_bundle_path/1000G_phase1.indels.b37.vcf"
 
 ### Programs
-install_path="/project/dna/install"
-bowtie2="$install_path/bowtie2-2.2.5/bowtie2"
-samtools="$install_path/samtools-1.3/bin/samtools"
-picard_jar="$install_path/picard-tools-2.4.1/picard.jar"
-GenomeAnalysisTK_jar="$install_path/gatk-3.6/GenomeAnalysisTK.jar"
+bowtie2="/project/dna/install/bowtie2-2.2.5/bowtie2"
+samtools="/project/dna/install/samtools-1.3/bin/samtools"
+picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
+GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
 
 ### Temporary directories
 javaIOTmpDir="$root/javaIOTmp.dir/"
@@ -54,12 +51,12 @@ javaIOTmpDir="$root/javaIOTmp.dir/"
 #                           Alignment with Bowtie2                            #
 ###############################################################################
 
-date; $bowtie2-build $ref_FASTA $root.bowtie2_idx
+$bowtie2-build $ref_fasta $root.bowtie2_idx
 if [ "$pairing" = "unpaired" ]; then
-    date; $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
+    $bowtie2 -x $root.bowtie2_idx -U $reads.fastq -S $root.aln_bowtie2.sam --threads $num_threads
 else
     if [ "$pairing" = "paired" ]; then
-        date; $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fq -2 $reads\_2.fq -S $root.aln_bowtie2.sam --threads $num_threads
+        $bowtie2 -x $root.bowtie2_idx -1 $reads\_1.fastq -2 $reads\_2.fastq -S $root.aln_bowtie2.sam --threads $num_threads
     else
         echo "pairing argument must be either 'unpaired' or 'paired'"
         exit -1
@@ -72,35 +69,35 @@ rm -f $root.bowtie2_idx*
 ###############################################################################
 
 ### Convert SAM to BAM
-date; $samtools view -@ $num_threads -bh $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
+$samtools view -@ $num_threads -bh $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
 rm -f $root.aln_bowtie2.sam
 
 ### Sort and index BAM file
-date; $samtools sort -@ $num_threads -O bam $root.aln_bowtie2.bam > $root.aln_bowtie2.sorted.bam
+$samtools sort -@ $num_threads -O bam $root.aln_bowtie2.bam > $root.aln_bowtie2.sorted.bam
 rm -f $root.aln_bowtie2.bam
-date; $samtools index $root.aln_bowtie2.sorted.bam
+$samtools index $root.aln_bowtie2.sorted.bam
 
 ###############################################################################
 #                              Duplicate removal                              #
 ###############################################################################
 
 ### Mark duplicates in the BAM file
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates I=$root.aln_bowtie2.sorted.bam O=$root.aln_bowtie2.sorted.dupmark.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
+java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar MarkDuplicates I=$root.aln_bowtie2.sorted.bam O=$root.aln_bowtie2.sorted.dupmark.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
 rm -f $root.dedup_metrics.txt
 rm -f $root.aln_bowtie2.sorted.bam
 rm -f $root.aln_bowtie2.sorted.bam.bai
 
 ### Label the BAM headers and index the resulting file
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.bam O=$root.aln_bowtie2.sorted.dupmark.rg.bam RGID=1 RGLB=Library RGPL=$platform RGPU=PlatformUnit RGSM=$root
+java -jar -Djava.io.tmpdir=$javaIOTmpDir $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.bam O=$root.aln_bowtie2.sorted.dupmark.rg.bam RGID=1 RGLB=Library RGPL=$platform RGPU=PlatformUnit RGSM=$root
 rm -f $root.aln_bowtie2.sorted.dupmark.bam
-date; $samtools index $root.aln_bowtie2.sorted.dupmark.rg.bam
+$samtools index $root.aln_bowtie2.sorted.dupmark.rg.bam
 
 ###############################################################################
 #                              Indel realignment                              #
 ###############################################################################
 
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -nt $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.bam --known $mills_VCF -o $root.realigner_target.intervals
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
+java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T RealignerTargetCreator -nt $num_threads -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.bam --known $mills_vcf -o $root.realigner_target.intervals
+java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
 rm -f $root.realigner_target.intervals
 rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam
 rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam.bai
@@ -109,8 +106,8 @@ rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam.bai
 #                      Base quality score recalibration                       #
 ###############################################################################
 
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T BaseRecalibrator -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -knownSites $dbsnps_VCF -knownSites $mills_VCF -knownSites $indels_VCF -o $root.bqsr.table
-date; java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T PrintReads -nct $num_threads -R $ref_FASTA -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.rg.realn.recal.bam
+java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T BaseRecalibrator -nct $num_threads -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -knownSites $dbsnps_vcf -knownSites $mills_vcf -knownSites $indels_vcf -o $root.bqsr.table
+java -jar -Djava.io.tmpdir=$javaIOTmpDir $GenomeAnalysisTK_jar -T PrintReads -nct $num_threads -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.rg.realn.recal.bam
 rm -f $root.bqsr.table
 rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
 rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bai

@@ -7,6 +7,11 @@
 #   RAM: 11951616  Swap: 23423
 #   RAM: 3121951616  Swap: 9675450
 
+if [ "$#" -ne 1 ]; then
+    printf "Usage: $0 input_mem\n"
+    exit -1
+fi
+
 printf "RAM usage:\n----------\n"
 printf "average: "
 awk '{ sum += $2; n++ } END { if (n > 0) print sum/n; }' $1

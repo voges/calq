@@ -40,7 +40,6 @@ ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 
 printf "Checking GATK bundle ... "
 if [ ! -f $ref_fasta ]; then printf "did not find $ref_fasta\n"; exit -1; fi
-if [ ! -f $hapmap_vcf ]; then printf "did not find $hapmap_vcf\n"; exit -1; fi
 printf "OK\n"
 
 ###############################################################################
@@ -59,8 +58,9 @@ printf "OK\n"
 #                         Variant calling with GATK                           #
 ###############################################################################
 
-printf "[1/1] Variant calling ... "
-$python $Platypus --nCPU=$num_threads --bamFiles=$input_bam --refFile=$ref_fasta --regions=$chromosome --output=$input_bam.Platypus_snps.vcf
+printf "Variant calling ... "
+$python $Platypus --nCPU=$num_threads --bamFiles=$input_bam --refFile=$ref_fasta --regions=$chromosome --output=$input_bam.snps.vcf
+printf "OK\n";
 
 ###############################################################################
 #                                   Cleanup                                   #
