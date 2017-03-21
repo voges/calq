@@ -43,7 +43,7 @@ printf "OK\n"
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/intern2/tmp/data_gidb/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/voges/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
@@ -66,20 +66,22 @@ printf "OK\n"
 #                                Executables                                  #
 ###############################################################################
 
+# Binaries
+bowtie2="/project/dna/install/bowtie2-2.2.5/bowtie2"
 java="/usr/bin/java"
 java_opts=""
-bowtie2="/project/dna/install/bowtie2-2.2.5/bowtie2"
 samtools="/project/dna/install/samtools-1.3/bin/samtools"
-picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
+
+# JAR files
 GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
+picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
 
 printf "Checking executables ... "
+if [ ! -x $bowtie2 ]; then printf "did not find $bowtie2\n"; exit -1; fi
 if [ ! -x $java ]; then printf "did not find $java\n"; exit -1; fi
-if [ ! -x $bowtie2 ]; then printf "did not find $bowtie2\n"; exit -1; fi
-if [ ! -x $bowtie2 ]; then printf "did not find $bowtie2\n"; exit -1; fi
 if [ ! -x $samtools ]; then printf "did not find $samtools\n"; exit -1; fi
-if [ ! -e $picard_jar ]; then printf "did not find $picard_jar\n"; exit -1; fi
 if [ ! -e $GenomeAnalysisTK_jar ]; then printf "did not find $GenomeAnalysisTK_jar\n"; exit -1; fi
+if [ ! -e $picard_jar ]; then printf "did not find $picard_jar\n"; exit -1; fi
 printf "OK\n"
 
 ###############################################################################

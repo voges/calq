@@ -1,6 +1,10 @@
 #!/bin/bash
 
 ###############################################################################
+#            Script for performing variant calling with Platypus              #
+###############################################################################
+
+###############################################################################
 #                               Command line                                  #
 ###############################################################################
 
@@ -35,7 +39,7 @@ printf "OK\n"
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/intern2/tmp/data_gidb/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/voges/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 
 printf "Checking GATK bundle ... "
@@ -46,12 +50,24 @@ printf "OK\n"
 #                                Executables                                  #
 ###############################################################################
 
+# Binaries
+java="/usr/bin/java"
+java_opts=""
 python="/usr/bin/python"
+
+# JAR files
+GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
 Platypus_py="/project/dna/install/Platypus-0.8.1/Platypus.py"
 
 printf "Checking executables ... "
+if [ ! -x $java ]; then printf "did not find $java\n"; exit -1; fi
 if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
+if [ ! -e $GenomeAnalysisTK_jar ]; then printf "did not find $GenomeAnalysisTK_jar\n"; exit -1; fi
 if [ ! -e $Platypus_py ]; then printf "did not find $Platypus_py\n"; exit -1; fi
+printf "OK\n"
+
+printf "Sourcing project_dna.config ... "
+source /project/dna/project_dna.config
 printf "OK\n"
 
 ###############################################################################
@@ -59,8 +75,12 @@ printf "OK\n"
 ###############################################################################
 
 printf "Variant calling ... "
-$python $Platypus --nCPU=$num_threads --bamFiles=$input_bam --refFile=$ref_fasta --regions=$chromosome --output=$input_bam.snps.vcf
+$python $Platypus_py callVariants --nCPU=$num_threads --bamFiles=$input_bam --refFile=$ref_fasta --regions=$chromosome --output=$input_bam.raw_variants.vcf --logFileName=$log_txt &>>$log_txt
 printf "OK\n";
+
+printf "SNP extraction ... "
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.raw_variants.vcf -selectType SNP -o $input_bam.snps.vcf &>>$log_txt
+printf "OK\n"
 
 ###############################################################################
 #                                   Cleanup                                   #

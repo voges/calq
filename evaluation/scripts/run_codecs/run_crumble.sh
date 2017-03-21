@@ -28,28 +28,29 @@ printf "OK\n"
 #                                Executables                                  #
 ###############################################################################
 
-pgrep="/usr/bin/pgrep"
-python="/usr/bin/python"
-time="/usr/bin/time"
-
-ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem.py"
-
+# Binaries
+cram_size="/project/dna/install/io_lib-1.14.6/bin/cram_size"
 crumble="/project/dna/install/crumble-0.5/crumble"
 crumble_string="crumble-0.5"
+pgrep="/usr/bin/pgrep"
+python="/usr/bin/python"
+samtools="/project/dna/install/samtools-1.3/bin/samtools"
 scramble="/project/dna/install/io_lib-1.14.6/bin/scramble"
 scramble_string="scramble-1.14.6"
-cram_size="/project/dna/install/io_lib-1.14.6/bin/cram_size"
-samtools="/project/dna/install/samtools-1.3/bin/samtools"
+time="/usr/bin/time"
+
+# Python scripts
+ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem.py"
 
 printf "Checking executables ... "
+if [ ! -x $cram_size ]; then printf "did not find $cram_size\n"; exit -1; fi
+if [ ! -x $crumble ]; then printf "did not find $crumble\n"; exit -1; fi
 if [ ! -x $pgrep ]; then printf "did not find $pgrep\n"; exit -1; fi
 if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
+if [ ! -x $samtools ]; then printf "did not find $samtools\n"; exit -1; fi
+if [ ! -x $scramble ]; then printf "did not find $scramble\n"; exit -1; fi
 if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
 if [ ! -e $ps_mem_py ]; then printf "did not find $ps_mem_py\n"; exit -1; fi
-if [ ! -x $crumble ]; then printf "did not find $crumble\n"; exit -1; fi
-if [ ! -x $scramble ]; then printf "did not find $scramble\n"; exit -1; fi
-if [ ! -x $cram_size ]; then printf "did not find $cram_size\n"; exit -1; fi
-if [ ! -x $samtools ]; then printf "did not find $samtools\n"; exit -1; fi
 printf "OK\n"
 
 ###############################################################################

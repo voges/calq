@@ -53,7 +53,10 @@ printf "OK\n"
 #                                Executables                                  #
 ###############################################################################
 
+# Binaries
 python="/usr/bin/python"
+
+# Python scripts
 hap_py="/project/dna/install/hap.py-0.3.1/bin/hap.py"
 rep_py="/project/dna/install/benchmarking-tools-c458561/reporting/basic/bin/rep.py"
 
