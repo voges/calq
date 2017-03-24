@@ -76,7 +76,7 @@ $python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_bam.$crumble_string-1.me
 printf "OK\n"
 
 printf "Running Scramble BAM-to-CRAM encoder ... "
-$scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-1.bam $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string-1.log
+$scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-1.bam $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.log
 printf "OK\n"
 
 printf "Reporting CRAM size ... "
