@@ -42,9 +42,9 @@ As usual, a list of the available command line options can be obtained via ``cal
 
 The CALQ encoder accepts input files in the SAM format (see also https://github.com/samtools/hts-specs).
 
-Basically, the following command can be used to compress the quality values from the SAM file ``input.sam``.
+Basically, the following command can be used to compress the quality values from the SAM file ``file.sam``.
 
-    calq input.sam
+    calq file.sam
 
 By default, the compressed quality values are written to the file ``file.sam.cq``. Furthermore, the CALQ encoder uses the following parameters by default:
 
@@ -70,7 +70,7 @@ Thus, the above command is equivalent to the following command.
 
 Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` from the **ngstools** repository (see https://github.com/voges/ngstools or https://bitbucket.org/voges/ngstools).
 
-    replace_qual_sam.py file.sam file.sam.cq.qual
+    python replace_qual_sam.py file.sam file.sam.cq.qual
 
 This produces a new SAM file ``file.sam.new_qual.sam`` containing the reconstructed quality values.
 
