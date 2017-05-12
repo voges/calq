@@ -40,7 +40,7 @@ printf "OK\n"
 ###############################################################################
 
 printf "Extracting quality values from FASTQ file ... "
-$python xtract_qual_fastq_py $input_fastq 2> $input_fastq.qual
+$python $xtract_qual_fastq_py $input_fastq 2> $input_fastq.qual
 printf "OK\n"
 
 printf "Running bgzip ... "
