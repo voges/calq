@@ -173,7 +173,7 @@ size_t File::read(void *buffer, const size_t &size)
         throwErrorException("buffer is NULL");
     }
     if (size == 0) {
-        throwErrorException("Attempted to read zero bytes");
+        return 0;
     }
     size_t ret = fread(buffer, 1, size, fp_);
     if (ret != size) {
@@ -189,11 +189,11 @@ size_t File::write(void *buffer, const size_t &size)
         throwErrorException("buffer is NULL");
     }
     if (size == 0) {
-        throwErrorException("Attempted to write zero bytes");
+        return 0;
     }
     size_t ret = fwrite(buffer, 1, size, fp_);
     if (ret != size) {
-        throwErrorException("fread failed");
+        throwErrorException("fwrite failed");
     }
     nrWrittenBytes_ += ret;
     return ret;

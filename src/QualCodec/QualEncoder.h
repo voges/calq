@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 
+#include "config.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMPileupDeque.h"
 #include "IO/SAM/SAMRecord.h"
@@ -39,6 +40,9 @@ public:
     void addMappedRecordToBlock(const SAMRecord &samRecord);
     void finishBlock(void);
     size_t writeBlock(CQFile *cqFile);
+#if MPEG
+    void writeMPEGBlock(File *mpegQVCIFile, File *mpegQVIFile);
+#endif
 
     size_t compressedMappedQualSize(void) const;
     size_t compressedUnmappedQualSize(void) const;

@@ -9,6 +9,7 @@
 #include <chrono>
 #include <limits>
 
+#include "config.h"
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/log.h"
@@ -19,9 +20,46 @@
 
 namespace calq {
 
+static size_t writeParametersSet(File *mpegParametersSetFile,
+                                 const uint32_t &QVIndexDimension,
+                                 const uint32_t &QVIndexAlphabetSize,
+                                 const uint32_t &QVCodebookIdentifierAlphabetSize,
+                                 const std::map<int, Quantizer> &QVIndexCodebooks)
+{
+    size_t ret = 0;
+    ret += mpegParametersSetFile->writeUint32(QVIndexDimension);
+    ret += mpegParametersSetFile->writeUint32(QVIndexAlphabetSize);
+    ret += mpegParametersSetFile->writeUint32(QVCodebookIdentifierAlphabetSize);
+
+    size_t nrCodebooks = QVIndexCodebooks.size();
+    if (nrCodebooks != QVCodebookIdentifierAlphabetSize) {
+        throwErrorException("nrCodebooks != QVCodebookIdentifierAlphabetSize");
+    }
+
+    for (auto const &c : QVIndexCodebooks) {
+        uint64_t QVCodebookIdentifier = c.first;
+        ret += mpegParametersSetFile->writeUint64(QVCodebookIdentifier);
+        uint64_t QVCodebookSize = c.second.inverseLut().size();
+        ret += mpegParametersSetFile->writeUint64(QVCodebookSize);
+        for (auto const &inverseLutEntry : c.second.inverseLut()) {
+            uint8_t QVIndex = inverseLutEntry.first;
+            ret += mpegParametersSetFile->writeUint8(QVIndex);
+            uint8_t QVReconstructed = inverseLutEntry.second;
+            ret += mpegParametersSetFile->writeUint8(QVReconstructed);
+        }
+    }
+
+    return ret;
+}
+
 CalqEncoder::CalqEncoder(const Options &options)
     : blockSize_(options.blockSize),
       cqFile_(options.outputFileName, CQFile::MODE_WRITE),
+#if MPEG
+      mpegParametersSetFile_(options.inputFileName + ".mpeg_qv_parameters_set", File::MODE_WRITE),
+      mpegQVCI0File_(options.inputFileName + ".mpeg_qvci_0", File::MODE_WRITE),
+      mpegQVI0File_(options.inputFileName + ".mpeg_qvi_0", File::MODE_WRITE),
+#endif
       polyploidy_(options.polyploidy),
       qualityValueMin_(options.qualityValueMin),
       qualityValueMax_(options.qualityValueMax),
@@ -50,6 +88,7 @@ CalqEncoder::CalqEncoder(const Options &options)
     if (options.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
     }
+
 //     if (referenceFileNames.empty() == true) {
 //        throwErrorException("referenceFileNames is empty");
 //     }
@@ -118,6 +157,15 @@ void CalqEncoder::encode(void)
 //         CALQ_LOG("Writing inverse quantization LUTs");
         compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);
 
+#if MPEG
+        // Write MPEG Parameters Set
+        uint32_t QVIndexDimension = 1;
+        int32_t QVIndexAlphabetSize = QualEncoder::QUANTIZER_STEPS_MAX;
+        uint32_t QVCodebookIdentifierAlphabetSize = QualEncoder::NR_QUANTIZERS;
+        std::map<int, Quantizer> QVIndexCodebooks = quantizers;
+        writeParametersSet(&mpegParametersSetFile_, QVIndexDimension, QVIndexAlphabetSize, QVCodebookIdentifierAlphabetSize, QVIndexCodebooks);
+#endif
+
 //         CALQ_LOG("Encoding quality values");
         QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_, quantizers);
         for (auto const &samRecord : samFile_.currentBlock.records) {
@@ -129,6 +177,10 @@ void CalqEncoder::encode(void)
         }
         qualEncoder.finishBlock();
         qualEncoder.writeBlock(&cqFile_);
+
+#if MPEG
+        qualEncoder.writeMPEGBlock(&mpegQVCI0File_, &mpegQVI0File_);
+#endif
 
         // Update statistics
         compressedMappedQualSize += qualEncoder.compressedMappedQualSize();

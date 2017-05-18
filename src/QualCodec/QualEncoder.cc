@@ -14,6 +14,7 @@
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/log.h"
+#include "config.h"
 
 namespace calq {
 
@@ -168,7 +169,7 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
 //         CALQ_LOG("  No mapped quantizer indices in this block");
     }
 
-    //CALQ_LOG("  Writing mapped quality value indices");
+//     CALQ_LOG("  Writing mapped quality value indices");
     tmp = "";
     for (auto const &mappedQualityValueIndex : mappedQualityValueIndices_) {
         tmp += std::to_string(mappedQualityValueIndex);
@@ -189,6 +190,38 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
 
     return compressedQualSize();
 }
+
+#if MPEG
+void QualEncoder::writeMPEGBlock(File *mpegQVCIFile, File *mpegQVIFile)
+{
+    std::string tmp("");
+    for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
+        tmp += std::to_string(mappedQuantizerIndex + 1);
+    }
+//          std::cout << "QVCodebookIdentifier: " << tmp << std::endl;
+
+    unsigned char *QVCodebookIdentifier = (unsigned char *)tmp.c_str();
+    size_t QVCodebookIdentifierBufferSize = tmp.length();
+    uint32_t PositionOffset = posOffset_;
+
+    mpegQVCIFile->writeUint32(PositionOffset);
+    mpegQVCIFile->writeUint64(QVCodebookIdentifierBufferSize);
+    mpegQVCIFile->write(QVCodebookIdentifier, QVCodebookIdentifierBufferSize);
+
+    tmp = "";
+    for (auto const &mappedQualityValueIndex : mappedQualityValueIndices_) {
+        tmp += std::to_string(mappedQualityValueIndex);
+    }
+//          std::cout << "QVIndex: " << tmp << std::endl;
+
+    unsigned char *QVIndex = (unsigned char *)tmp.c_str();
+    size_t QVIndexBufferSize = tmp.length();
+
+    mpegQVIFile->writeUint64(QVIndexBufferSize);
+    mpegQVIFile->write(QVIndex, QVIndexBufferSize);
+
+}
+#endif
 
 size_t QualEncoder::compressedMappedQualSize(void) const { return compressedMappedQualSize_; }
 size_t QualEncoder::compressedUnmappedQualSize(void) const { return compressedUnmappedQualSize_; }

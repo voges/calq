@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Common/Options.h"
+#include "config.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMFile.h"
 
@@ -26,6 +27,11 @@ public:
 private:
     size_t blockSize_;
     CQFile cqFile_;
+#if MPEG
+    File mpegParametersSetFile_;
+    File mpegQVCI0File_;
+    File mpegQVI0File_;
+#endif
     int polyploidy_;
     int qualityValueMin_;
     int qualityValueMax_;
