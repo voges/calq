@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
         // TCLAP arguments (only compression)
         TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
-        TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (Sanger: Phred+33 [0,40]; Illumina-1.3+: Phred+64 [0,40]; Illumina-1.5+: Phred+64 [0,40]; Illumina-1.8+: Phred+33 [0,41])", false, "Illumina-1.8+", "string", cmd);
+        TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (Sanger: Phred+33 [0,40]; Illumina-1.3+: Phred+64 [0,40]; Illumina-1.5+: Phred+64 [0,40]; Illumina-1.8+: Phred+33 [0,41]; Max33: Phred+33 [0,93]; Max64: Phred+64 [0,62])", false, "Illumina-1.8+", "string", cmd);
         TCLAP::MultiArg<std::string> referenceFileNamesArg("r", "referenceFileNames", "Reference file name(s) (FASTA format)", false, "string", cmd);
 
         // TCLAP arguments (only decompression)

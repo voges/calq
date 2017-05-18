@@ -114,6 +114,16 @@ void Options::validate(void)
             qualityValueOffset = 33;
             qualityValueMin = 0;
             qualityValueMax = 41;
+        } else if (qualityValueType == "Max33") {
+            // Max33 Phred+33 [0,93]
+            qualityValueOffset = 33;
+            qualityValueMin = 0;
+            qualityValueMax = 93;
+        } else if (qualityValueType == "Max64") {
+            // Max64 Phred+64 [0,62]
+            qualityValueOffset = 64;
+            qualityValueMin = 0;
+            qualityValueMax = 62;
         } else {
             throwErrorException("Quality value type not supported");
         }
