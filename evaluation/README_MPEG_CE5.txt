@@ -2,29 +2,28 @@ Parameters Set
 ==============
 
 The files *.mpeg_qv_parameters_set contain the parameters as defined in
-Section 5 "Parameters Set" of document N16758.
+Section 5 "Parameters Set" of document N16758. We store a separate set of
+parameters for every descriptor streams block.
 
 Syntax:
 -------
-// The test data contains 1 QV per base.
-uint32 QVIndexDimension = 0x00000001;
+while (EndOfFile == false) {
+    // The test data contains 1 QV per base.
+    uint32 QVIndexDimension = 0x00000001;
 
-// QVIndex is in the set {0,1,2,3,4,5,6,7}.
-uint32 QVIndexAlphabetSize = 0x00000008;
+    // QVIndex is in the set {0,1,2,3,4,5,6,7}.
+    uint32 QVIndexAlphabetSize = 0x00000008;
 
-// The data was coded using 7 codebook identifiers in the set {0,1,2,3,4,5,6}.
-// Note that the codebook identifier '-1' may also appear (this codebook
-// identifier is sent at loci with zero sequencing depth). Thus, we incremented
-// the descriptor QVCodebookIdentifier by 1. The descriptor stream therefore
-// contains data in the set {0,1,2,3,4,5,6,7}.
-uint32 QVCodebookIdentifierAlphabetSize = 0x00000007;
+    // The data was coded using 7 codebook identifiers in the set {0,1,2,3,4,5,6}.
+    uint32 QVCodebookIdentifierAlphabetSize = 0x00000007;
 
-for (QVCodebookIdentifier = 0; QVCodebookIdentifier < QVCodebookIdentifierAlphabetSize; QVCodebookIdentifier++) {
-    uint64 QVCodebookIdentifier;
-    uint64 QVCodebookSize;
-    for (QVIndex = 0; QVIndex < QVCodebookSize; QVIndex++) {
-        uint8 QVIndex;
-        uint8 QVReconstructed;
+    for (QVCodebookIdentifier = 0; QVCodebookIdentifier < QVCodebookIdentifierAlphabetSize; QVCodebookIdentifier++) {
+        uint64 QVCodebookIdentifier;
+        uint64 QVCodebookSize;
+        for (QVIndex = 0; QVIndex < QVCodebookSize; QVIndex++) {
+            uint8 QVIndex;
+            uint8 QVReconstructed;
+        }
     }
 }
 
@@ -48,6 +47,10 @@ while (EndOfFile == false) {
     uint64 QVCodebookIdentifierBufferSize;
 
     // Buffer containing the QVCodebookIdentifier descriptor stream.
+    // Note that the codebook identifier '-1' may also appear (this codebook
+    // identifier is sent at loci with zero sequencing depth). Thus, we incremented
+    // the descriptor QVCodebookIdentifier by 1. The descriptor stream therefore
+    // contains data in the set {0,1,2,3,4,5,6,7}.
     // The data is stored in the ASCII format; thus the QVCodebookIdentifier
     // '0' is actually stored as 0x30 and similarly for the other values.
     uint8[QVCodebookIdentifierBufferSize] QVCodebookIdentifier;
