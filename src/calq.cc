@@ -27,6 +27,13 @@ static void printVersionAndCopyright(void) {
     printf("-----------------------------------------------\n");
     printf("Please report bugs to voges@tnt.uni-hannover.de\n");
     printf("-----------------------------------------------\n");
+#if MPEG
+    printf("ATTENTION: MPEG-style encoder activated!\n");
+    printf("  Edit the macro 'MPEG' in the file 'config.h'\n");
+    printf("  to deactivate the MPEG-style encoder and to\n");
+    printf("  activate the CALQ encoder.\n");
+    printf("-----------------------------------------------\n");
+#endif
 }
 
 int main(int argc, char *argv[]) {

@@ -7,7 +7,7 @@
 #ifndef CALQ_CONFIG_H_
 #define CALQ_CONFIG_H_
 
-#define MPEG 1
+#define MPEG 0
 
 #endif // CALQ_CONFIG_H_
 
