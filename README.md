@@ -78,5 +78,5 @@ This produces a new SAM file ``file.sam.new_qual.sam`` containing the reconstruc
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
 
-Mikel Hernaez <[mikelhernaez@gmail.com](mailto:mikelhernaez@gmail.com)>
+Mikel Hernaez <[mhernaez@illinois.edu](mailto:mhernaez@illinois.edu)>
 
