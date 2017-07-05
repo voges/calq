@@ -32,6 +32,7 @@ private:
     File mpegQVCI0File_;
     File mpegQVI0File_;
 #endif
+    std::string inputFileName_;
     int polyploidy_;
     int qualityValueMin_;
     int qualityValueMax_;

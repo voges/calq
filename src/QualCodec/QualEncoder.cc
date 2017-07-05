@@ -8,6 +8,7 @@
 
 #include <math.h>
 
+#include <fstream>
 #include <map>
 #include <string>
 
@@ -154,6 +155,10 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
     std::string tmp("");
     for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
         tmp += std::to_string(mappedQuantizerIndex+1);
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+        std::fstream fs("qvci.stream", std::fstream::out | std::fstream::app);
+        fs << tmp;
+#endif
     }
 //     std::cout << "mqi: " << tmp << std::endl;
     unsigned char *mqi = (unsigned char *)tmp.c_str();
@@ -235,6 +240,24 @@ size_t QualEncoder::uncompressedQualSize(void) const { return uncompressedMapped
 
 void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    std::fstream fs2("qvi2.stream", std::fstream::out | std::fstream::app);
+    std::fstream fs3("qvi3.stream", std::fstream::out | std::fstream::app);
+    std::fstream fs4("qvi4.stream", std::fstream::out | std::fstream::app);
+    std::fstream fs5("qvi5.stream", std::fstream::out | std::fstream::app);
+    std::fstream fs6("qvi6.stream", std::fstream::out | std::fstream::app);
+    std::fstream fs7("qvi7.stream", std::fstream::out | std::fstream::app);
+    std::fstream fs8("qvi8.stream", std::fstream::out | std::fstream::app);
+    std::vector<std::fstream *> fs;
+    fs.push_back(&fs2);
+    fs.push_back(&fs3);
+    fs.push_back(&fs4);
+    fs.push_back(&fs5);
+    fs.push_back(&fs6);
+    fs.push_back(&fs7);
+    fs.push_back(&fs8);
+#endif
+
 //     printf("Encoding SAM record");
 //     samRecord.printShort();
 
@@ -260,6 +283,9 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
                int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                mappedQualityValueIndices_.push_back(qualityValueIndex);
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+               *fs[quantizerIndex] << qualityValueIndex;
+#endif
 //                printf("Encoding %c with k=%d -> %d\n", (char)(q+qualityValueOffset_), quantizerIndex, qualityValueIndex);
            }
            break;
@@ -271,6 +297,9 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
                int quantizerIndex = quantizers_.size() - 1;
                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                mappedQualityValueIndices_.push_back(qualityValueIndex);
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+               *fs[quantizerIndex] << qualityValueIndex;
+#endif
 //                printf("Encoding %c with kmax=%d -> %d\n", (char)(q+qualityValueOffset_), quantizerIndex, qualityValueIndex);
            }
            break;

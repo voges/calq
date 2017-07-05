@@ -60,6 +60,7 @@ CalqEncoder::CalqEncoder(const Options &options)
       mpegQVCI0File_(options.inputFileName + ".mpeg_qvci_0", File::MODE_WRITE),
       mpegQVI0File_(options.inputFileName + ".mpeg_qvi_0", File::MODE_WRITE),
 #endif
+      inputFileName_(options.inputFileName),
       polyploidy_(options.polyploidy),
       qualityValueMin_(options.qualityValueMin),
       qualityValueMax_(options.qualityValueMax),
