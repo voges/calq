@@ -191,7 +191,7 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
     return compressedQualSize();
 }
 
-#if MPEG
+#if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
 void QualEncoder::writeMPEGBlock(File *mpegQVCIFile, File *mpegQVIFile)
 {
     std::string tmp("");

@@ -55,7 +55,7 @@ static size_t writeParametersSet(File *mpegParametersSetFile,
 CalqEncoder::CalqEncoder(const Options &options)
     : blockSize_(options.blockSize),
       cqFile_(options.outputFileName, CQFile::MODE_WRITE),
-#if MPEG
+#if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
       mpegParametersSetFile_(options.inputFileName + ".mpeg_qv_parameters_set", File::MODE_WRITE),
       mpegQVCI0File_(options.inputFileName + ".mpeg_qvci_0", File::MODE_WRITE),
       mpegQVI0File_(options.inputFileName + ".mpeg_qvi_0", File::MODE_WRITE),
@@ -142,13 +142,13 @@ void CalqEncoder::encode(void)
             }
         }
 
-//         CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
+        CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
         std::map<int, Quantizer> quantizers;
         int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
         for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
              quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
              ++quantizerIdx, ++quantizerSteps) {
-//             CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
+            CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
 //             Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
             Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
             quantizers.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
@@ -157,7 +157,7 @@ void CalqEncoder::encode(void)
 //         CALQ_LOG("Writing inverse quantization LUTs");
         compressedMappedQualSize += cqFile_.writeQuantizers(quantizers);
 
-#if MPEG
+#if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
         // Write MPEG Parameters Set
         uint32_t QVIndexDimension = 1;
         int32_t QVIndexAlphabetSize = QualEncoder::QUANTIZER_STEPS_MAX;
@@ -178,7 +178,7 @@ void CalqEncoder::encode(void)
         qualEncoder.finishBlock();
         qualEncoder.writeBlock(&cqFile_);
 
-#if MPEG
+#if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
         qualEncoder.writeMPEGBlock(&mpegQVCI0File_, &mpegQVI0File_);
 #endif
 

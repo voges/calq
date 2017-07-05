@@ -40,7 +40,7 @@ public:
     void addMappedRecordToBlock(const SAMRecord &samRecord);
     void finishBlock(void);
     size_t writeBlock(CQFile *cqFile);
-#if MPEG
+#if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
     void writeMPEGBlock(File *mpegQVCIFile, File *mpegQVIFile);
 #endif
 
