@@ -60,6 +60,10 @@ CalqEncoder::CalqEncoder(const Options &options)
       mpegQVCI0File_(options.inputFileName + ".mpeg_qvci_0", File::MODE_WRITE),
       mpegQVI0File_(options.inputFileName + ".mpeg_qvi_0", File::MODE_WRITE),
 #endif
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+      qvciFile_(options.inputFileName + ".mpeg_qvci", File::MODE_WRITE),
+      qviFile_(options.inputFileName + ".mpeg_qvi", File::MODE_WRITE),
+#endif
       inputFileName_(options.inputFileName),
       polyploidy_(options.polyploidy),
       qualityValueMin_(options.qualityValueMin),
@@ -118,6 +122,12 @@ void CalqEncoder::encode(void)
     size_t compressedUnmappedQualSize = 0;
     size_t uncompressedMappedQualSize = 0;
     size_t uncompressedUnmappedQualSize = 0;
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    size_t compressedQvciSize = 0;
+    size_t compressedQviSize = 0;
+    size_t uncompressedQvciSize = 0;
+    size_t uncompressedQviSize = 0;
+#endif
 
     // Take time
     auto startTime = std::chrono::steady_clock::now();
@@ -143,13 +153,13 @@ void CalqEncoder::encode(void)
             }
         }
 
-        CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
+//         CALQ_LOG("Constructing %d quantizers", QualEncoder::NR_QUANTIZERS);
         std::map<int, Quantizer> quantizers;
         int quantizerSteps = QualEncoder::QUANTIZER_STEPS_MIN;
         for (int quantizerIdx = QualEncoder::QUANTIZER_IDX_MIN;
              quantizerIdx <= QualEncoder::QUANTIZER_IDX_MAX;
              ++quantizerIdx, ++quantizerSteps) {
-            CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
+//             CALQ_LOG("Constructing quantizer %d with %d steps", quantizerIdx, quantizerSteps);
 //             Quantizer quantizer = UniformQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
             Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin_, qualityValueMax_, quantizerSteps);
             quantizers.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
@@ -183,11 +193,21 @@ void CalqEncoder::encode(void)
         qualEncoder.writeMPEGBlock(&mpegQVCI0File_, &mpegQVI0File_);
 #endif
 
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+        qualEncoder.writeContextAdaptiveMPEGBlock(&qvciFile_, &qviFile_);
+#endif
+
         // Update statistics
         compressedMappedQualSize += qualEncoder.compressedMappedQualSize();
         compressedUnmappedQualSize += qualEncoder.compressedUnmappedQualSize();
         uncompressedMappedQualSize += qualEncoder.uncompressedMappedQualSize();
         uncompressedUnmappedQualSize += qualEncoder.uncompressedUnmappedQualSize();
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+        uncompressedQvciSize += qualEncoder.uncompressedQvciSize();
+        uncompressedQviSize += qualEncoder.uncompressedQviSize();
+        compressedQvciSize += qualEncoder.compressedQvciSize();
+        compressedQviSize += qualEncoder.compressedQviSize();
+#endif
     }
 
     auto stopTime = std::chrono::steady_clock::now();
@@ -220,6 +240,17 @@ void CalqEncoder::encode(void)
     CALQ_LOG("  Bits per quality value: %2.4f", ((double)cqFile_.nrWrittenBytes() * 8)/(double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize));
     CALQ_LOG("    Mapped:               %2.4f", ((double)compressedMappedQualSize * 8)/(double)(uncompressedMappedQualSize));
     CALQ_LOG("    Unmapped:             %2.4f", ((double)compressedUnmappedQualSize * 8)/(double)(uncompressedUnmappedQualSize));
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    CALQ_LOG("QUALENCODER COMPRESSION STATISTICS");
+    CALQ_LOG("  (Mapped) quality values:");
+    CALQ_LOG("    Uncompressed: %12zu", uncompressedMappedQualSize);
+    CALQ_LOG("  QVCI (Quality Value Codebook Indexes)");
+    CALQ_LOG("    Uncompressed: %12zu", uncompressedQvciSize);
+    CALQ_LOG("    Compressed:   %12zu", compressedQvciSize);
+    CALQ_LOG("  QVI (Quality Value Indexes)");
+    CALQ_LOG("    Uncompressed:                  %12zu", uncompressedQviSize);
+    CALQ_LOG("    Compressed (context-adaptive): %12zu", compressedQviSize);
+#endif
 }
 
 } // namespace calq

@@ -43,6 +43,9 @@ public:
 #if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
     void writeMPEGBlock(File *mpegQVCIFile, File *mpegQVIFile);
 #endif
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    void writeContextAdaptiveMPEGBlock(CQFile *qvciFile, CQFile *qviFile);
+#endif
 
     size_t compressedMappedQualSize(void) const;
     size_t compressedUnmappedQualSize(void) const;
@@ -53,6 +56,12 @@ public:
     size_t uncompressedMappedQualSize(void) const;
     size_t uncompressedUnmappedQualSize(void) const;
     size_t uncompressedQualSize(void) const;
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    size_t compressedQviSize(void) const;
+    size_t compressedQvciSize(void) const;
+    size_t uncompressedQvciSize(void) const;
+    size_t uncompressedQviSize(void) const;
+#endif
 
 private:
     void encodeMappedQual(const SAMRecord &samRecord);
@@ -69,6 +78,12 @@ private:
     size_t nrUnmappedRecords_;
     size_t uncompressedMappedQualSize_;
     size_t uncompressedUnmappedQualSize_;
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    size_t compressedQviSize_;
+    size_t compressedQvciSize_;
+    size_t uncompressedQvciSize_;
+    size_t uncompressedQviSize_;
+#endif
 
     int qualityValueOffset_;
 
@@ -79,6 +94,9 @@ private:
     std::string unmappedQualityValues_;
     std::deque<int> mappedQuantizerIndices_;
     std::deque<int> mappedQualityValueIndices_;
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    std::vector< std::deque<int> > qvi_;
+#endif
 
     // Pileup
     SAMPileupDeque samPileupDeque_;

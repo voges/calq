@@ -33,6 +33,12 @@ QualEncoder::QualEncoder(const int &polyploidy,
       nrUnmappedRecords_(0),
       uncompressedMappedQualSize_(0),
       uncompressedUnmappedQualSize_(0),
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+      compressedQviSize_(0),
+      compressedQvciSize_(0),
+      uncompressedQvciSize_(0),
+      uncompressedQviSize_(0),
+#endif
 
       qualityValueOffset_(qualityValueOffset),
       posOffset_(0),
@@ -40,6 +46,9 @@ QualEncoder::QualEncoder(const int &polyploidy,
       unmappedQualityValues_(""),
       mappedQuantizerIndices_(),
       mappedQualityValueIndices_(),
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+      qvi_(),
+#endif
 
       samPileupDeque_(),
 
@@ -64,6 +73,13 @@ QualEncoder::QualEncoder(const int &polyploidy,
     if (quantizers.empty() == true) {
         throwErrorException("quantizers is empty");
     }
+
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    for (int i = QUANTIZER_IDX_MIN; i <= QUANTIZER_IDX_MAX; ++i) {
+        qvi_.push_back(std::deque<int>());
+    }
+//     CALQ_LOG("Created a vector of %d double-ended queues for temporary QVI storage", qvi_.size());
+#endif
 }
 
 QualEncoder::~QualEncoder(void)
@@ -155,11 +171,8 @@ size_t QualEncoder::writeBlock(CQFile *cqFile)
     std::string tmp("");
     for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
         tmp += std::to_string(mappedQuantizerIndex+1);
-#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
-        std::fstream fs("qvci.stream", std::fstream::out | std::fstream::app);
-        fs << tmp;
-#endif
     }
+
 //     std::cout << "mqi: " << tmp << std::endl;
     unsigned char *mqi = (unsigned char *)tmp.c_str();
     size_t mqiSize = tmp.length();
@@ -228,6 +241,51 @@ void QualEncoder::writeMPEGBlock(File *mpegQVCIFile, File *mpegQVIFile)
 }
 #endif
 
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+void QualEncoder::writeContextAdaptiveMPEGBlock(CQFile *qvciFile, CQFile *qviFile)
+{
+    compressedQvciSize_+= qvciFile->writeUint32(posOffset_);
+
+    std::string tmp("");
+    for (auto const &mappedQuantizerIndex : mappedQuantizerIndices_) {
+        tmp += std::to_string(mappedQuantizerIndex+1);
+    }
+
+    unsigned char *qvci = (unsigned char *)tmp.c_str();
+    size_t qvciSize = tmp.length();
+    uint8_t qvciFlags = 0;
+    if (qvciSize > 0) {
+        qvciFlags = 1;
+        uncompressedQvciSize_ += qvciSize;
+        compressedQvciSize_ += qvciFile->writeUint8(qvciFlags);
+        compressedQvciSize_ += qvciFile->writeQualBlock(qvci, qvciSize);
+    } else {
+        qvciFlags = 0;
+        compressedQvciSize_ += qvciFile->writeUint8(qvciFlags);
+    }
+
+    tmp = "";
+    int idx = 0;
+    for (std::deque<int> const &qviStream : qvi_) {
+        tmp = "";
+        for (auto const &i : qviStream) {
+            tmp += std::to_string(i);
+        }
+        unsigned char *qvi = (unsigned char *)tmp.c_str();
+        size_t qviSize = tmp.length();
+        uint8_t qviFlags = 0;
+        if (qviSize > 0) {
+            qviFlags = 1;
+            compressedQviSize_ += qviFile->writeUint8(qviFlags);
+            compressedQviSize_ += qviFile->writeQualBlock(qvi, qviSize);
+        } else {
+            qviFlags = 0;
+            compressedQviSize_ += qviFile->writeUint8(qviFlags);
+        }
+    }
+}
+#endif
+
 size_t QualEncoder::compressedMappedQualSize(void) const { return compressedMappedQualSize_; }
 size_t QualEncoder::compressedUnmappedQualSize(void) const { return compressedUnmappedQualSize_; }
 size_t QualEncoder::compressedQualSize(void) const { return compressedMappedQualSize_ + compressedUnmappedQualSize_; }
@@ -237,27 +295,15 @@ size_t QualEncoder::nrRecords(void) const { return nrMappedRecords_ + nrUnmapped
 size_t QualEncoder::uncompressedMappedQualSize(void) const { return uncompressedMappedQualSize_; }
 size_t QualEncoder::uncompressedUnmappedQualSize(void) const { return uncompressedUnmappedQualSize_; }
 size_t QualEncoder::uncompressedQualSize(void) const { return uncompressedMappedQualSize_ + uncompressedUnmappedQualSize_; }
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+size_t QualEncoder::compressedQviSize(void) const { return compressedQviSize_; }
+size_t QualEncoder::compressedQvciSize(void) const { return compressedQvciSize_; }
+size_t QualEncoder::uncompressedQvciSize(void) const { return uncompressedQvciSize_; }
+size_t QualEncoder::uncompressedQviSize(void) const { return uncompressedQviSize_; }
+#endif
 
 void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
 {
-#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
-    std::fstream fs2("qvi2.stream", std::fstream::out | std::fstream::app);
-    std::fstream fs3("qvi3.stream", std::fstream::out | std::fstream::app);
-    std::fstream fs4("qvi4.stream", std::fstream::out | std::fstream::app);
-    std::fstream fs5("qvi5.stream", std::fstream::out | std::fstream::app);
-    std::fstream fs6("qvi6.stream", std::fstream::out | std::fstream::app);
-    std::fstream fs7("qvi7.stream", std::fstream::out | std::fstream::app);
-    std::fstream fs8("qvi8.stream", std::fstream::out | std::fstream::app);
-    std::vector<std::fstream *> fs;
-    fs.push_back(&fs2);
-    fs.push_back(&fs3);
-    fs.push_back(&fs4);
-    fs.push_back(&fs5);
-    fs.push_back(&fs6);
-    fs.push_back(&fs7);
-    fs.push_back(&fs8);
-#endif
-
 //     printf("Encoding SAM record");
 //     samRecord.printShort();
 
@@ -284,7 +330,10 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                mappedQualityValueIndices_.push_back(qualityValueIndex);
 #if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
-               *fs[quantizerIndex] << qualityValueIndex;
+               int qvci = quantizerIndex;
+               int qvi = qualityValueIndex;
+               qvi_.at(qvci).push_back(qvi);
+               uncompressedQviSize_++;
 #endif
 //                printf("Encoding %c with k=%d -> %d\n", (char)(q+qualityValueOffset_), quantizerIndex, qualityValueIndex);
            }
@@ -298,7 +347,10 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord)
                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                mappedQualityValueIndices_.push_back(qualityValueIndex);
 #if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
-               *fs[quantizerIndex] << qualityValueIndex;
+               int qvci = quantizerIndex;
+               int qvi = qualityValueIndex;
+               qvi_.at(qvci).push_back(qvi);
+               uncompressedQviSize_++;
 #endif
 //                printf("Encoding %c with kmax=%d -> %d\n", (char)(q+qualityValueOffset_), quantizerIndex, qualityValueIndex);
            }

@@ -27,10 +27,14 @@ public:
 private:
     size_t blockSize_;
     CQFile cqFile_;
-#if MPEG
+#if MPEG_CE5_DESCRIPTOR_STREAMS_OUTPUT
     File mpegParametersSetFile_;
     File mpegQVCI0File_;
     File mpegQVI0File_;
+#endif
+#if MPEG_CE5_DESCRIPTOR_STREAMS_COMPRESSION_EXTENSION
+    CQFile qvciFile_;
+    CQFile qviFile_;
 #endif
     std::string inputFileName_;
     int polyploidy_;
