@@ -38,7 +38,6 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
         posMax = pos - 1;
 
         size_t cigarIdx = 0;
-        printf("CIGAR: %s\n", cigar.c_str());
         size_t cigarLen = cigar.length();
         uint32_t opLen = 0;  // length of current CIGAR operation
 
