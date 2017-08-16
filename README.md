@@ -68,9 +68,9 @@ Thus, the above command is equivalent to the following command.
 
     calq -d -s file.sam file.sam.cq -o file.sam.cq.qual
 
-Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` from the **ngstools** repository (see https://github.com/voges/ngstools or https://bitbucket.org/voges/ngstools).
+Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py``. This and other supplementary scripts can be found in the folder ``src/ngstools``.
 
-    python replace_qual_sam.py file.sam file.sam.cq.qual
+    replace_qual_sam.py file.sam file.sam.cq.qual
 
 This produces a new SAM file ``file.sam.new_qual.sam`` containing the reconstructed quality values.
 
