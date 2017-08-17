@@ -12,21 +12,31 @@ install_path="/project/dna/install"
 picard_jar="$install_path/picard-tools-2.4.1/picard.jar"
 samtools="$install_path/samtools-1.3/bin/samtools"
 
+echo "Creating FASTA index file $1.fai"
 if [ -f $1.fai ]; then
     echo "FASTA index file $1.fai already exists. Not reproducing it."
-    #touch $1.fai
 else
-    echo "Constructing FASTA index file $1.fai"
     $samtools faidx $1
 fi
 
-echo "Extracting chromosome $chromosome from FASTA file $1"
-$samtools faidx $1 $chromosome 1> $root.$chromosome.fasta
-echo "Wrote chromosome $chromosome to FASTA file $root.$chromosome.fasta"
-echo "Constructing FASTA index file $root.$chromosome.fasta.fai"
-$samtools faidx $root.$chromosome.fasta
-echo "Finished constructing FASTA index file $root.$chromosome.fasta.fai"
-echo "Constructing FASTA dict file $root.$chromosome.dict"
-java -jar $picard_jar CreateSequenceDictionary R=$root.$chromosome.fasta O=$root.$chromosome.dict
-echo "Finished constructing FASTA index file $root.$chromosome.fasta.fai"
+echo "Writing chromosome $chromosome from FASTA file $1 to FASTA file $root.$chromosome.fasta"
+if [ -f $root.$chromosome.fasta ]; then
+    echo "FASTA file $root.$chromosome.fasta already exists. Not reproducing it."
+else
+    $samtools faidx $1 $chromosome 1> $root.$chromosome.fasta
+fi
+
+echo "Creating FASTA index file $root.$chromosome.fasta.fai"
+if [ -f $root.$chromosome.fasta.fai ]; then
+    echo "FASTA index file $root.$chromosome.fasta.fai already exists. Not reproducing it."
+else
+    $samtools faidx $root.$chromosome.fasta
+fi
+
+echo "Creating FASTA dict file $root.$chromosome.dict"
+if [ -f $root.$chromosome.dict ]; then
+    echo "FASTA dict file $root.$chromosome.dict already exists. Not reproducing it."
+else
+    java -jar $picard_jar CreateSequenceDictionary R=$root.$chromosome.fasta O=$root.$chromosome.dict
+fi
 
