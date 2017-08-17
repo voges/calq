@@ -27,20 +27,16 @@ printf "OK\n"
 # Binaries
 calq="/project/dna/install/calq-616e792/calq"
 calq_string="calq-616e792"
-pgrep="/usr/bin/pgrep"
 python="/usr/bin/python"
 time="/usr/bin/time"
 
 # Python scripts
-ps_mem_py="/home/voges/git/calq/evaluation/scripts/ps_mem/ps_mem.py"
 replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
 
 printf "Checking executables ... "
 if [ ! -x $calq ]; then printf "did not find $calq\n"; exit -1; fi
-if [ ! -x $pgrep ]; then printf "did not find $pgrep\n"; exit -1; fi
 if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
 if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
-if [ ! -e $ps_mem_py ]; then printf "did not find $ps_mem_py\n"; exit -1; fi
 if [ ! -e $replace_qual_sam_py ]; then printf "did not find $replace_qual_sam_py\n"; exit -1; fi
 printf "OK\n"
 
@@ -51,20 +47,12 @@ printf "OK\n"
 printf "Running CALQ encoder ... "
 cmd="$calq -f -q Illumina-1.8+ -p $polyploidy -b $block_size $input_sam -o $input_sam.cq"
 $time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log &
-time_pid=$!
-cmd_pid=$($pgrep -P $time_pid)
-printf "Command being traced: \"$cmd\"\n" > $input_sam.$calq_string.enc.mem
-$python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_sam.$calq_string.enc.mem
 mv $input_sam.cq $input_sam.$calq_string
 printf "OK\n"
 
 printf "Running CALQ decoder ... "
 cmd="$calq -f -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
 $time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log &
-time_pid=$!
-cmd_pid=$($pgrep -P $time_pid)
-printf "Command being traced: \"$cmd\"\n" > $input_sam.$calq_string.dec.mem
-$python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_sam.$calq_string.dec.mem
 printf "OK\n"
 
 #printf "Constructing SAM file with reconstruced quality values ... "

@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 
-###############################################################################
-#                    Replace quality values in a SAM file                     #
-###############################################################################
-
 import sys
 
-
+# Usage
 if len(sys.argv) != 3:
     sys.exit("Usage: python {} file.sam new.qual".format(sys.argv[0]))
 
@@ -14,22 +10,8 @@ sam_file_name = sys.argv[1]
 sam_file = open(sam_file_name, 'r')
 new_qual_file_name = sys.argv[2]
 new_qual_file = open(new_qual_file_name, 'r')
-new_sam_file_name = sam_file_name + '.new_qual.sam'
-new_sam_file = open(new_sam_file_name, 'w')
 
-print("SAM file: {}".format(sam_file_name))
-print("QUAL file: {}".format(new_qual_file_name))
-print("New SAM file: {}".format(new_sam_file_name))
-
-idx = 0
-header_lines = 0
-alignment_lines = 0
-
-print("Replacing quality values")
 while 1:
-    print("\r{}".format(idx)),
-    sys.stdout.flush()
-
     line = sam_file.readline()
     if not line:
         break
@@ -45,14 +27,8 @@ while 1:
                 new_line += '\t' + a[i]
         else:
             new_line += '\n'
-        new_sam_file.write(new_line)
-        alignment_lines += 1
+        sys.stdout.write(new_line)
     else:
-        new_sam_file.write(line)
-        header_lines += 1
-    idx += 1
-print("")
-print("Processed {} lines ({} header lines, {} alignment lines)".format(idx, header_lines, alignment_lines))
+        sys.stdout.write(line)
 
 sys.exit()
-

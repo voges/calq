@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-###############################################################################
-#                            Validate a FASTQ file                            #
-###############################################################################
-
 import atexit
 import sys
 
@@ -52,8 +48,7 @@ def print_summary():
     print "Processed {} FASTQ record(s) (i.e. {} lines)".format(record_cnt, line_cnt)
 
 
-atexit.register(print_summary)
-
+# Usage
 if len(sys.argv) != 2:
     sys.exit("Usage: python {} file.[fastq|fq]".format(sys.argv[0]))
 
@@ -64,12 +59,12 @@ if not fastq_file_name.endswith(".fastq") and not fastq_file_name.endswith(".fq"
 fastqFile = open(fastq_file_name, 'r')
 print "FASTQ file: {}".format(fastq_file_name)
 
+atexit.register(print_summary)
+
 allowed_raw_sequence_symbols = "ACGTNacgtn"
 print "Allowed raw sequence symbols: {}".format(allowed_raw_sequence_symbols)
-
 print "Will exit after {} errors or {} warnings".format(error_cnt_max, warning_cnt_max)
 
-print "Parsing"
 while 1:
     # Try to read a whole record (i.e. 4 lines)
     sequence_identifier = fastqFile.readline().rstrip('\n')
@@ -145,8 +140,4 @@ while 1:
     else:
         error(quality_scores_cnt, record_cnt, "Quality score line is empty")
 
-    print "\rProcessed {} record(s) and found {} error(s) and {} warning(s)".format(record_cnt, error_cnt, warning_cnt),
-    sys.stdout.flush()
-
 sys.exit()
-

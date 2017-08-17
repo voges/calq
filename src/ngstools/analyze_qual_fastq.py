@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 
-###############################################################################
-#      Get the minimum and maximum quality values from a FASTQ file           #
-###############################################################################
-
-import os
 import sys
 
-
+# Usage
 if len(sys.argv) != 2:
     sys.exit("Usage: python {} file.[fastq|fq]".format(sys.argv[0]))
 
@@ -18,20 +13,15 @@ if not fastq_file_name.endswith(".fastq") and not fastq_file_name.endswith(".fq"
 fastq_file = open(fastq_file_name, 'r')
 print("FASTQ file: {}".format(fastq_file_name))
 
-fastq_file.seek(0, os.SEEK_END)
-fastq_file_size = fastq_file.tell()
-fastq_file.seek(0, os.SEEK_SET)
-
-quality_score_min = sys.maxint
-quality_score_max = -sys.maxint - 1
-
+# Initialize statistics
+qual_min = sys.maxint
+qual_max = -sys.maxint - 1
+qual_size = 0
 record_cnt = 0
 line_cnt = 0
 
+# Parse FASTQ file
 while 1:
-    print("\r{0:.2f}%".format(100 * (float(fastq_file.tell()) / float(fastq_file_size)))),
-    sys.stdout.flush()
-
     # Try to read a whole record (i.e. 4 lines)
     sequence_identifier = fastq_file.readline().rstrip('\n')
     if not sequence_identifier:
@@ -40,20 +30,17 @@ while 1:
 
     raw_sequence = fastq_file.readline().rstrip('\n')
     if not raw_sequence:
-        print("Parse error (record {}, line {}): Record is not complete".format(record_cnt+1, line_cnt+1))
-        break
+        sys.exit("Error in record {}, line {}: Record is not complete".format(record_cnt+1, line_cnt+1))
     line_cnt += 1
 
     description = fastq_file.readline().rstrip('\n')
     if not description:
-        print("Parse error (record {}, line {}): Record is not complete".format(record_cnt + 1, line_cnt + 1))
-        break
+        sys.exit("Error in record {}, line {}: Record is not complete".format(record_cnt+1, line_cnt+1))
     line_cnt += 1
 
     quality_scores = fastq_file.readline().rstrip('\n')
     if not quality_scores:
-        print("Parse error (record {}, line {}): Record is not complete".format(record_cnt + 1, line_cnt + 1))
-        break
+        sys.exit("Error in record {}, line {}: Record is not complete".format(record_cnt+1, line_cnt+1))
     line_cnt += 1
 
     record_cnt += 1
@@ -68,16 +55,18 @@ while 1:
     #  Illumina 1.8+  Phred+33   [0,41]
 
     if len(quality_scores) > 0:
+        qual_size += len(quality_scores)
         for q in quality_scores:
-            if ord(q) > quality_score_max:
-                quality_score_max = ord(q)
-            if ord(q) < quality_score_min:
-                quality_score_min = ord(q)
+            if ord(q) > qual_max:
+                qual_max = ord(q)
+            if ord(q) < qual_min:
+                qual_min = ord(q)
     else:
-        print("Error (record {}, line {}): Quality score line is empty".format(record_cnt, line_cnt))
-print("")
-print("Processed {} FASTQ record(s) (i.e. {} lines)".format(record_cnt, line_cnt))
-print("Quality score range: [{}:{}]".format(quality_score_min, quality_score_max))
+        sys.exit("Error in record {}, line {}: Quality score line is empty".format(record_cnt, line_cnt))
+
+print("Line(s): {}".format(line_cnt))
+print("FASTQ record(s): {}".format(record_cnt))
+print("Quality score range: [{}:{}]".format(qual_min, qual_max))
+print("Quality score size: {} bytes".format(qual_size))
 
 sys.exit()
-

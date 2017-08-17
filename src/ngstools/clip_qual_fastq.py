@@ -1,47 +1,28 @@
 #!/usr/bin/env python
 
-###############################################################################
-#                  Clip the quality values in a FASTQ file                    #
-###############################################################################
-
-import os
 import sys
 
-
+# Usage
 if len(sys.argv) != 2:
     sys.exit("Usage: python {} file.[fastq|fq]".format(sys.argv[0]))
 
 # Get FASTQ file
 fastq_file_name = sys.argv[1]
 if not fastq_file_name.endswith(".fastq") and not fastq_file_name.endswith(".fq"):
-    print("FASTQ file name must end with either '.fastq' or '.fq'")
-    sys.exit()
+    sys.exit("FASTQ file name must end with either '.fastq' or '.fq'")
 fastq_file = open(fastq_file_name, 'r')
-print("FASTQ file: {}".format(fastq_file_name))
 
-# Get FASTQ file size
-fastq_file.seek(0, os.SEEK_END)
-fastq_file_size = fastq_file.tell()
-fastq_file.seek(0, os.SEEK_SET)
+sys.stderr.write("Clipping quality values into Illumina 1.8+ format ([0,41]+33)\n")
 
-# Make new output FASTQ file
-clipped_fastq_file_name = fastq_file_name + ".clipped_qual.fastq"
-clipped_fastq_file = open(clipped_fastq_file_name, 'w')
-print("Clipped FASTQ file: {}".format(clipped_fastq_file_name))
-
-print("Clipping quality values into Illumina 1.8+ format ([0,41]+33)")
-
+# Initialize statistics
 record_cnt = 0
 line_cnt = 0
-
 qual_total_cnt = 0
 qual_raise_cnt = 0
 qual_decrease_cnt = 0
 
+# Parse FASTQ file and clip the quality scores
 while 1:
-    print("\r{0:.2f}%".format(100*(float(fastq_file.tell())/float(fastq_file_size)))),
-    sys.stdout.flush()
-
     sequence_identifier = fastq_file.readline().rstrip('\n')
     if not sequence_identifier:
         break  # reached end of file, everything ok
@@ -58,9 +39,9 @@ while 1:
 
     record_cnt += 1
 
-    clipped_fastq_file.write(sequence_identifier + "\n")
-    clipped_fastq_file.write(raw_sequence + "\n")
-    clipped_fastq_file.write(description + "\n")
+    sys.stdout.write(sequence_identifier + "\n")
+    sys.stdout.write(raw_sequence + "\n")
+    sys.stdout.write(description + "\n")
 
     # Check and clip quality scores
 
@@ -80,13 +61,12 @@ while 1:
         if ord(q) > 33+41:
             q = chr(33+41)
             qual_decrease_cnt += 1
-        clipped_fastq_file.write(q)
+            sys.stdout.write(q)
 
-    clipped_fastq_file.write("\n")
+    sys.stdout.write("\n")
 
-print("")
-print("Processed {} FASTQ record(s) (i.e. {} lines)".format(record_cnt, line_cnt))
-print("Clipped {} out of {} quality values ({} raised + {} decreased)".format(qual_raise_cnt+qual_decrease_cnt, qual_total_cnt, qual_raise_cnt, qual_decrease_cnt))
+sys.stderr.write("Clipped {} out of {} quality values\n".format(qual_raise_cnt+qual_decrease_cnt, qual_total_cnt))
+sys.stderr.write("  Raised: {}\n".format(qual_raise_cnt))
+sys.stderr.write("  Decreased: {}\n".format(qual_decrease_cnt))
 
 sys.exit()
-
