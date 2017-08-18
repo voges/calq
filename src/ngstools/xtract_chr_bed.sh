@@ -1,17 +1,43 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 file.bed chromosome"
-    exit -1
-fi
+###############################################################################
+#                               Command line                                  #
+###############################################################################
+
+if [ "$#" -ne 2 ]; then printf "Usage: $0 file.bed chromosome\n"; exit -1; fi
 
 root=$(echo $1 | sed 's/\.[^.]*$//') # strip .bed
 chromosome=$2
 
-echo "Writing chromosome $chromosome from BED file $1 to BED file $root.$chromosome.bed"
+printf "Input BED file: $1\n"
+printf "Chromosome: $chromosome\n"
+
+if [ ! -f $1 ]; then printf "Error: Input BED file $1 is not a regular file.\n"; exit -1; fi
+
+###############################################################################
+#                                Executables                                  #
+###############################################################################
+
+grep="/usr/bin/grep"
+
+if [ ! -x $grep ]; then printf "Error: Binary file $grep is not executable.\n"; exit -1; fi
+
+###############################################################################
+#                                 Extraction                                  #
+###############################################################################
+
+printf "Extracting\n  chromosome: $chromosome\n  from: $1\n  to: $root.$chromosome.bed\n"
 if [ -f $root.$chromosome.bed ]; then
-    echo "BED file $root.$chromosome.bed already exists. Not reproducing it."
+    printf "$root.$chromosome.bed already exists (not reproducing it)\n"
 else
-    grep -P "^$chromosome" $1 > $root.$chromosome.bed
+    grep -P "^$chromosome" $1 1> $root.$chromosome.bed
 fi
+
+###############################################################################
+#                                   Cleanup                                   #
+###############################################################################
+
+#printf "Cleanup\n"
+#
+printf "Done\n"
 

@@ -4,19 +4,14 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 2 ]; then
-    printf "Usage: $0 input_fastq num_threads\n"
-    exit -1
-fi
+if [ "$#" -ne 2 ]; then printf "Usage: $0 input_fastq num_threads\n"; exit -1; fi
 
 input_fastq=$1
 printf "Input FASTQ file: $input_fastq\n"
 num_threads=$2
 printf "Number of threads: $num_threads\n"
 
-printf "Checking input FASTQ file $input_fastq ... "
-if [ ! -f $input_fastq ]; then printf "did not find input FASTQ file: $input_fastq\n"; exit -1; fi
-printf "OK\n"
+if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                Executables                                  #
@@ -29,30 +24,33 @@ python="/usr/bin/python"
 # Python scripts
 xtract_part_fastq_py="/home/voges/git/calq/src/ngstools/xtract_part_fastq.py"
 
-printf "Checking executables ... "
-if [ ! -x $bgzip ]; then printf "did not find $bgzip\n"; exit -1; fi
-if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
-if [ ! -e $xtract_part_fastq_py ]; then printf "did not find $xtract_part_fastq_py\n"; exit -1; fi
-printf "OK\n"
+if [ ! -x $bgzip ]; then printf "Error: Binary file $bgzip is not executable.\n"; exit -1; fi
+if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
+if [ ! -f $xtract_part_fastq_py ]; then printf "Error: Python script $xtract_part_fastq_py is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Extracting quality values from FASTQ file ... "
-$python $xtract_part_fastq_py $input_fastq 3 1> $input_fastq.qual
-printf "OK\n"
+printf "Extracting quality values\n  from: $input_fastq\n  to: $input_fastq.qual\n"
+if [ -f $input_fastq.qual ]; then
+    printf "$input_fastq.qual already exists (not reproducing it)\n"
+else
+    $python $xtract_part_fastq_py $input_fastq 3 1> $input_fastq.qual
+fi
 
-printf "Running bgzip ... "
-$bgzip -@ $num_threads -c $input_fastq.qual > $input_fastq.qual.bgz
-wc -c $input_fastq.qual.bgz > $input_fastq.qual.bgz.log
-printf "OK\n"
+printf "Compressing with bgzip\n  from: $input_fastq.qual\n  to:  $input_fastq.qual.bgz\n"
+if [ -f $input_fastq.qual.bgz ]; then
+    printf "$input_fastq.qual.bgz already exists (not reproducing it)\n"
+else
+    $bgzip -@ $num_threads -c $input_fastq.qual 1> $input_fastq.qual.bgz
+fi
 
 ###############################################################################
 #                                   Cleanup                                   #
 ###############################################################################
 
-printf "Cleanup ... "
+#printf "Cleanup\n"
 #
-printf "OK\n";
+printf "Done\n"
 

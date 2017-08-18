@@ -1,36 +1,60 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 file.[sam|bam] chromosome"
-    exit -1
-fi
+###############################################################################
+#                               Command line                                  #
+###############################################################################
+
+if [ "$#" -ne 2 ]; then printf "Usage: $0 file.[sam|bam] chromosome\n"; exit -1; fi
 
 root=$(echo $1 | sed 's/\.[^.]*$//') # strip .sam/.bam
 chromosome=$2
 
+printf "Input file: $1\n"
+printf "Chromosome: $chromosome\n"
+
+if [ ! -f $1 ]; then printf "Error: Input file $1 is not a regular file.\n"; exit -1; fi
+
+###############################################################################
+#                                Executables                                  #
+###############################################################################
+
 install_path="/project/dna/install"
 samtools="$install_path/samtools-1.3/bin/samtools"
 
+if [ ! -x $samtools ]; then printf "Error: Binary file $samtools is not executable.\n"; exit -1; fi
+
+###############################################################################
+#                                 Extraction                                  #
+###############################################################################
+
 if [[ $1 == *.sam ]]; then
-    echo "Converting SAM file $1 to BAM file $root.bam"
+    printf "SAM-to-BAM conversion\n  from: $1\n  to: $root.bam\n"
     if [ -f $root.bam ]; then
-        echo "BAM file $root.bam already exists. Not reproducing it."
+        printf "$root.bam already exists (not reproducing it)\n"
     else
-        $samtools view -bh $1 > $root.bam
+        $samtools view -bh $1 1> $root.bam
     fi
 fi
 
-echo "Constructing BAM index file $root.bai"
+printf "Constructing BAM index file: $root.bai\n"
 if [ -f $root.bai ]; then
-    echo "BAM index file $root.bai already exists. Not reproducing it."
+    printf "$root.bai already exists (not reproducing it)\n"
 else
     $samtools index $root.bam $root.bai
 fi
 
-echo "Writing chromosome $chromosome from $root.bam to $root.$chromosome.sam"
+printf "Extracting\n  chromosome: $chromosome\n  from: $root.bam\n  to: $root.$chromosome.sam\n"
 if [ -f $root.$chromosome.sam ]; then
-    echo "SAM file $root.$chromosome.sam already exists. Not reproducing it."
+    printf "$root.$chromosome.sam already exists (not reproducing it)\n"
 else
-    $samtools view -h $root.bam $chromosome > $root.$chromosome.sam
+    $samtools view -h $root.bam $chromosome 1> $root.$chromosome.sam
 fi
+
+###############################################################################
+#                                   Cleanup                                   #
+###############################################################################
+
+#printf "Cleanup\n"
+#
+printf "Done\n"
 
