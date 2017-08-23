@@ -4,21 +4,18 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 3 ]; then
-    printf "Usage: $0 input_sam polyploidy block_size\n"
-    exit -1
-fi
+if [ "$#" -ne 4 ]; then printf "Usage: $0 input_sam qual_type polyploidy block_size\n"; exit -1; fi
 
 input_sam=$1
 printf "Input SAM file: $input_sam\n"
-polyploidy=$2
+qual_type=$2
+printf "Quality value type: $qual_type\n"
+polyploidy=$3
 printf "Polyploidy: $polyploidy\n"
-block_size=$3
+block_size=$4
 printf "Block size: $block_size\n"
 
-printf "Checking input SAM file $input_sam ... "
-if [ ! -f $input_sam ]; then printf "did not find input SAM file: $input_sam\n"; exit -1; fi
-printf "OK\n"
+if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                Executables                                  #
@@ -31,40 +28,45 @@ python="/usr/bin/python"
 time="/usr/bin/time"
 
 # Python scripts
-replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
+replace_qual_sam_py="/home/voges/git/calq/src/ngstools/replace_qual_sam.py"
 
-printf "Checking executables ... "
-if [ ! -x $calq ]; then printf "did not find $calq\n"; exit -1; fi
-if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
-if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
-if [ ! -e $replace_qual_sam_py ]; then printf "did not find $replace_qual_sam_py\n"; exit -1; fi
-printf "OK\n"
+if [ ! -x $calq ]; then printf "Error: Binary file $calq is not executable.\n"; exit -1; fi
+if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
+if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; exit -1; fi
+if [ ! -f $replace_qual_sam_py ]; then printf "Error: Python script $replace_qual_sam_py is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                          Compress and decompress                            #
 ###############################################################################
 
-printf "Running CALQ encoder ... "
-cmd="$calq -f -q Illumina-1.8+ -p $polyploidy -b $block_size $input_sam -o $input_sam.cq"
-$time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log &
-mv $input_sam.cq $input_sam.$calq_string
-printf "OK\n"
+printf "Compressing with CALQ\n  from: $input_sam\n  to: $input_sam.$calq_string\n"
+cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string"
+if [ -f $input_sam.$calq_string ]; then
+    printf "$input_sam.$calq_string already exists (not reproducing it)\n"
+else
+    $time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
+fi
 
-printf "Running CALQ decoder ... "
-cmd="$calq -f -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
-$time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log &
-printf "OK\n"
+printf "Decompressing with CALQ\n  from: $input_sam.$calq_string\n  to: $input_sam.$calq_string.qual\n"
+cmd="$calq -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
+if [ -f $input_sam.$calq_string.qual ]; then
+    printf "$input_sam.$calq_string.qual already exists (not reproducing it)\n"
+else
+    $time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log
+fi
 
-#printf "Constructing SAM file with reconstruced quality values ... "
-#$python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual &> $input_sam.run_calq.log
-#mv $input_sam.new_qual.sam $input_sam.$calq_string.sam
-#printf "OK\n"
+printf "Constructing SAM file with reconstruced quality values\n  from: $input_sam.$calq_string.qual\n  to: $input_sam.$calq_string.sam"
+if [ -f $input_sam.$calq_string.sam ]; then
+    printf "$input_sam.$calq_string.sam already exists (not reproducing it)\n"
+else
+    $python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual 1> $input_sam.$calq_string.sam
+fi
 
 ###############################################################################
 #                                   Cleanup                                   #
 ###############################################################################
 
-printf "Cleanup ... "
-rm $input_sam.$calq_string.qual
-printf "OK\n";
+#printf "Cleanup\n"
+#
+printf "Done\n"
 
