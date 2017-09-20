@@ -4,14 +4,14 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 2 ]; then printf "Usage: $0 input_fastq num_threads\n"; exit -1; fi
+if [ "$#" -ne 2 ]; then printf "Usage: $0 input_sam num_threads\n"; exit -1; fi
 
-input_fastq=$1
-printf "Input FASTQ file: $input_fastq\n"
+input_sam=$1
+printf "Input SAM file: input_sam\n"
 num_threads=$2
 printf "Number of threads: $num_threads\n"
 
-if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is not a regular file.\n"; exit -1; fi
+if [ ! -f input_sam ]; then printf "Error: Input SAM file input_sam is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                Executables                                  #
@@ -19,38 +19,40 @@ if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is n
 
 # Binaries
 dsrc="/project/dna/install/dsrc-2.0/dsrc"
-dsrc_string="dsrc_il8b"
+dsrc_string="dsrc-2.0_il8b"
 gzip="/usr/bin/gzip"
 python="/usr/bin/python"
 time="/usr/bin/time"
 
 # Python scripts
+sam2fastq_py="/home/voges/git/calq/src/ngstools/sam2fastq.py"
 xtract_part_fastq_py="/home/voges/git/calq/src/ngstools/xtract_part_fastq.py"
 
 if [ ! -x $dsrc ]; then printf "Error: Binary file $dsrc is not executable.\n"; exit -1; fi
 if [ ! -x $gzip ]; then printf "Error: Binary file $gzip is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
 if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; exit -1; fi
+if [ ! -f $sam2fastq_py ]; then printf "Error: Python script $sam2fastq_py is not a regular file.\n"; exit -1; fi
 if [ ! -f $xtract_part_fastq_py ]; then printf "Error: Python script $xtract_part_fastq_py is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Compressing with DSRC\n  from: $input_fastq\n  to: $input_fastq.$dscr_string\n"
+printf "SAM-to-FASTQ conversion\n"
+$python $sam2fastq_py $input_sam 1> $input_fastq
+
+printf "Compressing with DSRC\n"
 $dsrc c -d3 -q2 -b256 -l -t$num_threads $input_fastq $input_fastq.$dsrc_string
 
-printf "Decompressing with DSRC\n  from: $input_fastq.$dscr_string\n  to: $input_fastq.$dsrc_string.fastq\n"
+printf "Decompressing with DSRC\n"
 $dsrc d -t$num_threads $input_fastq.$dsrc_string $input_fastq.$dsrc_string.fastq
 
-printf "Extracting quality values\n  from: $input_fastq.$dsrc_string.fastq\n  to: $input_fastq.$dsrc_string.fastq.qual\n"
+printf "Extracting quality values\n"
 $python $xtract_part_fastq_py $input_fastq.$dsrc_string.fastq 3 1> $input_fastq.$dsrc_string.fastq.qual
 
-
-printf "Compressing quality values with gzip\n  from: $input_fastq.$dsrc_string.fastq.qual\n  to: $input_fastq.$dsrc_string.fastq.qual.gz\n"
+printf "Compressing quality values with gzip\n"
 $gzip -9 -c $input_fastq.$dsrc_string.fastq.qual > $input_fastq.$dsrc_string.fastq.qual.gz
-
-wc -c $input_fastq.$dsrc_string.fastq.qual.gz > $input_fastq.$dsrc_string.fastq.qual.gz.log
 
 ###############################################################################
 #                                   Cleanup                                   #
