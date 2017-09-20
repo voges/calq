@@ -29,7 +29,9 @@ printf "Constructing FASTA index file: $1.fai\n"
 if [ -f $1.fai ]; then
     printf "$1.fai already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools faidx $1
+    printf "Returned from Samtools\n"
 fi
 
 ###############################################################################
