@@ -39,21 +39,23 @@ if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; 
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Constructing FASTA index file\n  from: $ref_fasta\n  to: $ref_fasta.fai\n"
+printf "Constructing FASTA index file: $ref_fasta.fai\n"
 if [ -f $ref_fasta.fai ]; then
     printf "$ref_fasta.fai already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools faidx $ref_fasta
+    printf "Returned from Samtools\n"
 fi
 
-printf "Crumble BAM-to-BAM encoding with compression level 1\n\n"
+printf "Crumble BAM-to-BAM encoding with compression level 1\n"
 cmd="$crumble -v -1 $input_bam $input_bam.$crumble_string-1.bam"
 $time -v -o $input_bam.$crumble_string-1.time $cmd &> $input_bam.$crumble_string-1.log
 
 printf "Scramble BAM-to-CRAM encoding\n"
 $scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-1.bam $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.log
 
-printf "Reporting CRAM size\n\n"
+printf "Reporting CRAM size\n"
 $cram_size $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.cram_size
 mv $input_bam.$crumble_string-1.bam.cram $input_bam.$crumble_string-1.bam.$scramble_string
 

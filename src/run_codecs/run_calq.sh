@@ -43,11 +43,11 @@ printf "Compressing with CALQ\n"
 cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string"
 $time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
 
-printf "Decompressing with CALQ\n  from: $input_sam.$calq_string\n  to: $input_sam.$calq_string.qual\n"
+printf "Decompressing with CALQ\n"
 cmd="$calq -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
 $time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log
 
-printf "Constructing SAM file with reconstruced quality values\n  from: $input_sam.$calq_string.qual\n  to: $input_sam.$calq_string.sam"
+printf "Constructing SAM file with reconstructed quality values\n"
 $python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual 1> $input_sam.$calq_string.sam
 
 ###############################################################################
