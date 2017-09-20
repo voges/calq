@@ -24,8 +24,8 @@ qvz2_string="qvz2-d5383c6"
 time="/usr/bin/time"
 
 # Python scripts
-$replace_qual_sam_py="/home/voges/git/calq/src/ngstools/replace_qual_sam.py"
-$xtract_field_sam_py="/home/voges/git/calq/src/ngstools/xtract_field_sam.py"
+replace_qual_sam_py="/home/voges/git/calq/src/ngstools/replace_qual_sam.py"
+xtract_field_sam_py="/home/voges/git/calq/src/ngstools/xtract_field_sam.py"
 
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
 if [ ! -x $qvz2 ]; then printf "Error: Binary file $qvz2 is not executable.\n"; exit -1; fi
