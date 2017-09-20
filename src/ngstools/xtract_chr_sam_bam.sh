@@ -32,7 +32,9 @@ if [[ $1 == *.sam ]]; then
     if [ -f $root.bam ]; then
         printf "$root.bam already exists (not reproducing it)\n"
     else
+        printf "Handing over to Samtools\n"
         $samtools view -bh $1 1> $root.bam
+        printf "Returned from Samtools\n"
     fi
 fi
 
@@ -40,14 +42,18 @@ printf "Constructing BAM index file: $root.bai\n"
 if [ -f $root.bai ]; then
     printf "$root.bai already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools index $root.bam $root.bai
+    printf "Returned from Samtools\n"
 fi
 
 printf "Extracting\n  chromosome: $chromosome\n  from: $root.bam\n  to: $root.$chromosome.sam\n"
 if [ -f $root.$chromosome.sam ]; then
     printf "$root.$chromosome.sam already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools view -h $root.bam $chromosome 1> $root.$chromosome.sam
+    printf "Returned from Samtools\n"
 fi
 
 ###############################################################################

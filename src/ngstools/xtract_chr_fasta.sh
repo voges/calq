@@ -36,30 +36,38 @@ printf "Creating FASTA index file: $1.fai\n"
 if [ -f $1.fai ]; then
     printf "$1.fai already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools faidx $1
+    printf "Returned from Samtools\n"
 fi
 
 printf "Extracting\n  chromosome: $chromosome\n  from: $1\n  to: $root.$chromosome.fasta\n"
 if [ -f $root.$chromosome.fasta ]; then
     printf "$root.$chromosome.fasta already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools faidx $1 $chromosome 1> $root.$chromosome.fasta
+    printf "Returned from Samtools\n"
 fi
 
 printf "Creating FASTA index file: $root.$chromosome.fasta.fai\n"
 if [ -f $root.$chromosome.fasta.fai ]; then
     printf "$root.$chromosome.fasta.fai already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools faidx $root.$chromosome.fasta
+    printf "Returned from Samtools\n"
 fi
 
 printf "Creating FASTA dict file: $root.$chromosome.dict\n"
 if [ -f $root.$chromosome.dict ]; then
     printf "$root.$chromosome.dict already exists (not reproducing it)\n"
 else
+    printf "Handing over to Picard\n"
     $java $java_opts -jar $picard_jar CreateSequenceDictionary \
         R=$root.$chromosome.fasta \
         O=$root.$chromosome.dict
+    printf "Returned from Picard\n"
 fi
 
 ###############################################################################

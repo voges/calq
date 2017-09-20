@@ -39,19 +39,23 @@ printf "Creating FASTA index file: $ref.fai\n"
 if [ -f $ref.fai ]; then
     printf "$ref.fai already exists (not reproducing it)\n"
 else
+    printf "Handing over to Samtools\n"
     $samtools faidx $2
+    printf "Returned from Samtools\n"
 fi
 
 printf "Extracting\n  chromosome: $chromosome\n  from: $1\n  to: $root.$chromosome.vcf\n"
 if [ -f $root.$chromosome.vcf ]; then
     printf "$root.$chromosome.vcf already exists (not reproducing it)\n"
 else
+    printf "Handing over to GATK\n"
     $java $java_opts -jar $GenomeAnalysisTK_jar \
         -T SelectVariants \
         -R $ref \
         -V $root.vcf \
         -o $root.$chromosome.vcf \
         -L $chromosome
+    printf "Returned from GATK\n"
 fi
 
 ###############################################################################
