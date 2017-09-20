@@ -11,7 +11,7 @@ printf "Input SAM file: input_sam\n"
 num_threads=$2
 printf "Number of threads: $num_threads\n"
 
-if [ ! -f input_sam ]; then printf "Error: Input SAM file input_sam is not a regular file.\n"; exit -1; fi
+if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                Executables                                  #
