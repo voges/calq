@@ -17,19 +17,13 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 #                                Executables                                  #
 ###############################################################################
 
-# Binaries
 prblock_compress="/project/dna/prog/libCSAM-da36a12/CompressQual"
 prblock_decompress="/project/dna/prog/libCSAM-da36a12/DecompressQual"
 pblock_string="pblock"
-#python="/usr/bin/python"
 time="/usr/bin/time"
-
-# Python scripts
-#
 
 if [ ! -x $prblock_compress ]; then printf "Error: Binary file $prblock_compress is not executable.\n"; exit -1; fi
 if [ ! -x $prblock_decompress ]; then printf "Error: Binary file $prblock_decompress is not executable.\n"; exit -1; fi
-#if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
 if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; exit -1; fi
 
 ###############################################################################
