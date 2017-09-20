@@ -8,7 +8,7 @@ if [ "$#" -ne 2 ]; then printf "Usage: $0 input_sam p (with p={1,2,4,8,16,32})\n
 
 input_sam=$1
 printf "Input SAM file: $input_sam\n"
-p=$1
+p=$2
 printf "p: $p\n" # p={1,2,4,8,16,32}
 
 if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a regular file.\n"; exit -1; fi
