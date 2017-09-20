@@ -32,10 +32,10 @@ if [ ! -f $xtract_part_fastq_py ]; then printf "Error: Python script $xtract_par
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Extracting quality values\n  from: $input_fastq\n  to: $input_fastq.qual\n"
+printf "Extracting quality values\n"
 $python $xtract_part_fastq_py $input_fastq 3 1> $input_fastq.qual
 
-printf "Compressing with bgzip\n  from: $input_fastq.qual\n  to:  $input_fastq.qual.bgz\n"
+printf "Compressing quality values with bgzip\n"
 $bgzip -@ $num_threads -c $input_fastq.qual 1> $input_fastq.qual.bgz
 
 ###############################################################################

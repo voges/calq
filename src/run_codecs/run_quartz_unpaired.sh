@@ -35,12 +35,12 @@ if [ ! -f $xtract_part_fastq_py ]; then printf "Error: Python script xtract_part
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Running Quartz\nfrom: $input_fastq\n  to: $input_fastq.filtered_$quartz_string\n"
+printf "Running Quartz\n"
 cmd="$quartz $quartz_dictionary "$quartz_string" 8 0 $input_fastq"
 $time -v -o $input_fastq.$quartz_string.time $cmd &> $input_fastq.$quartz_string.log
 mv $input_fastq.filtered_$quartz_string $input_fastq.$quartz_string.fastq
 
-printf "Compressing Quartz'd quality values ... "
+printf "Compressing Quartz'd quality values\n"
 $python $xtract_part_fastq_py $input_fastq.$quartz_string.fastq 3 1> $input_fastq.$quartz_string.fastq.qual
 bzip2 $input_fastq.$quartz_string.fastq.qual
 printf "Compressed quality values size: " >> $input_fastq.$quartz_string.log

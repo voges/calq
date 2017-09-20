@@ -46,51 +46,27 @@ else
     $samtools faidx $ref_fasta
 fi
 
-printf "Crumble BAM-to-BAM encoding with compression level 1\n  from: $input_bam\n  to: $input_bam.$crumble_string-1.bam\n"
+printf "Crumble BAM-to-BAM encoding with compression level 1\n\n"
 cmd="$crumble -v -1 $input_bam $input_bam.$crumble_string-1.bam"
-if [ -f $input_bam.$crumble_string-1.bam ]; then
-    printf "$input_bam.$crumble_string-1.bam already exists (not reproducing it)\n"
-else
-    $time -v -o $input_bam.$crumble_string-1.time $cmd &> $input_bam.$crumble_string-1.log
-fi
+$time -v -o $input_bam.$crumble_string-1.time $cmd &> $input_bam.$crumble_string-1.log
 
-printf "Scramble BAM-to-CRAM encoding\n  from: $input_bam.$crumble_string-1.bam\n  to: $input_bam.$crumble_string-1.bam.cram\n"
-if [ -f $input_bam.$crumble_string-1.bam.cram ]; then
-    printf "$input_bam.$crumble_string-1.bam.cram already exists (not reproducing it)\n"
-else
-    $scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-1.bam $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.log
-fi
+printf "Scramble BAM-to-CRAM encoding\n"
+$scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-1.bam $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.log
 
-printf "Reporting CRAM size\n  from: $input_bam.$crumble_string-1.bam.cram\n  to: $input_bam.$crumble_string-1.bam.$scramble_string.cram_size\n"
-if [ -f $input_bam.$crumble_string-1.bam.$scramble_string.cram_size ]; then
-    printf "$input_bam.$crumble_string-1.bam.$scramble_string.cram_size already exists (not reproducing it)\n"
-else
-    $cram_size $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.cram_size
-    mv $input_bam.$crumble_string-1.bam.cram $input_bam.$crumble_string-1.bam.$scramble_string
-fi
+printf "Reporting CRAM size\n\n"
+$cram_size $input_bam.$crumble_string-1.bam.cram &> $input_bam.$crumble_string-1.bam.$scramble_string.cram_size
+mv $input_bam.$crumble_string-1.bam.cram $input_bam.$crumble_string-1.bam.$scramble_string
 
-printf "Crumble BAM-to-BAM encoding with compression level 9\n  from: $input_bam\n  to: $input_bam.$crumble_string-9.bam\n"
+printf "Crumble BAM-to-BAM encoding with compression level 9\n"
 cmd="$crumble -v -9 $input_bam $input_bam.$crumble_string-9.bam"
-if [ -f $input_bam.$crumble_string-9.bam ]; then
-    printf "$input_bam.$crumble_string-9.bam already exists (not reproducing it)\n"
-else
-    $time -v -o $input_bam.$crumble_string-9.time $cmd &> $input_bam.$crumble_string-9.log
-fi
+$time -v -o $input_bam.$crumble_string-9.time $cmd &> $input_bam.$crumble_string-9.log
 
-printf "Scramble BAM-to-CRAM encoding\n  from: $input_bam.$crumble_string-9.bam\n  to: $input_bam.$crumble_string-9.bam.cram\n"
-if [ -f $input_bam.$crumble_string-9.bam.cram ]; then
-    printf "$input_bam.$crumble_string-9.bam.cram already exists (not reproducing it)\n"
-else
-    $scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-9.bam $input_bam.$crumble_string-9.bam.cram &> $input_bam.$crumble_string-9.bam.$scramble_string.log
-fi
+printf "Scramble BAM-to-CRAM encoding\n"
+$scramble -r $ref_fasta -t $num_threads $input_bam.$crumble_string-9.bam $input_bam.$crumble_string-9.bam.cram &> $input_bam.$crumble_string-9.bam.$scramble_string.log
 
-printf "Reporting CRAM size\n  from: $input_bam.$crumble_string-9.bam.cram\n  to: $input_bam.$crumble_string-9.bam.$scramble_string.cram_size\n"
-if [ -f $input_bam.$crumble_string-9.bam.$scramble_string.cram_size ]; then
-    printf "$input_bam.$crumble_string-9.bam.$scramble_string.cram_size already exists (not reproducing it)\n"
-else
-    $cram_size $input_bam.$crumble_string-9.bam.cram &> $input_bam.$crumble_string-9.bam.$scramble_string.cram_size
-    mv $input_bam.$crumble_string-9.bam.cram $input_bam.$crumble_string-9.bam.$scramble_string
-fi
+printf "Reporting CRAM size\n"
+$cram_size $input_bam.$crumble_string-9.bam.cram &> $input_bam.$crumble_string-9.bam.$scramble_string.cram_size
+mv $input_bam.$crumble_string-9.bam.cram $input_bam.$crumble_string-9.bam.$scramble_string
 
 ###############################################################################
 #                                   Cleanup                                   #

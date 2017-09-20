@@ -39,28 +39,16 @@ if [ ! -f $replace_qual_sam_py ]; then printf "Error: Python script $replace_qua
 #                          Compress and decompress                            #
 ###############################################################################
 
-printf "Compressing with CALQ\n  from: $input_sam\n  to: $input_sam.$calq_string\n"
+printf "Compressing with CALQ\n"
 cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string"
-if [ -f $input_sam.$calq_string ]; then
-    printf "$input_sam.$calq_string already exists (not reproducing it)\n"
-else
-    $time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
-fi
+$time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
 
 printf "Decompressing with CALQ\n  from: $input_sam.$calq_string\n  to: $input_sam.$calq_string.qual\n"
 cmd="$calq -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
-if [ -f $input_sam.$calq_string.qual ]; then
-    printf "$input_sam.$calq_string.qual already exists (not reproducing it)\n"
-else
-    $time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log
-fi
+$time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log
 
 printf "Constructing SAM file with reconstruced quality values\n  from: $input_sam.$calq_string.qual\n  to: $input_sam.$calq_string.sam"
-if [ -f $input_sam.$calq_string.sam ]; then
-    printf "$input_sam.$calq_string.sam already exists (not reproducing it)\n"
-else
-    $python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual 1> $input_sam.$calq_string.sam
-fi
+$python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual 1> $input_sam.$calq_string.sam
 
 ###############################################################################
 #                                   Cleanup                                   #

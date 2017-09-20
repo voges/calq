@@ -38,32 +38,17 @@ if [ ! -f $xtract_part_fastq_py ]; then printf "Error: Python script $xtract_par
 ###############################################################################
 
 printf "Compressing with DSRC\n  from: $input_fastq\n  to: $input_fastq.$dscr_string\n"
-if [ -f $input_fastq.$dscr_string ]; then
-    printf "$input_fastq.$dscr_string already exists (not reproducing it)\n"
-else
-    $dsrc c -d3 -q2 -b256 -l -t$num_threads $input_fastq $input_fastq.$dsrc_string
-fi
+$dsrc c -d3 -q2 -b256 -l -t$num_threads $input_fastq $input_fastq.$dsrc_string
 
 printf "Decompressing with DSRC\n  from: $input_fastq.$dscr_string\n  to: $input_fastq.$dsrc_string.fastq\n"
-if [ -f $input_fastq.$dscr_string.fastq ]; then
-    printf "$input_fastq.$dscr_string.fastq already exists (not reproducing it)\n"
-else
-    $dsrc d -t$num_threads $input_fastq.$dsrc_string $input_fastq.$dsrc_string.fastq
-fi
+$dsrc d -t$num_threads $input_fastq.$dsrc_string $input_fastq.$dsrc_string.fastq
 
 printf "Extracting quality values\n  from: $input_fastq.$dsrc_string.fastq\n  to: $input_fastq.$dsrc_string.fastq.qual\n"
-if [ -f $input_fastq.$dsrc_string.fastq.qual ]; then
-    printf "$input_fastq.$dsrc_string.fastq.qual already exists (not reproducing it)\n"
-else
-    $python $xtract_part_fastq_py $input_fastq.$dsrc_string.fastq 3 1> $input_fastq.$dsrc_string.fastq.qual
-fi
+$python $xtract_part_fastq_py $input_fastq.$dsrc_string.fastq 3 1> $input_fastq.$dsrc_string.fastq.qual
+
 
 printf "Compressing quality values with gzip\n  from: $input_fastq.$dsrc_string.fastq.qual\n  to: $input_fastq.$dsrc_string.fastq.qual.gz\n"
-if [ -f $input_fastq.$dsrc_string.fastq.qual.gz ]; then
-    printf "$input_fastq.$dsrc_string.fastq.qual.gz already exists (not reproducing it)\n"
-else
-    $gzip -9 -c $input_fastq.$dsrc_string.fastq.qual > $input_fastq.$dsrc_string.fastq.qual.gz
-fi
+$gzip -9 -c $input_fastq.$dsrc_string.fastq.qual > $input_fastq.$dsrc_string.fastq.qual.gz
 
 wc -c $input_fastq.$dsrc_string.fastq.qual.gz > $input_fastq.$dsrc_string.fastq.qual.gz.log
 

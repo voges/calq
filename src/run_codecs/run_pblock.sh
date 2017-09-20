@@ -36,19 +36,11 @@ if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; 
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Compressing quality values with p=$p\n  from: $input_sam\n  to: $input_sam.cqual\n"
-if [ -f $input_sam.cqual ]; then
-    printf "$input_sam.cqual already exists (not reproducing it)\n"
-else
-    $prblock_compress $input_sam -q 1 -m 1 -l $p
-fi
+printf "Compressing quality values with p=$p\n"
+$prblock_compress $input_sam -q 1 -m 1 -l $p
 
-printf "Decompressing quality values\n  from: $input_sam.cqual\n  to: $input_sam.qual\n"
-if [ -f $input_sam.qual ]; then
-    printf "$input_sam.qual already exists (not reproducing it)\n"
-else
-    $prblock_decompress $input_sam.cqual
-fi
+printf "Decompressing quality values\n"
+$prblock_decompress $input_sam.cqual
 
 mv $input_sam.cqual $input_sam.qual.$pblock_string
 mv $input_sam.qual $input_sam.qual.$pblock_string.qual
