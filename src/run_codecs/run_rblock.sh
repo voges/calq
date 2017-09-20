@@ -4,19 +4,14 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 2 ]; then
-    printf "Usage: $0 input_sam r\n"
-    exit -1
-fi
+if [ "$#" -ne 2 ]; then printf "Usage: $0 input_sam r (with r={5,10,20,40,80,160,320,640})\n"; exit -1; fi
 
 input_sam=$1
 printf "Input SAM file: $input_sam\n"
 r=$1
-printf "r: $p\n" # p={5,10,20,40,80,160,320,640}
+printf "r: $r\n" # r={5,10,20,40,80,160,320,640}
 
-printf "Checking input SAM file $input_sam ... "
-if [ ! -f $input_sam ]; then printf "did not find input SAM file: $input_sam\n"; exit -1; fi
-printf "OK\n"
+if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                Executables                                  #
@@ -26,41 +21,44 @@ printf "OK\n"
 prblock_compress="/project/dna/prog/libCSAM-da36a12/CompressQual"
 prblock_decompress="/project/dna/prog/libCSAM-da36a12/DecompressQual"
 rblock_string="rblock"
+#python="/usr/bin/python"
+time="/usr/bin/time"
 
 # Python scripts
 #
 
-printf "Checking executables ... "
-if [ ! -x $prblock_compress ]; then printf "did not find $prblock_compress\n"; exit -1; fi
-if [ ! -x $prblock_decompress ]; then printf "did not find $prblock_decompress\n"; exit -1; fi
-printf "OK\n"
+if [ ! -x $prblock_compress ]; then printf "Error: Binary file $prblock_compress is not executable.\n"; exit -1; fi
+if [ ! -x $prblock_decompress ]; then printf "Error: Binary file $prblock_decompress is not executable.\n"; exit -1; fi
+#if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
+if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; exit -1; fi
 
 ###############################################################################
 #                                  Compress                                   #
 ###############################################################################
 
-printf "Extracting quality values from FASTQ file ... "
-$python $xtract_qual_fastq_py $input_fastq 2> $input_fastq.qual
-printf "OK\n"
+printf "Compressing quality values with r=$r\n  from: $input_sam\n  to: $input_sam.cqual\n"
+if [ -f $input_sam.cqual ]; then
+    printf "$input_sam.cqual already exists (not reproducing it)\n"
+else
+    $prblock_compress $input_sam -q 2 -m 1 -l $r
+fi
 
-printf "Compressing quality values ... "
-$prblock_compress $input_sam -q 2 -m 1 -l $r
-printf "OK\n";
+printf "Decompressing quality values\n  from: $input_sam.cqual\n  to: $input_sam.qual\n"
+if [ -f $input_sam.qual ]; then
+    printf "$input_sam.qual already exists (not reproducing it)\n"
+else
+    $prblock_decompress $input_sam.cqual
+fi
 
-printf "Decompressing quality values ... "
-$prblock_decompress $input_sam.cqual
-printf "OK\n";
-
-mv $input_sam.cqual $input_sam.$rblock_string
-mv $input_sam.cqual.qual $input_sam.$rblock_string.qual
-wc -c $input_sam.$rblock_string > $input_sam.$rblock_string.log
-
+mv $input_sam.cqual $input_sam.qual.$rblock_string
+mv $input_sam.qual $input_sam.qual.$rblock_string.qual
+wc -c $input_sam.qual.$rblock_string > $input_sam.qual.$rblock_string.log
 
 ###############################################################################
 #                                   Cleanup                                   #
 ###############################################################################
 
-printf "Cleanup ... "
+#printf "Cleanup\n"
 #
-printf "OK\n";
+printf "Done\n"
 
