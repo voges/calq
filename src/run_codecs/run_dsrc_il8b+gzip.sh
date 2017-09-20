@@ -40,19 +40,19 @@ if [ ! -f $xtract_part_fastq_py ]; then printf "Error: Python script $xtract_par
 ###############################################################################
 
 printf "SAM-to-FASTQ conversion\n"
-$python $sam2fastq_py $input_sam 1> $input_fastq
+$python $sam2fastq_py $input_sam 1>$input_sam.fastq
 
 printf "Compressing with DSRC\n"
-$dsrc c -d3 -q2 -b256 -l -t$num_threads $input_fastq $input_fastq.$dsrc_string
+$dsrc c -d3 -q2 -b256 -l -t$num_threads $input_sam.fastq $input_sam.fastq.$dsrc_string
 
 printf "Decompressing with DSRC\n"
-$dsrc d -t$num_threads $input_fastq.$dsrc_string $input_fastq.$dsrc_string.fastq
+$dsrc d -t$num_threads $input_sam.fastq.$dsrc_string $input_sam.fastq.$dsrc_string.fastq
 
 printf "Extracting quality values\n"
-$python $xtract_part_fastq_py $input_fastq.$dsrc_string.fastq 3 1> $input_fastq.$dsrc_string.fastq.qual
+$python $xtract_part_fastq_py $input_sam.fastq.$dsrc_string.fastq 3 1> $input_sam.fastq.$dsrc_string.fastq.qual
 
 printf "Compressing quality values with gzip\n"
-$gzip -9 -c $input_fastq.$dsrc_string.fastq.qual > $input_fastq.$dsrc_string.fastq.qual.gz
+$gzip -9 -c $input_sam.fastq.$dsrc_string.fastq.qual > $input_sam.fastq.$dsrc_string.fastq.qual.gz
 
 ###############################################################################
 #                                   Cleanup                                   #
