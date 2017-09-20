@@ -11,14 +11,12 @@ sam_file_name = sys.argv[1]
 if not sam_file_name.endswith(".sam"):
     sys.exit("SAM file name must end with '.sam'")
 sam_file = open(sam_file_name, 'r')
-sys.stderr.write("SAM file: {}".format(sam_file_name))
 
 # Get new QUAL file
 new_qual_file_name = sys.argv[2]
 if not new_qual_file_name.endswith(".qual"):
     sys.exit("QUAL file name must end with '.qul'")
 new_qual_file = open(new_qual_file_name, 'r')
-sys.stderr.write("QUAL file: {}".format(new_qual_file_name))
 
 while 1:
     line = sam_file.readline()

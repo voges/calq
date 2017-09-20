@@ -4,7 +4,7 @@ import sys
 
 # Usage
 if len(sys.argv) != 3:
-    sys.exit("Usage: python {} file.sam field_id".format(sys.argv[0]))
+    sys.exit("Usage: python {} file.sam field_id 1>file.field".format(sys.argv[0]))
 
 # Get SAM file
 sam_file_name = sys.argv[1]

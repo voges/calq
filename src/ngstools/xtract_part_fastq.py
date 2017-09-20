@@ -4,7 +4,7 @@ import sys
 
 # Usage
 if len(sys.argv) != 3:
-    sys.exit("Usage: python {} file.[fastq|fq] part_id".format(sys.argv[0]))
+    sys.exit("Usage: python {} file.[fastq|fq] part_id 1>file.part".format(sys.argv[0]))
 
 # Get FASTQ file
 fastq_file_name = sys.argv[1]
