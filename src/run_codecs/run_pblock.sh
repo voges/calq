@@ -37,8 +37,7 @@ printf "Decompressing quality values\n"
 $prblock_decompress $input_sam.cqual
 
 mv $input_sam.cqual $input_sam.qual.$pblock_string
-mv $input_sam.qual $input_sam.qual.$pblock_string.qual
-wc -c $input_sam.qual.$pblock_string > $input_sam.qual.$pblock_string.log
+mv $input_sam.cqual.qual $input_sam.qual.$pblock_string.qual
 
 ###############################################################################
 #                                   Cleanup                                   #
