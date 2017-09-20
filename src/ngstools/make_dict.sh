@@ -32,9 +32,9 @@ printf "Constructing FASTA dict file: $root.dict\n"
 if [ -f $root.dict ]; then
     printf "$root.dict already exists (not reproducing it)\n"
 else
-    "Handing over to Picard =================================================="
+    printf "Handing over to Picard ==================================================\n"
     $java $java_opts -jar $picard_jar CreateSequenceDictionary R=$1 O=$root.dict
-    "Returned from Picard ===================================================="
+    printf "Returned from Picard ====================================================\n"
 fi
 
 ###############################################################################
