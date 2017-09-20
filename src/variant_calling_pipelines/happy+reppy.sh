@@ -29,25 +29,11 @@ printf "Golden VCF file (gzipped): $golden_vcf_gz\n"
 golden_bed=$6
 printf "Golden BED file: $golden_bed\n"
 
-printf "Checking log file $log_txt ... "
-if [ -f $log_txt ]; then printf "log file already exists: $log_txt\n"; exit -1; fi
-printf "OK\n"
-
-printf "Checking input VCF file $variants_vcf ... "
-if [ ! -f $variants_vcf ]; then printf "did not find input VCF file: $variants_vcf\n"; exit -1; fi
-printf "OK\n"
-
-printf "Checking reference FASTA file $ref_fasta ... "
-if [ ! -f $ref_fasta ]; then printf "did not find reference FASTA file: $ref_fasta\n"; exit -1; fi
-printf "OK\n"
-
-printf "Checking golden VCF file (gzipped) $golden_vcf_gz ... "
-if [ ! -f $golden_vcf_gz ]; then printf "did not find golden VCF file (gzipped): $golden_vcf_gz\n"; exit -1; fi
-printf "OK\n"
-
-printf "Checking golden BED file $golden_bed ... "
-if [ ! -f $golden_bed ]; then printf "did not find golden BED file: $golden_bed\n"; exit -1; fi
-printf "OK\n"
+if [ -f $log_txt ]; then printf "Error: File $log_txt file already exists.\n"; exit -1; fi
+if [ ! -f $variants_vcf ]; then printf "Error: Input VCF file $variants_vcf is not a regular file.\n"; exit -1; fi
+if [ ! -f $ref_fasta ]; then print "Error: Reference FASTA file $ref_fasta is not a regular file.\n"; exit -1; fi
+if [ ! -f $golden_vcf_gz ]; then printf "Error: Golden VCF file (gzipped) $golden_vcf_gz is not a regular file.\n"; exit -1; fi
+if [ ! -f $golden_bed ]; then printf "Error: Golden BED file $golden_bed is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                                Executables                                  #
@@ -60,11 +46,9 @@ python="/usr/bin/python"
 hap_py="/project/dna/install/hap.py-0.3.1/bin/hap.py"
 rep_py="/project/dna/install/benchmarking-tools-c458561/reporting/basic/bin/rep.py"
 
-printf "Checking executables ... "
-if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
-if [ ! -e $hap_py ]; then printf "did not find $hap_py\n"; exit -1; fi
-if [ ! -e $rep_py ]; then printf "did not find $rep_py\n"; exit -1; fi
-printf "OK\n"
+if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
+if [ ! -f $hap_py ]; then printf "Error: Python script $hap_py is not a regular file.\n"; exit -1; fi
+if [ ! -f $rep_py ]; then printf "Error: Python script $rep_py is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                 Report results with hap.py and rep.py                       #
@@ -72,7 +56,6 @@ printf "OK\n"
 
 printf "[1/2] Running hap.py ... "
 $python $hap_py --threads $num_threads --verbose $golden_vcf_gz $variants_vcf -f $golden_bed -o $variants_vcf.happy -r $ref_fasta --roc VQLSOD &>>$log_txt
-printf "OK\n"
 
 printf "[2/2] Running rep.py ... "
 rm -f "$variants_vcf".happy.rep.tsv
@@ -82,16 +65,15 @@ printf "$variants_vcf.happy.extended.csv," >> "$variants_vcf".happy.rep.tsv
 for i in "$variants_vcf".happy.roc.Locations.*; do printf "$i,"; done >> "$variants_vcf".happy.rep.tsv
 sed -i '$ s/.$//' "$variants_vcf".happy.rep.tsv
 $python $rep_py -o "$variants_vcf".happy.rep.tsv.reppy.html -l "$variants_vcf".happy.rep.tsv &>>$log_txt
-printf "OK\n"
 
 ###############################################################################
 #                                   Cleanup                                   #
 ###############################################################################
 
-printf "Cleanup ... "
+printf "Cleanup\n"
 rm -f $variants_vcf.happy.extended.csv
 rm -f $variants_vcf.happy.metrics.json
 rm -f $variants_vcf.happy.roc.*
 rm -f $variants_vcf.happy.vcf*
-printf "OK\n";
+printf "Done\n";
 
