@@ -31,10 +31,12 @@ if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; 
 ###############################################################################
 
 printf "Compressing quality values with p=$p\n"
-$prblock_compress $input_sam -q 1 -m 1 -l $p
+cmd="$prblock_compress $input_sam -q 1 -m 1 -l $p"
+$time -v -o $input_sam.$pblock_string.enc.time $cmd &> $input_sam.$pblock_string.enc.log
 
 printf "Decompressing quality values\n"
-$prblock_decompress $input_sam.cqual
+cmd="$prblock_decompress $input_sam.cqual"
+$time -v -o $input_sam.$pblock_string.dec.time $cmd &> $input_sam.$pblock_string.dec.log
 
 mv $input_sam.cqual $input_sam.qual.$pblock_string
 mv $input_sam.cqual.qual $input_sam.qual.$pblock_string.qual
