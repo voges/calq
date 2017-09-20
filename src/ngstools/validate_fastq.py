@@ -40,7 +40,7 @@ def print_summary():
     global warning_string
     global record_cnt
     global line_cnt
-    print "Found {} error(s) and {} warning(s):".format(error_cnt, warning_cnt)
+    print "Found {} error(s) and {} warning(s)".format(error_cnt, warning_cnt)
     if len(error_string) != 0:
         print error_string,
     if len(warning_string) != 0:

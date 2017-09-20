@@ -4,7 +4,7 @@ import sys
 
 # Usage
 if len(sys.argv) != 2:
-    sys.exit("Usage: python {} file.[fastq|fq]".format(sys.argv[0]))
+    sys.exit("Usage: python {} file.[fastq|fq] 1>clipped.[fastq|fq]".format(sys.argv[0]))
 
 # Get FASTQ file
 fastq_file_name = sys.argv[1]
@@ -61,7 +61,7 @@ while 1:
         if ord(q) > 33+41:
             q = chr(33+41)
             qual_decrease_cnt += 1
-            sys.stdout.write(q)
+        sys.stdout.write(q)
 
     sys.stdout.write("\n")
 

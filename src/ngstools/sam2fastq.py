@@ -4,7 +4,7 @@ import sys
 
 # Usage
 if len(sys.argv) != 2:
-    sys.exit("Usage: python {} file.sam".format(sys.argv[0]))
+    sys.exit("Usage: python {} file.sam 1>file.fastq".format(sys.argv[0]))
 
 # Get SAM file
 sam_file_name = sys.argv[1]
