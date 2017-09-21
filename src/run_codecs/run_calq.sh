@@ -22,8 +22,8 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 ###############################################################################
 
 # Binaries
-calq="/project/dna/install/calq-616e792/calq"
-calq_string="calq-616e792"
+calq="/project/dna/install/calq-0b74e3d/calq"
+calq_string="calq-0b74e3d"
 python="/usr/bin/python"
 time="/usr/bin/time"
 
