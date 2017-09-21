@@ -58,7 +58,7 @@ else
         exit -1
     fi
 fi
-rm -f $root.bowtie2_idx*
+#rm -f $root.bowtie2_idx*
 
 ###############################################################################
 #                             Sorting & indexing                              #
@@ -66,11 +66,9 @@ rm -f $root.bowtie2_idx*
 
 # Convert SAM to BAM
 $samtools view -@ $num_threads -bh $root.aln_bowtie2.sam > $root.aln_bowtie2.bam
-#rm -f $root.aln_bowtie2.sam
 
 # Sort and index BAM file
 $samtools sort -@ $num_threads -O bam $root.aln_bowtie2.bam > $root.aln_bowtie2.sorted.bam
-#rm -f $root.aln_bowtie2.bam
 $samtools index $root.aln_bowtie2.sorted.bam
 
 ###############################################################################
@@ -79,13 +77,9 @@ $samtools index $root.aln_bowtie2.sorted.bam
 
 # Mark duplicates in the BAM file
 $java -jar $picard_jar MarkDuplicates I=$root.aln_bowtie2.sorted.bam O=$root.aln_bowtie2.sorted.dupmark.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
-#rm -f $root.dedup_metrics.txt
-#rm -f $root.aln_bowtie2.sorted.bam
-#rm -f $root.aln_bowtie2.sorted.bam.bai
 
 # Label the BAM headers and index the resulting file
 $java -jar $picard_jar AddOrReplaceReadGroups I=$root.aln_bowtie2.sorted.dupmark.bam O=$root.aln_bowtie2.sorted.dupmark.rg.bam RGID=1 RGLB=Library RGPL=$platform RGPU=PlatformUnit RGSM=$root
-#rm -f $root.aln_bowtie2.sorted.dupmark.bam
 $samtools index $root.aln_bowtie2.sorted.dupmark.rg.bam
 
 ###############################################################################
@@ -94,9 +88,6 @@ $samtools index $root.aln_bowtie2.sorted.dupmark.rg.bam
 
 $java -jar $GenomeAnalysisTK_jar -T RealignerTargetCreator -nt $num_threads -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.bam --known $mills_vcf -o $root.realigner_target.intervals
 $java -jar $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
-#rm -f $root.realigner_target.intervals
-#rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam
-#rm -f $root.aln_bowtie2.sorted.dupmark.rg.bam.bai
 
 ###############################################################################
 #                      Base quality score recalibration                       #
@@ -104,7 +95,4 @@ $java -jar $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_fasta -I $root.aln_bo
 
 $java -jar $GenomeAnalysisTK_jar -T BaseRecalibrator -nct $num_threads -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -knownSites $dbsnps_vcf -knownSites $mills_vcf -knownSites $indels_vcf -o $root.bqsr.table
 $java -jar $GenomeAnalysisTK_jar -T PrintReads -nct $num_threads -R $ref_fasta -I $root.aln_bowtie2.sorted.dupmark.rg.realn.bam -BQSR $root.bqsr.table -o $root.aln_bowtie2.sorted.dupmark.rg.realn.recal.bam
-#rm -f $root.bqsr.table
-#rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bam
-#rm -f $root.aln_bowtie2.sorted.dupmark.rg.realn.bai
 

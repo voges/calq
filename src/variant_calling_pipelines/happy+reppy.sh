@@ -54,10 +54,10 @@ if [ ! -f $rep_py ]; then printf "Error: Python script $rep_py is not a regular 
 #                 Report results with hap.py and rep.py                       #
 ###############################################################################
 
-printf "[1/2] Running hap.py ... "
+printf "[1/2] Running hap.py\n"
 $python $hap_py --threads $num_threads --verbose $golden_vcf_gz $variants_vcf -f $golden_bed -o $variants_vcf.happy -r $ref_fasta --roc VQLSOD &>>$log_txt
 
-printf "[2/2] Running rep.py ... "
+printf "[2/2] Running rep.py\n"
 rm -f "$variants_vcf".happy.rep.tsv
 printf "method\tcomparisonmethod\tfiles\n" >> "$variants_vcf".happy.rep.tsv
 printf "$variants_vcf\t$golden_vcf_gz\t" >> "$variants_vcf".happy.rep.tsv

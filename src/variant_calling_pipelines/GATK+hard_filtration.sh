@@ -65,11 +65,11 @@ samtools="/project/dna/install/samtools-1.3/bin/samtools"
 GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
 picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
 
-if [ ! -x $bowtie2 ]; then printf "did not find $bowtie2\n"; exit -1; fi
-if [ ! -x $java ]; then printf "did not find $java\n"; exit -1; fi
-if [ ! -x $samtools ]; then printf "did not find $samtools\n"; exit -1; fi
-if [ ! -f $GenomeAnalysisTK_jar ]; then printf "did not find $GenomeAnalysisTK_jar\n"; exit -1; fi
-if [ ! -f $picard_jar ]; then printf "did not find $picard_jar\n"; exit -1; fi
+if [ ! -x $bowtie2 ]; then printf "Error: Binary file $bowtie2 is not executable.\n"; exit -1; fi
+if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
+if [ ! -x $samtools ]; then printf "Error: Binary file $samtools is not executable.\n"; exit -1; fi
+if [ ! -f $GenomeAnalysisTK_jar ]; then printf "Error: JAR file $GenomeAnalysisTK_jar is not a regular file.\n"; exit -1; fi
+if [ ! -f $picard_jar ]; then printf "Error: JAR file $picard_jar is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
 #                         Variant calling with GATK                           #

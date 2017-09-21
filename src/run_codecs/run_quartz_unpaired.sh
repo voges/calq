@@ -16,6 +16,7 @@ if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is n
 ###############################################################################
 
 # Binaries
+bzip2="/usr/bin/bzip2"
 python="/usr/bin/python"
 quartz="/project/dna/install/quartz-0.2.2/quartz"
 quartz_string="quartz-0.2.2"
@@ -25,6 +26,7 @@ time="/usr/bin/time"
 # Python scripts
 xtract_part_fastq_py="/home/voges/git/calq/src/ngstools/xtract_part_fastq.py"
 
+if [ ! -x $bzip2 ]; then printf "Error: Binary file $bzip2 is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
 if [ ! -x $quartz ]; then printf "Error: Binary file $quartz is not executable.\n"; exit -1; fi
 if [ ! -f $quartz_dictionary ]; then printf "Error: File $quartz_dictionary is not a regular file.\n"; exit -1; fi
@@ -40,12 +42,11 @@ cmd="$quartz $quartz_dictionary "$quartz_string" 8 0 $input_fastq"
 $time -v -o $input_fastq.$quartz_string.time $cmd &> $input_fastq.$quartz_string.log
 mv $input_fastq.filtered_$quartz_string $input_fastq.$quartz_string.fastq
 
-printf "Compressing Quartz'd quality values\n"
+printf "Extracting Quartz'd quality values\n"
 $python $xtract_part_fastq_py $input_fastq.$quartz_string.fastq 3 1> $input_fastq.$quartz_string.fastq.qual
-bzip2 $input_fastq.$quartz_string.fastq.qual
-printf "Compressed quality values size: " >> $input_fastq.$quartz_string.log
-wc -c $input_fastq.$quartz_string.fastq.qual.bz2 >> $input_fastq.$quartz_string.log
-printf "\n" >> $input_fastq.$quartz_string.log
+
+printf "Compressing Quartz'd quality values\n"
+$bzip2 $input_fastq.$quartz_string.fastq.qual
 
 ###############################################################################
 #                                   Cleanup                                   #

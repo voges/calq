@@ -24,7 +24,7 @@ root=$(echo $input_fastq | sed 's/\.[^.]*$//') # strip .fastq
 ###############################################################################
 
 # GATK bundle
-gatk_bundle_path="/data/voges/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/phys/intern2/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
@@ -43,7 +43,7 @@ GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
 picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
 
 # Reference indexing
-if [ ! -e "${ref_fasta}.fai" ]; then
+if [ ! -f "${ref_fasta}.fai" ]; then
     $samtools faidx $ref_fasta
 fi
 
@@ -59,16 +59,12 @@ $bwa mem -t $num_threads -M $ref_fasta $input_fastq > $root.aln_bwa.sam
 
 # Sort SAM file and convert to BAM
 $java -jar $picard_jar SortSam I=$root.aln_bwa.sam O=$root.aln_bwa.sorted.bam SORT_ORDER=coordinate
-rm -f $root.aln_bwa.sam
 
 # Mark duplicates in the BAM file
 $java -jar $picard_jar MarkDuplicates I=$root.aln_bwa.sorted.bam O=$root.aln_bwa.sorted.dupmark.bam M=$root.dedup_metrics.txt ASSUME_SORTED=true
-rm -f $root.dedup_metrics.txt
-rm -f $root.aln_bwa.sorted.bam
 
 # Add read group name
 $java -jar $picard_jar AddOrReplaceReadGroups I=$root.aln_bwa.sorted.dupmark.bam O=$root.aln_bwa.sorted.dupmark.rg.bam RGID=1 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=$sample
-rm -f $root.aln_bwa.sorted.dupmark.bam
 
 # Index the BAM file
 $java -jar $picard_jar BuildBamIndex I=$root.aln_bwa.sorted.dupmark.rg.bam
@@ -79,8 +75,6 @@ $java -jar $picard_jar BuildBamIndex I=$root.aln_bwa.sorted.dupmark.rg.bam
 
 #$java -jar $GenomeAnalysisTK_jar -nct $num_threads -T baseRecalibrator -R $ref_fasta -I $root.aln_bwa.sorted.dupmark.rg.bam -knownSites $dbsnps_vcf -knownSites $mills_vcf -knownSites $indels_vcf -o $root.bqsr.table
 #$java -jar $GenomeAnalysisTK_jar -nct $num_threads -T PrintReads -R $ref_fasta -I $root.aln_bwa.sorted.dupmark.rg.bam -BQSR $root.bqsr.table -o $root.aln_bwa.sorted.dupmark.rg.recal.bam
-#rm -f $root.bqsr.table
-#rm -f $root.aln_bwa.sorted.dupmark.rg.bam
 
 ###############################################################################
 #                      Call variants using Haplotype Caller                   #
@@ -107,14 +101,8 @@ filterLevel="99.0"
 # Argument -tranche is MPEG's theta
 $java -jar $GenomeAnalysisTK_jar -R $ref_fasta -T VariantRecalibrator -input $root.raw_variants.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.snps.recal -tranchesFile $root.snps.tranches -rscriptFile $root.snps.r
 $java -jar $GenomeAnalysisTK_jar -R $ref_fasta -T ApplyRecalibration -input $root.raw_variants.vcf -mode SNP -recalFile $root.snps.recal -tranchesFile $root.snps.tranches --ts_filter_level $filterLevel -o $root.recalibrated_snps+raw_indels.vcf
-rm -f $root.snps.recal
-rm -f $root.snps.tranches
-rm -f $root.snps.r
 
 # Argument -tranche is MPEG's theta
 $java -jar $GenomeAnalysisTK_jar -R $ref_fasta -T VariantRecalibrator -input $root.recalibrated_snps+raw_indels.vcf -resource:$resourceIndels $recalParamsIndels -mode INDEL -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $root.indels.recal -tranchesFile $root.indels.tranches -rscriptFile $root.indels.r
 $java -jar $GenomeAnalysisTK_jar -R $ref_fasta -T ApplyRecalibration -input $root.recalibrated_snps+raw_indels.vcf -mode INDEL -recalFile $root.indels.recal -tranchesFile $root.indels.tranches --ts_filter_level $filterLevel -o $root.recalibrated_variants.vcf
-rm -f $root.indels.recal
-rm -f $root.indels.tranches
-rm -f $root.indels.r
 
