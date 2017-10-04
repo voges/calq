@@ -4,12 +4,16 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 2 ]; then printf "Usage: $0 input_sam T\n"; exit -1; fi
+if [ "$#" -ne 4 ]; then printf "Usage: $0 input_sam qual_type polyploidy block_size\n"; exit -1; fi
 
 input_sam=$1
 printf "Input SAM file: $input_sam\n"
-T=$2
-printf "T: $T\n"
+qual_type=$2
+printf "Quality value type: $qual_type\n"
+polyploidy=$3
+printf "Polyploidy: $polyploidy\n"
+block_size=$4
+printf "Block size: $block_size\n"
 
 if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a regular file.\n"; exit -1; fi
 
@@ -18,49 +22,47 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 ###############################################################################
 
 # Binaries
+calq="/project/dna/install/calq-d3965e2/calq"
+calq_string="calq-d3965e2"
 python="/usr/bin/python"
-qvz2="/project/dna/install/qvz2-d5383c6/qvz2"
-qvz2_string="qvz2-d5383c6"
 samtools="/project/dna/install/samtools-1.3/bin/samtools"
 time="/usr/bin/time"
 
 # Python scripts
 replace_qual_sam_py="/home/voges/git/calq/src/ngstools/replace_qual_sam.py"
-xtract_field_sam_py="/home/voges/git/calq/src/ngstools/xtract_field_sam.py"
 
+if [ ! -x $calq ]; then printf "Error: Binary file $calq is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
-if [ ! -x $qvz2 ]; then printf "Error: Binary file $qvz2 is not executable.\n"; exit -1; fi
+if [ ! -x $samtools ]; then printf "Error: Binary file $samtools is not executable.\n"; exit -1; fi
 if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; exit -1; fi
 if [ ! -f $replace_qual_sam_py ]; then printf "Error: Python script $replace_qual_sam_py is not a regular file.\n"; exit -1; fi
-if [ ! -x $samtools ]; then printf "Error: Binary file $samtools is not executable.\n"; exit -1; fi
-if [ ! -f $xtract_field_sam_py ]; then printf "Error: Python script $xtract_field_sam_py is not a regular file.\n"; exit -1; fi
 
 ###############################################################################
-#                                  Compress                                   #
+#                          Compress and decompress                            #
 ###############################################################################
 
-printf "Extracting quality values from SAM file\n"
-$python $xtract_field_sam_py $input_sam 10 1> $input_sam.qual
+printf "Compressing with CALQ\n"
+cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string"
+$time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
 
-printf "Running QVZ2\n"
-cmd="$qvz2 -t $T -v -u $input_sam.$qvz2_string-t$T.qual $input_sam.qual $input_sam.$qvz2_string-t$T"
-$time -v -o $input_sam.$qvz2_string-t$T.time $cmd &> $input_sam.$qvz2_string-t$T.log
-wc -c $input_sam.$qvz2_string-t$T &>> $input_sam.$qvz2_string-t$T.log
+printf "Decompressing with CALQ\n"
+cmd="$calq -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
+$time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log
 
-printf "Constructing new SAM file with QVZ2'd quality values\n"
-$python $replace_qual_sam_py $input_sam $input_sam.$qvz2_string-t$T.qual 1>$input_sam.$qvz2_string-t$T.sam
+printf "Constructing SAM file with reconstructed quality values\n"
+$python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual 1> $input_sam.$calq_string.sam
 
 printf "SAM-to-BAM conversion\n"
-$samtools view -bh $input_sam.$qvz2_string-t$T.sam > $input_sam.$qvz2_string-t$T.bam
+$samtools view -bh $input_sam.$calq_string.sam > $input_sam.$calq_string.bam
 
 printf "BAM index creation\n"
-$samtools index -b $input_sam.$qvz2_string-t$T.bam $input_sam.$qvz2_string-t$T.bai
+$samtools index -b $input_sam.$calq_string.bam $input_sam.$calq_string.bai
 
 ###############################################################################
 #                                   Cleanup                                   #
 ###############################################################################
 
-#printf "Cleanup ... "
+#printf "Cleanup\n"
 #
-printf "OK\n";
+printf "Done\n"
 

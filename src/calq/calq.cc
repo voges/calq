@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
         // TCLAP arguments (only decompression)
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress", cmd, false);
-        TCLAP::ValueArg<std::string> sideInformationFileNameArg("s", "sideInformationFilName", "Side information file name", false, "", "string", cmd);
+        TCLAP::ValueArg<std::string> sideInformationFileNameArg("s", "sideInformationFileName", "Side information file name", false, "", "string", cmd);
 
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);

@@ -19,14 +19,22 @@ input_fastq=$2
 sample=$3
 root=$(echo $input_fastq | sed 's/\.[^.]*$//') # strip .fastq
 
+if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is not a regular file.\n"; exit -1; fi
+
 ###############################################################################
-#                          Data and programs                                  #
+#                                GATK bundle                                  #
 ###############################################################################
 
-# GATK bundle
 gatk_bundle_path="/phys/intern2/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 mills_vcf="$gatk_bundle_path/Mills_and_1000G_gold_standard.indels.b37.vcf"
+
+if [ ! -f $ref_fasta ]; then printf "Error: File $ref_fasta is not a regular file.\n"; exit -1; fi
+if [ ! -f $indels_vcf ]; then printf "Error: File $indels_vcf is not a regular file.\n"; exit -1; fi
+
+###############################################################################
+#                                Executables                                  #
+###############################################################################
 
 # Binaries
 bwa="/project/dna/install/bwa-0.7.13/bwa"
@@ -35,17 +43,24 @@ samtools="/project/dna/install/samtools-1.3/bin/samtools"
 tabix="/project/dna/install/project/dna/install/htslib-1.3/bin/tabix"
 
 # JAR files
-picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
 GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
+picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
+
+if [ ! -x $bwa ]; then printf "Error: Binary file $bwa is not executable.\n"; exit -1; fi
+if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
+if [ ! -x $samtools ]; then printf "Error: Binary file $samtools is not executable.\n"; exit -1; fi
+if [ ! -x $tabix ]; then printf "Error: Binary file $tabix is not executable.\n"; exit -1; fi
+if [ ! -f $GenomeAnalysisTK_jar ]; then printf "Error: JAR file $GenomeAnalysisTK_jar is not a regular file.\n"; exit -1; fi
+if [ ! -f $picard_jar ]; then printf "Error: JAR file $picard_jar is not a regular file.\n"; exit -1; fi
+
+###############################################################################
+#                                  Mapping                                    #
+###############################################################################
 
 # Reference indexing
 if [ ! -f "${ref_fasta}.fai" ]; then
     $samtools faidx $ref_fasta
 fi
-
-###############################################################################
-#                                  Mapping                                    #
-###############################################################################
 
 # Generate BWA index
 $bwa index -a bwtsw $ref_fasta
@@ -66,7 +81,7 @@ $java -jar $picard_jar AddOrReplaceReadGroups I=$root.aln_bwa.fixmate.sorted.bam
 #                                 Improvement                                 #
 ###############################################################################
 
-# Reduce the number of miscalls of INDELs by realigning
+# Reduce the number of miscalls of indels by realigning
 $java -Xmx2g -jar $GenomeAnalysisTK_jar -T RealignerTargetCreator -R $ref_fasta -I $root.aln_bwa.fixmate.sorted.rg.bam -o $root.realigner_target.intervals --known $mills_vcf
 $java -Xmx4g -jar $GenomeAnalysisTK_jar -T IndelRealigner -R $ref_fasta -I $root.aln_bwa.fixmate.sorted.rg.bam -targetIntervals $root.realigner_target.intervals -o $root.aln_bwa.fixmate.sorted.rg.realn.bam
 

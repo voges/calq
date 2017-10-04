@@ -25,6 +25,7 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 calq="/project/dna/install/calq-0b74e3d/calq"
 calq_string="calq-0b74e3d"
 python="/usr/bin/python"
+samtools="/project/dna/install/samtools-1.3/bin/samtools"
 time="/usr/bin/time"
 
 # Python scripts
@@ -32,6 +33,7 @@ replace_qual_sam_py="/home/voges/git/calq/src/ngstools/replace_qual_sam.py"
 
 if [ ! -x $calq ]; then printf "Error: Binary file $calq is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi
+if [ ! -x $samtools ]; then printf "Error: Binary file $samtools is not executable.\n"; exit -1; fi
 if [ ! -x $time ]; then printf "Error: Binary file $time is not executable.\n"; exit -1; fi
 if [ ! -f $replace_qual_sam_py ]; then printf "Error: Python script $replace_qual_sam_py is not a regular file.\n"; exit -1; fi
 
@@ -49,6 +51,12 @@ $time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec
 
 printf "Constructing SAM file with reconstructed quality values\n"
 $python $replace_qual_sam_py $input_sam $input_sam.$calq_string.qual 1> $input_sam.$calq_string.sam
+
+printf "SAM-to-BAM conversion\n"
+$samtools view -bh $input_sam.$calq_string.sam > $input_sam.$calq_string.bam
+
+printf "BAM index creation\n"
+$samtools index -b $input_sam.$calq_string.bam $input_sam.$calq_string.bai
 
 ###############################################################################
 #                                   Cleanup                                   #

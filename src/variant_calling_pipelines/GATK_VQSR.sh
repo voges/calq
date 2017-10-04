@@ -12,20 +12,20 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 4 ]; then
-    printf "Usage: $0 num_threads log_txt input_bam chromosome\n"
+if [ "$#" -ne 3 ]; then
+    printf "Usage: $0 num_threads input_bam chromosome\n"
     exit -1
 fi
 
 num_threads=$1
 printf "Number of threads: $num_threads\n"
-log_txt=$2
-printf "Log file: $log_txt\n"
-input_bam=$3
+input_bam=$2
 printf "Input BAM file: $input_bam\n"
 input_bai="$(printf $input_bam | sed 's/\.[^.]*$//')".bai
 printf "Corresponding BAM index file: $input_bai\n"
-chromosome=$4
+log_txt="$input.bam.GATK_VQSR.log"
+printf "Log file: $log_txt\n"
+chromosome=$3
 printf "Chromosome: $chromosome\n"
 
 if [ -f $log_txt ]; then printf "Error: File $log_txt file already exists.\n"; exit -1; fi
@@ -36,7 +36,7 @@ if [ ! -f $input_bai ]; then printf "Error: BAM index file $input_bai is not a r
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/intern2/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/phys/ssd/voges/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"

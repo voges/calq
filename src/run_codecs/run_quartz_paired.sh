@@ -21,7 +21,7 @@ if [ ! -f $input_2_fastq ]; then printf "Error Input FASTQ file $input_2_fastq i
 ###############################################################################
 
 # Binaries
-bzip2="/usr/bin/bzip2"
+bzip2="/bin/bzip2"
 python="/usr/bin/python"
 quartz="/project/dna/install/quartz-0.2.2/quartz"
 quartz_string="quartz-0.2.2"

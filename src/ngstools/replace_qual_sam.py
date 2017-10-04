@@ -15,7 +15,7 @@ sam_file = open(sam_file_name, 'r')
 # Get new QUAL file
 new_qual_file_name = sys.argv[2]
 if not new_qual_file_name.endswith(".qual"):
-    sys.exit("QUAL file name must end with '.qul'")
+    sys.exit("QUAL file name must end with '.qual'")
 new_qual_file = open(new_qual_file_name, 'r')
 
 while 1:
