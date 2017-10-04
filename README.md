@@ -70,9 +70,9 @@ Thus, the above command is equivalent to the following command.
 
 Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py``. This and other supplementary scripts can be found in the folder ``src/ngstools``.
 
-    replace_qual_sam.py file.sam file.sam.cq.qual
+    replace_qual_sam.py file.sam file.sam.cq.qual 1> file.sam.cq.sam
 
-This produces a new SAM file ``file.sam.new_qual.sam`` containing the reconstructed quality values.
+This produces a new SAM file ``file.sam.cq.sam`` containing the reconstructed quality values.
 
 ## Who do I talk to?
 
