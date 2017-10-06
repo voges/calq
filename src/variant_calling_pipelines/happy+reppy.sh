@@ -31,7 +31,7 @@ printf "Golden BED file: $golden_bed\n"
 
 if [ -f $log_txt ]; then printf "Error: File $log_txt file already exists.\n"; exit -1; fi
 if [ ! -f $variants_vcf ]; then printf "Error: Input VCF file $variants_vcf is not a regular file.\n"; exit -1; fi
-if [ ! -f $ref_fasta ]; then print "Error: Reference FASTA file $ref_fasta is not a regular file.\n"; exit -1; fi
+if [ ! -f $ref_fasta ]; then printf "Error: Reference FASTA file $ref_fasta is not a regular file.\n"; exit -1; fi
 if [ ! -f $golden_vcf_gz ]; then printf "Error: Golden VCF file (gzipped) $golden_vcf_gz is not a regular file.\n"; exit -1; fi
 if [ ! -f $golden_bed ]; then printf "Error: Golden BED file $golden_bed is not a regular file.\n"; exit -1; fi
 
