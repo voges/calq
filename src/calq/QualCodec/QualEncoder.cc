@@ -137,16 +137,16 @@ size_t QualEncoder::writeBlock(CQFile *cqFile) {
     compressedMappedQualSize_ += cqFile->writeUint32((uint32_t)qualityValueOffset_);
 
     // Write inverse quantization LUTs
-    compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
+    //compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
 
     // Write unmapped quality values
     unsigned char *uqv = (unsigned char *)unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
     if (uqvSize > 0) {
-        compressedUnmappedQualSize_ += cqFile->writeUint8(0x01);
-        compressedUnmappedQualSize_ += cqFile->writeQualBlock(uqv, uqvSize);
+        //compressedUnmappedQualSize_ += cqFile->writeUint8(0x01);
+        //compressedUnmappedQualSize_ += cqFile->writeQualBlock(uqv, uqvSize);
     } else {
-        compressedUnmappedQualSize_ += cqFile->writeUint8(0x00);
+        //compressedUnmappedQualSize_ += cqFile->writeUint8(0x00);
     }
 
     // Write mapped quantizer indices
@@ -158,7 +158,8 @@ size_t QualEncoder::writeBlock(CQFile *cqFile) {
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
         compressedMappedQualSize_ += cqFile->writeUint8(0x01);
-        compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
+        //compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
+        compressedMappedQualSize_ += cqFile->write(mqi, mqiSize);
     } else {
         compressedMappedQualSize_ += cqFile->writeUint8(0x00);
     }
@@ -174,7 +175,8 @@ size_t QualEncoder::writeBlock(CQFile *cqFile) {
         size_t mqviSize = mqviString.length();
         if (mqviSize > 0) {
             compressedMappedQualSize_ += cqFile->writeUint8(0x01);
-            compressedMappedQualSize_ += cqFile->writeQualBlock(mqvi, mqviSize);
+            //compressedMappedQualSize_ += cqFile->writeQualBlock(mqvi, mqviSize);
+            compressedMappedQualSize_ += cqFile->write(mqvi, mqviSize);
         } else {
             compressedMappedQualSize_ += cqFile->writeUint8(0x00);
         }

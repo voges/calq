@@ -82,7 +82,7 @@ void CalqEncoder::encode(void) {
 
     // Write CQ file header
     CALQ_LOG("Writing CQ file header");
-    cqFile_.writeHeader(blockSize_);
+    //cqFile_.writeHeader(blockSize_);
 
     while (samFile_.readBlock(blockSize_) != 0) {
 //         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
