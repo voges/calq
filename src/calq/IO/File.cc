@@ -21,7 +21,7 @@ File::File(void)
       nrReadBytes_(0),
       nrWrittenBytes_(0) {}
 
-File::File(const std::string &path, const Mode &mode)
+File::File(const std::string &path, const Mode mode)
     : fp_(NULL),
       fsize_(0),
       isOpen_(false),
@@ -39,7 +39,7 @@ File::~File(void) {
     close();
 }
 
-void File::open(const std::string &path, const Mode &mode) {
+void File::open(const std::string &path, const Mode mode) {
     if (path.empty() == true) {
         throwErrorException("path is empty");
     }
@@ -89,7 +89,7 @@ void File::close(void) {
     }
 }
 
-void File::advance(const size_t &offset) {
+void File::advance(const size_t offset) {
     int ret = fseek(fp_, (long int)offset, SEEK_CUR);
     if (ret != 0) {
         throwErrorException("fseek failed");
@@ -105,7 +105,7 @@ void * File::handle(void) const {
     return fp_;
 }
 
-void File::seek(const size_t &pos) {
+void File::seek(const size_t pos) {
     if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
     }
@@ -153,7 +153,7 @@ bool File::isWritable(void) const {
     return false;
 }
 
-size_t File::read(void *buffer, const size_t &size) {
+size_t File::read(void *buffer, const size_t size) {
     if (buffer == NULL) {
         throwErrorException("buffer is NULL");
     }
@@ -168,7 +168,7 @@ size_t File::read(void *buffer, const size_t &size) {
     return ret;
 }
 
-size_t File::write(void *buffer, const size_t &size) {
+size_t File::write(void *buffer, const size_t size) {
     if (buffer == NULL) {
         throwErrorException("buffer is NULL");
     }
@@ -208,7 +208,7 @@ size_t File::readUint16(uint16_t *word) {
         free(buffer);
         throwErrorException("read failed");
     } else {
-        *word = (uint16_t)buffer[2] <<  8 | (uint16_t)buffer[3];
+        *word = (uint16_t)buffer[0] <<  8 | (uint16_t)buffer[1];
         free(buffer);
     }
 
@@ -263,7 +263,7 @@ size_t File::readUint64(uint64_t *qword) {
     return ret;
 }
 
-size_t File::writeByte(const unsigned char &byte) {
+size_t File::writeByte(const unsigned char byte) {
     size_t ret = fwrite(&byte, 1, 1, fp_);
     if (ret != sizeof(unsigned char)) {
         throwErrorException("fwrite failed");
@@ -272,18 +272,18 @@ size_t File::writeByte(const unsigned char &byte) {
     return ret;
 }
 
-size_t File::writeUint8(const uint8_t &byte) {
+size_t File::writeUint8(const uint8_t byte) {
     return writeByte(byte);
 }
 
-size_t File::writeUint16(const uint16_t &word) {
+size_t File::writeUint16(const uint16_t word) {
     size_t ret = 0;
     ret += writeByte((unsigned char)(word >> 8) & 0xFF);
     ret += writeByte((unsigned char)(word)      & 0xFF);
     return ret;
 }
 
-size_t File::writeUint32(const uint32_t &dword) {
+size_t File::writeUint32(const uint32_t dword) {
     size_t ret = 0;
     ret += writeByte((unsigned char)(dword >> 24) & 0xFF);
     ret += writeByte((unsigned char)(dword >> 16) & 0xFF);
@@ -292,7 +292,7 @@ size_t File::writeUint32(const uint32_t &dword) {
     return ret;
 }
 
-size_t File::writeUint64(const uint64_t &qword) {
+size_t File::writeUint64(const uint64_t qword) {
     size_t ret = 0;
     ret += writeByte((unsigned char)(qword >> 56) & 0xFF);
     ret += writeByte((unsigned char)(qword >> 48) & 0xFF);
