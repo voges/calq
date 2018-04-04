@@ -25,7 +25,7 @@ if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is n
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/intern2/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/phys/intern2/muenteferi/GATK"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"

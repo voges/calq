@@ -1,6 +1,6 @@
 #!/bin/bash
 
-happy_reppy_sh="/home/voges/git/calq/src/variant_calling_pipelines/happy+reppy.sh"
+happy_reppy_sh="/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/happy+reppy.sh"
 num_threads=4
 variants_vcf=$1
 log_txt="$variants_vcf.happy+reppy.log"

@@ -16,7 +16,7 @@ if [ ! -f $input_fastq ]; then printf "Error: Input FASTQ file $input_fastq is n
 ###############################################################################
 
 # Binaries
-bzip2="/bin/bzip2"
+bzip2="/usr/bin/bzip2"
 python="/usr/bin/python"
 quartz="/project/dna/install/quartz-0.2.2/quartz"
 quartz_string="quartz-0.2.2"
@@ -24,7 +24,7 @@ quartz_dictionary="/project/dna/resources/quartz_dictionary/dec200.bin.sorted"
 time="/usr/bin/time"
 
 # Python scripts
-xtract_part_fastq_py="/home/voges/git/calq/src/ngstools/xtract_part_fastq.py"
+xtract_part_fastq_py="/home/muenteferi/Dokumente/calq/src/ngstools/xtract_part_fastq.py"
 
 if [ ! -x $bzip2 ]; then printf "Error: Binary file $bzip2 is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi

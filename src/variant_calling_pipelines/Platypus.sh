@@ -32,7 +32,7 @@ if [ ! -f $input_bai ]; then printf "Error: BAM index file $input_bai is not a r
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/ssd/voges/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/gidb/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 
 if [ ! -f $ref_fasta ]; then printf "Error: File $ref_fasta is not a regular file.\n"; exit -1; fi
@@ -48,7 +48,7 @@ python="/usr/bin/python"
 
 # JAR files
 GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
-Platypus_py="/project/dna/install/Platypus-0.8.1/Platypus.py"
+Platypus_py="/home/muenteferi/Dokumente/Platypus/bin/Platypus.py"
 
 if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi

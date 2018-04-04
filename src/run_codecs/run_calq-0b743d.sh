@@ -22,14 +22,14 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 ###############################################################################
 
 # Binaries
-calq="/project/dna/install/calq-0b74e3d/calq"
+calq="/home/muenteferi/Dokumente/calqBuild/calq"
 calq_string="calq-0b74e3d"
 python="/usr/bin/python"
 samtools="/project/dna/install/samtools-1.3/bin/samtools"
 time="/usr/bin/time"
 
 # Python scripts
-replace_qual_sam_py="/home/voges/git/calq/src/ngstools/replace_qual_sam.py"
+replace_qual_sam_py="/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
 
 if [ ! -x $calq ]; then printf "Error: Binary file $calq is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi

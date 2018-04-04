@@ -26,8 +26,9 @@ samtools="/project/dna/install/samtools-1.3/bin/samtools"
 time="/usr/bin/time"
 
 # Python scripts
-sam2fastq_py="/home/voges/git/calq/src/ngstools/sam2fastq.py"
-xtract_part_fastq_py="/home/voges/git/calq/src/ngstools/xtract_part_fastq.py"
+sam2fastq_py="/home/muenteferi/Dokumente/calq/src/ngstools/sam2fastq.py"
+xtract_part_fastq_py="/home/muenteferi/Dokumente/calq/src/ngstools/xtract_part_fastq.py"
+replace_qual_sam_py="/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
 
 if [ ! -x $dsrc ]; then printf "Error: Binary file $dsrc is not executable.\n"; exit -1; fi
 if [ ! -x $gzip ]; then printf "Error: Binary file $gzip is not executable.\n"; exit -1; fi
