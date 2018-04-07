@@ -22,7 +22,7 @@ bgzip="/project/dna/install/htslib-1.3/bin/bgzip"
 python="/usr/bin/python"
 
 # Python scripts
-xtract_part_fastq_py="/home/voges/git/calq/src/ngstools/xtract_part_fastq.py"
+xtract_part_fastq_py="/home/muenteferi/Dokumente/calq/src/ngstools/xtract_part_fastq.py"
 
 if [ ! -x $bgzip ]; then printf "Error: Binary file $bgzip is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi

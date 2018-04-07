@@ -48,7 +48,7 @@ python="/usr/bin/python"
 
 # JAR files
 GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
-Platypus_py="/home/muenteferi/Dokumente/Platypus/bin/Platypus.py"
+Platypus_py="/project/dna/install/Platypus-0.8.1/Platypus.py"
 
 if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
 if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\n"; exit -1; fi

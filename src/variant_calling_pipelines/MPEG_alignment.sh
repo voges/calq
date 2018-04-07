@@ -26,7 +26,7 @@ platform=$4 # ILLUMINA,SLX,SOLEXA,SOLID,454,LS454,COMPLETE,PACBIO,IONTORRENT,CAP
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/ssd/voges/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/gidb/MPEG/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
