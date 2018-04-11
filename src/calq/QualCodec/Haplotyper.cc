@@ -1,11 +1,13 @@
+#include "Haplotyper.h"
+
+static constexpr double SIGMA = 17.0;
+
 //Returns score, takes seq and qual pileup and position
-Haplotyper::Haplotyper(const std::function<double, std::string, std::string, size_t pos>& calcScore) : scoreCalc(calcScore){
-    double SIGMA = 17.0;
+Haplotyper::Haplotyper(const std::function<double(std::string, std::string, size_t pos)>& calcScore) : scoreCalc(calcScore), kernel(SIGMA){
     double THRESHOLD = 0.001;
-    GaussKernel kernel = GaussKernel(SIGMA);
-    size_t size = kernel.calqMinSize(THRESHOLD)
+    size_t size = this->kernel.calcMinSize(THRESHOLD);
  
-    buffer = FilterBuffer(kernel.calcValue, size);       
+    buffer = FilterBuffer([this](size_t pos, size_t size) -> double{return this->kernel.calcValue(pos,size);}, size);
 }
 
 size_t Haplotyper::getOffset() const {
@@ -13,6 +15,6 @@ size_t Haplotyper::getOffset() const {
 }
 
 double Haplotyper::insertData(const std::string& seqPile, const std::string& qualPile, size_t pos){
-    buffer.push(coreCalc(seqPile, qualPile, pos));
+    buffer.push(scoreCalc(seqPile, qualPile, pos));
     return buffer.filter();
 }

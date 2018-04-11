@@ -1,3 +1,4 @@
+#if 0
 /** @file calq.cc
  *  @brief This file contains the main function of CALQ.
  */
@@ -125,4 +126,13 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 }
+#else
+
+#include "QualCodec/HaplotyperTest.h"
+
+int main(int argc, char *argv[]) {
+    haplotyperTest();
+}
+
+#endif
 

@@ -1,3 +1,7 @@
+#include <vector>
+#include <stddef.h>
+#include <functional>
+
 class FilterBuffer {
 private:
     std::vector<double> kernel;
@@ -9,10 +13,10 @@ public:
     void push (double activityScore);
 
     //Calculate filter score at offset position
-    double filter const ();
+    double filter() const;
 
     //Initialize buffer and 
-    FilterBuffer(const std::function<double, size_t, size_t>& kernelBuilder, size_t kernelSize);
+    FilterBuffer(const std::function<double(size_t, size_t)>& kernelBuilder, size_t kernelSize);
 
     //Create dummy buffer
     FilterBuffer();
@@ -22,4 +26,4 @@ public:
 
     //DIstance between buffer center and borders
     size_t getOffset() const;
-}
+};
