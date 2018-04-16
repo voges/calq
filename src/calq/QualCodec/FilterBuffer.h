@@ -1,6 +1,11 @@
+#ifndef FILTERBUFFER_H
+#define FILTERBUFFER_H
+
 #include <vector>
 #include <stddef.h>
 #include <functional>
+
+#include "CircularBuffer.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -21,7 +26,7 @@ public:
     double calcValue(size_t pos, size_t size);
 
     //Calcutes how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
-    size_t calcMinSize(double threshold, size_t maximum = 128);
+    size_t calcMinSize(double threshold, size_t maximum = 101);
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -29,8 +34,7 @@ public:
 class FilterBuffer {
 private:
     std::vector<double> kernel;
-    std::vector<double> buffer;
-    size_t bufferPos; //Index pointer to oldest value
+    CircularBuffer<double> buffer;
 
 public:
     //New activity score in pipeline
@@ -53,3 +57,5 @@ public:
 };
 
 //----------------------------------------------------------------------------------------------------------------------
+
+#endif

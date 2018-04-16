@@ -28,28 +28,24 @@ size_t GaussKernel::calcMinSize(double threshold, size_t maximum){
 
 //New activity score in pipeline
 void FilterBuffer::push (double activityScore) {
-    buffer[bufferPos] = activityScore;
-    bufferPos = (bufferPos+1) % buffer.size();
+    buffer.push(activityScore);
 }
 
 //Calculate filter score at offset position
 double FilterBuffer::filter() const{
     double result = 0.0;
     for(size_t i=0;i<kernel.size();++i) {
-        size_t index = (i+ bufferPos) % buffer.size();
-        result += kernel[i] * buffer[index];
-
+        result += kernel[i] * buffer[i];
+ //       std::cout << kernel[i] << " " << buffer[i] << std::endl;
     }
     return result;
 }
 
 //Initialize buffer and 
-FilterBuffer::FilterBuffer(const std::function<double(size_t, size_t)>& kernelBuilder, size_t kernelSize){
+FilterBuffer::FilterBuffer(const std::function<double(size_t, size_t)>& kernelBuilder, size_t kernelSize) : buffer(kernelSize, 0.0){
     if(!(kernelSize % 2)) {
         throwErrorException("Kernel size must be an odd number");
     }
-    bufferPos = 0;
-    buffer.resize(kernelSize, 0.0);
     kernel.resize(kernelSize, 0.0);
 
     for(size_t i=0;i<kernel.size();++i){
@@ -57,8 +53,7 @@ FilterBuffer::FilterBuffer(const std::function<double(size_t, size_t)>& kernelBu
     }
 }
 
-FilterBuffer::FilterBuffer(){
-    bufferPos = 0;
+FilterBuffer::FilterBuffer() : buffer(1, 0.0){
 }
 
 size_t FilterBuffer::getSize() const{
@@ -66,5 +61,5 @@ size_t FilterBuffer::getSize() const{
 } 
 
 size_t FilterBuffer::getOffset() const{
-    return (buffer.size()-1)/2;
+    return (buffer.size()+1)/2;
 }

@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "Common/constants.h"
+
 namespace calq {
 
 class Genotyper {
@@ -24,6 +26,15 @@ class Genotyper {
                           const std::string &qualPileup);
     int computeQuantizerIndex(const std::string &seqPileup,
                               const std::string &qualPileup);
+
+#ifdef HAPLOTYPER
+    std::map<std::string, double>& getGenotypelikelihoods(const std::string &seqPileup,
+                                  const std::string &qualPileup) {
+        computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
+        return genotypeLikelihoods_;
+
+    }
+#endif
 
  private:
     void initLikelihoods(void);

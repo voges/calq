@@ -1,16 +1,22 @@
+#ifndef BASESPREADER_H
+#define BASESPREADER_H
+
 #include <stddef.h>
 #include <vector>
 
+#include "CircularBuffer.h"
+
 class BaseSpreader {
 private:
-    constexpr size_t MAX_PROPAGATION=50;
-    constexpr size_t MIN_HQ_SOFTCLIPS=7;
-    constexpr size_t HQ_SOFTCLIP_THRESHOLD=29;
     std::vector<std::pair<size_t, double>> forwardSpread;
+    CircularBuffer<double> buffer;
+    const size_t MAX_PROPAGATION;
+    const size_t MIN_HQ_SOFTCLIPS;
 public:
-    double push(double score, const std::string& cigar) {
+    double push(double score, size_t softclips);
+    size_t getOffset() const;
 
-    }
-
-
+    BaseSpreader(size_t max_prop, size_t min_hq_clips);
 };
+
+#endif

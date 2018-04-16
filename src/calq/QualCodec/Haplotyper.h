@@ -2,6 +2,8 @@
 #include <cmath>
 
 #include "FilterBuffer.h"
+#include "Genotyper.h"
+#include "BaseSpreader.h"
 
 class Haplotyper {
 private:
@@ -9,18 +11,22 @@ private:
     FilterBuffer buffer;
 
     GaussKernel kernel;
-    
-    //Function to calulate raw quality score from seqPile, qualPile, position
-    std::function<double(std::string, std::string, size_t pos)> scoreCalc;
+
+    BaseSpreader spreader;
+
+    calq::Genotyper genotyper;
+
+    const size_t SIGMA;
+
 
 public:
 
     //Init
-    Haplotyper(const std::function<double(std::string, std::string, size_t pos)>& calcScore);
+    Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation, size_t minHQSoftclip_streak, size_t gaussRadius);
 
     //Returns offset between activity scores' position and front
     size_t getOffset() const;
 
     //Pushes new activity score calculated using parameters and returns filtered acticityscore for (pos-offset)
-    double insertData(const std::string& seqPile, const std::string& qualPile, size_t pos);
+    double push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference);
 };
