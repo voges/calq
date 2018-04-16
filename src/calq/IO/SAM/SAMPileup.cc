@@ -9,8 +9,11 @@
 #include <stdio.h>
 
 namespace calq {
-
+#ifdef HAPLOTYPER
+SAMPileup::SAMPileup(void) : pos(0), qual(""), seq(""), hq_softcounter(0) {}
+#else
 SAMPileup::SAMPileup(void) : pos(0), qual(""), seq("") {}
+#endif
 
 SAMPileup::~SAMPileup(void) {}
 

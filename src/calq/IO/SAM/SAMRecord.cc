@@ -94,6 +94,12 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const {
             continue;
         }
 
+#ifdef HAPLOTYPER
+        size_t front_hq_ctr=0; //Score before clip
+        size_t back_hq_ctr=0;  //Score after clip
+        const char HQ_SOFTCLIP_THRESHOLD = 29 + 64;
+#endif
+
         switch (cigar[cigarIdx]) {
         case 'M':
         case '=':
@@ -105,8 +111,32 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const {
                 idx++; pileupIdx++;
             }
             break;
-        case 'I':
         case 'S':
+#ifdef HAPLOTYPER //Calculate number of high quality soft clips
+            for(int l=0;l<opLen;++l){
+                if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
+                    ++front_hq_ctr;
+                } else {
+                    break;
+                }
+
+            }
+
+            for(int l=opLen-1;l>=0;--l){
+                if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
+                    ++back_hq_ctr;
+                } else {
+                    break;
+                }
+
+            }
+
+            if(idx-1 > 0)
+                samPileupDeque_->pileups_[pileupIdx].hq_softcounter += front_hq_ctr;
+            if(idx+opLen < this->qual.size())
+                samPileupDeque_->pileups_[pileupIdx+1].hq_softcounter += back_hq_ctr;
+#endif
+        case 'I':
             idx += opLen;
             break;
         case 'D':

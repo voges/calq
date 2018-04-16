@@ -2,7 +2,6 @@
 #include <cmath>
 
 #include "FilterBuffer.h"
-#include "GaussKernel.h"
 
 class Haplotyper {
 private:

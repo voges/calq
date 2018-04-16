@@ -1,5 +1,4 @@
 #include "FilterBuffer.h"
-#include "GaussKernel.h"
 
 #include <iostream>
 

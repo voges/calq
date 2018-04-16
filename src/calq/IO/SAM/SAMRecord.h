@@ -13,6 +13,7 @@
 #include <string>
 
 #include "IO/SAM/SAMPileupDeque.h"
+#include "Common/constants.h"
 
 namespace calq {
 

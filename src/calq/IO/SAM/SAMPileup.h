@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "Common/constants.h"
+
 namespace calq {
 
 class SAMPileup {
@@ -25,6 +27,10 @@ class SAMPileup {
     uint32_t pos;  // 0-based position of this pileup
     std::string qual;
     std::string seq;
+
+#ifdef HAPLOTYPER
+    uint16_t hq_softcounter; //High quality softclips
+#endif
 };
 
 }  // namespace calq
