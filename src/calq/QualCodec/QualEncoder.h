@@ -25,6 +25,7 @@
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
 #include "QualCodec/Quantizers/Quantizer.h"
+#include "Haplotyper.h"
 
 namespace calq {
 
@@ -78,8 +79,14 @@ class QualEncoder {
     // Pileup
     SAMPileupDeque samPileupDeque_;
 
+#ifdef HAPLOTYPER
+    Haplotyper haplotyper_;
+#else
+
     // Genotyper
     Genotyper genotyper_;
+
+#endif
 
     // Quantizers
     std::map<int, Quantizer> quantizers_;

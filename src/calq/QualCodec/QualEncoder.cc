@@ -41,8 +41,11 @@ QualEncoder::QualEncoder(const int &polyploidy,
       mappedQualityValueIndices_(),
 
       samPileupDeque_(),
-
+#ifdef HAPLOTYPER
+      haplotyper(17, polyploidy, qualityValueOffset, NR_QUANTIZERS, 50, 7, 50),
+#else
       genotyper_(polyploidy, qualityValueOffset, NR_QUANTIZERS),
+#endif
 
       quantizers_(),
 
@@ -99,7 +102,10 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord) {
     samRecordDeque_.push_back(samRecord);
 
     while (samPileupDeque_.posMin() < samRecord.posMin) {
+#ifdef HAPLOTYPER
+#else
         int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
+#endif
         mappedQuantizerIndices_.push_back(k);
         samPileupDeque_.pop_front();
     }

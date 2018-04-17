@@ -18,6 +18,7 @@ private:
 
     const size_t SIGMA;
 
+    size_t nr_quantizers;
 
 public:
 
@@ -28,5 +29,6 @@ public:
     size_t getOffset() const;
 
     //Pushes new activity score calculated using parameters and returns filtered acticityscore for (pos-offset)
-    double push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference);
+    size_t push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference);
+
 };
