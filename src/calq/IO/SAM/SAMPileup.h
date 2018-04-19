@@ -28,6 +28,8 @@ class SAMPileup {
     std::string qual;
     std::string seq;
 
+    char ref;
+
 #ifdef HAPLOTYPER
     uint16_t hq_softcounter; //High quality softclips
 #endif

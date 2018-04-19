@@ -5,6 +5,7 @@
 // Copyright 2015-2017 Leibniz Universitaet Hannover
 
 #include "IO/SAM/SAMRecord.h"
+#include "IO/FASTA/FASTAFile.h"
 
 #include <string.h>
 
@@ -74,7 +75,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const {
+void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFile& f) const {
     if (samPileupDeque_->empty() == true) {
         throwErrorException("samPileupQueue is empty");
     }
@@ -94,11 +95,9 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const {
             continue;
         }
 
-#ifdef HAPLOTYPER
         size_t front_hq_ctr=0; //Score before clip
         size_t back_hq_ctr=0;  //Score after clip
         const char HQ_SOFTCLIP_THRESHOLD = 29 + 64;
-#endif
 
         switch (cigar[cigarIdx]) {
         case 'M':
@@ -108,11 +107,11 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const {
                 samPileupDeque_->pileups_[pileupIdx].pos = samPileupDeque_->posMin() + pileupIdx;
                 samPileupDeque_->pileups_[pileupIdx].seq += seq[idx];
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
+                samPileupDeque_->pileups_[pileupIdx].ref = f.references.at("20")[pileupIdx];
                 idx++; pileupIdx++;
             }
             break;
         case 'S':
-#ifdef HAPLOTYPER //Calculate number of high quality soft clips
             for(int l=0;l<opLen;++l){
                 if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
                     ++front_hq_ctr;
@@ -135,7 +134,6 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_) const {
                 samPileupDeque_->pileups_[pileupIdx].hq_softcounter += front_hq_ctr;
             if(idx+opLen < this->qual.size())
                 samPileupDeque_->pileups_[pileupIdx+1].hq_softcounter += back_hq_ctr;
-#endif
         case 'I':
             idx += opLen;
             break;

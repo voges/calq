@@ -1,5 +1,8 @@
 #include "Haplotyper.h"
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 //Returns score, takes seq and qual pileup and position
 Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation, size_t minHQSoftclip_streak, size_t gaussRadius)
@@ -15,12 +18,34 @@ size_t Haplotyper::getOffset() const {
 }
 
 size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference){
+    static CircularBuffer<std::string> debug(this->getOffset(), "\n");
+
+    if(seqPile.empty()) {
+        buffer.push(spreader.push(0.0,0));
+        return 0;
+    }
     std::string refstr;
     refstr += reference;
     refstr += reference;
-    double refProb = 1 - genotyper.getGenotypelikelihoods(seqPile, qualPile)[refstr];
+    double refProb;
+    if(reference == 'N')
+        refProb = 1.0;
+    else
+        refProb= 1 - genotyper.getGenotypelikelihoods(seqPile, qualPile).at(refstr);
     buffer.push(spreader.push(refProb, hq_softclips/qualPile.size()));
     double activity = buffer.filter();
+
+    std::stringstream s;
+
+    s << refstr << " " << seqPile << " " << qualPile << " " << hq_softclips << " ";
+
+    s << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
+              << std::setfill( '0' ) << refProb;
+
+    std::cerr << debug.push(s.str()) << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
+              << std::setfill( '0' ) << activity << std::endl;
+
+
     return activity * nr_quantizers;
 }
 

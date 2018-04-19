@@ -27,7 +27,8 @@ CalqEncoder::CalqEncoder(const Options &options)
       qualityValueMax_(options.qualityValueMax),
       qualityValueOffset_(options.qualityValueOffset),
       referenceFileNames_(options.referenceFileNames),
-      samFile_(options.inputFileName) {
+      samFile_(options.inputFileName),
+      fastaFile_(referenceFileNames_[0]){
     if (options.blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
@@ -49,23 +50,8 @@ CalqEncoder::CalqEncoder(const Options &options)
     if (options.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
     }
-//     if (referenceFileNames.empty() == true) {
-//        throwErrorException("referenceFileNames is empty");
-//     }
-
-    // Check and, in case they are provided, get reference sequences
     if (referenceFileNames_.empty() == true) {
-        CALQ_LOG("No reference file name(s) given - operating without reference sequence(s)");
-    } else {
-        CALQ_LOG("Looking in %zu reference file(s) for reference sequence(s)", referenceFileNames_.size());
-        for (auto const &referenceFileName : referenceFileNames_) {
-            CALQ_LOG("Parsing reference file: %s", referenceFileName.c_str());
-            FASTAFile fastaFile(referenceFileName);
-            CALQ_LOG("Found %zu reference(s):", fastaFile.references.size());
-            for (auto const &reference : fastaFile.references) {
-                CALQ_LOG("  %s (length: %zu)", reference.first.c_str(), reference.second.length());
-            }
-        }
+        throwErrorException("referenceFileNames is empty");
     }
 }
 
@@ -105,12 +91,12 @@ void CalqEncoder::encode(void) {
         QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_);
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
-                qualEncoder.addMappedRecordToBlock(samRecord);
+                qualEncoder.addMappedRecordToBlock(samRecord, this->fastaFile_);
             } else {
                 qualEncoder.addUnmappedRecordToBlock(samRecord);
             }
         }
-        qualEncoder.finishBlock();
+        qualEncoder.finishBlock(fastaFile_, samFile_.currentBlock.records.back().rname);
         qualEncoder.writeBlock(&cqFile_);
 
         // Update statistics

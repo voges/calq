@@ -16,7 +16,7 @@
 namespace calq {
 
 class Genotyper {
- public:
+public:
     Genotyper(const int &polyploidy,
               const int &qualOffset,
               const int &nrQuantizers);
@@ -27,16 +27,14 @@ class Genotyper {
     int computeQuantizerIndex(const std::string &seqPileup,
                               const std::string &qualPileup);
 
-#ifdef HAPLOTYPER
-    std::map<std::string, double>& getGenotypelikelihoods(const std::string &seqPileup,
-                                  const std::string &qualPileup) {
+    const std::map<std::string, double>& getGenotypelikelihoods(const std::string &seqPileup,
+                                                                const std::string &qualPileup) {
         computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
         return genotypeLikelihoods_;
 
     }
-#endif
 
- private:
+private:
     void initLikelihoods(void);
     void resetLikelihoods(void);
     void computeGenotypeLikelihoods(const std::string &seqPileup,

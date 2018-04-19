@@ -3,3 +3,7 @@
 calq.kdev4
 .kdev4/
 build/
+calq.config
+calq.creator
+calq.files
+calq.includes

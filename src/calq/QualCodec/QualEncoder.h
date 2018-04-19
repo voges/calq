@@ -38,8 +38,8 @@ class QualEncoder {
     ~QualEncoder(void);
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
-    void addMappedRecordToBlock(const SAMRecord &samRecord);
-    void finishBlock(void);
+    void addMappedRecordToBlock(const SAMRecord &samRecord, const FASTAFile& fasta);
+    void finishBlock(const FASTAFile& fasta, const std::string& section);
     size_t writeBlock(CQFile *cqFile);
 
     size_t compressedMappedQualSize(void) const;
@@ -81,6 +81,8 @@ class QualEncoder {
 
 #ifdef HAPLOTYPER
     Haplotyper haplotyper_;
+
+    size_t posCounter;
 #else
 
     // Genotyper

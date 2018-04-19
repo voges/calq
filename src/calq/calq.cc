@@ -1,4 +1,4 @@
-#if 0
+#if 1
 /** @file calq.cc
  *  @brief This file contains the main function of CALQ.
  */

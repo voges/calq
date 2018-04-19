@@ -17,6 +17,8 @@
 
 namespace calq {
 
+class FASTAFile;
+
 class SAMRecord {
  public:
     static const int NUM_FIELDS = 12;
@@ -24,7 +26,7 @@ class SAMRecord {
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);
 
-    void addToPileupQueue(SAMPileupDeque *samPileupDeque) const;
+    void addToPileupQueue(SAMPileupDeque *samPileupDeque, const FASTAFile& f) const;
 
     bool isMapped(void) const;
     void printLong(void) const;
