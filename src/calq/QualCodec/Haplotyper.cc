@@ -42,8 +42,11 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     s << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
               << std::setfill( '0' ) << refProb;
 
-    std::cerr << debug.push(s.str()) << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
-              << std::setfill( '0' ) << activity << std::endl;
+  //  std::cerr << debug.push(s.str()) << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
+  //            << std::setfill( '0' ) << activity << std::endl;
+
+    if(hq_softclips > 0)
+        std::cerr << hq_softclips << " detected!" << std::endl;
 
 
     return activity * nr_quantizers;
