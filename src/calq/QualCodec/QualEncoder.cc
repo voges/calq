@@ -105,7 +105,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
     samRecordDeque_.push_back(samRecord);
 
     while (samPileupDeque_.posMin() < samRecord.posMin) {
-        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter, fasta.references.at(samRecord.rname)[samPileupDeque_.posMin()]);
+        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter, samPileupDeque_.front().indelEvidence, fasta.references.at(samRecord.rname)[samPileupDeque_.posMin()]);
         ++posCounter;
         //Start not until pipeline is full
         if(posCounter > haplotyper_.getOffset()){
@@ -126,7 +126,7 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
 void QualEncoder::finishBlock(const FASTAFile& fasta, const std::string& section) {
     // Compute all remaining quantizers
     while (samPileupDeque_.empty() == false) {
-        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter, fasta.references.at(section)[samPileupDeque_.posMin()]);
+        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter, samPileupDeque_.front().indelEvidence, fasta.references.at(section)[samPileupDeque_.posMin()]);
         ++posCounter;
         if(posCounter > haplotyper_.getOffset()){
             mappedQuantizerIndices_.push_back(k);
@@ -137,7 +137,7 @@ void QualEncoder::finishBlock(const FASTAFile& fasta, const std::string& section
     //Empty pipeline
     size_t offset = std::min(posCounter,haplotyper_.getOffset());
     for(size_t i=0;i<offset;++i){
-        int k = haplotyper_.push("", "", 0, 'N');
+        int k = haplotyper_.push("", "", 0, 0, 'N');
         mappedQuantizerIndices_.push_back(k);
     }
 

@@ -52,6 +52,9 @@ class SAMRecord {
  private:
     void check(void);
 
+    size_t calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead) const;
+    bool isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f) const;
+
  private:
     bool mapped_;
 };

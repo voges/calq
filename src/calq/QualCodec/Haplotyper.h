@@ -20,6 +20,13 @@ private:
 
     size_t nr_quantizers;
 
+    size_t polyploidy;
+
+    std::map<size_t, double> calcIndelLikelihoods(size_t numberOfEvidence);
+
+    double NO_INDEL_LIKELIHOOD;
+    double INDEL_LIKELIHOOD;
+
 public:
 
     //Init
@@ -29,6 +36,6 @@ public:
     size_t getOffset() const;
 
     //Pushes new activity score calculated using parameters and returns filtered acticityscore for (pos-offset)
-    size_t push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference);
+    size_t push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, size_t indels, char reference);
 
 };

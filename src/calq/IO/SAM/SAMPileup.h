@@ -8,6 +8,7 @@
 #define CALQ_IO_SAM_SAMPILEUP_H_
 
 #include <string>
+#include <vector>
 
 #include "Common/constants.h"
 
@@ -32,6 +33,8 @@ class SAMPileup {
 
 #ifdef HAPLOTYPER
     uint16_t hq_softcounter; //High quality softclips
+
+    size_t indelEvidence; //String of 0 and 1. 1 means there is evidence of an indel
 #endif
 };
 

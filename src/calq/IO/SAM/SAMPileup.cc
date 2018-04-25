@@ -10,7 +10,7 @@
 
 namespace calq {
 #ifdef HAPLOTYPER
-SAMPileup::SAMPileup(void) : pos(0), qual(""), seq(""), hq_softcounter(0) {}
+SAMPileup::SAMPileup(void) : pos(0), qual(""), seq(""), hq_softcounter(0), indelEvidence(0) {}
 #else
 SAMPileup::SAMPileup(void) : pos(0), qual(""), seq("") {}
 #endif

@@ -8,6 +8,7 @@
 #include "IO/FASTA/FASTAFile.h"
 
 #include <string.h>
+#include <queue>
 
 #include "Common/Exceptions.h"
 #include "Common/log.h"
@@ -75,6 +76,103 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
+size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead) const{
+    size_t score = 0;
+
+    size_t cigarIdx = 0;
+    size_t cigarLen = cigar.length();
+    size_t opLen = 0;  // length of current CIGAR operation
+    size_t idx = 0;
+    size_t pileupIdx = posMin;
+
+    std::queue<char> seqBuffer;
+    std::queue<char> qualBuffer;
+    std::queue<char> refBuffer;
+
+
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
+            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
+            continue;
+        }
+
+        switch (cigar[cigarIdx]) {
+        case 'M':
+        case '=':
+        case 'X':
+            for (size_t i = 0; i < opLen; i++) {
+                if((pileupIdx-posMin) >= offsetRef){
+                    refBuffer.push(f.references.at(rname).at(pileupIdx));
+                }
+                if((pileupIdx-posMin) >= offsetRead){
+                    seqBuffer.push(seq[idx]);
+                    qualBuffer.push(qual[idx]);
+                }
+                idx++; pileupIdx++;
+            }
+            break;
+        case 'S':
+        case 'I':
+            idx += opLen;
+            break;
+        case 'D':
+        case 'N':
+            pileupIdx += opLen;
+            break;
+        case 'H':
+        case 'P':
+            break;  // these have been clipped
+        default:
+            throwErrorException("Bad CIGAR string");
+        }
+        opLen = 0;
+
+    }
+
+    while(refBuffer.size() && seqBuffer.size()){
+        char seq = seqBuffer.front();
+        char qual = qualBuffer.front();
+        char ref = refBuffer.front();
+        seqBuffer.pop();
+        qualBuffer.pop();
+        refBuffer.pop();
+
+        if(seq != ref && ref != 'N')
+            score += qual;
+
+        if(!refBuffer.size() && seqBuffer.size()){
+            refBuffer.push(f.references.at(rname).at(pileupIdx));
+            idx++; pileupIdx++;
+        }
+    }
+
+    return score;
+}
+
+bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f) const{
+
+    size_t baseline = calcIndelScore(f, readOffset, readOffset);
+
+    for(size_t i = 1; i <= maxIndelSize; ++i) {
+
+        if(readOffset + i >= tlen)
+            continue;
+
+        if(calcIndelScore(f, readOffset, readOffset+i) <= baseline) {
+            return true;
+        }
+
+        if(calcIndelScore(f, readOffset+i, readOffset) <= baseline) {
+            return true;
+        }
+
+    }
+
+    return false;
+
+}
+
 void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFile& f) const {
     if (samPileupDeque_->empty() == true) {
         throwErrorException("samPileupQueue is empty");
@@ -88,6 +186,9 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
     size_t opLen = 0;  // length of current CIGAR operation
     size_t idx = 0;
     size_t pileupIdx = posMin - samPileupDeque_->posMin();
+    const size_t maxIndelSize = 3;
+
+    bool justfoundEvidence=false;
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
@@ -99,6 +200,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
         size_t back_hq_ctr=0;  //Score after clip
         const char HQ_SOFTCLIP_THRESHOLD = 29 + 64;
 
+
         switch (cigar[cigarIdx]) {
         case 'M':
         case '=':
@@ -107,7 +209,14 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].pos = samPileupDeque_->posMin() + pileupIdx;
                 samPileupDeque_->pileups_[pileupIdx].seq += seq[idx];
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
-                samPileupDeque_->pileups_[pileupIdx].ref = f.references.at("20")[pileupIdx];
+                samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
+                if(isIndelEvidence(maxIndelSize, pileupIdx, f)){
+                    samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
+                    justfoundEvidence = true;
+                } else {
+                    justfoundEvidence = false;
+                }
+
                 idx++; pileupIdx++;
             }
             break;
@@ -138,10 +247,19 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx+1].hq_softcounter += back_hq_ctr;
 
         case 'I':
+            if(justfoundEvidence){
+                samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
+                justfoundEvidence = false;
+            }
             idx += opLen;
             break;
         case 'D':
         case 'N':
+            if(justfoundEvidence){
+                samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
+                justfoundEvidence = false;
+            }
+            idx += opLen;
             pileupIdx += opLen;
             break;
         case 'H':
