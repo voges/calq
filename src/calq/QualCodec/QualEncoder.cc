@@ -43,12 +43,9 @@ QualEncoder::QualEncoder(const int &polyploidy,
       mappedQualityValueIndices_(),
 
       samPileupDeque_(),
-#ifdef HAPLOTYPER
+
       haplotyper_(17, polyploidy, qualityValueOffset, NR_QUANTIZERS, 50, 7, 50),
       posCounter(0),
-#else
-      genotyper_(polyploidy, qualityValueOffset, NR_QUANTIZERS),
-#endif
 
       quantizers_(),
 

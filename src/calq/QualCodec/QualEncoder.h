@@ -79,16 +79,9 @@ class QualEncoder {
     // Pileup
     SAMPileupDeque samPileupDeque_;
 
-#ifdef HAPLOTYPER
     Haplotyper haplotyper_;
 
     size_t posCounter;
-#else
-
-    // Genotyper
-    Genotyper genotyper_;
-
-#endif
 
     // Quantizers
     std::map<int, Quantizer> quantizers_;

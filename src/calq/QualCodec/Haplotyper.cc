@@ -14,19 +14,26 @@ Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nr
  
     buffer = FilterBuffer([this](size_t pos, size_t size) -> double{return this->kernel.calcValue(pos,size);}, size);
 
+    //TODO: Check if this is right
     NO_INDEL_LIKELIHOOD = log10(1.0-pow(10,-4.5));
     INDEL_LIKELIHOOD = pow(10,-4.5);
 }
+
 
 size_t Haplotyper::getOffset() const {
     return buffer.getOffset() + spreader.getOffset();
 }
 
+
 std::map<size_t, double> Haplotyper::calcIndelLikelihoods(size_t numberOfEvidence){
+    //TODO: Cache and check with test cases
+    //Taken from GATK reference confidence model
+
+
     double denominator = -log10(polyploidy);
     std::map<size_t, double> likelihoods;
 
-
+    //No evidence of indel
     if(numberOfEvidence == 0) {
         for(int variantCount = 0; variantCount <= polyploidy; ++variantCount) {
             likelihoods[variantCount] = 1.0;
@@ -34,6 +41,7 @@ std::map<size_t, double> Haplotyper::calcIndelLikelihoods(size_t numberOfEvidenc
         return likelihoods;
     }
 
+    //Calculate likelihoods
     likelihoods[0] = numberOfEvidence * NO_INDEL_LIKELIHOOD;
     for(int variantCount = 1; variantCount <= polyploidy; ++variantCount) {
         double refLikelihood = NO_INDEL_LIKELIHOOD + log10(polyploidy - numberOfEvidence);
@@ -46,16 +54,19 @@ std::map<size_t, double> Haplotyper::calcIndelLikelihoods(size_t numberOfEvidenc
 
 size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, size_t indels, char reference){
     static CircularBuffer<std::string> debug(this->getOffset(), "\n");
-
+    //Empty input
     if(seqPile.empty()) {
         buffer.push(spreader.push(0.0,0));
         return 0;
     }
+
+    //Build reference string
     std::string refstr;
     refstr += reference;
     refstr += reference;
     double refProb;
     if(reference == 'N'){
+        //Assuming all genotypes have the same chance of appearing
         auto likelihoods = genotyper.getGenotypelikelihoods(seqPile, qualPile);
         refProb = 1-(likelihoods.at("AA") + likelihoods.at("CC") + likelihoods.at("GG") + likelihoods.at("TT"))/4.0; //Probability of hom
     }
@@ -65,6 +76,7 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
 
         refProb = std::max(snpProb, indelProb);
     }
+    //Filter activity score
     buffer.push(spreader.push(refProb, hq_softclips/qualPile.size()));
     double activity = buffer.filter();
 
@@ -78,8 +90,8 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
  //   std::cerr << debug.push(s.str()) << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
   //            << std::setfill( '0' ) << activity << std::endl;*/
 
-    if(hq_softclips > 0)
-        std::cerr << hq_softclips << " detected!" << std::endl;
+  //  if(hq_softclips > 0)
+  //      std::cerr << hq_softclips << " detected!" << std::endl;
 
 
     return activity * nr_quantizers;

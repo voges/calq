@@ -35,7 +35,7 @@ class CalqEncoder {
     int qualityValueOffset_;
     std::vector<std::string> referenceFileNames_;
     SAMFile samFile_;
-    FASTAFile fastaFile_;
+    FASTAFile fastaFile_; //Reference
 };
 
 }  // namespace calq

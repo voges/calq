@@ -31,11 +31,9 @@ class SAMPileup {
 
     char ref;
 
-#ifdef HAPLOTYPER
-    uint16_t hq_softcounter; //High quality softclips
+    uint16_t hq_softcounter; //High quality softclips next to this position
 
-    size_t indelEvidence; //String of 0 and 1. 1 means there is evidence of an indel
-#endif
+    size_t indelEvidence; //Number of reads indicating an undetected indel
 };
 
 }  // namespace calq

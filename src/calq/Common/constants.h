@@ -15,7 +15,5 @@
 #define MiB (KB*1024LL)
 #define GiB (MB*1024LL)
 
-#define HAPLOTYPER
-
 #endif  // CALQ_COMMON_CONSTANTS_H_
 

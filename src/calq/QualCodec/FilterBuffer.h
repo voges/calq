@@ -10,6 +10,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+//Samples a normal distribution
 class GaussKernel {
 private:
     const double SIGMA;
@@ -31,6 +32,7 @@ public:
 
 //----------------------------------------------------------------------------------------------------------------------
 
+//Filters an input signal using a filter kernel
 class FilterBuffer {
 private:
     std::vector<double> kernel;

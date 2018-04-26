@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+//Fixed-size-buffer in circular shape
 template<typename T>
 class CircularBuffer {
 private:
@@ -21,6 +22,7 @@ public:
         return data[(pos+index)%data.size()];
     }
 
+    //Leftmost value
     T& back (){
         return (*this)[pos];
     }
@@ -29,6 +31,7 @@ public:
         return (*this)[pos];
     }
 
+    //Rightmost value
     T& front (){
         return (*this)[(pos+data.size()-1)%data.size()];
     }
@@ -41,6 +44,7 @@ public:
         return data.size();
     }
 
+    //Returns oldest value, deletes it and puts new value
     T push(const T& val) {
         T oldVal = data[pos];
         data[pos] = val;

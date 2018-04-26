@@ -126,6 +126,8 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 }
+
+//Testing
 #else
 
 #include "QualCodec/HaplotyperTest.h"

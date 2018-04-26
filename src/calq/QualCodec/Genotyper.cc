@@ -196,4 +196,11 @@ void Genotyper::computeGenotypeLikelihoods(const std::string &seqPileup,
     }
 }
 
+const std::map<std::string, double>& Genotyper::getGenotypelikelihoods(const std::string &seqPileup,
+                                                            const std::string &qualPileup) {
+    computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
+    return genotypeLikelihoods_;
+
+}
+
 }  // namespace calq

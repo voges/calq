@@ -1,5 +1,5 @@
 #include "FilterBuffer.h"
-#include "BaseSpreader.h"
+#include "SoftclipSpreader.h"
 #include "Haplotyper.h"
 
 #include <iostream>
@@ -90,7 +90,7 @@ void circBufferTest(){
 
 
 void baseSpreaderTest(){
-    BaseSpreader b(5,3);
+    SoftclipSpreader b(5,3);
 
     equals(b.getOffset(),5);
 

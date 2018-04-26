@@ -3,7 +3,7 @@
 
 #include "FilterBuffer.h"
 #include "Genotyper.h"
-#include "BaseSpreader.h"
+#include "SoftclipSpreader.h"
 
 class Haplotyper {
 private:
@@ -12,7 +12,7 @@ private:
 
     GaussKernel kernel;
 
-    BaseSpreader spreader;
+    SoftclipSpreader spreader;
 
     calq::Genotyper genotyper;
 

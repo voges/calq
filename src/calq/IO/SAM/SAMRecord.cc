@@ -77,21 +77,23 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 SAMRecord::~SAMRecord(void) {}
 
 size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead) const{
-    size_t score = 0;
+    size_t score = 0; // Current mismatch score
 
-    size_t cigarIdx = 0;
+    size_t cigarIdx = 0; //Current CIGAR position
     size_t cigarLen = cigar.length();
     size_t opLen = 0;  // length of current CIGAR operation
-    size_t idx = 0;
-    size_t pileupIdx = posMin;
+    size_t idx = 0; // Current base position relative to read start
+    size_t pileupIdx = posMin; // current base position relatie to reference start
 
+    //Buffers to deal with delay in case of different position offsets
     std::queue<char> seqBuffer;
     std::queue<char> qualBuffer;
     std::queue<char> refBuffer;
 
-
-
+    //Loop inspired by addToPileupQueue
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+
+        //Process numbers
         if (isdigit(cigar[cigarIdx])) {
             opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
             continue;
@@ -102,6 +104,7 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
         case '=':
         case 'X':
             for (size_t i = 0; i < opLen; i++) {
+                //Store in buffer, if offset passed
                 if((pileupIdx-posMin) >= offsetRef){
                     refBuffer.push(f.references.at(rname).at(pileupIdx));
                 }
@@ -130,7 +133,9 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
 
     }
 
+    //Process buffers
     while(refBuffer.size() && seqBuffer.size()){
+        //Get front of queues
         char seq = seqBuffer.front();
         char qual = qualBuffer.front();
         char ref = refBuffer.front();
@@ -138,10 +143,12 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
         qualBuffer.pop();
         refBuffer.pop();
 
+        //Add qualities of mismatching bases, but ignore undefined reference bases
         if(seq != ref && ref != 'N')
             score += qual;
 
-        if(!refBuffer.size() && seqBuffer.size()){
+        //Add additional reference bases if available and read bases left
+        if(!refBuffer.size() && seqBuffer.size() && f.references.at(rname).size() > pileupIdx){
             refBuffer.push(f.references.at(rname).at(pileupIdx));
             idx++; pileupIdx++;
         }
@@ -152,23 +159,29 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
 
 bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f) const{
 
+    //Calc mismatching quality sum for original alignment
     size_t baseline = calcIndelScore(f, readOffset, readOffset);
 
+    //Try insertion and deletion of all sizes smaller than maxIndelSize
     for(size_t i = 1; i <= maxIndelSize; ++i) {
 
+        //Ignore indels starting after read
         if(readOffset + i >= tlen)
             continue;
 
+        //Check if deletion aligns better than original
         if(calcIndelScore(f, readOffset, readOffset+i) <= baseline) {
             return true;
         }
 
+        //Check if insertion aligns better than original
         if(calcIndelScore(f, readOffset+i, readOffset) <= baseline) {
             return true;
         }
 
     }
 
+    //Original is best options
     return false;
 
 }
@@ -186,9 +199,11 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
     size_t opLen = 0;  // length of current CIGAR operation
     size_t idx = 0;
     size_t pileupIdx = posMin - samPileupDeque_->posMin();
-    const size_t maxIndelSize = 3;
 
-    bool justfoundEvidence=false;
+    const size_t maxIndelSize = 3; //TODO: Command line arguments
+
+    bool justfoundEvidence=false; //Memorize if base before is evidence of indel. Used to ignore evidence if there is already an indel after.
+    //TODO: just check in the cigar string and save some time by skippingisIndelEvidence
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
@@ -198,6 +213,8 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
 
         size_t front_hq_ctr=0; //Score before clip
         size_t back_hq_ctr=0;  //Score after clip
+
+        //TODO: use offset parameter and add new cmd parameter for phred value
         const char HQ_SOFTCLIP_THRESHOLD = 29 + 64;
 
 
@@ -210,6 +227,8 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].seq += seq[idx];
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
                 samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
+
+                //Check indel and update evidence counter
                 if(isIndelEvidence(maxIndelSize, pileupIdx, f)){
                     samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
                     justfoundEvidence = true;
@@ -221,8 +240,12 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
             }
             break;
         case 'S':
-            std::cerr << "Softclips" << " detected!" << std::endl;
 
+            //Process softclips
+
+            //std::cerr << "Softclips" << " detected!" << std::endl;
+
+            //Clips to the right
             for(int l=0;l<opLen;++l){
                 if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
                     ++front_hq_ctr;
@@ -232,6 +255,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
 
             }
 
+            //Clips to the left
             for(int l=opLen-1;l>=0;--l){
                 if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
                     ++back_hq_ctr;
@@ -241,12 +265,15 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
 
             }
 
+            //Decide which to use
             if(idx-1 > 0)
                 samPileupDeque_->pileups_[pileupIdx].hq_softcounter += front_hq_ctr;
             if(idx+opLen < this->qual.size())
                 samPileupDeque_->pileups_[pileupIdx+1].hq_softcounter += back_hq_ctr;
 
         case 'I':
+
+            //Take back evidence increment if insertion follows directly
             if(justfoundEvidence){
                 samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
                 justfoundEvidence = false;
@@ -255,6 +282,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
             break;
         case 'D':
         case 'N':
+            //Take back evidence increment if deletion follows directly
             if(justfoundEvidence){
                 samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
                 justfoundEvidence = false;

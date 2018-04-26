@@ -28,11 +28,7 @@ public:
                               const std::string &qualPileup);
 
     const std::map<std::string, double>& getGenotypelikelihoods(const std::string &seqPileup,
-                                                                const std::string &qualPileup) {
-        computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
-        return genotypeLikelihoods_;
-
-    }
+                                                                const std::string &qualPileup);
 
 private:
     void initLikelihoods(void);
