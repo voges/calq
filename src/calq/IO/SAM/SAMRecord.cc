@@ -77,7 +77,6 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 SAMRecord::~SAMRecord(void) {}
 
 size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead) const{
-    return 0;
     size_t score = 0; // Current mismatch score
 
     size_t cigarIdx = 0; //Current CIGAR position
