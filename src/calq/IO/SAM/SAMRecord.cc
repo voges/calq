@@ -77,14 +77,11 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead, size_t abortScore) const{
+size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead, size_t abortScore, size_t cigarIdx, size_t idx, size_t pileupIdx) const{
     size_t score = 0; // Current mismatch score
 
-    size_t cigarIdx = 0; //Current CIGAR position
     size_t cigarLen = cigar.length();
     size_t opLen = 0;  // length of current CIGAR operation
-    size_t idx = 0; // Current base position relative to read start
-    size_t pileupIdx = posMin; // current base position relatie to reference start
 
     //Buffers to deal with delay in case of different position offsets
     std::queue<char> seqBuffer;
@@ -182,23 +179,23 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
     return score;
 }
 
-bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f) const{
+bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f, size_t cigarIdx, size_t idx, size_t pileupIdx) const{
 
     if(tlen < readOffset + maxIndelSize || f.references.at(rname).length() < readOffset + maxIndelSize)
         return false;
     //Calc mismatching quality sum for original alignment
-    size_t baseline = calcIndelScore(f, readOffset, readOffset, std::numeric_limits<std::size_t>::max());
+    size_t baseline = calcIndelScore(f, readOffset, readOffset, std::numeric_limits<std::size_t>::max(), cigarIdx, idx, pileupIdx);
 
     //Try insertion and deletion of all sizes smaller than maxIndelSize
     for(size_t i = 1; i <= maxIndelSize; ++i) {
 
         //Check if deletion aligns better than original
-        if(calcIndelScore(f, readOffset, readOffset+i, baseline) <= baseline) {
+        if(calcIndelScore(f, readOffset, readOffset+i, baseline, cigarIdx, idx, pileupIdx) <= baseline) {
             return true;
         }
 
         //Check if insertion aligns better than original
-        if(calcIndelScore(f, readOffset+i, readOffset, baseline) <= baseline) {
+        if(calcIndelScore(f, readOffset+i, readOffset, baseline, cigarIdx, idx, pileupIdx) <= baseline) {
             return true;
         }
 
@@ -252,7 +249,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
 
                 //Check indel and update evidence counter
-                if(isIndelEvidence(maxIndelSize, pileupIdx, f)){
+                if(isIndelEvidence(maxIndelSize, pileupIdx, f, cigarIdx, idx, pileupIdx + samPileupDeque_->posMin())){
                     samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
                     justfoundEvidence = true;
                 } else {

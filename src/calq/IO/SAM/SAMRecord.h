@@ -53,10 +53,10 @@ class SAMRecord {
     void check(void);
 
     //Sums up all mismatching quality values of read and reference. The offset values provide a way to check different indels.
-    size_t calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead, size_t abortScore) const;
+    size_t calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead, size_t abortScore, size_t cigarIdx, size_t idx, size_t pileupIdx) const;
 
     //Returns true if this read at position readOffset gets a better IndelScore when assuming an indel not in the original alignment.
-    bool isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f) const;
+    bool isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f, size_t cigarIdx, size_t idx, size_t pileupIdx) const;
 
  private:
     bool mapped_;
