@@ -228,13 +228,13 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
                 samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
 
-                //Check indel and update evidence counter
+            /*   //Check indel and update evidence counter
                 if(isIndelEvidence(maxIndelSize, pileupIdx, f)){
                     samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
                     justfoundEvidence = true;
                 } else {
                     justfoundEvidence = false;
-                }
+                }*/
 
                 idx++; pileupIdx++;
             }
