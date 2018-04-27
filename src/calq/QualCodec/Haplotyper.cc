@@ -72,7 +72,7 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     }
     else {
         double snpProb = 1 - genotyper.getGenotypelikelihoods(seqPile, qualPile).at(refstr);
-        double indelProb = 0;//1 - calcIndelLikelihoods(indels).at(0);
+        double indelProb = 1 - calcIndelLikelihoods(indels).at(0);
 
         refProb = std::max(snpProb, indelProb);
     }
