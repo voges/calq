@@ -77,6 +77,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 SAMRecord::~SAMRecord(void) {}
 
 size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead) const{
+    return 0;
     size_t score = 0; // Current mismatch score
 
     size_t cigarIdx = 0; //Current CIGAR position
@@ -159,15 +160,13 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
 
 bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f) const{
 
+    if(tlen < readOffset + maxIndelSize || f.references.at(rname).length() < readOffset + maxIndelSize)
+        return false;
     //Calc mismatching quality sum for original alignment
     size_t baseline = calcIndelScore(f, readOffset, readOffset);
 
     //Try insertion and deletion of all sizes smaller than maxIndelSize
     for(size_t i = 1; i <= maxIndelSize; ++i) {
-
-        //Ignore indels starting after read
-        if(readOffset + i >= tlen)
-            continue;
 
         //Check if deletion aligns better than original
         if(calcIndelScore(f, readOffset, readOffset+i) <= baseline) {
@@ -200,7 +199,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
     size_t idx = 0;
     size_t pileupIdx = posMin - samPileupDeque_->posMin();
 
-    const size_t maxIndelSize = 3; //TODO: Command line arguments
+    const size_t maxIndelSize = 10; //TODO: Command line arguments
 
     bool justfoundEvidence=false; //Memorize if base before is evidence of indel. Used to ignore evidence if there is already an indel after.
     //TODO: just check in the cigar string and save some time by skippingisIndelEvidence
@@ -228,13 +227,13 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
                 samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
 
-            /*   //Check indel and update evidence counter
+                //Check indel and update evidence counter
                 if(isIndelEvidence(maxIndelSize, pileupIdx, f)){
                     samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
                     justfoundEvidence = true;
                 } else {
                     justfoundEvidence = false;
-                }*/
+                }
 
                 idx++; pileupIdx++;
             }
