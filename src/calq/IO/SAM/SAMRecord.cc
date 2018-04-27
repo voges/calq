@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <queue>
+#include <limits>
 
 #include "Common/Exceptions.h"
 #include "Common/log.h"
@@ -76,7 +77,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead) const{
+size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead, size_t abortScore) const{
     size_t score = 0; // Current mismatch score
 
     size_t cigarIdx = 0; //Current CIGAR position
@@ -144,8 +145,11 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
         refBuffer.pop();
 
         //Add qualities of mismatching bases, but ignore undefined reference bases
-        if(seq != ref && ref != 'N')
+        if(seq != ref && ref != 'N'){
             score += qual;
+            if(score > abortScore)
+                return score;
+        }
 
         //Add additional reference bases if available and read bases left
         if(!refBuffer.size() && seqBuffer.size() && f.references.at(rname).size() > pileupIdx){
@@ -162,18 +166,18 @@ bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FA
     if(tlen < readOffset + maxIndelSize || f.references.at(rname).length() < readOffset + maxIndelSize)
         return false;
     //Calc mismatching quality sum for original alignment
-    size_t baseline = calcIndelScore(f, readOffset, readOffset);
+    size_t baseline = calcIndelScore(f, readOffset, readOffset, std::numeric_limits<std::size_t>::max());
 
     //Try insertion and deletion of all sizes smaller than maxIndelSize
     for(size_t i = 1; i <= maxIndelSize; ++i) {
 
         //Check if deletion aligns better than original
-        if(calcIndelScore(f, readOffset, readOffset+i) <= baseline) {
+        if(calcIndelScore(f, readOffset, readOffset+i, baseline) <= baseline) {
             return true;
         }
 
         //Check if insertion aligns better than original
-        if(calcIndelScore(f, readOffset+i, readOffset) <= baseline) {
+        if(calcIndelScore(f, readOffset+i, readOffset, baseline) <= baseline) {
             return true;
         }
 
