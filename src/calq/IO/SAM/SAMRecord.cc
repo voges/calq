@@ -113,6 +113,27 @@ size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t of
                     seqBuffer.push(seq[idx]);
                     qualBuffer.push(qual[idx]);
                 }
+
+
+                //Process buffers
+                while(refBuffer.size() && seqBuffer.size()){
+                    //Get front of queues
+                    char seq = seqBuffer.front();
+                    char qual = qualBuffer.front();
+                    char ref = refBuffer.front();
+                    seqBuffer.pop();
+                    qualBuffer.pop();
+                    refBuffer.pop();
+
+                    //Add qualities of mismatching bases, but ignore undefined reference bases
+                    if(seq != ref && ref != 'N'){
+                        score += qual;
+                        if(score > abortScore)
+                            return score;
+                    }
+                }
+
+
                 idx++; pileupIdx++;
             }
             break;
