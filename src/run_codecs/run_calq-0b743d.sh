@@ -42,7 +42,7 @@ if [ ! -f $replace_qual_sam_py ]; then printf "Error: Python script $replace_qua
 ###############################################################################
 
 printf "Compressing with CALQ\n"
-cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string"
+cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string -f"
 $time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
 
 printf "Decompressing with CALQ\n"
