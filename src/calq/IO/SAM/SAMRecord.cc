@@ -77,125 +77,43 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-size_t SAMRecord::calcIndelScore(const FASTAFile& f, size_t offsetRef, size_t offsetRead, size_t abortScore, size_t cigarIdx, size_t idx, size_t pileupIdx) const{
+size_t SAMRecord::calcIndelScore(const std::string& reference, size_t offsetRef, size_t offsetRead, size_t abortScore) const{
+
     size_t score = 0; // Current mismatch score
 
-    size_t cigarLen = cigar.length();
-    size_t opLen = 0;  // length of current CIGAR operation
+    size_t length = std::min(seq.length()-offsetRead, reference.length()-offsetRef-posMin);
 
-    //Buffers to deal with delay in case of different position offsets
-    std::queue<char> seqBuffer;
-    std::queue<char> qualBuffer;
-    std::queue<char> refBuffer;
-
-    //Loop inspired by addToPileupQueue
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-
-        //Process numbers
-        if (isdigit(cigar[cigarIdx])) {
-            opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
-            continue;
-        }
-
-        switch (cigar[cigarIdx]) {
-        case 'M':
-        case '=':
-        case 'X':
-            for (size_t i = 0; i < opLen; i++) {
-                //Store in buffer, if offset passed
-                if((pileupIdx-posMin) >= offsetRef){
-                    refBuffer.push(f.references.at(rname).at(pileupIdx));
-                }
-                if((pileupIdx-posMin) >= offsetRead){
-                    seqBuffer.push(seq[idx]);
-                    qualBuffer.push(qual[idx]);
-                }
-
-
-                //Process buffers
-                while(refBuffer.size() && seqBuffer.size()){
-                    //Get front of queues
-                    char seq = seqBuffer.front();
-                    char qual = qualBuffer.front();
-                    char ref = refBuffer.front();
-                    seqBuffer.pop();
-                    qualBuffer.pop();
-                    refBuffer.pop();
-
-                    //Add qualities of mismatching bases, but ignore undefined reference bases
-                    if(seq != ref && ref != 'N'){
-                        score += qual;
-                        if(score > abortScore)
-                            return score;
-                    }
-                }
-
-
-                idx++; pileupIdx++;
-            }
-            break;
-        case 'S':
-        case 'I':
-            idx += opLen;
-            break;
-        case 'D':
-        case 'N':
-            pileupIdx += opLen;
-            break;
-        case 'H':
-        case 'P':
-            break;  // these have been clipped
-        default:
-            throwErrorException("Bad CIGAR string");
-        }
-        opLen = 0;
-
-    }
-
-    //Process buffers
-    while(refBuffer.size() && seqBuffer.size()){
-        //Get front of queues
-        char seq = seqBuffer.front();
-        char qual = qualBuffer.front();
-        char ref = refBuffer.front();
-        seqBuffer.pop();
-        qualBuffer.pop();
-        refBuffer.pop();
-
-        //Add qualities of mismatching bases, but ignore undefined reference bases
-        if(seq != ref && ref != 'N'){
-            score += qual;
-            if(score > abortScore)
+    for(size_t i=0; i < length;++i) {;
+        if(seq[offsetRead+i] != reference[posMin+offsetRef + i]) {
+            score += qual[offsetRead+i];
+            if(score > abortScore){
                 return score;
+            }
         }
 
-        //Add additional reference bases if available and read bases left
-        if(!refBuffer.size() && seqBuffer.size() && f.references.at(rname).size() > pileupIdx){
-            refBuffer.push(f.references.at(rname).at(pileupIdx));
-            idx++; pileupIdx++;
-        }
+        score += offsetRef + i;
     }
 
     return score;
 }
 
-bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const FASTAFile& f, size_t cigarIdx, size_t idx, size_t pileupIdx) const{
+bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const std::string& reference) const{
 
-    if(tlen < readOffset + maxIndelSize || f.references.at(rname).length() < readOffset + maxIndelSize)
+    if((posMax-posMin) <= readOffset + maxIndelSize || reference.length() <= readOffset + maxIndelSize)
         return false;
     //Calc mismatching quality sum for original alignment
-    size_t baseline = calcIndelScore(f, readOffset, readOffset, std::numeric_limits<std::size_t>::max(), cigarIdx, idx, pileupIdx);
+    size_t baseline = calcIndelScore(reference, readOffset, readOffset, std::numeric_limits<std::size_t>::max());
 
     //Try insertion and deletion of all sizes smaller than maxIndelSize
     for(size_t i = 1; i <= maxIndelSize; ++i) {
 
         //Check if deletion aligns better than original
-        if(calcIndelScore(f, readOffset, readOffset+i, baseline, cigarIdx, idx, pileupIdx) <= baseline) {
+        if(calcIndelScore(reference, readOffset, readOffset+i, baseline) <= baseline) {
             return true;
         }
 
         //Check if insertion aligns better than original
-        if(calcIndelScore(f, readOffset+i, readOffset, baseline, cigarIdx, idx, pileupIdx) <= baseline) {
+        if(calcIndelScore(reference, readOffset+i, readOffset, baseline) <= baseline) {
             return true;
         }
 
@@ -249,7 +167,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
 
                 //Check indel and update evidence counter
-                if(isIndelEvidence(maxIndelSize, pileupIdx, f, cigarIdx, idx, pileupIdx + samPileupDeque_->posMin())){
+                if(isIndelEvidence(maxIndelSize, idx, f.references.at(rname))){
                     samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
                     justfoundEvidence = true;
                 } else {
@@ -307,7 +225,6 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
                 justfoundEvidence = false;
             }
-            idx += opLen;
             pileupIdx += opLen;
             break;
         case 'H':
