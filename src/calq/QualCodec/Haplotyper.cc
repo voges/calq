@@ -134,9 +134,9 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     buffer.push(spreader.push(altProb, hq_softclips/qualPile.size()));
     double activity = buffer.filter();
 
-    size_t quant = activity > 0.002 ? 6 : 0;// std::min(activity * nr_quantizers / 0.02,(double) nr_quantizers-1);
+    size_t quant =  std::min(activity * nr_quantizers / 0.02,(double) nr_quantizers-1);
 
- /*   std::stringstream s;
+    std::stringstream s;
 
 
     s << reference << " " << seqPile  << " ";
@@ -148,7 +148,7 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     if(out != "\n" ){
         std::cerr << out << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
                   << std::setfill( '0' ) << activity << " " << quant+2 << std::endl;
-    }*/
+    }
 
       if(hq_softclips > 0)
           std::cerr << hq_softclips << " detected!" << std::endl;
