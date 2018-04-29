@@ -77,53 +77,6 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-size_t SAMRecord::calcIndelScore(const std::string& reference, size_t offsetRef, size_t offsetRead, size_t abortScore) const{
-
-    size_t score = 0; // Current mismatch score
-
-    size_t length = std::min(seq.length()-offsetRead, reference.length()-offsetRef-posMin);
-
-    for(size_t i=0; i < length;++i) {;
-        if(seq[offsetRead+i] != reference[posMin+offsetRef + i]) {
-            score += qual[offsetRead+i];
-            if(score > abortScore){
-                return score;
-            }
-        }
-
-        score += offsetRef + i;
-    }
-
-    return score;
-}
-
-bool SAMRecord::isIndelEvidence(size_t maxIndelSize, size_t readOffset, const std::string& reference) const{
-
-    if((posMax-posMin) <= readOffset + maxIndelSize || reference.length() <= readOffset + maxIndelSize)
-        return false;
-    //Calc mismatching quality sum for original alignment
-    size_t baseline = calcIndelScore(reference, readOffset, readOffset, std::numeric_limits<std::size_t>::max());
-
-    //Try insertion and deletion of all sizes smaller than maxIndelSize
-    for(size_t i = 1; i <= maxIndelSize; ++i) {
-
-        //Check if deletion aligns better than original
-        if(calcIndelScore(reference, readOffset, readOffset+i, baseline) <= baseline) {
-            return true;
-        }
-
-        //Check if insertion aligns better than original
-        if(calcIndelScore(reference, readOffset+i, readOffset, baseline) <= baseline) {
-            return true;
-        }
-
-    }
-
-    //Original is best options
-    return false;
-
-}
-
 void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFile& f) const {
     if (samPileupDeque_->empty() == true) {
         throwErrorException("samPileupQueue is empty");
@@ -166,14 +119,6 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
                 samPileupDeque_->pileups_[pileupIdx].qual += qual[idx];
                 samPileupDeque_->pileups_[pileupIdx].ref = f.references.at(rname)[pileupIdx];
 
-                //Check indel and update evidence counter
-                if(isIndelEvidence(maxIndelSize, idx, f.references.at(rname))){
-                    samPileupDeque_->pileups_[pileupIdx].indelEvidence +=1;
-                    justfoundEvidence = true;
-                } else {
-                    justfoundEvidence = false;
-                }
-
                 idx++; pileupIdx++;
             }
             break;
@@ -181,7 +126,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
 
             //Process softclips
 
-            //std::cerr << "Softclips" << " detected!" << std::endl;
+            std::cerr << "Softclips" << " detected!" << std::endl;
 
             //Clips to the right
             for(int l=0;l<opLen;++l){

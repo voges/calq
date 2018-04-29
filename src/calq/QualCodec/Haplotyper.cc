@@ -3,6 +3,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <limits>
+#include <algorithm>
 
 #include <cmath>
 
@@ -11,46 +13,107 @@ Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nr
     : SIGMA(sigma), kernel(sigma), spreader(maxHQSoftclip_propagation, minHQSoftclip_streak), genotyper(ploidy, qualOffset, nrQuantizers), nr_quantizers(nrQuantizers), polyploidy(ploidy){
     double THRESHOLD = 0.0000001;
     size_t size = this->kernel.calcMinSize(THRESHOLD, gaussRadius*2+1);
- 
+
     buffer = FilterBuffer([this](size_t pos, size_t size) -> double{return this->kernel.calcValue(pos,size);}, size);
 
     //TODO: Check if this is right
+    double INDEL_QUAL = 45;
+
     NO_INDEL_LIKELIHOOD = log10(1.0-pow(10,-4.5));
-    INDEL_LIKELIHOOD = pow(10,-4.5);
+    INDEL_LIKELIHOOD = -4.5;
 }
 
 
 size_t Haplotyper::getOffset() const {
-    return buffer.getOffset() + spreader.getOffset();
+    return buffer.getOffset() + spreader.getOffset() - 1;
+}
+
+double log10sum(double a, double b) {
+    if(a > b) {
+        log10sum(b, a);
+    } else if (a == - std::numeric_limits<double>::infinity()){
+        return b;
+    }
+    return b + log10(1+ pow(10.0,-(b-a)));
+}
+
+std::vector<double> Haplotyper::calcPriors(double hetero) {
+    hetero = log10(hetero);
+    std::vector<double> result(polyploidy+1, hetero);
+    double sum = - std::numeric_limits<double>::infinity();
+    for(size_t i = 1; i<polyploidy+1; ++i){
+        result[i] -= log10(i);
+        sum = log10sum(sum, result[i]);
+    }
+    result[0] = log10(1.0 - exp10(sum));
+
+    return result;
+
 }
 
 
-std::map<size_t, double> Haplotyper::calcIndelLikelihoods(size_t numberOfEvidence){
-    //TODO: Cache and check with test cases
-    //Taken from GATK reference confidence model
 
 
-    double denominator = -log10(polyploidy);
-    std::map<size_t, double> likelihoods;
+std::vector<double> Haplotyper::calcNonRefLikelihoods(char ref, const std::string& seqPile,const std::string& qualPile) {
+    std::vector<double> result(polyploidy+1, 0.0);
+    std::map<std::string, double> SNPlikelihoods = genotyper.getGenotypelikelihoods(seqPile, qualPile);
 
-    //No evidence of indel
-    if(numberOfEvidence == 0) {
-        for(int variantCount = 0; variantCount <= polyploidy; ++variantCount) {
-            likelihoods[variantCount] = 1.0;
+    for(const std::pair<std::string, double> &m : SNPlikelihoods){
+        size_t altCount = polyploidy - std::count(m.first.begin(), m.first.end(), ref);
+        result[altCount] += m.second;
+    }
+
+    for(size_t i=0;i<result.size();++i) {
+        result[i] = log10(result[i]);
+    }
+
+    return result;
+}
+
+double Haplotyper::calcActivityScore(char ref, const std::string& seqPile,const std::string& qualPile, double heterozygosity){
+    if(ref == 'N'){
+        return 1.0;
+    }
+    std::vector<double> likelihoods = calcNonRefLikelihoods(ref,seqPile,qualPile);
+    std::vector<double> priors = calcPriors(heterozygosity);
+
+    double posteriori0 = likelihoods[0] + priors[0];
+    bool map0 = true;
+    for(size_t i=1; i<polyploidy+1;++i ){
+        if(likelihoods[i] + priors[i] >  posteriori0){
+            map0 = false;
+            break;
         }
-        return likelihoods;
+
     }
 
-    //Calculate likelihoods
-    likelihoods[0] = numberOfEvidence * NO_INDEL_LIKELIHOOD;
-    for(int variantCount = 1; variantCount <= polyploidy; ++variantCount) {
-        double refLikelihood = NO_INDEL_LIKELIHOOD + log10(polyploidy - numberOfEvidence);
-        double altLikelihood = INDEL_LIKELIHOOD + log10(numberOfEvidence);
-        likelihoods[variantCount] = numberOfEvidence * (log10(exp10(refLikelihood)+exp10(altLikelihood)) + denominator);
-        likelihoods[variantCount] = pow(10,(likelihoods[variantCount]/-10.0));
+    if(map0){
+        return 0.0;
     }
-    return likelihoods;
+
+    double altLikelihoodSum = - std::numeric_limits<double>::infinity();
+    double altPriorSum = - std::numeric_limits<double>::infinity();
+
+    for(size_t i=1; i<polyploidy+1;++i) {
+        altLikelihoodSum = log10sum(altLikelihoodSum, likelihoods[i]);
+        altPriorSum = log10sum(altPriorSum, priors[i]);
+    }
+
+    double altPosteriorSum = altLikelihoodSum + altPriorSum;
+    //Normalize
+    posteriori0 = posteriori0 - log10sum(altPosteriorSum, posteriori0);
+
+    const double CUTOFF = -1.0;
+
+    if(posteriori0 > CUTOFF)
+        return 0.0;
+
+    return 1.0 - exp10(posteriori0);
+
+
 }
+
+
 
 size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, size_t indels, char reference){
     static CircularBuffer<std::string> debug(this->getOffset(), "\n");
@@ -61,39 +124,36 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     }
 
     //Build reference string
-    std::string refstr;
-    refstr += reference;
-    refstr += reference;
-    double refProb;
-    if(reference == 'N'){
-        //Assuming all genotypes have the same chance of appearing
-        auto likelihoods = genotyper.getGenotypelikelihoods(seqPile, qualPile);
-        refProb = 1-(likelihoods.at("AA") + likelihoods.at("CC") + likelihoods.at("GG") + likelihoods.at("TT"))/4.0; //Probability of hom
-    }
-    else {
-        double snpProb = 1 - genotyper.getGenotypelikelihoods(seqPile, qualPile).at(refstr);
-        double indelProb = 1 - calcIndelLikelihoods(indels).at(0);
 
-        refProb = std::max(snpProb, indelProb);
-    }
+    const double heterozygosity = 1.0/1000.0;
+
+    double altProb = calcActivityScore(reference, seqPile, qualPile, heterozygosity);
+
+
     //Filter activity score
-    buffer.push(spreader.push(refProb, hq_softclips/qualPile.size()));
+    buffer.push(spreader.push(altProb, hq_softclips/qualPile.size()));
     double activity = buffer.filter();
 
-  /*  std::stringstream s;
+    size_t quant = activity > 0.002 ? 6 : 0;// std::min(activity * nr_quantizers / 0.02,(double) nr_quantizers-1);
 
-    s << refstr << " " << seqPile << " " << qualPile << " " << hq_softclips << " ";
+ /*   std::stringstream s;
+
+
+    s << reference << " " << seqPile  << " ";
 
     s << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
-              << std::setfill( '0' ) << refProb;
+      << std::setfill( '0' ) << altProb;
 
- //   std::cerr << debug.push(s.str()) << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
-  //            << std::setfill( '0' ) << activity << std::endl;*/
+    std::string out = debug.push(s.str());
+    if(out != "\n" ){
+        std::cerr << out << " " << std::fixed << std::setw( 6 ) << std::setprecision( 4 )
+                  << std::setfill( '0' ) << activity << " " << quant+2 << std::endl;
+    }*/
 
-  //  if(hq_softclips > 0)
-  //      std::cerr << hq_softclips << " detected!" << std::endl;
+      if(hq_softclips > 0)
+          std::cerr << hq_softclips << " detected!" << std::endl;
 
 
-    return activity * nr_quantizers;
+    return quant;
 }
 

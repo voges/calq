@@ -38,4 +38,10 @@ public:
     //Pushes new activity score calculated using parameters and returns filtered acticityscore for (pos-offset)
     size_t push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, size_t indels, char reference);
 
+    std::vector<double> calcNonRefLikelihoods(char ref, const std::string& seqPile,const std::string& qualPile);
+
+    double calcActivityScore(char ref, const std::string& seqPile,const std::string& qualPile, double heterozygosity);
+
+    std::vector<double> calcPriors(double hetero);
+
 };
