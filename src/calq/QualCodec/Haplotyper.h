@@ -21,22 +21,16 @@
 
 class Haplotyper {
  private:
+    const size_t SIGMA;
+
     // Saving kernel and old raw quality scores
     FilterBuffer buffer;
 
     GaussKernel kernel;
-
     SoftclipSpreader spreader;
-
     calq::Genotyper genotyper;
-
-    const size_t SIGMA;
-
     size_t nr_quantizers;
-
     size_t polyploidy;
-
-    std::map<size_t, double> calcIndelLikelihoods(size_t numberOfEvidence);
 
     double NO_INDEL_LIKELIHOOD;
     double INDEL_LIKELIHOOD;

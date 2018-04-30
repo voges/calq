@@ -23,7 +23,7 @@ double SoftclipSpreader::push(double score, size_t softclips) {
         forwardSpread.push_back(std::pair<size_t, double>(clipped+1, score));
 
         // Change past positions
-        for (int i = buffer.size()-clipped; i < buffer.size(); ++i) {
+        for (int i = buffer.size()-clipped; i < static_cast<int>(buffer.size()); ++i) {
             buffer[i] += score;
         }
     }

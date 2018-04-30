@@ -123,7 +123,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
             // std::cerr << "Softclips" << " detected!" << std::endl;
 
             // Clips to the right
-            for (int l = 0; l < opLen; ++l) {
+            for (int l = 0; l < static_cast<int>(opLen); ++l) {
                 if (this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD) {
                     ++front_hq_ctr;
                 } else {
@@ -132,7 +132,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
             }
 
             // Clips to the left
-            for (int l = opLen-1; l >= 0; --l) {
+            for (int l = static_cast<int>(opLen-1); l >= 0; --l) {
                 if (this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD) {
                     ++back_hq_ctr;
                 } else {
