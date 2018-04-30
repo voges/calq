@@ -60,6 +60,8 @@ void gaussKernelTest() {
     equals(k.calcMinSize(0.01), 7);
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
+
 void filterBufferTest() {
     FilterBuffer buffer([](size_t pos, size_t size)->double{return pos/static_cast<double>(size-1);}, 3);
 
@@ -76,6 +78,8 @@ void filterBufferTest() {
     // Test offset
     equals(buffer.getOffset(), 1);
 }
+
+// ----------------------------------------------------------------------------------------------------------------------
 
 void circBufferTest() {
     CircularBuffer<int> buffer(3, 0);

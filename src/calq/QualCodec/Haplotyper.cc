@@ -37,6 +37,9 @@ size_t Haplotyper::getOffset() const {
     return buffer.getOffset() + spreader.getOffset() - 1;
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
+
+
 double log10sum(double a, double b) {
     if (a > b) {
         log10sum(b, a);
@@ -45,6 +48,8 @@ double log10sum(double a, double b) {
     }
     return b + log10(1+ pow(10.0, -(b-a)));
 }
+
+// ----------------------------------------------------------------------------------------------------------------------
 
 // Calc priors like in GATK
 std::vector<double> Haplotyper::calcPriors(double hetero) {
@@ -59,6 +64,8 @@ std::vector<double> Haplotyper::calcPriors(double hetero) {
 
     return result;
 }
+
+// ----------------------------------------------------------------------------------------------------------------------
 
 std::vector<double> Haplotyper::calcNonRefLikelihoods(char ref, const std::string& seqPile, const std::string& qualPile) {
     std::vector<double> result(polyploidy+1, 0.0);
@@ -75,6 +82,8 @@ std::vector<double> Haplotyper::calcNonRefLikelihoods(char ref, const std::strin
 
     return result;
 }
+
+// ----------------------------------------------------------------------------------------------------------------------
 
 double Haplotyper::calcActivityScore(char ref, const std::string& seqPile, const std::string& qualPile, double heterozygosity) {
     if (ref == 'N') {
@@ -119,6 +128,8 @@ double Haplotyper::calcActivityScore(char ref, const std::string& seqPile, const
     return 1.0 - exp10(posteriori0);
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
+
 size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference) {
     // Empty input
     if (seqPile.empty()) {
@@ -160,4 +171,7 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
 
     return quant;
 }
+
+// ----------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------
 
