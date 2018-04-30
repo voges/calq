@@ -12,7 +12,6 @@
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/log.h"
-#include "config.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
 
@@ -28,7 +27,7 @@ CalqEncoder::CalqEncoder(const Options &options)
       qualityValueOffset_(options.qualityValueOffset),
       referenceFileNames_(options.referenceFileNames),
       samFile_(options.inputFileName),
-      fastaFile_(referenceFileNames_[0]){
+      fastaFile_(referenceFileNames_[0]) {
     if (options.blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }

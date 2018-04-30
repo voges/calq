@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "config.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMPileupDeque.h"
 #include "IO/SAM/SAMRecord.h"

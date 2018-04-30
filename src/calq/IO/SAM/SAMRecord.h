@@ -26,7 +26,7 @@ class SAMRecord {
     explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord(void);
 
-    void addToPileupQueue(SAMPileupDeque *samPileupDeque, const FASTAFile& f) const;
+    void addToPileupQueue(SAMPileupDeque *samPileupDeque, const FASTAFile& f, size_t qualityOffset) const;
 
     bool isMapped(void) const;
     void printLong(void) const;
@@ -51,7 +51,6 @@ class SAMRecord {
 
  private:
     void check(void);
- private:
     bool mapped_;
 };
 

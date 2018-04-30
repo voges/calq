@@ -1,11 +1,20 @@
+/** @file HaplotyperTest.cc
+ *  @brief This file contains Test cases for the haplotyper
+ */
+
+// Copyright 2015-2018 Leibniz Universitaet Hannover
+
+#include "QualCodec/HaplotyperTest.h"
+
+#include <iostream>
+
 #include "FilterBuffer.h"
 #include "SoftclipSpreader.h"
 #include "Haplotyper.h"
 
-#include <iostream>
+// ----------------------------------------------------------------------------------------------------------------------
 
-
-void equals(double a, double b, double EPSILON = 0.0001){
+void equals(double a, double b, double EPSILON = 0.0001) {
     if ((a-EPSILON) < b && (a+EPSILON) > b) {
         std::cout << "Test passed, " << a << " equals " << b << " !" << std::endl;
     } else {
@@ -13,14 +22,16 @@ void equals(double a, double b, double EPSILON = 0.0001){
     }
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
 
-void gaussKernelTest () {
-    //Test variance 1
+
+void gaussKernelTest() {
+    // Test variance 1
     GaussKernel k(1.0);
 
     double buffer[63];
-    for(size_t i=0;i<63;++i){
-        buffer[i] = k.calcValue(i,63);
+    for (size_t i = 0; i < 63; ++i) {
+        buffer[i] = k.calcValue(i, 63);
     }
 
     equals(buffer[31], 0.3989);
@@ -29,11 +40,11 @@ void gaussKernelTest () {
     equals(buffer[33], 0.0539);
     equals(buffer[29], 0.0539);
 
-    //Test variance 17
+    // Test variance 17
     GaussKernel k2(17.0);
     double buffer2[127];
-    for(size_t i=0;i<127;++i){
-        buffer2[i] = k2.calcValue(i,127);
+    for (size_t i = 0; i < 127; ++i) {
+        buffer2[i] = k2.calcValue(i, 127);
     }
 
     equals(buffer2[63], 0.0234);
@@ -44,15 +55,15 @@ void gaussKernelTest () {
     equals(buffer2[41], 0.0101);
     equals(buffer2[85], 0.0101);
 
-    //Test length limits
-    equals(k2.calcMinSize(0.01),47);
-    equals(k.calcMinSize(0.01),7);
+    // Test length limits
+    equals(k2.calcMinSize(0.01), 47);
+    equals(k.calcMinSize(0.01), 7);
 }
 
-void filterBufferTest(){
-    FilterBuffer buffer([](size_t pos, size_t size)->double{return pos/(double)(size-1);}, 3);
+void filterBufferTest() {
+    FilterBuffer buffer([](size_t pos, size_t size)->double{return pos/static_cast<double>(size-1);}, 3);
 
-    //Test "Convolution"
+    // Test "Convolution"
     equals(buffer.filter(), 0);
     buffer.push(1);
     equals(buffer.filter(), 1);
@@ -62,113 +73,113 @@ void filterBufferTest(){
     equals(buffer.filter(), 4);
     buffer.push(4);
 
-    //Test offset
+    // Test offset
     equals(buffer.getOffset(), 1);
 }
 
-void circBufferTest(){
+void circBufferTest() {
     CircularBuffer<int> buffer(3, 0);
 
-    //Test size
+    // Test size
     equals(buffer.size(), 3);
     buffer.push(1);
     buffer.push(2);
     buffer.push(3);
 
-    //Test access
+    // Test access
     equals(buffer.front(), 3);
     equals(buffer[2], 3);
     equals(buffer.back(), 1);
     equals(buffer[0], 1);
     equals(buffer[1], 2);
 
-    //Test push
+    // Test push
     equals(buffer.push(0), 1);
     equals(buffer.push(0), 2);
     equals(buffer.push(0), 3);
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
 
-void baseSpreaderTest(){
-    SoftclipSpreader b(5,3);
+void baseSpreaderTest() {
+    SoftclipSpreader b(5, 3);
 
-    equals(b.getOffset(),5);
+    equals(b.getOffset(), 5);
 
-    //Push 0 out
+    // Push 0 out
 
-    equals(b.push(1,1),0);
-    equals(b.push(1,2),0);
-    equals(b.push(1,2),0);
-    equals(b.push(1,2),0);
-    equals(b.push(1,3),0);
+    equals(b.push(1, 1), 0);
+    equals(b.push(1, 2), 0);
+    equals(b.push(1, 2), 0);
+    equals(b.push(1, 2), 0);
+    equals(b.push(1, 3), 0);
 
-    //One base not affected by spread
-    equals(b.push(1,3),1);
+    // One base not affected by spread
+    equals(b.push(1, 3), 1);
 
-    //One base affected by 1 spread
-    equals(b.push(1,2),2);
+    // One base affected by 1 spread
+    equals(b.push(1, 2), 2);
 
-    //Six bases affected by 2 spreads
-    equals(b.push(1,2),3);
-    equals(b.push(1,2),3);
-    equals(b.push(1,2),3);
-    equals(b.push(1,2),3);
-    equals(b.push(1,2),3);
-    equals(b.push(1,2),3);
+    // Six bases affected by 2 spreads
+    equals(b.push(1, 2), 3);
+    equals(b.push(1, 2), 3);
+    equals(b.push(1, 2), 3);
+    equals(b.push(1, 2), 3);
+    equals(b.push(1, 2), 3);
+    equals(b.push(1, 2), 3);
 
-    //One base affected by 1 spread
-    equals(b.push(1,1),2);
+    // One base affected by 1 spread
+    equals(b.push(1, 1), 2);
 
-    //No bases affected anymore
-    equals(b.push(1,0),1);
-    equals(b.push(1,0),1);
-
-
-
+    // No bases affected anymore
+    equals(b.push(1, 0), 1);
+    equals(b.push(1, 0), 1);
 }
 
-void fullHaploTest(){
+// ----------------------------------------------------------------------------------------------------------------------
+
+void fullHaploTest() {
     Haplotyper h(5, 2, 33, 8, 5, 3, 5);
 
     equals(h.getOffset(), 11);
 
-    //First 5 pushes inside basespreader
-    for(int i = 0;i< 5;++i) {
-        equals(h.push("C","}",0,0,'A'),0);
+    // First 5 pushes inside basespreader
+    for (int i = 0; i < 5; ++i) {
+        equals(h.push("C", "}", 0, 'A'), 0);
     }
 
-    //next 11 pushes inside filterbuffer approaching 0.73
-    for(int i = 0;i< 10;++i) {
-        h.push("C","}",0,0,'A');
+    // next 11 pushes inside filterbuffer approaching 0.73
+    for (int i = 0; i < 10; ++i) {
+        h.push("C", "}", 0, 'A');
     }
-    equals(h.push("C","}",0,0,'A'),0.72946);
-    equals(h.push("C","}",0,0,'A'),0.72946);
+    equals(h.push("C", "}", 0, 'A'), 0.72946);
+    equals(h.push("C", "}", 0, 'A'), 0.72946);
 
-    //reset
+    // reset
     Haplotyper h2(5, 2, 33, 8, 5, 3, 5);
 
-    h2.push("CCC","}}}",15,0,'A');
+    h2.push("CCC", "}}}", 15, 'A');
 
-    //push spreaded bases into filterbuffer
-    for(int i = 0;i< 8;++i) {
-         h2.push("CCCCCCCCCCCCCC","}}}}}}}}}}}}",0,0,'C'); //Activity close to 0
+    // push spreaded bases into filterbuffer
+    for (int i = 0; i < 8; ++i) {
+         h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');  // Activity close to 0
     }
-    //Reach maximum
-    equals(h2.push("CCCCCCCCCCCCCC","}}}}}}}}}}}}",0,0,'C'),0.759463);
-    equals(h2.push("CCCCCCCCCCCCCC","}}}}}}}}}}}}",0,0,'C'),0.809495);
-    equals(h2.push("CCCCCCCCCCCCCC","}}}}}}}}}}}}",0,0,'C'),0.7595);
+    // Reach maximum
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.759463);
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.809495);
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.7595);
 
-    //Reach minimum
-    for(int i = 0;i< 9;++i) {
-         h2.push("CCCCCCCCCCCCCC","}}}}}}}}}}}}",0,0,'C');
+    // Reach minimum
+    for (int i = 0; i < 9; ++i) {
+         h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');
     }
 
-    equals(h2.push("CCCCCCCCCCCCCC","}}}}}}}}}}}}",0,0,'C'),0.0005);
-
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.0005);
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
 
-void haplotyperTest(){
+void haplotyperTest() {
     std::cout << "****Starting haplotyper test suite****" << std::endl;
     std::cout << "-> BaseSpreader tests" << std::endl;
     baseSpreaderTest();
@@ -183,4 +194,5 @@ void haplotyperTest(){
     std::cout << "****Haplotyper test suite finished****" << std::endl;
 }
 
-
+// ----------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------

@@ -16,7 +16,7 @@
 namespace calq {
 
 class Genotyper {
-public:
+ public:
     Genotyper(const int &polyploidy,
               const int &qualOffset,
               const int &nrQuantizers);
@@ -30,7 +30,7 @@ public:
     const std::map<std::string, double>& getGenotypelikelihoods(const std::string &seqPileup,
                                                                 const std::string &qualPileup);
 
-private:
+ private:
     void initLikelihoods(void);
     void resetLikelihoods(void);
     void computeGenotypeLikelihoods(const std::string &seqPileup,

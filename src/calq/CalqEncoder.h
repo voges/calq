@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "Common/Options.h"
-#include "config.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMFile.h"
 #include "IO/FASTA/FASTAFile.h"
@@ -35,7 +34,7 @@ class CalqEncoder {
     int qualityValueOffset_;
     std::vector<std::string> referenceFileNames_;
     SAMFile samFile_;
-    FASTAFile fastaFile_; //Reference
+    FASTAFile fastaFile_;  // Reference
 };
 
 }  // namespace calq

@@ -31,9 +31,7 @@ class SAMPileup {
 
     char ref;
 
-    uint16_t hq_softcounter; //High quality softclips next to this position
-
-    size_t indelEvidence; //Number of reads indicating an undetected indel
+    uint16_t hq_softcounter;  // High quality softclips next to this position
 };
 
 }  // namespace calq

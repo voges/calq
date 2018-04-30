@@ -12,11 +12,11 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <algorithm>
 
 #include "Common/constants.h"
 #include "Common/Exceptions.h"
 #include "Common/log.h"
-#include "config.h"
 #include "QualCodec/Quantizers/UniformQuantizer.h"
 #include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
 
@@ -98,19 +98,20 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
         samPileupDeque_.setPosMax(samRecord.posMax);
     }
 
-    samRecord.addToPileupQueue(&samPileupDeque_, fasta);
+    samRecord.addToPileupQueue(&samPileupDeque_, fasta, qualityValueOffset_);
     samRecordDeque_.push_back(samRecord);
 
     while (samPileupDeque_.posMin() < samRecord.posMin) {
-        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter, samPileupDeque_.front().indelEvidence, fasta.references.at(samRecord.rname)[samPileupDeque_.posMin()]);
+        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
+                                 fasta.references.at(samRecord.rname)[samPileupDeque_.posMin()]);
         ++posCounter;
-        //Start not until pipeline is full
-        if(posCounter > haplotyper_.getOffset()){
+        // Start not until pipeline is full
+        if (posCounter > haplotyper_.getOffset()) {
             mappedQuantizerIndices_.push_back(k);
         }
         samPileupDeque_.pop_front();
     }
-    //Start not until pipeline is full
+    // Start not until pipeline is full
     while (samRecordDeque_.front().posMax+haplotyper_.getOffset() < samPileupDeque_.posMin()) {
         encodeMappedQual(samRecordDeque_.front());
         samRecordDeque_.pop_front();
@@ -123,22 +124,23 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
 void QualEncoder::finishBlock(const FASTAFile& fasta, const std::string& section) {
     // Compute all remaining quantizers
     while (samPileupDeque_.empty() == false) {
-        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter, samPileupDeque_.front().indelEvidence, fasta.references.at(section)[samPileupDeque_.posMin()]);
+        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
+                                 fasta.references.at(section)[samPileupDeque_.posMin()]);
         ++posCounter;
-        if(posCounter > haplotyper_.getOffset()){
+        if (posCounter > haplotyper_.getOffset()) {
             mappedQuantizerIndices_.push_back(k);
         }
         samPileupDeque_.pop_front();
     }
 
-    //Empty pipeline
-    size_t offset = std::min(posCounter,haplotyper_.getOffset());
-    for(size_t i=0;i<offset;++i){
-        int k = haplotyper_.push("", "", 0, 0, 'N');
+    // Empty pipeline
+    size_t offset = std::min(posCounter, haplotyper_.getOffset());
+    for (size_t i = 0; i < offset; ++i) {
+        int k = haplotyper_.push("", "", 0, 'N');
         mappedQuantizerIndices_.push_back(k);
     }
 
-    //TODO: borders of blocks probably too low activity
+    // TODO(muenteferi): borders of blocks probably too low activity
 
     // Process all remaining records from queue
     while (samRecordDeque_.empty() == false) {
@@ -146,7 +148,7 @@ void QualEncoder::finishBlock(const FASTAFile& fasta, const std::string& section
         samRecordDeque_.pop_front();
     }
 
-    posCounter=0;
+    posCounter = 0;
 }
 
 size_t QualEncoder::writeBlock(CQFile *cqFile) {
@@ -222,43 +224,43 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord) {
     size_t quantizerIndicesIdx = samRecord.posMin - posOffset_;
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-       if (isdigit(samRecord.cigar[cigarIdx])) {
-           opLen = opLen*10 + (size_t)samRecord.cigar[cigarIdx] - (size_t)'0';
-           continue;
-       }
+        if (isdigit(samRecord.cigar[cigarIdx])) {
+            opLen = opLen*10 + (size_t)samRecord.cigar[cigarIdx] - (size_t)'0';
+            continue;
+        }
 
-       switch (samRecord.cigar[cigarIdx]) {
-       case 'M':
-       case '=':
-       case 'X':
-           // Encode opLen quality values with computed quantizer indices
-           for (size_t i = 0; i < opLen; i++) {
-               int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
-               int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
-               int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
-               mappedQualityValueIndices_.at(quantizerIndex).push_back(qualityValueIndex);
-           }
-           break;
-       case 'I':
-       case 'S':
-           // Encode opLen quality values with max quantizer index
-           for (size_t i = 0; i < opLen; i++) {
-               int q = (int)samRecord.qual[qualIdx++] - qualityValueOffset_;
-               int qualityValueIndex = quantizers_.at(QUANTIZER_IDX_MAX).valueToIndex(q);
-               mappedQualityValueIndices_.at(QUANTIZER_IDX_MAX).push_back(qualityValueIndex);
-           }
-           break;
-       case 'D':
-       case 'N':
-           quantizerIndicesIdx += opLen;
-           break;  // do nothing as these bases are not present
-       case 'H':
-       case 'P':
-           break;  // these have been clipped
-       default:
-           throwErrorException("Bad CIGAR string");
-       }
-       opLen = 0;
+        switch (samRecord.cigar[cigarIdx]) {
+        case 'M':
+        case '=':
+        case 'X':
+            // Encode opLen quality values with computed quantizer indices
+            for (size_t i = 0; i < opLen; i++) {
+                int q = static_cast<int>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
+                int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
+                int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
+                mappedQualityValueIndices_.at(quantizerIndex).push_back(qualityValueIndex);
+            }
+            break;
+        case 'I':
+        case 'S':
+            // Encode opLen quality values with max quantizer index
+            for (size_t i = 0; i < opLen; i++) {
+                int q = static_cast<int>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
+                int qualityValueIndex = quantizers_.at(QUANTIZER_IDX_MAX).valueToIndex(q);
+                mappedQualityValueIndices_.at(QUANTIZER_IDX_MAX).push_back(qualityValueIndex);
+            }
+            break;
+        case 'D':
+        case 'N':
+            quantizerIndicesIdx += opLen;
+            break;  // do nothing as these bases are not present
+        case 'H':
+        case 'P':
+            break;  // these have been clipped
+        default:
+            throwErrorException("Bad CIGAR string");
+        }
+        opLen = 0;
     }
 }
 

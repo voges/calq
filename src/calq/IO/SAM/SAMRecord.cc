@@ -2,10 +2,9 @@
  *  @brief This file contains the implementation of the SAMRecord class.
  */
 
-// Copyright 2015-2017 Leibniz Universitaet Hannover
+// Copyright 2015-2018 Leibniz Universitaet Hannover
 
 #include "IO/SAM/SAMRecord.h"
-#include "IO/FASTA/FASTAFile.h"
 
 #include <string.h>
 #include <queue>
@@ -13,6 +12,7 @@
 
 #include "Common/Exceptions.h"
 #include "Common/log.h"
+#include "IO/FASTA/FASTAFile.h"
 
 namespace calq {
 
@@ -77,7 +77,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
 SAMRecord::~SAMRecord(void) {}
 
-void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFile& f) const {
+void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFile& f, size_t qualityOffset) const {
     if (samPileupDeque_->empty() == true) {
         throwErrorException("samPileupQueue is empty");
     }
@@ -91,22 +91,16 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
     size_t idx = 0;
     size_t pileupIdx = posMin - samPileupDeque_->posMin();
 
-    const size_t maxIndelSize = 10; //TODO: Command line arguments
-
-    bool justfoundEvidence=false; //Memorize if base before is evidence of indel. Used to ignore evidence if there is already an indel after.
-    //TODO: just check in the cigar string and save some time by skippingisIndelEvidence
-
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
             opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
             continue;
         }
 
-        size_t front_hq_ctr=0; //Score before clip
-        size_t back_hq_ctr=0;  //Score after clip
+        size_t front_hq_ctr = 0;  // Score before clip
+        size_t back_hq_ctr = 0;  // Score after clip
 
-        //TODO: use offset parameter and add new cmd parameter for phred value
-        const char HQ_SOFTCLIP_THRESHOLD = 29 + 64;
+        const char HQ_SOFTCLIP_THRESHOLD = 29 + qualityOffset;
 
 
         switch (cigar[cigarIdx]) {
@@ -124,52 +118,39 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
             break;
         case 'S':
 
-            //Process softclips
+            // Process softclips
 
-            std::cerr << "Softclips" << " detected!" << std::endl;
+            // std::cerr << "Softclips" << " detected!" << std::endl;
 
-            //Clips to the right
-            for(int l=0;l<opLen;++l){
-                if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
+            // Clips to the right
+            for (int l = 0; l < opLen; ++l) {
+                if (this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD) {
                     ++front_hq_ctr;
                 } else {
                     break;
                 }
-
             }
 
-            //Clips to the left
-            for(int l=opLen-1;l>=0;--l){
-                if(this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD){
+            // Clips to the left
+            for (int l = opLen-1; l >= 0; --l) {
+                if (this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD) {
                     ++back_hq_ctr;
                 } else {
                     break;
                 }
-
             }
 
-            //Decide which to use
-            if(idx-1 > 0)
+            // Decide which to use
+            if (idx-1 > 0)
                 samPileupDeque_->pileups_[pileupIdx].hq_softcounter += front_hq_ctr;
-            if(idx+opLen < this->qual.size())
+            if (idx+opLen < this->qual.size())
                 samPileupDeque_->pileups_[pileupIdx+1].hq_softcounter += back_hq_ctr;
 
         case 'I':
-
-            //Take back evidence increment if insertion follows directly
-            if(justfoundEvidence){
-                samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
-                justfoundEvidence = false;
-            }
             idx += opLen;
             break;
         case 'D':
         case 'N':
-            //Take back evidence increment if deletion follows directly
-            if(justfoundEvidence){
-                samPileupDeque_->pileups_[pileupIdx-1].indelEvidence -= 1;
-                justfoundEvidence = false;
-            }
             pileupIdx += opLen;
             break;
         case 'H':

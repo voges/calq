@@ -13,6 +13,7 @@
 #include "Common/Exceptions.h"
 #include "Common/log.h"
 
+
 namespace calq {
 
 static int combinationsWithRepetitions(std::vector<std::string> *genotypeAlphabet,
@@ -200,7 +201,6 @@ const std::map<std::string, double>& Genotyper::getGenotypelikelihoods(const std
                                                             const std::string &qualPileup) {
     computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
     return genotypeLikelihoods_;
-
 }
 
 }  // namespace calq
