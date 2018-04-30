@@ -15,6 +15,8 @@
 
 #include <cmath>
 
+// ----------------------------------------------------------------------------------------------------------------------
+
 // Returns score, takes seq and qual pileup and position
 Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
                        size_t minHQSoftclip_streak, size_t gaussRadius)
@@ -29,6 +31,7 @@ Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nr
     INDEL_LIKELIHOOD = -4.5;
 }
 
+// ----------------------------------------------------------------------------------------------------------------------
 
 size_t Haplotyper::getOffset() const {
     return buffer.getOffset() + spreader.getOffset() - 1;
