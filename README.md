@@ -4,7 +4,7 @@
 
 ---
 
-This is the official repository for the development of the CALQ software. It is hosted at GitHub (https://github.com/voges/calq) and Bitbucket (https://bitbucket.org/voges/calq).
+This is the official repository for the development of the CALQ software. It is hosted at GitHub (https://github.com/voges/calq).
 
 ## Build instructions
 
@@ -16,13 +16,9 @@ CALQ has been tested on the following systems:
 * openSUSE Tumbleweed 20170308 with GCC 6.3.1
 * macOS Sierra (version 10.12.3) with Apple LLVM (i.e., Clang) version 8.0.0.
 
-Clone the CALQ repository with either
+Clone the CALQ repository with
 
     git clone https://github.com/voges/calq.git
-
-or
-
-    git clone https://bitbucket.org/voges/calq.git
 
 Build the executable from the command line with the following commands; alternatively use the CMake GUI.
 
