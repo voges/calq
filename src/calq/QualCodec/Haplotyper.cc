@@ -17,11 +17,13 @@
 
 // ----------------------------------------------------------------------------------------------------------------------
 
+namespace calq {
+
 // Returns score, takes seq and qual pileup and position
 Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
                        size_t minHQSoftclip_streak, size_t gaussRadius)
-                       : SIGMA(sigma), kernel(sigma), spreader(maxHQSoftclip_propagation, minHQSoftclip_streak), genotyper(ploidy, qualOffset, nrQuantizers),
-                       nr_quantizers(nrQuantizers), polyploidy(ploidy) {
+                       : SIGMA(sigma), kernel(sigma), spreader(maxHQSoftclip_propagation, minHQSoftclip_streak, true),
+                         genotyper(ploidy, qualOffset, nrQuantizers), nr_quantizers(nrQuantizers), polyploidy(ploidy) {
     double THRESHOLD = 0.0000001;
     size_t size = this->kernel.calcMinSize(THRESHOLD, gaussRadius*2+1);
 
@@ -90,7 +92,10 @@ double Haplotyper::calcActivityScore(char ref, const std::string& seqPile, const
         return 1.0;
     }
     std::vector<double> likelihoods = calcNonRefLikelihoods(ref, seqPile, qualPile);
-    std::vector<double> priors = calcPriors(heterozygosity);
+    static std::vector<double> priors;
+    if (priors.size() == 0) {
+        priors = calcPriors(heterozygosity);
+    }
 
     // --------------Calc Posteriors like in GATK ------------------
     double posteriori0 = likelihoods[0] + priors[0];
@@ -150,6 +155,7 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
 
     size_t quant =  std::min(activity * nr_quantizers / 0.02, static_cast<double>(nr_quantizers-1));
 
+#define CALQ_DEBUG
 #ifdef CALQ_DEBUG
     static CircularBuffer<std::string> debug(this->getOffset(), "\n");
     std::stringstream s;
@@ -171,6 +177,7 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
 
     return quant;
 }
+}  // namespace calq
 
 // ----------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------

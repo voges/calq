@@ -17,6 +17,8 @@
 
 // ----------------------------------------------------------------------------------------------------------------------
 
+namespace calq {
+
 // Samples a normal distribution
 class GaussKernel {
  private:
@@ -64,6 +66,7 @@ class FilterBuffer {
     // DIstance between buffer center and borders
     size_t getOffset() const;
 };
+}  // namespace calq
 
 // ----------------------------------------------------------------------------------------------------------------------
 

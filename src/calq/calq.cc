@@ -1,4 +1,5 @@
-#ifndef CALQ_DEBUG
+#define CALQ_TEST 0
+#if !CALQ_TEST
 /** @file calq.cc
  *  @brief This file contains the main function of CALQ.
  */
@@ -132,8 +133,8 @@ int main(int argc, char *argv[]) {
 
 #include "QualCodec/HaplotyperTest.h"
 
-int main(int argc, char *argv[]) {
-    haplotyperTest();
+int main() {
+    calq::haplotyperTest();
 }
 
 #endif

@@ -11,8 +11,11 @@
 #include "FilterBuffer.h"
 #include "SoftclipSpreader.h"
 #include "Haplotyper.h"
+#include "QualCodec/Quantizers/LloydMaxQuantizer.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
+
+namespace calq {
 
 void equals(double a, double b, double EPSILON = 0.0001) {
     if ((a-EPSILON) < b && (a+EPSILON) > b) {
@@ -76,7 +79,7 @@ void filterBufferTest() {
     buffer.push(4);
 
     // Test offset
-    equals(buffer.getOffset(), 1);
+    equals(buffer.getOffset(), 2);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -105,8 +108,40 @@ void circBufferTest() {
 
 // ----------------------------------------------------------------------------------------------------------------------
 
+void lloydQuantizerTest() {
+    // Uniform distribution
+    calq::LloydMaxQuantizer q(0, 99, 10);
+    for (int i = 0; i <= 99; ++i) {
+        q.addToPdf(i);
+    }
+    q.build();
+
+    equals(q.valueToIndex(99), 9);
+    equals(q.valueToIndex(10), 1);
+    equals(q.valueToIndex(9), 0);
+    equals(q.valueToIndex(38), 3);
+    equals(q.valueToIndex(0), 0);
+
+    // Non-Uniform
+    calq::LloydMaxQuantizer q2(1, 100, 10);
+    for (int i = 1; i <= 100; ++i) {
+        q2.addToPdf(i, pow(abs(i - 50), 4));
+    }
+
+    q2.build();
+
+    equals(q2.valueToIndex(100), 9);
+    equals(q2.valueToIndex(94), 8);
+    equals(q2.valueToIndex(11), 1);
+    equals(q2.valueToIndex(50), 5);
+    equals(q2.valueToIndex(73), 5);
+    equals(q2.valueToIndex(1), 0);
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
 void baseSpreaderTest() {
-    SoftclipSpreader b(5, 3);
+    SoftclipSpreader b(5, 3, false);
 
     equals(b.getOffset(), 5);
 
@@ -127,6 +162,7 @@ void baseSpreaderTest() {
     // Six bases affected by 2 spreads
     equals(b.push(1, 2), 3);
     equals(b.push(1, 2), 3);
+
     equals(b.push(1, 2), 3);
     equals(b.push(1, 2), 3);
     equals(b.push(1, 2), 3);
@@ -134,6 +170,7 @@ void baseSpreaderTest() {
 
     // One base affected by 1 spread
     equals(b.push(1, 1), 2);
+
 
     // No bases affected anymore
     equals(b.push(1, 0), 1);
@@ -145,7 +182,7 @@ void baseSpreaderTest() {
 void fullHaploTest() {
     Haplotyper h(5, 2, 33, 8, 5, 3, 5);
 
-    equals(h.getOffset(), 11);
+    equals(h.getOffset(), 10);
 
     // First 5 pushes inside basespreader
     for (int i = 0; i < 5; ++i) {
@@ -156,8 +193,8 @@ void fullHaploTest() {
     for (int i = 0; i < 10; ++i) {
         h.push("C", "}", 0, 'A');
     }
-    equals(h.push("C", "}", 0, 'A'), 0.72946);
-    equals(h.push("C", "}", 0, 'A'), 0.72946);
+    equals(h.push("C", "}", 0, 'A'), 7);
+    equals(h.push("C", "}", 0, 'A'), 7);
 
     // reset
     Haplotyper h2(5, 2, 33, 8, 5, 3, 5);
@@ -169,16 +206,16 @@ void fullHaploTest() {
          h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');  // Activity close to 0
     }
     // Reach maximum
-    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.759463);
-    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.809495);
-    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.7595);
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 7);
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 7);
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 7);
 
     // Reach minimum
     for (int i = 0; i < 9; ++i) {
          h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');
     }
 
-    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0.0005);
+    equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -193,10 +230,13 @@ void haplotyperTest() {
     gaussKernelTest();
     std::cout << "-> Filter buffer tests" << std::endl;
     filterBufferTest();
+    std::cout << "-> Lloyd-max quantizer tests" << std::endl;
+    lloydQuantizerTest();
     std::cout << "-> Full Haplotyper tests" << std::endl;
     fullHaploTest();
     std::cout << "****Haplotyper test suite finished****" << std::endl;
 }
+}  // namespace calq
 
 // ----------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------

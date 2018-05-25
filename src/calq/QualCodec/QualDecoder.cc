@@ -14,44 +14,6 @@
 
 namespace calq {
 
-static size_t readLength(const std::string &cigar) {
-    size_t readLen = 0;
-    size_t cigarIdx = 0;
-    size_t cigarLen = cigar.length();
-    size_t opLen = 0;  // length of current CIGAR operation
-
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-       if (isdigit(cigar[cigarIdx])) {
-           opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
-           continue;
-       }
-
-       switch (cigar[cigarIdx]) {
-       case 'M':
-       case '=':
-       case 'X':
-           readLen += opLen;
-           break;
-       case 'I':
-       case 'S':
-           readLen += opLen;
-           break;
-       case 'D':
-       case 'N':
-           break;  // do nothing as these bases are not present
-       case 'H':
-       case 'P':
-           break;  // these have been clipped
-       default:
-           throwErrorException("Bad CIGAR string");
-       }
-
-       opLen = 0;
-    }
-
-    return readLen;
-}
-
 QualDecoder::QualDecoder(void)
     : posOffset_(0),
       qualityValueOffset_(0),
@@ -158,7 +120,7 @@ size_t QualDecoder::readBlock(CQFile *cqFile) {
     }
 
     // Read mapped quality value indices
-    for (int i = 0; i < quantizers_.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(quantizers_.size()); ++i) {
         qvi_.push_back("");
         qviIdx_.push_back(0);
         uint8_t mqviFlags = 0;

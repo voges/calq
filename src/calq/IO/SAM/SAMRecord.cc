@@ -14,6 +14,9 @@
 #include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 
+// If 1: consider softclips only at the end of the read. Id 0: consider softclips everywhere
+#define BORDERSTRATEGY 0
+
 namespace calq {
 
 SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
@@ -70,7 +73,6 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
             }
             opLen = 0;
         }
-
         posMax -= 1;
     }
 }
@@ -91,14 +93,13 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
     size_t idx = 0;
     size_t pileupIdx = posMin - samPileupDeque_->posMin();
 
+    size_t softclips = 0;
+
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
             opLen = opLen*10 + (size_t)cigar[cigarIdx] - (size_t)'0';
             continue;
         }
-
-        size_t front_hq_ctr = 0;  // Score before clip
-        size_t back_hq_ctr = 0;  // Score after clip
 
         const char HQ_SOFTCLIP_THRESHOLD = 29 + qualityOffset;
 
@@ -117,35 +118,11 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
             }
             break;
         case 'S':
-
-            // Process softclips
-
-            // std::cerr << "Softclips" << " detected!" << std::endl;
-
-            // Clips to the right
             for (int l = 0; l < static_cast<int>(opLen); ++l) {
                 if (this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD) {
-                    ++front_hq_ctr;
-                } else {
-                    break;
+                    ++softclips;
                 }
             }
-
-            // Clips to the left
-            for (int l = static_cast<int>(opLen-1); l >= 0; --l) {
-                if (this->qual[idx+l] >= HQ_SOFTCLIP_THRESHOLD) {
-                    ++back_hq_ctr;
-                } else {
-                    break;
-                }
-            }
-
-            // Decide which to use
-            if (idx-1 > 0)
-                samPileupDeque_->pileups_[pileupIdx].hq_softcounter += front_hq_ctr;
-            if (idx+opLen < this->qual.size())
-                samPileupDeque_->pileups_[pileupIdx+1].hq_softcounter += back_hq_ctr;
-
         case 'I':
             idx += opLen;
             break;
@@ -161,6 +138,11 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque *samPileupDeque_, const FASTAFil
         }
 
         opLen = 0;
+    }
+
+    // Write clips
+    for (size_t i = posMin - samPileupDeque_->posMin(); i <= pileupIdx; ++i) {
+        samPileupDeque_->pileups_[pileupIdx].hq_softcounter += softclips;
     }
 }
 
