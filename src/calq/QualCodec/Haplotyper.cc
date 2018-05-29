@@ -155,8 +155,8 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
 
     size_t quant =  std::min(activity * nr_quantizers / 0.02, static_cast<double>(nr_quantizers-1));
 
-#define CALQ_DEBUG
-#ifdef CALQ_DEBUG
+#define CALQ_DEBUG 0
+#if CALQ_DEBUG
     static CircularBuffer<std::string> debug(this->getOffset(), "\n");
     std::stringstream s;
 

@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "QualCodec/Quantizers/Quantizer.h"
+#include "Common/Exceptions.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 
@@ -41,6 +42,21 @@ class LloydMaxQuantizer : public Quantizer{
     void resetPdf();
 
     void build();
+
+    std::vector<double> exportValues();
+
+    template<typename T>
+    void importValues(const std::vector<T>& imp) {
+        if (imp.size() != steps) {
+            throwErrorException("Number of values does not match quantizer size");
+        }
+
+        values.clear();
+
+        for (T val : imp) {
+            values.push_back(static_cast<double>(val));
+        }
+    }
 };
 }  // namespace calq
 
