@@ -86,6 +86,26 @@ void CalqEncoder::encode(void) {
             }
         }
 
+        // Compute quantizers
+//         int numQuantizerSteps = QUANTIZER_STEPS_MIN;
+//         int quantizerIdx = QUANTIZER_IDX_MIN;
+//         for (int i = 0; i < NR_QUANTIZERS; ++i) {
+//             Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin, qualityValueMax, numQuantizerSteps);
+// 
+//             LloydMaxQuantizer lloydMaxQuantizer(qualityValueMin_, qualityValueMax_, numQuantizerSteps);
+//             for (auto const &samRecord : samFile_.currentBlock.records) {
+//                 if (samRecord.isMapped() == true) {
+//                     for (auto const &q : samRecord.qual) {
+//                         lloydMaxQuantizer.addToPdf(q);
+//                     }
+//                 }
+//             }
+//             lloydMaxQuantizer.build();
+//             quantizers.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
+//             numQuantizerSteps++;
+//             quantizerIdx++;
+//         }
+
         // Encode the quality values
         QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_);
         for (auto const &samRecord : samFile_.currentBlock.records) {
