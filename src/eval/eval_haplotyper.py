@@ -7,10 +7,10 @@ datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"]
 subsets = ["3", "11", "20"]
 
 filtersize = ["10", "17", "25"]
-filtertype = ["Gauss", "Rectangle"]
+filtertype = ["Gauss"]
 quantizerType = ["Uniform", "Lloyd"]
 
-quantSteps = [["2", "8"], ["4", "4"]]
+quantSteps = [["2", "8"]]
 
 squashed = ["", "--noSquash"]
 
