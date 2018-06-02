@@ -1,5 +1,3 @@
-#define CALQ_TEST 0
-#if !CALQ_TEST
 /** @file calq.cc
  *  @brief This file contains the main function of CALQ.
  */
@@ -13,6 +11,7 @@
 #include "Common/Exceptions.h"
 #include "Common/helpers.h"
 #include "Common/log.h"
+#include "QualCodec/HaplotyperTest.h"
 #include "tclap/CmdLine.h"
 
 static void printVersionAndCopyright(void) {
@@ -42,14 +41,22 @@ int main(int argc, char *argv[]) {
 
         // TCLAP arguments (both compression and decompression)
         TCLAP::SwitchArg forceSwitch("f", "force", "Force overwriting of output files etc.", cmd, false);
+        TCLAP::SwitchArg debugSwitch("", "debug", "Output verbose debug information regarding activity profile.", cmd, false);
+        TCLAP::SwitchArg testSwitch("", "test", "Run test cases.", cmd, false);
         TCLAP::UnlabeledValueArg<std::string> inputFileNameArg("inputFileName", "Input file name", true, "", "string", cmd);
         TCLAP::ValueArg<std::string> outputFileNameArg("o", "outputFileName", "Output file name", false, "", "string", cmd);
 
         // TCLAP arguments (only compression)
-        TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records)", false, 10000, "int", cmd);
-        TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy", false, 2, "int", cmd);
+        TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records). Default 10000", false, 10000, "int", cmd);
+        TCLAP::ValueArg<int> filterSizeArg("", "filterSize", "Haplotyper filter radius. Default 17", false, 17, "int", cmd);
+        TCLAP::ValueArg<int> quantizationMinArg("", "quantizationMin", "Minimum quantization steps. Default 2", false, 2, "int", cmd);
+        TCLAP::ValueArg<int> quantizationMaxArg("", "quantizationMax", "Maximum quantization steps. Default 8", false, 8, "int", cmd);
+        TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy. Default 2", false, 2, "int", cmd);
         TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (Sanger: Phred+33 [0,40]; Illumina-1.3+: Phred+64 [0,40]; Illumina-1.5+: Phred+64 [0,40]; Illumina-1.8+: Phred+33 [0,41]; Max33: Phred+33 [0,93]; Max64: Phred+64 [0,62])", false, "Illumina-1.8+", "string", cmd);
-        TCLAP::MultiArg<std::string> referenceFileNamesArg("r", "referenceFileNames", "Reference file name(s) (FASTA format)", false, "string", cmd);
+        TCLAP::ValueArg<std::string> referenceFileNamesArg("r", "referenceFileName", "Reference file (FASTA format)", false, "", "string", cmd);
+        TCLAP::ValueArg<std::string> filterTypeArg("", "filterType", "Haplotyper Filter Type (Gauss; Rectangle). Default Gauss", false, "Gauss", "string", cmd);
+        TCLAP::ValueArg<std::string> quantizerTypeArg("", "quantizerType", "Quantizer type (Uniform; Lloyd). Default Uniform", false, "Uniform", "string", cmd);
+        TCLAP::SwitchArg noSquash("", "noSquash", "Do not squash activityscores between 0.0 and 1.0, which is done by default", cmd, false);
 
         // TCLAP arguments (only decompression)
         TCLAP::SwitchArg decompressSwitch("d", "decompress", "Decompress", cmd, false);
@@ -60,9 +67,9 @@ int main(int argc, char *argv[]) {
 
         // Check for sanity in compression mode
         if (decompressSwitch.isSet() == false) {
-//             if (referenceFileNamesArg.isSet() == false) {
-//                throwErrorException("Argument 'r' required in compression mode");
-//             }
+            if (referenceFileNamesArg.isSet() == false) {
+                throwErrorException("Argument 'r' required in compression mode");
+            }
             if (sideInformationFileNameArg.isSet() == true) {
                 throwErrorException("Argument 's' forbidden in compression mode");
             }
@@ -85,24 +92,44 @@ int main(int argc, char *argv[]) {
             if (sideInformationFileNameArg.isSet() == false) {
                 throwErrorException("Argument 's' required in decompression mode");
             }
+            if (filterSizeArg.isSet() == true) {
+                throwErrorException("Argument 'filterSize' forbidden in decompression mode");
+            }
+            if (filterTypeArg.isSet() == true) {
+                throwErrorException("Argument 'filterType' forbidden in decompression mode");
+            }
+            if (noSquash.isSet() == true) {
+                throwErrorException("Argument 'noSquash' forbidden in decompression mode");
+            }
         }
 
         // Get the value parsed by each arg
         options.force = forceSwitch.getValue();
+        options.debug = debugSwitch.getValue();
+        options.test = testSwitch.getValue();
         options.inputFileName = inputFileNameArg.getValue();
         options.outputFileName = outputFileNameArg.getValue();
         options.blockSize = blockSizeArg.getValue();
+        options.filterSize = filterSizeArg.getValue();
+        options.quantizationMin = quantizationMinArg.getValue();
+        options.quantizationMax = quantizationMaxArg.getValue();
         options.polyploidy = polyploidyArg.getValue();
         options.qualityValueType = qualityValueTypeArg.getValue();
+        options.filterTypeStr = filterTypeArg.getValue();
+        options.quantizerTypeStr = quantizerTypeArg.getValue();
         options.referenceFileNames = referenceFileNamesArg.getValue();
         options.decompress = decompressSwitch.getValue();
         options.sideInformationFileName = sideInformationFileNameArg.getValue();
+        options.squash = !noSquash.getValue();
 
         // Check the options
         options.validate();
 
         // Compress or decompress
-        if (options.decompress == false) {
+        if (options.test) {
+            calq::haplotyperTest();
+            CALQ_LOG("Finished testing");
+        } else if (options.decompress == false) {
             calq::CalqEncoder calqEncoder(options);
             calqEncoder.encode();
             CALQ_LOG("Finished encoding");
@@ -128,14 +155,4 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 }
 
-// Testing
-#else
-
-#include "QualCodec/HaplotyperTest.h"
-
-int main() {
-    calq::haplotyperTest();
-}
-
-#endif
 

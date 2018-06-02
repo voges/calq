@@ -15,19 +15,34 @@
 
 #include <cmath>
 
+#include "Common/Exceptions.h"
+
 // ----------------------------------------------------------------------------------------------------------------------
 
 namespace calq {
 
 // Returns score, takes seq and qual pileup and position
 Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
-                       size_t minHQSoftclip_streak, size_t gaussRadius)
-                       : SIGMA(sigma), kernel(sigma), spreader(maxHQSoftclip_propagation, minHQSoftclip_streak, true),
-                         genotyper(ploidy, qualOffset, nrQuantizers), nr_quantizers(nrQuantizers), polyploidy(ploidy) {
-    double THRESHOLD = 0.0000001;
-    size_t size = this->kernel.calcMinSize(THRESHOLD, gaussRadius*2+1);
+                       size_t minHQSoftclip_streak, size_t gaussRadius, bool debug, bool squashed, Options::FilterType filterType)
+    : SIGMA(sigma), spreader(maxHQSoftclip_propagation, minHQSoftclip_streak, squashed),
+      genotyper(ploidy, qualOffset, nrQuantizers), nr_quantizers(nrQuantizers), polyploidy(ploidy), DEBUG(debug), squashedActivity(squashed) {
 
-    buffer = FilterBuffer([this](size_t pos, size_t size) -> double{return this->kernel.calcValue(pos, size);}, size);
+    if (filterType == Options::FilterType::GAUSS) {
+        GaussKernel kernel(sigma);
+        double THRESHOLD = 0.0000001;
+        size_t size = kernel.calcMinSize(THRESHOLD, gaussRadius*2+1);
+
+        buffer = FilterBuffer([kernel](size_t pos, size_t size) -> double{return kernel.calcValue(pos, size);}, size);
+        localDistortion = kernel.calcValue((size-1)/2, size);
+    } else if (filterType == Options::FilterType::RECTANGLE) {
+        RectangleKernel kernel(sigma);
+        size_t size = kernel.calcMinSize(gaussRadius*2+1);
+
+        buffer = FilterBuffer([kernel](size_t pos, size_t size) -> double{return kernel.calcValue(pos, size);}, size);
+        localDistortion = kernel.calcValue((size-1)/2, size);
+    } else {
+        throwErrorException("FilterType not supported by haplotyper");
+    }
 
     NO_INDEL_LIKELIHOOD = log10(1.0-pow(10, -4.5));
     INDEL_LIKELIHOOD = -4.5;
@@ -152,30 +167,38 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     // Filter activity score
     buffer.push(spreader.push(altProb, hq_softclips/qualPile.size()));
     double activity = buffer.filter();
-
-    size_t quant =  std::min(activity * nr_quantizers / 0.02, static_cast<double>(nr_quantizers-1));
-
-#define CALQ_DEBUG 0
-#if CALQ_DEBUG
-    static CircularBuffer<std::string> debug(this->getOffset(), "\n");
-    std::stringstream s;
-
-    s << reference << " " << seqPile  << " ";
-
-    s << std::fixed << std::setw(6) << std::setprecision(4)
-      << std::setfill('0') << altProb;
-
-    std::string out = debug.push(s.str());
-    if (out != "\n") {
-        std::cerr << out << " " << std::fixed << std::setw(6) << std::setprecision(4)
-                  << std::setfill('0') << activity << " " << quant+2 << std::endl;
+    if (squashedActivity) {
+        activity = std::min(activity, 1.0);
     }
 
-    if (hq_softclips > 0)
-        std::cerr << hq_softclips << " detected!" << std::endl;
-#endif
+    size_t quant = getQuantizerIndex(activity);
+
+    if (DEBUG) {
+        static CircularBuffer<std::string> debug(this->getOffset(), "\n");
+        std::stringstream s;
+
+        s << reference << " " << seqPile  << " ";
+
+        s << std::fixed << std::setw(6) << std::setprecision(4)
+          << std::setfill('0') << altProb;
+
+        std::string out = debug.push(s.str());
+        if (out != "\n") {
+            std::cerr << out << " " << std::fixed << std::setw(6) << std::setprecision(4)
+                      << std::setfill('0') << activity << " " << quant << std::endl;
+        }
+
+        if (hq_softclips > 0)
+            std::cerr << hq_softclips << " detected!" << std::endl;
+    }
 
     return quant;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+size_t Haplotyper::getQuantizerIndex(double activity) {
+    return std::min(std::floor((activity / localDistortion ) * nr_quantizers), static_cast<double>(nr_quantizers-1));
 }
 }  // namespace calq
 

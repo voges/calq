@@ -7,12 +7,6 @@
 #ifndef CALQ_QUALCODEC_QUALENCODER_H_
 #define CALQ_QUALCODEC_QUALENCODER_H_
 
-#define QUANTIZER_STEPS_MIN 2
-#define QUANTIZER_STEPS_MAX 8
-#define NR_QUANTIZERS (QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1)
-#define QUANTIZER_IDX_MIN 0
-#define QUANTIZER_IDX_MAX (NR_QUANTIZERS-1)
-
 #include <chrono>
 #include <deque>
 #include <map>
@@ -33,7 +27,14 @@ class QualEncoder {
     explicit QualEncoder(const int &polyploidy,
                          const int &qualityValueMax,
                          const int &qualityValueMin,
-                         const int &qualityValueOffset);
+                         const int &qualityValueOffset,
+                         const int &filterRadius,
+                         const int &quantizersMin,
+                         const int &quantizersMax,
+                         const bool &debug,
+                         const std::map<int, Quantizer>& quant,
+                         const bool &squashed,
+                         Options::FilterType filterType);
     ~QualEncoder(void);
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
@@ -63,6 +64,8 @@ class QualEncoder {
     size_t nrUnmappedRecords_;
     size_t uncompressedMappedQualSize_;
     size_t uncompressedUnmappedQualSize_;
+
+    int NR_QUANTIZERS;
 
     // Quality value offset for this block
     int qualityValueOffset_;

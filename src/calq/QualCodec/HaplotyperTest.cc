@@ -110,11 +110,12 @@ void circBufferTest() {
 
 void lloydQuantizerTest() {
     // Uniform distribution
-    calq::LloydMaxQuantizer q(0, 99, 10);
+    calq::LloydMaxQuantizer q(10);
+    calq::ProbabilityDistribution pdf(0, 99);
     for (int i = 0; i <= 99; ++i) {
-        q.addToPdf(i);
+        pdf.addToPdf(i);
     }
-    q.build();
+    q.build(pdf);
 
     equals(q.valueToIndex(99), 9);
     equals(q.valueToIndex(10), 1);
@@ -123,12 +124,13 @@ void lloydQuantizerTest() {
     equals(q.valueToIndex(0), 0);
 
     // Non-Uniform
-    calq::LloydMaxQuantizer q2(1, 100, 10);
+    calq::LloydMaxQuantizer q2(10);
+    calq::ProbabilityDistribution pdf2(1, 100);
     for (int i = 1; i <= 100; ++i) {
-        q2.addToPdf(i, pow(abs(i - 50), 4));
+        pdf2.addToPdf(i, pow(abs(i - 50), 4));
     }
 
-    q2.build();
+    q2.build(pdf2);
 
     equals(q2.valueToIndex(100), 9);
     equals(q2.valueToIndex(94), 8);
@@ -180,7 +182,7 @@ void baseSpreaderTest() {
 // ----------------------------------------------------------------------------------------------------------------------
 
 void fullHaploTest() {
-    Haplotyper h(5, 2, 33, 8, 5, 3, 5);
+    Haplotyper h(5, 2, 33, 8, 5, 3, 5, false, true, Options::FilterType::GAUSS);
 
     equals(h.getOffset(), 10);
 
@@ -197,7 +199,7 @@ void fullHaploTest() {
     equals(h.push("C", "}", 0, 'A'), 7);
 
     // reset
-    Haplotyper h2(5, 2, 33, 8, 5, 3, 5);
+    Haplotyper h2(5, 2, 33, 8, 5, 3, 5, false, true, Options::FilterType::GAUSS);
 
     h2.push("CCC", "}}}", 15, 'A');
 

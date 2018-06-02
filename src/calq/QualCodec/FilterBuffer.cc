@@ -20,7 +20,7 @@ GaussKernel::GaussKernel(double sigma) : SIGMA(sigma), INV_SQRT_SIGMA_2PI(1.0/(s
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-double GaussKernel::calcValue(size_t pos, size_t size) {
+double GaussKernel::calcValue(size_t pos, size_t size) const {
     const double MEAN = (size-1)/2;
     double exponent = (pos - MEAN)/SIGMA;
     exponent = exponent * exponent * (-0.5);
@@ -29,7 +29,7 @@ double GaussKernel::calcValue(size_t pos, size_t size) {
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-size_t GaussKernel::calcMinSize(double threshold, size_t maximum) {
+size_t GaussKernel::calcMinSize(double threshold, size_t maximum) const {
     threshold /= INV_SQRT_SIGMA_2PI;
     threshold = std::log(threshold);
     threshold *= -2.0;
@@ -87,6 +87,24 @@ size_t FilterBuffer::getSize() const {
 
 size_t FilterBuffer::getOffset() const {
     return (buffer.size()+1)/2;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+RectangleKernel::RectangleKernel(double size) : SIZE(size) {
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+double RectangleKernel::calcValue(size_t pos, size_t size) const {
+    const double MEAN = (size-1)/2;
+    return (pos-MEAN) <= SIZE ? 1.0 : 0.0;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+size_t RectangleKernel::calcMinSize(size_t maximum) const {
+    return std::min(SIZE*2+1, static_cast<double>(maximum));
 }
 }  // namespace calq
 

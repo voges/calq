@@ -27,13 +27,21 @@ namespace calq {
 QualEncoder::QualEncoder(const int &polyploidy,
                          const int &qualityValueMax,
                          const int &qualityValueMin,
-                         const int &qualityValueOffset)
+                         const int &qualityValueOffset,
+                         const int &filterRadius,
+                         const int &quantizersMin,
+                         const int &quantizersMax,
+                         const bool &debug,
+                         const std::map<int, Quantizer>& quant,
+                         const bool &squashed,
+                         Options::FilterType filterType)
     : compressedMappedQualSize_(0),
       compressedUnmappedQualSize_(0),
       nrMappedRecords_(0),
       nrUnmappedRecords_(0),
       uncompressedMappedQualSize_(0),
       uncompressedUnmappedQualSize_(0),
+      NR_QUANTIZERS(quantizersMax - quantizersMin + 1),
 
       qualityValueOffset_(qualityValueOffset),
       posOffset_(0),
@@ -44,10 +52,10 @@ QualEncoder::QualEncoder(const int &polyploidy,
 
       samPileupDeque_(),
 
-      haplotyper_(17, polyploidy, qualityValueOffset, NR_QUANTIZERS, 50, 7, 50),
+      haplotyper_(filterRadius, polyploidy, qualityValueOffset, NR_QUANTIZERS, 50, 7, 50, debug, squashed, filterType),
       posCounter(0),
 
-      quantizers_(),
+      quantizers_(quant),
 
       samRecordDeque_() {
     if (polyploidy < 1) {
@@ -61,16 +69,6 @@ QualEncoder::QualEncoder(const int &polyploidy,
     }
     if (qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
-    }
-
-    // Construct quantizers
-    int quantizerSteps = QUANTIZER_STEPS_MIN;
-    int quantizerIdx = QUANTIZER_IDX_MIN;
-    for (int i = 0; i < NR_QUANTIZERS; ++i) {
-        Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin, qualityValueMax, quantizerSteps);
-        quantizers_.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
-        quantizerSteps++;
-        quantizerIdx++;
     }
 
     // Initialize a buffer for mapped quality value indices per quantizer
@@ -246,8 +244,8 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord) {
             // Encode opLen quality values with max quantizer index
             for (size_t i = 0; i < opLen; i++) {
                 int q = static_cast<int>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
-                int qualityValueIndex = quantizers_.at(QUANTIZER_IDX_MAX).valueToIndex(q);
-                mappedQualityValueIndices_.at(QUANTIZER_IDX_MAX).push_back(qualityValueIndex);
+                int qualityValueIndex = quantizers_.at(NR_QUANTIZERS - 1).valueToIndex(q);
+                mappedQualityValueIndices_.at(NR_QUANTIZERS - 1).push_back(qualityValueIndex);
             }
             break;
         case 'D':

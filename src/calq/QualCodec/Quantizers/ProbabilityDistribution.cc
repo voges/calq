@@ -4,31 +4,71 @@
 
 // Copyright 2015-2018 Leibniz Universitaet Hannover
 
-#include "QualCodec/Quantizers/LloydMaxQuantizer.h"
+#include "QualCodec/Quantizers/ProbabilityDistribution.h"
 
 #include <utility>
 #include <algorithm>
 
+#include "Common/Exceptions.h"
+
+
 // ----------------------------------------------------------------------------------------------------------------------
 
 namespace calq {
-class ProbabilityDistribution {
-    ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin, size_t rangeMax) {
-        this->
+ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin, size_t rangeMax) {
+    this->rangeMin = rangeMin;
+    this->pdf.resize(rangeMax-rangeMin + 1);
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+void ProbabilityDistribution::addToPdf(size_t qualScore, size_t number) {
+    if (qualScore < rangeMin || qualScore > rangeMin + pdf.size() - 1)
+        throwErrorException("PDF: Score not in range");
+    pdf[qualScore-rangeMin] += number;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+void ProbabilityDistribution::resetPdf() {
+    for (size_t i = 0; i < pdf.size(); ++i) {
+        pdf[i] = 0;
     }
+}
 
-    void ProbabilityDistribution::addToPdf(size_t qualScore, size_t number) {
+// ----------------------------------------------------------------------------------------------------------------------
 
-    }
+size_t ProbabilityDistribution::getCount(size_t value) const {
+    if (value < rangeMin || value > rangeMin + pdf.size() - 1)
+        throwErrorException("PDF: Value not in range");
+    return value;
+}
 
-    void ProbabilityDistribution::resetPdf() {
+// ----------------------------------------------------------------------------------------------------------------------
 
-    }
+size_t ProbabilityDistribution::operator[](size_t index) const {
+    if (index >= pdf.size())
+        throwErrorException("PDF: Index not in range");
+    return pdf[index];
+}
 
-    size_t ProbabilityDistribution::getCount(size_t value) {
+// ----------------------------------------------------------------------------------------------------------------------
 
-    }
-};
+size_t ProbabilityDistribution::size() const {
+    return pdf.size();
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+size_t ProbabilityDistribution::getRangeMin() const {
+    return rangeMin;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+size_t ProbabilityDistribution::getRangeMax() const {
+    return rangeMin + pdf.size() - 1;
+}
 }  // namespace calq
 
 // ----------------------------------------------------------------------------------------------------------------------

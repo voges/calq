@@ -32,9 +32,16 @@ class CalqEncoder {
     int qualityValueMin_;
     int qualityValueMax_;
     int qualityValueOffset_;
-    std::vector<std::string> referenceFileNames_;
+    std::string referenceFileNames_;
     SAMFile samFile_;
     FASTAFile fastaFile_;  // Reference
+    bool debug;
+    int filterRadius;
+    int quantMin;
+    int quantMax;
+    Options::QuantizerType quantType;
+    Options::FilterType filterType;
+    bool squashed;
 };
 
 }  // namespace calq

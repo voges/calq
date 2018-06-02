@@ -18,18 +18,40 @@ struct Options {
 
     void validate(void);
 
+    enum struct QuantizerType {
+        NONE,
+        UNIFORM,
+        LLOYD_MAX
+    };
+
+    enum struct FilterType {
+        NONE,
+        GAUSS,
+        RECTANGLE
+    };
+
     // Options for both compression and decompression
     bool force;
+    bool debug;
+    bool test;
+    bool squash;
     std::string inputFileName;
     std::string outputFileName;
     // Options for only compression
     int blockSize;
+    int filterSize;
+    int quantizationMin;
+    int quantizationMax;
     int polyploidy;
     int qualityValueMax;
     int qualityValueMin;
     int qualityValueOffset;
     std::string qualityValueType;
-    std::vector<std::string> referenceFileNames;
+    FilterType filterType;
+    std::string filterTypeStr;
+    QuantizerType quantizerType;
+    std::string quantizerTypeStr;
+    std::string referenceFileNames;
     // Options for only decompression
     bool decompress;
     std::string sideInformationFileName;

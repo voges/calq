@@ -13,15 +13,22 @@ namespace calq {
 Options::Options(void)
       // Options for both compression and decompression
     : force(false),
+      debug(false),
+      test(false),
       inputFileName(""),
       outputFileName(""),
       // Options for only compression
       blockSize(0),
+      filterSize(0),
+      quantizationMin(0),
+      quantizationMax(0),
       polyploidy(0),
       qualityValueMax(0),
       qualityValueMin(0),
       qualityValueOffset(0),
       qualityValueType(""),
+      filterType(FilterType::NONE),
+      quantizerType(QuantizerType::NONE),
       referenceFileNames(),
       // Options for only decompression
       decompress(false),
@@ -33,6 +40,20 @@ void Options::validate(void) {
     // force
     if (force == true) {
         CALQ_LOG("Force switch set - overwriting output file(s)");
+    }
+
+    if (debug == true) {
+        CALQ_LOG("Debug switch set - verbose output");
+    }
+
+    if (test == true) {
+        CALQ_LOG("Test switch set - running test cases instead of compression");
+    }
+
+    if (squash == true) {
+        CALQ_LOG("Acitivity scores are squashed between 0.0 and 1.0");
+    } else {
+        CALQ_LOG("Acitivity scores are !NOT! squashed between 0.0 and 1.0");
     }
 
     // inputFileName
@@ -81,11 +102,59 @@ void Options::validate(void) {
         }
     }
 
+    // Haplotyper filter size
+    if (decompress == false) {
+        CALQ_LOG("Filter size: %d", filterSize);
+        if (filterSize < 1) {
+            throwErrorException("Filter size must be greater than 0");
+        }
+    }
+
+    // Quantization
+    if (decompress == false) {
+        CALQ_LOG("Quantization min steps: %d", quantizationMin);
+        if (quantizationMin < 2) {
+            throwErrorException("Quantization must be greater than 1");
+        }
+    }
+
+    // Quantization
+    if (decompress == false) {
+        CALQ_LOG("Quantization max steps: %d", quantizationMax);
+        if (quantizationMax < 2 || quantizationMax < quantizationMin) {
+            throwErrorException("Quantization must be greater than 1 and quantizationMin");
+        }
+    }
+
     // polyploidy
     if (decompress == false) {
         CALQ_LOG("Polyploidy: %d", polyploidy);
         if (polyploidy < 1) {
             throwErrorException("Polyploidy must be greater than 0");
+        }
+    }
+
+    // qualityValueType
+    if (decompress == false) {
+        CALQ_LOG("Filter type: %s", filterTypeStr.c_str());
+        if (filterTypeStr == "Gauss") {
+            filterType = FilterType::GAUSS;
+        } else if (filterTypeStr == "Rectangle") {
+            filterType = FilterType::RECTANGLE;
+        } else {
+            throwErrorException("Filter type not supported");
+        }
+    }
+
+    // qualityValueType
+    if (decompress == false) {
+        CALQ_LOG("Quantizer type: %s", quantizerTypeStr.c_str());
+        if (quantizerTypeStr == "Uniform") {
+            quantizerType = QuantizerType::UNIFORM;
+        } else if (quantizerTypeStr == "Lloyd") {
+            quantizerType = QuantizerType::LLOYD_MAX;
+        } else {
+            throwErrorException("Quantizer type not supported");
         }
     }
 
@@ -132,21 +201,19 @@ void Options::validate(void) {
         // referenceFiles
         if (decompress == false) {
             if (referenceFileNames.empty() == true) {
-                CALQ_LOG("Operating without reference file(s)");
+                CALQ_LOG("Operating without reference file");
             } else {
-                CALQ_LOG("Operating with %zu reference file(s):", referenceFileNames.size());
-                for (auto const &referenceFileName : referenceFileNames) {
-                    CALQ_LOG("  %s", referenceFileName.c_str());
-                    if (referenceFileName.empty() == true) {
-                        throwErrorException("Reference file name not proviced");
-                    }
-                    if (fileExists(referenceFileName) == false) {
-                        throwErrorException("Cannot access reference file");
-                    }
-                    if (fileNameExtension(referenceFileName) != std::string("fa")
-                        && fileNameExtension(referenceFileName) != std::string("fasta")) {
-                        throwErrorException("Reference file name extension must be 'fa' or 'fasta'");
-                    }
+                CALQ_LOG("Operating with reference file:");
+                CALQ_LOG("  %s", referenceFileNames.c_str());
+                if (referenceFileNames.empty() == true) {
+                    throwErrorException("Reference file name not proviced");
+                }
+                if (fileExists(referenceFileNames) == false) {
+                    throwErrorException("Cannot access reference file");
+                }
+                if (fileNameExtension(referenceFileNames) != std::string("fa")
+                        && fileNameExtension(referenceFileNames) != std::string("fasta")) {
+                    throwErrorException("Reference file name extension must be 'fa' or 'fasta'");
                 }
             }
         }

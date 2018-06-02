@@ -12,16 +12,16 @@
 // ----------------------------------------------------------------------------------------------------------------------
 
 namespace calq {
-void LloydMaxQuantizer::fillLUT() {
+void LloydMaxQuantizer::fillLUT(const ProbabilityDistribution& pdf) {
     size_t index = 0;
-    size_t pos = 0;
+    size_t pos = pdf.getRangeMin();
 
     while (index < borders.size()) {
-        while (pos < pdf.size()) {
-            if (pos + rangeMin >= borders[index]) {
+        while (pos <= pdf.getRangeMax()) {
+            if (pos >= borders[index]) {
                 break;
             }
-            this->lut_[pos+rangeMin] = std::pair<int, int> (index, std::round(values[index]));
+            this->lut_[pos] = std::pair<int, int> (index, std::round(values[index]));
             pos += 1;
         }
         index += 1;
@@ -34,43 +34,45 @@ void LloydMaxQuantizer::fillLUT() {
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-double LloydMaxQuantizer::calcCentroid(size_t left, size_t right) {
+double LloydMaxQuantizer::calcCentroid(size_t left, size_t right, const ProbabilityDistribution& pdf) {
     double sum = 0;
     double weightSum = 0;
 
-    if (right == pdf.size() + rangeMin) {
+    const double THRESHOLD = 0.01;  // Avoid division by zero
+
+    if (right == pdf.getRangeMax() + 1) {
         sum += pdf[pdf.size() - 1];
         weightSum += (right) * pdf[pdf.size() - 1];
         right -= 1;
     }
 
     for (size_t i = left; i <= right; ++i) {
-        sum += pdf[i - rangeMin];
-        weightSum += i * pdf[i - rangeMin];
+        sum += pdf[i - pdf.getRangeMin()];
+        weightSum += i * pdf[i - pdf.getRangeMin()];
     }
 
-    return weightSum / sum;
+    return (sum > THRESHOLD) ? (weightSum / sum) : ((left + right)/2);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-void LloydMaxQuantizer::calcBorders() {
+void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf) {
     // Step 1: Init
     double stepSize = pdf.size() / static_cast<double>(steps);
     for (size_t i = 0; i < steps; ++i) {
-        borders[i] = rangeMin + (i + 1) * stepSize;
-        values[i] = rangeMin + i * stepSize + stepSize / 2.0;
+        borders[i] = pdf.getRangeMin() + (i + 1) * stepSize;
+        values[i] = pdf.getRangeMin() + i * stepSize + stepSize / 2.0;
     }
 
     double change = 0.0;
 
     // Step 2: Lloyd's II. algorithm
     for (int k = 0; k < static_cast<int>(borders.size()); ++k) {
-        double left = (k == 0) ? rangeMin : borders[k-1];
+        double left = (k == 0) ? pdf.getRangeMin() : borders[k-1];
         double right = borders[k];
 
         // Calc centroid
-        double centroid = calcCentroid(ceil(left), floor(right));
+        double centroid = calcCentroid(ceil(left), floor(right), pdf);
 
         change = std::max(change, std::abs(values[k] - centroid));
         values[k] = centroid;
@@ -91,39 +93,17 @@ void LloydMaxQuantizer::calcBorders() {
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-LloydMaxQuantizer::LloydMaxQuantizer(size_t rangeMin, size_t rangeMax, size_t steps) {
+LloydMaxQuantizer::LloydMaxQuantizer(size_t steps) {
     this->steps = steps;
-    this->rangeMin = rangeMin;
     borders.resize(steps, 0);
     values.resize(steps, 0);
-    pdf.resize(rangeMax-rangeMin + 1, 0);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-void LloydMaxQuantizer::addToPdf(size_t qualScore, size_t number) {
-    pdf[qualScore-rangeMin] += number;
-}
-
-// ----------------------------------------------------------------------------------------------------------------------
-
-void LloydMaxQuantizer::resetPdf() {
-    for (size_t i = 0; i < pdf.size(); ++i) {
-        pdf[i] = 0;
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------------------------
-
-void LloydMaxQuantizer::build() {
-    calcBorders();
-    fillLUT();
-}
-
-// ----------------------------------------------------------------------------------------------------------------------
-
-std::vector<double> LloydMaxQuantizer::exportValues() {
-    return values;
+void LloydMaxQuantizer::build(const ProbabilityDistribution& pdf) {
+    calcBorders(pdf);
+    fillLUT(pdf);
 }
 }  // namespace calq
 

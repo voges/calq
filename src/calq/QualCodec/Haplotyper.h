@@ -16,6 +16,7 @@
 #include "FilterBuffer.h"
 #include "Genotyper.h"
 #include "SoftclipSpreader.h"
+#include "Common/Options.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 
@@ -28,19 +29,23 @@ class Haplotyper {
     // Saving kernel and old raw quality scores
     FilterBuffer buffer;
 
-    GaussKernel kernel;
     SoftclipSpreader spreader;
     calq::Genotyper genotyper;
     size_t nr_quantizers;
     size_t polyploidy;
+    const bool DEBUG;
 
     double NO_INDEL_LIKELIHOOD;
     double INDEL_LIKELIHOOD;
+    const bool squashedActivity;
+    double localDistortion;
+
+    size_t getQuantizerIndex(double activity);
 
  public:
     // Init
     Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
-               size_t minHQSoftclip_streak, size_t gaussRadius);
+               size_t minHQSoftclip_streak, size_t gaussRadius, bool debug, bool squashed, Options::FilterType filterType);
 
     // Returns offset between activity scores' position and front
     size_t getOffset() const;

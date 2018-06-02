@@ -33,10 +33,28 @@ class GaussKernel {
     explicit GaussKernel(double sigma = 1.0);
 
     // Get gauss value at position pos and buffersize size with mean=size/2
-    double calcValue(size_t pos, size_t size);
+    double calcValue(size_t pos, size_t size) const;
 
     // Calcutes how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
-    size_t calcMinSize(double threshold, size_t maximum = 101);
+    size_t calcMinSize(double threshold, size_t maximum = 101) const;
+};
+
+// ----------------------------------------------------------------------------------------------------------------------
+
+// Samples an uniform distribution
+class RectangleKernel {
+ private:
+    const double SIZE;
+
+ public:
+    // init
+    explicit RectangleKernel(double size = 1.0);
+
+    // Get gauss value at position pos and buffersize size with mean=size/2
+    double calcValue(size_t pos, size_t size) const;
+
+    // Calcutes how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
+    size_t calcMinSize(size_t maximum = 101) const;
 };
 
 // ----------------------------------------------------------------------------------------------------------------------

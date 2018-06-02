@@ -14,6 +14,9 @@
 #include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
+#include "QualCodec/Quantizers/ProbabilityDistribution.h"
+#include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
+#include "QualCodec/Quantizers/LloydMaxQuantizer.h"
 
 namespace calq {
 
@@ -27,7 +30,14 @@ CalqEncoder::CalqEncoder(const Options &options)
       qualityValueOffset_(options.qualityValueOffset),
       referenceFileNames_(options.referenceFileNames),
       samFile_(options.inputFileName),
-      fastaFile_(referenceFileNames_[0]) {
+      fastaFile_(referenceFileNames_),
+      debug(options.debug),
+      filterRadius(options.filterSize),
+      quantMin(options.quantizationMin),
+      quantMax(options.quantizationMax),
+      quantType(options.quantizerType),
+      filterType(options.filterType),
+      squashed(options.squash) {
     if (options.blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
@@ -72,6 +82,8 @@ void CalqEncoder::encode(void) {
     while (samFile_.readBlock(blockSize_) != 0) {
 //         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
+        ProbabilityDistribution pdf(qualityValueMin_, qualityValueMax_);
+
         // Check quality value range
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
@@ -82,32 +94,28 @@ void CalqEncoder::encode(void) {
                     if (((int)q-qualityValueOffset_) > qualityValueMax_) {
                         throwErrorException("Quality value too large");
                     }
+                    pdf.addToPdf(((int)q-qualityValueOffset_));
                 }
             }
         }
 
-        // Compute quantizers
-//         int numQuantizerSteps = QUANTIZER_STEPS_MIN;
-//         int quantizerIdx = QUANTIZER_IDX_MIN;
-//         for (int i = 0; i < NR_QUANTIZERS; ++i) {
-//             Quantizer quantizer = UniformMinMaxQuantizer(qualityValueMin, qualityValueMax, numQuantizerSteps);
-// 
-//             LloydMaxQuantizer lloydMaxQuantizer(qualityValueMin_, qualityValueMax_, numQuantizerSteps);
-//             for (auto const &samRecord : samFile_.currentBlock.records) {
-//                 if (samRecord.isMapped() == true) {
-//                     for (auto const &q : samRecord.qual) {
-//                         lloydMaxQuantizer.addToPdf(q);
-//                     }
-//                 }
-//             }
-//             lloydMaxQuantizer.build();
-//             quantizers.insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
-//             numQuantizerSteps++;
-//             quantizerIdx++;
-//         }
+        std::map<int, Quantizer> quantizers;
+
+        for (int i = quantMin; i <= quantMax; ++i) {
+            if (quantType == Options::QuantizerType::UNIFORM){
+                UniformMinMaxQuantizer quantizer(qualityValueMin_, qualityValueMax_, i);
+                quantizers.insert(std::pair<int, Quantizer>(i-quantMin, quantizer));
+            } else if (quantType == Options::QuantizerType::LLOYD_MAX) {
+                LloydMaxQuantizer quantizer(i);
+                quantizer.build(pdf);
+                quantizers.insert(std::pair<int, Quantizer>(i-quantMin, quantizer));
+            } else {
+                throwErrorException("Quantization Type not supported");
+            }
+        }
 
         // Encode the quality values
-        QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_);
+        QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_, filterRadius, quantMin, quantMax, debug, quantizers, squashed, filterType);
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
                 qualEncoder.addMappedRecordToBlock(samRecord, this->fastaFile_);

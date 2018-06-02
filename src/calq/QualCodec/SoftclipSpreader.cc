@@ -48,7 +48,7 @@ double SoftclipSpreader::push(double score, size_t softclips) {
             ++it;
     }
 
-    double orig =  original.push(score);
+    double orig =  std::min(original.push(score), 1.0);
 
     return squashed ? squash(buffer.push(ownscore), 1.0 - orig) : buffer.push(ownscore);
 }

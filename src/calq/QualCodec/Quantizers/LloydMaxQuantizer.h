@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "QualCodec/Quantizers/Quantizer.h"
+#include "QualCodec/Quantizers/ProbabilityDistribution.h"
 #include "Common/Exceptions.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -20,43 +21,27 @@ namespace calq {
 
 class LloydMaxQuantizer : public Quantizer{
  private:
-    std::vector<size_t> pdf;
-    size_t rangeMin;
-
+    // Decision thresholds
     std::vector<double> borders;
+
+    // Representative values for each interval
     std::vector<double> values;
 
     size_t steps;
 
-    void fillLUT();
+    // Fill LUT of base class
+    void fillLUT(const ProbabilityDistribution& pdf);
 
-    double calcCentroid(size_t left, size_t right);
+    // Calculates the centroid in a region of a pdf
+    double calcCentroid(size_t left, size_t right, const ProbabilityDistribution& pdf);
 
-    void calcBorders();
-
+    // Calculates quantization borders using pdf
+    void calcBorders(const ProbabilityDistribution& pdf);
  public:
-    LloydMaxQuantizer(size_t rangeMin, size_t rangeMax, size_t steps);
+    explicit LloydMaxQuantizer(size_t steps);
 
-    void addToPdf(size_t qualScore, size_t number = 1);
-
-    void resetPdf();
-
-    void build();
-
-    std::vector<double> exportValues();
-
-    template<typename T>
-    void importValues(const std::vector<T>& imp) {
-        if (imp.size() != steps) {
-            throwErrorException("Number of values does not match quantizer size");
-        }
-
-        values.clear();
-
-        for (T val : imp) {
-            values.push_back(static_cast<double>(val));
-        }
-    }
+    // Creates quantization boundaries from a probability distribution and fills LUT
+    void build(const ProbabilityDistribution& pdf);
 };
 }  // namespace calq
 
