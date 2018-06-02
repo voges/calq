@@ -17,7 +17,7 @@ squashed = ["", "--noSquash"]
 for dset in datasets:
     for sset in subsets:
         folder = "{}/{}/{}.{}/".format(basedir, dset[0], dset[1], sset)
-        file = "{}{}.bam".format(folder, dset[1])
+        file = "{}{}.{}.bam".format(folder, dset[1], sset)
         if os.path.isfile(file):
             print("existing: " + file)
         else:
