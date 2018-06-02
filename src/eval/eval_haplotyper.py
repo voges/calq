@@ -44,20 +44,25 @@ for dset in datasets:
                             outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.out".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
                             if not os.path.isdir(outfolder):
                                 print("Creating dir: " + outfolder)
-                               # os.system("mkdir " + outfolder)
+                                os.system("mkdir " + outfolder)
                             calqCommand = "{} -q Illumina-1.8+ -p 2 -b 10000 {}.sam  -o {} -r {} --quantizerType {} " \
                                           "--filterType {} --quantizationMin {} --quantizationMax {} --filterSize {} {}".\
                                 format(calqPath, filepath, outfile, referencePath, qtype, ftype, qsteps[0],
                                        qsteps[1], fsize, squash)
                             print(calqCommand + "\n")
+                            os.system(calqCommand)
                             calqDeCommand = "{} -d -s {}.sam {} -o {}.qual".format(calqPath, filepath, outfile, outfile)
                             print(calqDeCommand + "\n")
+                            os.system(calqDeCommand)
                             replaceCommand = "python {} {}.sam {}.qual 1> {}.sam".format(replacePath, filepath, outfile, outfile)
                             print (replaceCommand + "\n")
+                            os.system(replaceCommand)
                             convertCommand = "{} view -bh {}.sam > {}.bam".format(samtools, outfile, outfile)
                             print(convertCommand + "\n")
+                            os.system(convertCommand)
                             indexCommand = "{} index -b {}.bam {}.bai".format(samtools, outfile, outfile)
                             print(indexCommand + "\n")
+                            os.system(indexCommand)
                             print("\n")
 
 
