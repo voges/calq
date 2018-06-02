@@ -91,6 +91,8 @@ class QualEncoder {
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded
     std::deque<SAMRecord> samRecordDeque_;
+
+    bool debugOut;
 };
 
 }  // namespace calq

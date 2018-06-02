@@ -57,7 +57,8 @@ QualEncoder::QualEncoder(const int &polyploidy,
 
       quantizers_(quant),
 
-      samRecordDeque_() {
+      samRecordDeque_(),
+      debugOut(debug) {
     if (polyploidy < 1) {
         throwErrorException("polyploidy must be greater than zero");
     }
@@ -159,6 +160,16 @@ size_t QualEncoder::writeBlock(CQFile *cqFile) {
 
     // Write inverse quantization LUTs
     compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
+
+    if (debugOut) {
+        std::cerr << "New block. Quantizers:" << std::endl;
+        for(auto &q : quantizers_) {
+            std::cerr << "Quantizer " << q.first << ", " << q.second.inverseLut().size() << " steps:" << std::endl;
+            for (auto &lut : q.second.inverseLut()) {
+                std::cerr << lut.first << ": " << lut.second << std::endl;
+            }
+        }
+    }
 
     // Write unmapped quality values
     unsigned char *uqv = (unsigned char *)unmappedQualityValues_.c_str();
