@@ -8,11 +8,11 @@ subsets = ["3", "11", "20"]
 
 filtersize = ["10", "17", "25"]
 filtertype = ["Gauss"]
-quantizerType = ["Uniform", "Lloyd"]
+quantizerType = ["Uniform"]
 
 quantSteps = [["2", "8"]]
 
-squashed = ["", "--noSquash"]
+squashed = [""]
 
 for dset in datasets:
     for sset in subsets:
