@@ -16,12 +16,19 @@ squashed = ["", "--noSquash"]
 
 for dset in datasets:
     for sset in subsets:
-        folder = "{}/{}/{}.{}/".format(basedir, dset[0], dset[1], sset)
-        file = "{}{}.{}.bam".format(folder, dset[1], sset)
-        if os.path.isfile(file):
-            print("existing: " + file)
-        else:
-            print("NOT existing: " + file)
+        folder = "{}/{}/{}.{}".format(basedir, dset[0], dset[1], sset)
+        file = "{}/{}.{}".format(folder, dset[1], sset)
+        if not os.path.isfile(file + ".bam"):
+            print("NOT existing: " + file + ".bam")
+            exit(-1)
+
+        for fsize in filtersize:
+            for ftype in filtertype:
+                for qtype in quantizerType:
+                    for qsteps in quantSteps:
+                        for squash in squashed:
+                            outfile = "{}.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
+                            print(outfile)
 
 
 
