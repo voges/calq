@@ -12,7 +12,7 @@ quantizerType = ["Uniform"]
 
 quantSteps = [["2", "8"]]
 
-squashed = [" "]
+squashed = [""]
 
 install_path = "/project/dna/install"
 samtools = install_path + "/samtools-1.3/bin/samtools"
@@ -43,7 +43,7 @@ for dset in datasets:
                             if not os.path.isdir(outfolder):
                                 print("Creating dir: " + outfolder)
                                # os.system("mkdir " + outfolder)
-                            calqCommand = "{} -q Illumina-1.8+ -p 2 -b 10000 {}  -o {} -r {] --quantizerType {} " \
+                            calqCommand = "{} -q Illumina-1.8+ -p 2 -b 10000 {}  -o {} -r {} --quantizerType {} " \
                                           "--filterType {} --quantizationMin {} --quantizationMax {} --filterSize {} {}".\
                                 format(calqPath, filepath + ".sam", outfile, referencePath, qtype, ftype, qsteps[0],
                                        qsteps[1], fsize, squash)
