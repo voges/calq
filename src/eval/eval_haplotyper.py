@@ -12,7 +12,7 @@ quantizerType = ["Uniform"]
 
 quantSteps = [["2", "8"]]
 
-squashed = [""]
+squashed = [" "]
 
 install_path = "/project/dna/install"
 samtools = install_path + "/samtools-1.3/bin/samtools"
@@ -39,7 +39,7 @@ for dset in datasets:
                     for qsteps in quantSteps:
                         for squash in squashed:
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
-                            outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
+                            outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.out".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
                             if not os.path.isdir(outfolder):
                                 print("Creating dir: " + outfolder)
                                # os.system("mkdir " + outfolder)
