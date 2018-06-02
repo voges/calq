@@ -47,7 +47,7 @@ for dset in datasets:
                                           "--filterType {} --quantizationMin {} --quantizationMax {} --filterSize {} {}".\
                                 format(calqPath, file + ".sam", outfile, referencePath, qtype, ftype, qsteps[0],
                                        qsteps[1], fsize, squash)
-                                print(calqCommand)
+                            print(calqCommand)
 
 
 
