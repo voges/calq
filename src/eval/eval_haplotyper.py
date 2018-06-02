@@ -45,7 +45,7 @@ for dset in datasets:
                                # os.system("mkdir " + outfolder)
                             calqCommand = "{} -q Illumina-1.8+ -p 2 -b 10000 {}  -o {} -r {] --quantizerType {} " \
                                           "--filterType {} --quantizationMin {} --quantizationMax {} --filterSize {} {}".\
-                                format(calqPath, file + ".sam", outfile, referencePath, qtype, ftype, qsteps[0],
+                                format(calqPath, filepath + ".sam", outfile, referencePath, qtype, ftype, qsteps[0],
                                        qsteps[1], fsize, squash)
                             print(calqCommand)
 
