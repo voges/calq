@@ -1,20 +1,18 @@
 import os.path
 
-basedir = "/data/voges/muenteferi"
-#datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
-#            ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
-#            ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-subsets = ["20"]
-
+# Parameters
+datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
+            ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
+            ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
+subsets = ["3", "11", "20"]
 filtersize = ["10"]
 filtertype = ["Gauss"]
 quantizerType = ["Uniform"]
-
 quantSteps = [["2", "8"]]
-
 squashed = [""]
 
+# Paths
+basedir = "/data/voges/muenteferi"
 install_path = "/project/dna/install"
 samtools = install_path + "/samtools-1.3/bin/samtools"
 calqPath = "/home/muenteferi/Dokumente/calqBuild/calq"
@@ -24,6 +22,7 @@ platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Pl
 GATK_HF_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_HF.sh"
 GATK_VQSR_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_VQSR.sh"
 HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do_happy+reppy_chr"
+
 vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
            ".GATK.snps.filtered990.vcf", ".GATK.snps.filtered999.vcf", ".GATK.snps.filtered1000.vcf"]
 
@@ -48,7 +47,7 @@ for dset in datasets:
                         for squash in squashed:
                             # Create folders and SAM input
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
-                            outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.out".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
+                            outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.cq".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
                             if not os.path.isdir(outfolder):
                                 print("Creating dir: " + outfolder, flush=True)
                                 os.system("mkdir " + outfolder)
