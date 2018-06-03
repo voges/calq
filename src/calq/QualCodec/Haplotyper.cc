@@ -140,10 +140,10 @@ double Haplotyper::calcActivityScore(char ref, const std::string& seqPile, const
 
     // --------------------------------------------------------
 
-    const double CUTOFF = -1.0;
+  /*  const double CUTOFF = -1.0;
 
     if (posteriori0 > CUTOFF)
-        return 0.0;
+        return 0.0;*/
 
     return 1.0 - exp10(posteriori0);
 }
