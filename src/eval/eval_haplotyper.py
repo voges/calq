@@ -104,14 +104,6 @@ for dset in datasets:
                             os.system("mv .bam.GATK_VQSR.log {}.GATK_VQSR.log".format(outfile))
 
 
-                            # Hap.py / rep.py
-                            for vcf in vcfList:
-                                HAPPY_Command = "{}{}.sh {}.bam{}".format(HAPPY_prefix, sset, outfile, vcf)
-                                print(HAPPY_Command + "\n", flush=True)
-                                os.system(HAPPY_Command)
-                                print("\n", flush=True)
-
-
 
 
 
