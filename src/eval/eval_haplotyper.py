@@ -5,7 +5,7 @@ basedir = "/data/voges/muenteferi"
 #            ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
 #            ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
 datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-subsets = ["3"]
+subsets = ["20"]
 
 filtersize = ["10"]
 filtertype = ["Gauss"]
@@ -20,6 +20,10 @@ samtools = install_path + "/samtools-1.3/bin/samtools"
 calqPath = "/home/muenteferi/Dokumente/calqBuild/calq"
 referencePath = "/data/voges/muenteferi/GATK_bundle-2.8-b37/human_g1k_v37.20.fasta"
 replacePath = "/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
+platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Platypus.sh"
+GATK_HF_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_HF.sh"
+GATK_VQSR_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_VQSR.sh"
+HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do_happy+reppy_chr"
 
 for dset in datasets:
     for sset in subsets:
@@ -63,6 +67,18 @@ for dset in datasets:
                             indexCommand = "{} index -b {}.bam {}.bai".format(samtools, outfile, outfile)
                             print(indexCommand + "\n")
                             os.system(indexCommand)
+                            PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
+                            print(PlatypusCommand + "\n")
+                            os.system(PlatypusCommand)
+                            GATK_HF_Command = "{} 12 {}.bam {}".format(GATK_HF_Path, outfile, sset)
+                            print(GATK_HF_Command + "\n")
+                            os.system(GATK_HF_Command)
+                            GATK_VQSR_Command = "{} 12 {}.bam {}".format(GATK_VQSR_Path, outfile, sset)
+                            print(GATK_VQSR_Command + "\n")
+                            os.system(GATK_VQSR_Command)
+                            HAPPY_Command = "{}{}.sh".format(HAPPY_prefix, sset)
+                            print(HAPPY_Command + "\n")
+                            os.system(HAPPY_Command)
                             print("\n")
 
 
