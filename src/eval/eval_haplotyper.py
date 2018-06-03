@@ -31,11 +31,11 @@ for dset in datasets:
         filename = "{}.{}".format(dset[1], sset)
         filepath = "{}/{}".format(folder, filename)
         if not os.path.isfile(filepath + ".bam"):
-            print("NOT existing: " + filepath + ".bam")
+            print("NOT existing: " + filepath + ".bam", flush=True)
             exit(-1)
 
         if not os.path.isfile(filepath + ".sam"):
-            print("Converting to sam: " + file + ".bam" )
+            print("Converting to sam: " + file + ".bam" , flush=True)
             command = "{} view -h -o {}.sam {}.bam".format(samtools, filepath, filepath)
             os.system(command)
 
@@ -48,7 +48,7 @@ for dset in datasets:
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
                             outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.out".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
                             if not os.path.isdir(outfolder):
-                                print("Creating dir: " + outfolder)
+                                print("Creating dir: " + outfolder, flush=True)
                                 os.system("mkdir " + outfolder)
 
                             # Compress
@@ -56,49 +56,56 @@ for dset in datasets:
                                           "--filterType {} --quantizationMin {} --quantizationMax {} --filterSize {} {}".\
                                 format(calqPath, filepath, outfile, referencePath, qtype, ftype, qsteps[0],
                                        qsteps[1], fsize, squash)
-                            print(calqCommand + "\n")
+                            print(calqCommand + "\n", flush=True)
                             os.system(calqCommand)
 
                             # Decompress
                             calqDeCommand = "{} -d -s {}.sam {} -o {}.qual".format(calqPath, filepath, outfile, outfile)
-                            print(calqDeCommand + "\n")
+                            print(calqDeCommand + "\n", flush=True)
                             os.system(calqDeCommand)
 
                             # Insert quality values
                             replaceCommand = "python {} {}.sam {}.qual 1> {}.sam".format(replacePath, filepath, outfile, outfile)
-                            print (replaceCommand + "\n")
+                            print (replaceCommand + "\n", flush=True)
                             os.system(replaceCommand)
 
                             # Create bam
                             convertCommand = "{} view -bh {}.sam > {}.bam".format(samtools, outfile, outfile)
-                            print(convertCommand + "\n")
+                            print(convertCommand + "\n", flush=True)
                             os.system(convertCommand)
 
                             # Index bam
                             indexCommand = "{} index -b {}.bam {}.bai".format(samtools, outfile, outfile)
-                            print(indexCommand + "\n")
+                            print(indexCommand + "\n", flush=True)
                             os.system(indexCommand)
 
                             # Platypus
+                            os.system("rm .bam.GATK_HF.log")
                             PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
-                            print(PlatypusCommand + "\n")
+                            print(PlatypusCommand + "\n", flush=True)
                             os.system(PlatypusCommand)
+                            os.system("mv .bam.GATK_HF.log {}.Playtypus.log".format(outfile))
+
 
                             # GATK_HF
+                            os.system("rm .bam.GATK_HF.log")
                             GATK_HF_Command = "{} 12 {}.bam {}".format(GATK_HF_Path, outfile, sset)
-                            print(GATK_HF_Command + "\n")
+                            print(GATK_HF_Command + "\n", flush=True)
                             os.system(GATK_HF_Command)
+                            os.system("mv .bam.GATK_HF.log {}.GATK_HF.log".format(outfile))
 
                             # GATK_VQSR
+                            os.system("rm .bam.GATK_VQSR.log")
                             GATK_VQSR_Command = "{} 12 {}.bam {}".format(GATK_VQSR_Path, outfile, sset)
-                            print(GATK_VQSR_Command + "\n")
+                            print(GATK_VQSR_Command + "\n", flush=True)
                             os.system(GATK_VQSR_Command)
+                            os.system("mv .bam.GATK_VQSR.log {}.GATK_VQSR.log".format(outfile))
 
                             # Hap.py / rep.py
                             HAPPY_Command = "{}{}.sh".format(HAPPY_prefix, sset)
-                            print(HAPPY_Command + "\n")
+                            print(HAPPY_Command + "\n", flush=True)
                             os.system(HAPPY_Command)
-                            print("\n")
+                            print("\n", flush=True)
 
 
 
