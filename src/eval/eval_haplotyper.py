@@ -24,6 +24,8 @@ platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Pl
 GATK_HF_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_HF.sh"
 GATK_VQSR_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_VQSR.sh"
 HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do_happy+reppy_chr"
+vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
+           ".GATK.snps.filtered990.vcf", ".GATK.snps.filtered999.vcf", ".GATK.snps.filtered1000.vcf"]
 
 for dset in datasets:
     for sset in subsets:
@@ -101,11 +103,13 @@ for dset in datasets:
                             os.system(GATK_VQSR_Command)
                             os.system("mv .bam.GATK_VQSR.log {}.GATK_VQSR.log".format(outfile))
 
+
                             # Hap.py / rep.py
-                            HAPPY_Command = "{}{}.sh".format(HAPPY_prefix, sset)
-                            print(HAPPY_Command + "\n", flush=True)
-                            os.system(HAPPY_Command)
-                            print("\n", flush=True)
+                            for vcf in vcfList:
+                                HAPPY_Command = "{}{}.sh {}.bam{}".format(HAPPY_prefix, sset, outfile, vcf)
+                                print(HAPPY_Command + "\n", flush=True)
+                                os.system(HAPPY_Command)
+                                print("\n", flush=True)
 
 
 

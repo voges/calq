@@ -78,10 +78,10 @@ if [ ! -f $picard_jar ]; then printf "Error: JAR file $picard_jar is not a regul
 ###############################################################################
 
 printf "[1/4] Variant calling\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_fasta -L $chromosome -I $input_bam --dbsnp $dbsnps_vcf --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o $input_bam.raw_variants.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_fasta -L $chromosome -I $input_bam --dbsnp $dbsnps_vcf --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o $input_bam.GATK.raw_variants.vcf &>>$log_txt
 
 printf "[2/4] SNP extraction\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.raw_variants.vcf -selectType SNP -o $input_bam.snps.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.GATK.raw_variants.vcf -selectType SNP -o $input_bam.GATK.snps.vcf &>>$log_txt
 
 printf "[3/4] Variant filtering step 1/2\n"
 resourceSNPs1="hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap_vcf"
@@ -89,17 +89,17 @@ resourceSNPs2="omni,known=false,training=true,truth=true,prior=12.0 $omni_vcf"
 resourceSNPs3="1000G,known=false,training=true,truth=false,prior=10.0 $KG_vcf"
 resourceSNPs4="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_vcf"
 recalParamsSNPs="-an DP -an QD -an FS -an SOR -an MQ -an MQRankSum -an ReadPosRankSum"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_fasta -L $chromosome -input $input_bam.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches -rscriptFile $input_bam.snps.r &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_fasta -L $chromosome -input $input_bam.GATK.snps.vcf -resource:$resourceSNPs1 -resource:$resourceSNPs2 -resource:$resourceSNPs3 -resource:$resourceSNPs4 $recalParamsSNPs -mode SNP -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches -rscriptFile $input_bam.snps.r &>>$log_txt
 
 printf "[4/4] Variant filtering step 2/2\n"
 filterLevel900="90.0"
 filterLevel990="99.0"
 filterLevel999="99.9"
 filterLevel1000="100.0"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel900 -o $input_bam.snps.filtered900.vcf &>>$log_txt
-$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel990 -o $input_bam.snps.filtered990.vcf &>>$log_txt
-$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel999 -o $input_bam.snps.filtered999.vcf &>>$log_txt
-$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel1000 -o $input_bam.snps.filtered1000.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.GATK.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel900 -o $input_bam.GATK.snps.filtered900.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.GATK.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel990 -o $input_bam.GATK.snps.filtered990.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.GATK.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel999 -o $input_bam.GATK.snps.filtered999.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T ApplyRecalibration -R $ref_fasta -L $chromosome -input $input_bam.GATK.snps.vcf -mode SNP -recalFile $input_bam.snps.recal -tranchesFile $input_bam.snps.tranches --ts_filter_level $filterLevel1000 -o $input_bam.GATK.snps.filtered1000.vcf &>>$log_txt
 
 ###############################################################################
 #                                   Cleanup                                   #

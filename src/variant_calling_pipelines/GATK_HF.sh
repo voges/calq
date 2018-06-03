@@ -76,15 +76,15 @@ if [ ! -f $picard_jar ]; then printf "Error: JAR file $picard_jar is not a regul
 ###############################################################################
 
 printf "[1/3] Variant calling\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_fasta -L $chromosome -I $input_bam --dbsnp $dbsnps_vcf --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o $input_bam.raw_variants.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_fasta -L $chromosome -I $input_bam --dbsnp $dbsnps_vcf --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o $input_bam.GATK.raw_variants.vcf &>>$log_txt
 
 printf "[2/3] SNP extraction\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.raw_variants.vcf -selectType SNP -o $input_bam.snps.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.GATK.raw_variants.vcf -selectType SNP -o $input_bam.GATK.snps.vcf &>>$log_txt
 
 printf "[3/3] Hard filtering\n"
 filterExpression="QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0"
 filterName="GATK_Recommended"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantFiltration -R $ref_fasta -L $chromosome -V $input_bam.snps.vcf --filterExpression "$filterExpression" --filterName "$filterName" -o $input_bam.snps.hard_filtered.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantFiltration -R $ref_fasta -L $chromosome -V $input_bam.GATK.snps.vcf --filterExpression "$filterExpression" --filterName "$filterName" -o $input_bam.GATK.snps.hard_filtered.vcf &>>$log_txt
 
 ###############################################################################
 #                                   Cleanup                                   #
