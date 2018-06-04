@@ -57,7 +57,7 @@ for dset in datasets:
                         for squash in squashed:
                             # Create folders and SAM input
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
-                            outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.out".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
+                            outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.cq".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
 
                             # Hap.py / rep.py
                             for vcf in vcfList:
