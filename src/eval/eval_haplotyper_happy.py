@@ -32,7 +32,7 @@ if os.path.isfile(outCSV):
     exit(-1)
 
 f = open(outCSV, 'w')
-f.write("Data Chromosome Filtersize Filter Quantizer QuantizerMin QuantizerMax SquashMode Caller IndelP IndelR IndelF SNPP SNPR SNPF\n");
+f.write("Data Chromosome Filtersize Filter Quantizer QuantizerMin QuantizerMax SquashMode Caller IndelP IndelR IndelF SNPP SNPR SNPF Filesize\n");
 
 for dset in datasets:
     for sset in subsets:
@@ -56,6 +56,8 @@ for dset in datasets:
                             # Create folders and SAM input
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
                             outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.cq".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
+
+                            filesize = os.path.getsize(outfile)
 
                             # Hap.py / rep.py
                             for vcf in vcfList:
@@ -102,9 +104,9 @@ for dset in datasets:
                                     print("indel: P: {} R: {} F: {}; SNP: P: {} R: {} F: {}\n".format(indelP, indelR,
                                                                                                     indelF, SNPP, SNPR,
                                                                                                     SNPF), flush=True)
-                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR,
+                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR,
                                                                                                     indelF, SNPP, SNPR,
-                                                                                                    SNPF))
+                                                                                                    SNPF, filesize))
                                 print("\n", flush=True)
 f.close()
 
