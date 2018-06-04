@@ -57,50 +57,59 @@ for dset in datasets:
                                           "--filterType {} --quantizationMin {} --quantizationMax {} --filterSize {} {}".\
                                 format(calqPath, filepath, outfile, referencePath, qtype, ftype, qsteps[0],
                                        qsteps[1], fsize, squash)
-                            print(calqCommand + "\n", flush=True)
-                            os.system(calqCommand)
 
-                            # Decompress
-                            calqDeCommand = "{} -d -s {}.sam {} -o {}.qual".format(calqPath, filepath, outfile, outfile)
-                            print(calqDeCommand + "\n", flush=True)
-                            os.system(calqDeCommand)
+                            if not os.path.isfile(outfile + ".bam"):
+                                print(calqCommand + "\n", flush=True)
+                                os.system(calqCommand)
 
-                            # Insert quality values
-                            replaceCommand = "python {} {}.sam {}.qual 1> {}.sam".format(replacePath, filepath, outfile, outfile)
-                            print (replaceCommand + "\n", flush=True)
-                            os.system(replaceCommand)
+                                # Decompress
+                                calqDeCommand = "{} -d -s {}.sam {} -o {}.qual".format(calqPath, filepath, outfile, outfile)
+                                print(calqDeCommand + "\n", flush=True)
+                                os.system(calqDeCommand)
 
-                            # Create bam
-                            convertCommand = "{} view -bh {}.sam > {}.bam".format(samtools, outfile, outfile)
-                            print(convertCommand + "\n", flush=True)
-                            os.system(convertCommand)
+                                # Insert quality values
+                                replaceCommand = "python {} {}.sam {}.qual 1> {}.sam".format(replacePath, filepath, outfile, outfile)
+                                print (replaceCommand + "\n", flush=True)
+                                os.system(replaceCommand)
 
-                            # Index bam
-                            indexCommand = "{} index -b {}.bam {}.bai".format(samtools, outfile, outfile)
-                            print(indexCommand + "\n", flush=True)
-                            os.system(indexCommand)
+                                # Create bam
+                                convertCommand = "{} view -bh {}.sam > {}.bam".format(samtools, outfile, outfile)
+                                print(convertCommand + "\n", flush=True)
+                                os.system(convertCommand)
 
-                            # Platypus
-                            os.system("rm .bam.GATK_HF.log")
-                            PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
-                            print(PlatypusCommand + "\n", flush=True)
-                            os.system(PlatypusCommand)
-                            os.system("mv .bam.GATK_HF.log {}.Playtypus.log".format(outfile))
+                                # Index bam
+                                indexCommand = "{} index -b {}.bam {}.bai".format(samtools, outfile, outfile)
+                                print(indexCommand + "\n", flush=True)
+                                os.system(indexCommand)
+                            else:
+                                print("{}.bam already existing. Skipping calq.".format(outfile) + "\n", flush=True)
 
+                            if not os.path.isfile(outfile + ".Playtypus.log"):
+                                # Platypus
+                                PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
+                                print(PlatypusCommand + "\n", flush=True)
+                                os.system(PlatypusCommand)
+                                os.system("mv .bam.GATK_HF.log {}.Playtypus.log".format(outfile))
+                            else:
+                                print("{}.Platypus.log already existing. Skipping platypus.".format(outfile) + "\n", flush=True)
 
-                            # GATK_HF
-                            os.system("rm .bam.GATK_HF.log")
-                            GATK_HF_Command = "{} 12 {}.bam {}".format(GATK_HF_Path, outfile, sset)
-                            print(GATK_HF_Command + "\n", flush=True)
-                            os.system(GATK_HF_Command)
-                            os.system("mv .bam.GATK_HF.log {}.GATK_HF.log".format(outfile))
+                            if not os.path.isfile(outfile + ".GATK_HF.log"):
+                                # GATK_HF
+                                GATK_HF_Command = "{} 12 {}.bam {}".format(GATK_HF_Path, outfile, sset)
+                                print(GATK_HF_Command + "\n", flush=True)
+                                os.system(GATK_HF_Command)
+                                os.system("mv .bam.GATK_HF.log {}.GATK_HF.log".format(outfile))
+                            else:
+                                print("{}.GATK_HF.log already existing. Skipping GATK_HF.".format(outfile) + "\n", flush=True)
 
-                            # GATK_VQSR
-                            os.system("rm .bam.GATK_VQSR.log")
-                            GATK_VQSR_Command = "{} 12 {}.bam {}".format(GATK_VQSR_Path, outfile, sset)
-                            print(GATK_VQSR_Command + "\n", flush=True)
-                            os.system(GATK_VQSR_Command)
-                            os.system("mv .bam.GATK_VQSR.log {}.GATK_VQSR.log".format(outfile))
+                            if not os.path.isfile(outfile + ".GATK_VQSR.log"):
+                                # GATK_VQSR
+                                GATK_VQSR_Command = "{} 12 {}.bam {}".format(GATK_VQSR_Path, outfile, sset)
+                                print(GATK_VQSR_Command + "\n", flush=True)
+                                os.system(GATK_VQSR_Command)
+                                os.system("mv .bam.GATK_VQSR.log {}.GATK_VQSR.log".format(outfile))
+                            else:
+                                print("{}.GATK_VQSR.log already existing. Skipping GATK_VQSR.".format(outfile) + "\n", flush=True)
 
 
 
