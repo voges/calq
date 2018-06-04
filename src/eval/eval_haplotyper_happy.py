@@ -64,10 +64,15 @@ for dset in datasets:
                                 if not os.path.isfile("{}.bam{}".format(outfile, vcf)):
                                     print("File '{}' does not exist. Skipping!\n".format(outfile), flush=True)
                                     continue
-                                HAPPY_Command = "{}{}.sh {}.bam{}".format(HAPPY_prefix, sset, outfile, vcf)
-                                print(HAPPY_Command + "\n", flush=True)
-                                os.system(HAPPY_Command)
+
                                 happyCSV = "{}.bam{}.happy.summary.csv".format(outfile, vcf)
+                                HAPPY_Command = "{}{}.sh {}.bam{}".format(HAPPY_prefix, sset, outfile, vcf)
+
+                                if os.path.isfile(happyCSV):
+                                    print("File already existing. Skipping Happy, just collecting info!\n".format(outfile), flush=True)
+                                else
+                                    print(HAPPY_Command + "\n", flush=True)
+                                    os.system(HAPPY_Command)
 
                                 indelP = 0.0
                                 indelR = 0.0
