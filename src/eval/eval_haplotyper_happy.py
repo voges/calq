@@ -1,21 +1,19 @@
 import os.path
 import csv
 
-basedir = "/data/voges/muenteferi"
-#datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
-#            ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
-#            ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-subsets = ["20"]
-
+# Parameters
+datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
+            ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
+            ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
+subsets = ["3", "11", "20"]
 filtersize = ["10"]
 filtertype = ["Gauss"]
 quantizerType = ["Uniform"]
-
 quantSteps = [["2", "8"]]
-
 squashed = [""]
 
+
+basedir = "/data/voges/muenteferi"
 install_path = "/project/dna/install"
 samtools = install_path + "/samtools-1.3/bin/samtools"
 calqPath = "/home/muenteferi/Dokumente/calqBuild/calq"
@@ -104,7 +102,7 @@ for dset in datasets:
                                     print("indel: P: {} R: {} F: {}; SNP: P: {} R: {} F: {}\n".format(indelP, indelR,
                                                                                                     indelF, SNPP, SNPR,
                                                                                                     SNPF), flush=True)
-                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset, sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR,
+                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR,
                                                                                                     indelF, SNPP, SNPR,
                                                                                                     SNPF))
                                 print("\n", flush=True)
