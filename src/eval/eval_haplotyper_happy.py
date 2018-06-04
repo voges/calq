@@ -70,7 +70,7 @@ for dset in datasets:
 
                                 if os.path.isfile(happyCSV):
                                     print("File already existing. Skipping Happy, just collecting info!\n".format(outfile), flush=True)
-                                else
+                                else:
                                     print(HAPPY_Command + "\n", flush=True)
                                     os.system(HAPPY_Command)
 
