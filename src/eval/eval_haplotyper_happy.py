@@ -62,7 +62,7 @@ for dset in datasets:
                             # Hap.py / rep.py
                             for vcf in vcfList:
                                 if not os.path.isfile("{}.bam{}".format(outfile, vcf)):
-                                    print("File '{}' does not exist. Skipping!\n".format(outfile), flush=True)
+                                    print("File '{}.bam{}' does not exist. Skipping!\n".format(outfile, vcf), flush=True)
                                     continue
 
                                 happyCSV = "{}.bam{}.happy.summary.csv".format(outfile, vcf)
