@@ -67,6 +67,7 @@ $python $Platypus_py callVariants --nCPU=$num_threads --bamFiles=$input_bam --re
 
 printf "[2/2] SNP extraction\n"
 $java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.platypus.raw_variants.vcf -selectType SNP -o $input_bam.platypus.snps.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.platypus.raw_variants.vcf -selectType INDEL -o $input_bam.platypus.indels.vcf &>>$log_txt
 
 ###############################################################################
 #                                   Cleanup                                   #
