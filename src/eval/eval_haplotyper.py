@@ -5,7 +5,7 @@ datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"]
             ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
             ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
 subsets = ["3", "11", "20"]
-filtersize = ["10"]
+filtersize = ["10", "17"]
 filtertype = ["Gauss"]
 quantizerType = ["Uniform"]
 quantSteps = [["2", "8"]]
@@ -18,9 +18,9 @@ samtools = install_path + "/samtools-1.3/bin/samtools"
 calqPath = "/home/muenteferi/Dokumente/calqBuild/calq"
 referencePath = "/data/voges/muenteferi/GATK_bundle-2.8-b37/human_g1k_v37.fasta"
 replacePath = "/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
-platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Platypus.sh"
-GATK_HF_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_HF.sh"
-GATK_VQSR_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_VQSR.sh"
+platypusPath = "/home/muenteferi/Downloads/variant_calling_pipelines/Platypus.sh"
+GATK_HF_Path = "/home/muenteferi/Downloads/variant_calling_pipelines/GATK_HF.sh"
+GATK_VQSR_Path = "/home/muenteferi/Downloads/variant_calling_pipelines/GATK_VQSR.sh"
 HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do_happy+reppy_chr"
 
 vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
