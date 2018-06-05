@@ -84,12 +84,12 @@ for dset in datasets:
                             else:
                                 print("{}.bam already existing. Skipping calq.".format(outfile) + "\n", flush=True)
 
-                            if not os.path.isfile(outfile + ".Playtypus.log"):
+                            if not os.path.isfile(outfile + ".Platypus.log"):
                                 # Platypus
                                 PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
                                 print(PlatypusCommand + "\n", flush=True)
                                 os.system(PlatypusCommand)
-                                os.system("mv .bam.GATK_HF.log {}.Playtypus.log".format(outfile))
+                                os.system("mv .bam.GATK_HF.log {}.Platypus.log".format(outfile))
                             else:
                                 print("{}.Platypus.log already existing. Skipping platypus.".format(outfile) + "\n", flush=True)
 
