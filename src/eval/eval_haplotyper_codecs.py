@@ -11,7 +11,7 @@ quantizerType = ["Uniform"]
 quantSteps = [["2", "8"]]
 squashed = [""]
 
-codecs = [[".calq-0b74e3d", ""], [".crumble-0.5", ""], [".dsrc_2.0-il8b", ""], [".quartz-0.2.2", ""], [".qvz2-d5383c6", "-t1"]]
+codecs = [[".sam.calq-0b74e3d", ""], [".bam.crumble-0.5", ""], [".dsrc_2.0-il8b", ""], [".fastq.quartz-0.2.2.fastq.clipped_qual.aln_bowtie2.sorted.dupmark.rg", ""], [".sam.qvz2-d5383c6", "-t1"]]
 
 # Paths
 basedir = "/data/voges/muenteferi"
