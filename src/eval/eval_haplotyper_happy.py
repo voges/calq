@@ -76,14 +76,20 @@ for dset in datasets:
                                     print(HAPPY_Command + "\n", flush=True)
                                     os.system(HAPPY_Command)
 
-                                indelP = 0.0
-                                indelR = 0.0
-                                SNPP = 0.0
-                                SNPR = 0.0
-                                rowCtr = 0.0
-                                colCtr = 0.0
-                                indelF = 0.0
-                                SNPF = 0.0
+                                indelP = -1.0
+                                indelR = -1.0
+                                SNPP = -1.0
+                                SNPR = -1.0
+                                rowCtr = -1.0
+                                colCtr = -1.0
+                                indelF = -1.0
+                                SNPF = -1.0
+
+                                if not os.path.isfile(happyCSV):
+                                    print("FAIL!\n".format(indelP, indelR, indelF, SNPP, SNPR, SNPF), flush=True)
+                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR, indelF, SNPP, SNPR, SNPF, filesize))
+                                    continue
+                                    
 
                                 with open(happyCSV, newline='') as File:
                                     reader = csv.reader(File)
