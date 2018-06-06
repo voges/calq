@@ -71,23 +71,23 @@ for dset in datasets:
                                 HAPPY_Command = "{}{}.sh {}.bam{}".format(HAPPY_prefix, sset, outfile, vcf)
 
                                 if os.path.isfile(happyCSV):
-                                    print("File already existing. Skipping Happy, just collecting info!\n".format(outfile), flush=True)
+                                    print("File {} already existing. Skipping Happy, just collecting info!\n".format(happyCSV), flush=True)
                                 else:
                                     print(HAPPY_Command + "\n", flush=True)
                                     os.system(HAPPY_Command)
 
-                                indelP = -1.0
-                                indelR = -1.0
-                                SNPP = -1.0
-                                SNPR = -1.0
-                                rowCtr = -1.0
-                                colCtr = -1.0
-                                indelF = -1.0
-                                SNPF = -1.0
+                                indelP = 0.0
+                                indelR = 0.0
+                                SNPP = 0.0
+                                SNPR = 0.0
+                                rowCtr = 0.0
+                                colCtr = 0.0
+                                indelF = 0.0
+                                SNPF = 0.0
 
                                 if not os.path.isfile(happyCSV):
                                     print("FAIL!\n".format(indelP, indelR, indelF, SNPP, SNPR, SNPF), flush=True)
-                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR, indelF, SNPP, SNPR, SNPF, filesize))
+                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, filesize))
                                     continue
                                     
 
