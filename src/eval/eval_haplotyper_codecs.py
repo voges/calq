@@ -38,9 +38,33 @@ for dset in datasets:
             exit(-1)
         for codec in codecs:
             outfile = "{}{}/{}.{}{}{}{}".format(folder, codec[1],  dset[1], sset, codec[0], codec[1], codec[2])
-            os.system("rm " + outfile + ".Platypus.log")
-            os.system("rm " + outfile + ".GATK_HF.log")
-            os.system("rm " + outfile + ".GATK_VQSR.log")
+            
+            if not os.path.isfile(outfile + ".Platypus.log"):
+                # Platypus
+                PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
+                print(PlatypusCommand + "\n", flush=True)
+                os.system(PlatypusCommand)
+                os.system("mv .bam.GATK_HF.log {}.Platypus.log".format(outfile))
+            else:
+                print("{}.Platypus.log already existing. Skipping platypus.".format(outfile) + "\n", flush=True)
+
+            if not os.path.isfile(outfile + ".GATK_HF.log"):
+                # GATK_HF
+                GATK_HF_Command = "{} 12 {}.bam {}".format(GATK_HF_Path, outfile, sset)
+                print(GATK_HF_Command + "\n", flush=True)
+                os.system(GATK_HF_Command)
+                os.system("mv .bam.GATK_HF.log {}.GATK_HF.log".format(outfile))
+            else:
+                print("{}.GATK_HF.log already existing. Skipping GATK_HF.".format(outfile) + "\n", flush=True)
+
+            if not os.path.isfile(outfile + ".GATK_VQSR.log"):
+                # GATK_VQSR
+                GATK_VQSR_Command = "{} 12 {}.bam {}".format(GATK_VQSR_Path, outfile, sset)
+                print(GATK_VQSR_Command + "\n", flush=True)
+                os.system(GATK_VQSR_Command)
+                os.system("mv .bam.GATK_VQSR.log {}.GATK_VQSR.log".format(outfile))
+            else:
+                print("{}.GATK_VQSR.log already existing. Skipping GATK_VQSR.".format(outfile) + "\n", flush=True)
 
 
 
