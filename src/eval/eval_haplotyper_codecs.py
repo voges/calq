@@ -38,10 +38,10 @@ for dset in datasets:
             exit(-1)
         for codec in codecs:
             outfile = "{}{}/{}.{}{}{}{}".format(folder, codec[1],  dset[1], sset, codec[0], codec[1], codec[2])
-            os.system(outfile + ".Platypus.log")
-            os.system(outfile + ".GATK_HF.log")
-            os.system(outfile + ".GATK_VQSR.log")
-          
+            os.system("rm " + outfile + ".Platypus.log")
+            os.system("rm " + outfile + ".GATK_HF.log")
+            os.system("rm " + outfile + ".GATK_VQSR.log")
+
 
 
 
