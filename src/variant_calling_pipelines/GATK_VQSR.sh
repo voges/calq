@@ -94,7 +94,7 @@ $java $java_opts -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_fasta
 
 resourceIndels1="mills,known=false,training=true,truth=true,prior=12.0 $mills_vcf"
 resourceIndels2="dbsnp,known=true,training=false,truth=false,prior=2.0 $dbsnps_vcf"
-recalParamsIndels="--maxGaussians 4 -an QD -an DP -an FS -an SOR -an ReadPosRankSum -an MQRankSum -an InbreedingCoeff"
+recalParamsIndels="--maxGaussians 4 -an QD -an DP -an FS -an SOR -an ReadPosRankSum -an MQRankSum"
 $java $java_opts -jar $GenomeAnalysisTK_jar -T VariantRecalibrator -R $ref_fasta -L $chromosome -input $input_bam.GATK.indels.vcf -resource:$resourceIndels1 -resource:$resourceIndels2 $recalParamsIndels -mode INDEL -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -recalFile $input_bam.indels.recal -tranchesFile $input_bam.indels.tranches -rscriptFile $input_bam.indels.r &>>$log_txt
 
 
