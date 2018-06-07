@@ -11,7 +11,7 @@ quantizerType = ["Uniform"]
 quantSteps = [["2", "8"]]
 squashed = [""]
 
-codecs = [[".sam", ".calq-0b74e3d", ""], [".bam", ".crumble-0.5", ""], ["", ".dsrc_2.0-il8b", ""], [".fastq", ".quartz-0.2.2", ".fastq.clipped_qual.aln_bowtie2.sorted.dupmark.rg"], [".sam", ".qvz2-d5383c6", "-t1"]]
+codecs = [[".sam", ".calq-0b74e3d", ""], [".bam", ".crumble-0.5", ""], [".sam", ".dsrc_2.0-il8b", ""], [".fastq", ".quartz-0.2.2", ".fastq.clipped_qual.aln_bowtie2.sorted.dupmark.rg"], [".sam", ".qvz2-d5383c6", "-t1"], [".sam", ".qvz2-d5383c6", "-t2"], [".sam", ".qvz2-d5383c6", "-t3"], [".sam", ".qvz2-d5383c6", "-t4"], [".sam", ".qvz2-d5383c6", "-t5"], [".sam", ".qvz2-d5383c6", "-t16"], [".sam", ".qvz2-d5383c6", "-t1"]]
 
 # Paths
 basedir = "/data/voges/muenteferi"
@@ -38,7 +38,7 @@ for dset in datasets:
             exit(-1)
         for codec in codecs:
             outfile = "{}{}/{}.{}{}{}{}".format(folder, codec[1],  dset[1], sset, codec[0], codec[1], codec[2])
-            
+
             if not os.path.isfile(outfile + ".Platypus.log"):
                 # Platypus
                 PlatypusCommand = "{} 12 {}.bam {}".format(platypusPath, outfile, sset)
