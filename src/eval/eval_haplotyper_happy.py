@@ -34,7 +34,7 @@ if os.path.isfile(outCSV):
     exit(-1)
 
 f = open(outCSV, 'w')
-f.write("Data Chromosome Filtersize Filter Quantizer QuantizerMin QuantizerMax SquashMode Caller IndelP IndelR IndelF SNPP SNPR SNPF Filesize\n");
+f.write("Data Chromosome Codec Caller IndelP IndelR IndelF SNPP SNPR SNPF Filesize\n");
 
 for dset in datasets:
     for sset in subsets:
@@ -87,7 +87,7 @@ for dset in datasets:
 
                                 if not os.path.isfile(happyCSV):
                                     print("FAIL!\n".format(indelP, indelR, indelF, SNPP, SNPR, SNPF), flush=True)
-                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, filesize))
+                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, filesize))
                                     continue
                                     
 
@@ -112,7 +112,7 @@ for dset in datasets:
                                     print("indel: P: {} R: {} F: {}; SNP: P: {} R: {} F: {}\n".format(indelP, indelR,
                                                                                                     indelF, SNPP, SNPR,
                                                                                                     SNPF), flush=True)
-                                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, ftype, qtype, qsteps[0], qsteps[1], squash, vcf, indelP, indelR,
+                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, indelP, indelR,
                                                                                                     indelF, SNPP, SNPR,
                                                                                                     SNPF, filesize))
                                 print("\n", flush=True)
