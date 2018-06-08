@@ -34,7 +34,7 @@ if os.path.isfile(outCSV):
     exit(-1)
 
 f = open(outCSV, 'w')
-f.write("Data Chromosome Codec Caller IndelP IndelR IndelF SNPP SNPR SNPF Filesize\n");
+f.write("Data Chromosome Codec Caller TruthNo TruePositive FalseNegative precision recall f-score Filesize\n");
 
 for dset in datasets:
     for sset in subsets:
@@ -76,18 +76,18 @@ for dset in datasets:
                                     print(HAPPY_Command + "\n", flush=True)
                                     os.system(HAPPY_Command)
 
-                                indelP = 0.0
-                                indelR = 0.0
-                                SNPP = 0.0
-                                SNPR = 0.0
-                                rowCtr = 0.0
-                                colCtr = 0.0
-                                indelF = 0.0
-                                SNPF = 0.0
+                                precision = 0.0
+                                recall = 0.0
+                                fScore = 0.0
+                                calls = 0
+                                truePositive = 0
+                                falseNegative = 0
+                                rowCtr = 0
+                                colCtr = 0
 
                                 if not os.path.isfile(happyCSV):
-                                    print("FAIL!\n".format(indelP, indelR, indelF, SNPP, SNPR, SNPF), flush=True)
-                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, filesize))
+                                    print("FAIL!\n", flush=True)
+                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, 0, 0, 0, -1.0, -1.0, -1.0, filesize))
                                     continue
                                     
 
@@ -95,26 +95,35 @@ for dset in datasets:
                                     reader = csv.reader(File)
                                     for row in reader:
                                         for col in row:
-                                            if rowCtr == 4 and colCtr == 9:
-                                                SNPR = float(col)
-                                            if rowCtr == 4 and colCtr == 10:
-                                                SNPP = float(col)
-                                            if rowCtr == 2 and colCtr == 9:
-                                                indelR = float(col)
-                                            if rowCtr == 2 and colCtr == 10:
-                                                indelP = float(col)
+                                            if ".snps." in vcf:
+                                                if rowCtr == 4 and colCtr == 9:
+                                                    recall = float(col)
+                                                if rowCtr == 4 and colCtr == 10:
+                                                    precision = float(col)
+                                                if rowCtr == 4 and colCtr == 2:
+                                                    calls = int(col)
+                                                if rowCtr == 4 and colCtr == 3:
+                                                    truePositive = int(col)
+                                                if rowCtr == 4 and colCtr == 4:
+                                                    falseNegative = int(col)
+                                            else:
+                                                if rowCtr == 2 and colCtr == 9:
+                                                    recall = float(col)
+                                                if rowCtr == 2 and colCtr == 10:
+                                                    precision = float(col)
+                                                if rowCtr == 2 and colCtr == 2:
+                                                    calls = int(col)
+                                                if rowCtr == 2 and colCtr == 3:
+                                                    truePositive = int(col)
+                                                if rowCtr == 2 and colCtr == 4:
+                                                    falseNegative = int(col)
+
                                             colCtr = colCtr + 1
                                         rowCtr = rowCtr + 1
                                         colCtr = 0
-                                    indelF = 0.0 if indelR == 0.0 and indelP == 0.0 else 2.0 * indelP * indelR / (
-                                                indelP + indelR)
-                                    SNPF = 0.0 if SNPR == 0.0 and SNPP == 0.0 else 2.0 * SNPP * SNPR / (SNPP + SNPR)
-                                    print("indel: P: {} R: {} F: {}; SNP: P: {} R: {} F: {}\n".format(indelP, indelR,
-                                                                                                    indelF, SNPP, SNPR,
-                                                                                                    SNPF), flush=True)
-                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, indelP, indelR,
-                                                                                                    indelF, SNPP, SNPR,
-                                                                                                    SNPF, filesize))
+                                    fScore = 0.0 if recall == 0.0 and precision == 0.0 else 2.0 * precision * recall / (precision + recall)
+                                    print("P: {} R: {} F: {};\n".format(precision, recall, fScore), flush=True)
+                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, calls, truePositive, falseNegative, precision, recall, fScore, filesize))
                                 print("\n", flush=True)
 f.close()
 
