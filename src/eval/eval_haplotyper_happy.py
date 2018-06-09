@@ -34,7 +34,7 @@ if os.path.isfile(outCSV):
     exit(-1)
 
 f = open(outCSV, 'w')
-f.write("Data Chromosome Codec Caller TruthNo TruePositive FalseNegative precision recall f-score Filesize\n");
+f.write("Data Chromosome Codec Caller Truth TruePositive FalseNegative FalsePositive Unknown precision recall f-score Filesize\n");
 
 for dset in datasets:
     for sset in subsets:
@@ -81,13 +81,15 @@ for dset in datasets:
                                 fScore = 0.0
                                 calls = 0
                                 truePositive = 0
+                                falsePositive = 0
+                                unknownCalls = 0
                                 falseNegative = 0
                                 rowCtr = 0
                                 colCtr = 0
 
                                 if not os.path.isfile(happyCSV):
                                     print("FAIL!\n", flush=True)
-                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, 0, 0, 0, -1.0, -1.0, -1.0, filesize))
+                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, filesize))
                                     continue
                                     
 
@@ -106,6 +108,11 @@ for dset in datasets:
                                                     truePositive = int(col)
                                                 if rowCtr == 4 and colCtr == 4:
                                                     falseNegative = int(col)
+                                                if rowCtr == 4 and colCtr == 6:
+                                                    falsePositive = int(col)
+                                                if rowCtr == 4 and colCtr == 7:
+                                                    unknownCalls = int(col)
+
                                             else:
                                                 if rowCtr == 2 and colCtr == 9:
                                                     recall = float(col)
@@ -117,13 +124,18 @@ for dset in datasets:
                                                     truePositive = int(col)
                                                 if rowCtr == 2 and colCtr == 4:
                                                     falseNegative = int(col)
+                                                if rowCtr == 2 and colCtr == 6:
+                                                    falsePositive = int(col)
+                                                if rowCtr == 2 and colCtr == 7:
+                                                    unknownCalls = int(col)
+
 
                                             colCtr = colCtr + 1
                                         rowCtr = rowCtr + 1
                                         colCtr = 0
                                     fScore = 0.0 if recall == 0.0 and precision == 0.0 else 2.0 * precision * recall / (precision + recall)
                                     print("P: {} R: {} F: {};\n".format(precision, recall, fScore), flush=True)
-                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, calls, truePositive, falseNegative, precision, recall, fScore, filesize))
+                                    f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, calls, truePositive, falseNegative, falsePositive, unknownCalls, precision, recall, fScore, filesize))
                                 print("\n", flush=True)
 f.close()
 
