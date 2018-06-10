@@ -1,4 +1,5 @@
 import os.path
+import csv
 
 # Parameters
 datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
@@ -77,7 +78,7 @@ for dset in datasets:
                     print("FAIL!\n", flush=True)
                     f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, codec[1], vcf, -1.0, -1.0,
                                                                                             -1.0, -1.0, -1.0, -1.0,
-                                                                                            -1.0, -1.0, filesize))
+                                                                                            -1.0, -1.0, -1.0))
                     continue
 
                 with open(happyCSV, newline='') as File:
@@ -126,7 +127,7 @@ for dset in datasets:
                                                                                             truePositive, falseNegative,
                                                                                             falsePositive, unknownCalls,
                                                                                             precision, recall, fScore,
-                                                                                            filesize))
+                                                                                            -1.0))
                 print("\n", flush=True)
 f.close()
 
