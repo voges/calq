@@ -10,7 +10,7 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     printf "Usage: $0 num_threads input_bam chromosome GPU_ID\n"
     exit -1
 fi
