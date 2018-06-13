@@ -5,10 +5,10 @@ import csv
 datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
             ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
             ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-subsets = ["3", "11", "20"]
+subsets = ["20"]
 filtersize = ["17"]
 filtertype = ["Gauss"]
-quantizerType = ["Lloyd"]
+quantizerType = ["Uniform"]
 quantSteps = [["2", "8"]]
 squashed = [""]
 
@@ -17,6 +17,8 @@ basedir = "/data/voges/muenteferi"
 install_path = "/project/dna/install"
 samtools = install_path + "/samtools-1.3/bin/samtools"
 calqPath = "/home/muenteferi/Dokumente/calqBuild/calq"
+scramble = "/project/dna/bin/scramble"
+cramsize = "/project/dna/bin/cram_size"
 referencePath = "/data/voges/muenteferi/GATK_bundle-2.8-b37/human_g1k_v37.fasta"
 replacePath = "/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
 platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Platypus.sh"
@@ -59,7 +61,16 @@ for dset in datasets:
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
                             outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.cq".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
 
-                            filesize = os.path.getsize(outfile)
+                            filesize = "0"
+
+                            if not os.path.isfile(outfile + ".bam.cram"):
+                                CRAM_Command = "{} -r {} {}.bam {}.bam.cram".format(scramble, referencePath, outfile, outfile)
+                                os.system(CRAM_Command)
+                            else:
+                                print("File '{}.bam.cram' exists. Skipping!\n".format(outfile), flush=True)
+
+                            Size_Command = "{} {}.bam.cram | grep QS | awk '{{print $6}}'".format(cramsize, outfile)
+                            filesize = os.popen(Size_Command).read()
 
                             # Hap.py / rep.py
                             for vcf in vcfList:
