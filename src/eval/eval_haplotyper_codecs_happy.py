@@ -59,7 +59,7 @@ for dset in datasets:
             else:
                 print("File '{}.bam.cram' exists. Skipping!\n".format(outfile), flush=True)
 
-            Size_Command = "{} {}.bam.cram | grep QS | awk \'\{print $6\}\'".format(cramsize, outfile)
+            Size_Command = "{} {}.bam.cram | grep QS | awk '{{print $6}}'".format(cramsize, outfile)
             filesize = os.popen(Size_Command).read()
 
             # Hap.py / rep.py
