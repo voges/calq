@@ -46,6 +46,11 @@ for dset in datasets:
             exit(-1)
         for codec in codecs:
             outfile = "{}{}/{}.{}{}{}{}".format(folder, codec[1],  dset[1], sset, codec[0], codec[1], codec[2])
+            cname = codec[1]+codec[2]
+            if cname == "":
+                cname = ".none"
+            if cname == ".quartz-0.2.2.clipped_qual.aln_bowtie2.sorted.dupmark.rg":
+                cname = ".quartz-0.2.2"
 
             # Hap.py / rep.py
             for vcf in vcfList:
@@ -76,7 +81,7 @@ for dset in datasets:
 
                 if not os.path.isfile(happyCSV):
                     print("FAIL!\n", flush=True)
-                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, codec[1], vcf, -1.0, -1.0,
+                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, cname, vcf, -1.0, -1.0,
                                                                                             -1.0, -1.0, -1.0, -1.0,
                                                                                             -1.0, -1.0, -1.0))
                     continue
@@ -123,7 +128,7 @@ for dset in datasets:
                     fScore = 0.0 if recall == 0.0 and precision == 0.0 else 2.0 * precision * recall / (
                                 precision + recall)
                     print("P: {} R: {} F: {};\n".format(precision, recall, fScore), flush=True)
-                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, codec[0], vcf, calls,
+                    f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, cname, vcf, calls,
                                                                                             truePositive, falseNegative,
                                                                                             falsePositive, unknownCalls,
                                                                                             precision, recall, fScore,
