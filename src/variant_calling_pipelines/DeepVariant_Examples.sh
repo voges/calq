@@ -71,18 +71,23 @@ if [ ! -f $dv_postprocess ]; then printf "Error: JAR file $dv_postprocess is not
 #                         Variant calling with GATK                           #
 ###############################################################################
 
+LOGDIR=./logs
+N_SHARDS=8
+
+mkdir -p "${LOGDIR}"
+
 printf "[1/4] Extract candidate sites\n"
-$python $dv_examples --mode calling --ref $ref_fasta --reads $input_bam --regions "$chromosome" --examples "$input_bam.examples.tfrecord.gz" &>>$log_txt
 
-printf "[2/4] Variant calling\n"
-$python $dv_calling --outfile "$input_bam.examples.tfrecord_filtered.gz"  --examples "$input_bam.examples.tfrecord.gz"  --checkpoint "$dv_model" &>>$log_txt
+time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
+  python bin/make_examples.zip \
+    --mode calling \
+    --ref "$ref_fasta" \
+    --reads "$input_bam" \
+    --examples ""$input_bam.examples.tfrecord.gz"" \
+    --regions "$chromosome" \
+    --task {}
 
-printf "[3/4] Postprocessing\n"
-$python $dv_postprocess --ref $ref_fasta --infile "$input_bam.examples.tfrecord_filtered.gz" --outfile "$input_bam.DeepVariant.raw_variants.vcf" &>>$log_txt
-
-printf "[4/4] SNP / Indel extraction\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V "$input_bam.DeepVariant.raw_variants.vcf" -selectType SNP -o "$input_bam.DeepVariant.snps.vcf" &>>$log_txt
-$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V "$input_bam.DeepVariant.raw_variants.vcf" -selectType INDEL -o "$input_bam.DeepVariant.indels.vcf" &>>$log_txt
+#$python $dv_examples --mode calling --ref $ref_fasta --reads $input_bam --regions "$chromosome" --examples "$input_bam.examples.tfrecord.gz" &>>$log_txt
 
 
 
