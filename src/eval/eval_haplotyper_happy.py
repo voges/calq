@@ -60,17 +60,7 @@ for dset in datasets:
                             # Create folders and SAM input
                             outfolder = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}".format(folder,fsize,ftype,qsteps[0], qsteps[1], qtype, squash)
                             outfile = "{}.calq-haplo.filter{}{}.quant{}_{}{}{}.cq".format(outfolder + "/" + filename, fsize, ftype, qsteps[0], qsteps[1], qtype, squash)
-
-                            filesize = "0"
-
-                            if not os.path.isfile(outfile + ".bam.cram"):
-                                CRAM_Command = "{} -r {} {}.bam {}.bam.cram".format(scramble, referencePath, outfile, outfile)
-                                os.system(CRAM_Command)
-                            else:
-                                print("File '{}.bam.cram' exists. Skipping!\n".format(outfile), flush=True)
-
-                            Size_Command = "{} {}.bam.cram | grep QS | awk '{{print $6}}'".format(cramsize, outfile)
-                            filesize = os.popen(Size_Command).read()
+                            filesize = os.path.getsize(outfile)
 
                             # Hap.py / rep.py
                             for vcf in vcfList:

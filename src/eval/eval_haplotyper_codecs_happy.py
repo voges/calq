@@ -53,15 +53,6 @@ for dset in datasets:
 
             filesize = "0"
 
-            if not os.path.isfile(outfile + ".bam.cram"):
-                CRAM_Command = "{} -r {} {}.bam {}.bam.cram".format(scramble, referencePath, outfile, outfile)
-                os.system(CRAM_Command)
-            else:
-                print("File '{}.bam.cram' exists. Skipping!\n".format(outfile), flush=True)
-
-            Size_Command = "{} {}.bam.cram | grep QS | awk '{{print $6}}'".format(cramsize, outfile)
-            filesize = os.popen(Size_Command).read()
-
             # Hap.py / rep.py
             for vcf in vcfList:
                 if not os.path.isfile("{}.bam".format(outfile)):
