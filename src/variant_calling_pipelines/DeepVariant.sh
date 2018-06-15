@@ -29,7 +29,7 @@ gpu=$3
 printf "GPU: $gpu\n"
 
 #Select GPU
-CUDA_VISIBLE_DEVICES=$gpu
+export CUDA_VISIBLE_DEVICES=$gpu
 
 if [ -f $log_txt ]; then printf "Error: File $log_txt file already exists.\n"; exit -1; fi
 if [ ! -f $input_bam ]; then printf "Error: Input BAM file $input_bam is not a regular file.\n"; exit -1; fi
