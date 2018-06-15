@@ -83,7 +83,7 @@ time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --
     --mode calling \
     --ref "$ref_fasta" \
     --reads "$input_bam" \
-    --examples ""$input_bam.examples.tfrecord.gz"" \
+    --examples ""$input_bam.examples.tfrecord@${N_SHARDS}.gz"" \
     --regions "$chromosome" \
     --task {}
 
