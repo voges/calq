@@ -79,7 +79,7 @@ mkdir -p "${LOGDIR}"
 printf "[1/4] Extract candidate sites\n"
 
 time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
-  python bin/make_examples.zip \
+  python $dv_examples \
     --mode calling \
     --ref "$ref_fasta" \
     --reads "$input_bam" \
