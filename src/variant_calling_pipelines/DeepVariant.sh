@@ -78,15 +78,20 @@ mkdir -p "${LOGDIR}"
 
 printf "[1/4] Extract candidate sites\n"
 
+if [ ! -f $input_bam.tfrecord-00000-of-0000$N_SHARDS.gz ] 
+then
+
 time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
   python $dv_examples \
     --mode calling \
     --ref "$ref_fasta" \
     --reads "$input_bam" \
-    --examples ""$input_bam.examples.tfrecord@${N_SHARDS}.gz"" \
+    --examples "$input_bam.examples.tfrecord@${N_SHARDS}.gz" \
     --regions "$chromosome" \
     --task {}
-
+else
+printf "Examples $input_bam.examples existing, skipping make_examples.\n"
+fi
 printf "[2/4] Variant calling\n"
 $python $dv_calling --outfile "$input_bam.examples.tfrecord_filtered.gz"  --examples "$input_bam.examples.tfrecord@${N_SHARDS}.gz"  --checkpoint "$dv_model" &>>$log_txt
 
