@@ -21,6 +21,7 @@ replacePath = "/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
 platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Platypus.sh"
 GATK_HF_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_HF.sh"
 GATK_VQSR_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_VQSR.sh"
+deepVariantPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/DeepVariant.sh"
 HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do_happy+reppy_chr"
 
 vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
@@ -35,10 +36,10 @@ for dset in datasets:
             print("NOT existing: " + filepath + ".bam", flush=True)
             exit(-1)
 
-        if not os.path.isfile(filepath + ".sam"):
-            print("Converting to sam: " + file + ".bam" , flush=True)
-            command = "{} view -h -o {}.sam {}.bam".format(samtools, filepath, filepath)
-            os.system(command)
+#        if not os.path.isfile(filepath + ".sam"):
+#            print("Converting to sam: " + file + ".bam" , flush=True)
+#            command = "{} view -h -o {}.sam {}.bam".format(samtools, filepath, filepath)
+#            os.system(command)
 
         for fsize in filtersize:
             for ftype in filtertype:
@@ -92,6 +93,15 @@ for dset in datasets:
                                 os.system("mv .bam.GATK_HF.log {}.Platypus.log".format(outfile))
                             else:
                                 print("{}.Platypus.log already existing. Skipping platypus.".format(outfile) + "\n", flush=True)
+
+                            if not os.path.isfile(outfile + ".DeepVariant.log"):
+                                # Platypus
+                                DeepVariantCommand = "{} 4 {}.bam {} 1".format(deepVariantPath, outfile, sset)
+                                print(DeepVariantCommand + "\n", flush=True)
+                                os.system(DeepVariantCommand)
+                                os.system("mv .bam.DeepVariant.log {}.DeepVariant.log".format(outfile))
+                            else:
+                                print("{}.DeepVariant.log already existing. Skipping DeepVariant.".format(outfile) + "\n", flush=True)
 
                             if not os.path.isfile(outfile + ".GATK_HF.log"):
                                 # GATK_HF
