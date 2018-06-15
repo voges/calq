@@ -72,7 +72,7 @@ if [ ! -f $dv_postprocess ]; then printf "Error: JAR file $dv_postprocess is not
 ###############################################################################
 
 LOGDIR=./logs
-N_SHARDS=4
+N_SHARDS=$num_threads
 
 mkdir -p "${LOGDIR}"
 
