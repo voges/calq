@@ -26,6 +26,7 @@ replacePath = "/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
 platypusPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/Platypus.sh"
 GATK_HF_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_HF.sh"
 GATK_VQSR_Path = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/GATK_VQSR.sh"
+deepVariantPath = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/DeepVariant.sh"
 HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do_happy+reppy_chr"
 
 vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
