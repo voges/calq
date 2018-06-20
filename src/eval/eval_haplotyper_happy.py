@@ -5,10 +5,10 @@ import csv
 datasets = [["ERP001775", "ERR174324.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
             ["NA12878_Garvan_replicate_J", "NA12878_V2.5_Robot_2.aln_bowtie2.sorted.dupmark.rg.realn.recal"],
             ["NA12878-SRX517292", "SRR1238539.aln_bowtie2.sorted.dupmark.rg.realn.recal"]]
-subsets = ["20"]
+subsets = ["3", "11", "20"]
 filtersize = ["17"]
 filtertype = ["Gauss"]
-quantizerType = ["Uniform"]
+quantizerType = ["Lloyd"]
 quantSteps = [["2", "8"]]
 squashed = [""]
 
@@ -28,7 +28,8 @@ HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do
 vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
            ".GATK.snps.filtered990.vcf", ".GATK.snps.filtered999.vcf", ".GATK.snps.filtered1000.vcf",
            ".platypus.indels.vcf", ".GATK.indels.hard_filtered.vcf", ".GATK.indels.filtered900.vcf",
-           ".GATK.indels.filtered990.vcf", ".GATK.indels.filtered999.vcf", ".GATK.indels.filtered1000.vcf"]
+           ".GATK.indels.filtered990.vcf", ".GATK.indels.filtered999.vcf", ".GATK.indels.filtered1000.vcf",
+           ".DeepVariant.snps.vcf", ".DeepVariant.indels.vcf"]
 outCSV = "results.csv"
 
 if os.path.isfile(outCSV):
@@ -47,10 +48,10 @@ for dset in datasets:
             print("NOT existing: " + filepath + ".bam", flush=True)
             exit(-1)
 
-        if not os.path.isfile(filepath + ".sam"):
-            print("Converting to sam: " + file + ".bam" , flush=True)
-            command = "{} view -h -o {}.sam {}.bam".format(samtools, filepath, filepath)
-            os.system(command)
+#        if not os.path.isfile(filepath + ".sam"):
+#            print("Converting to sam: " + file + ".bam" , flush=True)
+#            command = "{} view -h -o {}.sam {}.bam".format(samtools, filepath, filepath)
+#            os.system(command)
 
         for fsize in filtersize:
             for ftype in filtertype:
@@ -92,7 +93,7 @@ for dset in datasets:
                                     print("FAIL!\n", flush=True)
                                     f.write("{} {} calq-haplo{}{}{} {} {} {} {} {} {} {} {} {} {}\n".format(dset[0], sset, fsize, qtype, squash, vcf, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, filesize))
                                     continue
-                                    
+
 
                                 with open(happyCSV, newline='') as File:
                                     reader = csv.reader(File)

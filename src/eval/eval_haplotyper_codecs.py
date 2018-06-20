@@ -74,9 +74,9 @@ for dset in datasets:
             else:
                 print("{}.GATK_VQSR.log already existing. Skipping GATK_VQSR.".format(outfile) + "\n", flush=True)
 
-            if not os.path.isfile(outfile + ".DeepVariant.log"):
+            if not os.path.isfile(outfile + ".DeepVariant.log") or True:
                 # Platypus
-                DeepVariantCommand = "{} 4 {}.bam {} 1".format(deepVariantPath, outfile, sset)
+                DeepVariantCommand = "{} 4 {}.bam {} 3".format(deepVariantPath, outfile, sset)
                 print(DeepVariantCommand + "\n", flush=True)
                 os.system(DeepVariantCommand)
                 os.system("mv .bam.DeepVariant.log {}.DeepVariant.log".format(outfile))

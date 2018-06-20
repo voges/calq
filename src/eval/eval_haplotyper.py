@@ -94,9 +94,9 @@ for dset in datasets:
                             else:
                                 print("{}.Platypus.log already existing. Skipping platypus.".format(outfile) + "\n", flush=True)
 
-                            if not os.path.isfile(outfile + ".DeepVariant.log"):
+                            if os.path.isfile(outfile + ".DeepVariant.log"):
                                 # Platypus
-                                DeepVariantCommand = "{} 4 {}.bam {} 1".format(deepVariantPath, outfile, sset)
+                                DeepVariantCommand = "{} 4 {}.bam {} 3".format(deepVariantPath, outfile, sset)
                                 print(DeepVariantCommand + "\n", flush=True)
                                 os.system(DeepVariantCommand)
                                 os.system("mv .bam.DeepVariant.log {}.DeepVariant.log".format(outfile))

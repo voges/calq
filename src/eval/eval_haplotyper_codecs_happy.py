@@ -13,7 +13,8 @@ quantSteps = [["2", "8"]]
 squashed = [""]
 
 
-codecs = [[".sam", ".calq-0b74e3d", ""], [".bam", ".crumble-0.5", "-1"],[".bam", ".crumble-0.5", "-9"], ["", ".dsrc-2.0-il8b", ""], ["", ".quartz-0.2.2", ".clipped_qual.aln_bowtie2.sorted.dupmark.rg"], [".sam", ".qvz2-d5383c6", "-t1"], [".sam", ".qvz2-d5383c6", "-t2"], ["", "", ""], [".sam", ".qvz2-d5383c6", "-t4"], [".sam", ".qvz2-d5383c6", "-t8"]]
+#codecs = [[".sam", ".calq-0b74e3d", ""], [".bam", ".crumble-0.5", "-1"],[".bam", ".crumble-0.5", "-9"], ["", ".dsrc-2.0-il8b", ""], ["", ".quartz-0.2.2", ".clipped_qual.aln_bowtie2.sorted.dupmark.rg"], [".sam", ".qvz2-d5383c6", "-t1"], [".sam", ".qvz2-d5383c6", "-t2"], ["", "", ""], [".sam", ".qvz2-d5383c6", "-t4"], [".sam", ".qvz2-d5383c6", "-t8"]]
+codecs = [[".sam", ".calq-0b74e3d", ""], ["", "", ""]]
 
 # Paths
 basedir = "/data/voges/muenteferi"
@@ -32,7 +33,8 @@ HAPPY_prefix = "/home/muenteferi/Dokumente/calq/src/variant_calling_pipelines/do
 vcfList = [".platypus.snps.vcf", ".GATK.snps.hard_filtered.vcf", ".GATK.snps.filtered900.vcf",
            ".GATK.snps.filtered990.vcf", ".GATK.snps.filtered999.vcf", ".GATK.snps.filtered1000.vcf",
            ".platypus.indels.vcf", ".GATK.indels.hard_filtered.vcf", ".GATK.indels.filtered900.vcf",
-           ".GATK.indels.filtered990.vcf", ".GATK.indels.filtered999.vcf", ".GATK.indels.filtered1000.vcf"]
+           ".GATK.indels.filtered990.vcf", ".GATK.indels.filtered999.vcf", ".GATK.indels.filtered1000.vcf",
+           ".DeepVariant.snps.vcf", ".DeepVariant.indels.vcf"]
 
 outCSV = "resultsCodec.csv"
 f = open(outCSV, 'w')
