@@ -24,17 +24,7 @@ namespace calq {
 
 class QualEncoder {
  public:
-    explicit QualEncoder(const int &polyploidy,
-                         const int &qualityValueMax,
-                         const int &qualityValueMin,
-                         const int &qualityValueOffset,
-                         const int &filterRadius,
-                         const int &quantizersMin,
-                         const int &quantizersMax,
-                         const bool &debug,
-                         const std::map<int, Quantizer>& quant,
-                         const bool &squashed,
-                         Options::FilterType filterType);
+    explicit QualEncoder(const Options& options, const std::map<int, Quantizer>& quant);
     ~QualEncoder(void);
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
@@ -83,6 +73,8 @@ class QualEncoder {
 
     Haplotyper haplotyper_;
 
+    Genotyper genotyper_;
+
     size_t posCounter;
 
     // Quantizers
@@ -93,6 +85,8 @@ class QualEncoder {
     std::deque<SAMRecord> samRecordDeque_;
 
     bool debugOut;
+
+    Options::Version version_;
 };
 
 }  // namespace calq

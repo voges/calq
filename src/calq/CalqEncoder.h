@@ -25,23 +25,11 @@ class CalqEncoder {
     void encode(void);
 
  private:
-    size_t blockSize_;
     CQFile cqFile_;
-    std::string inputFileName_;
-    int polyploidy_;
-    int qualityValueMin_;
-    int qualityValueMax_;
-    int qualityValueOffset_;
-    std::string referenceFileNames_;
     SAMFile samFile_;
     FASTAFile fastaFile_;  // Reference
-    bool debug;
-    int filterRadius;
-    int quantMin;
-    int quantMax;
-    Options::QuantizerType quantType;
-    Options::FilterType filterType;
-    bool squashed;
+
+    const Options options;
 };
 
 }  // namespace calq

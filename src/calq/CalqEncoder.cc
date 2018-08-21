@@ -20,46 +20,33 @@
 
 namespace calq {
 
-CalqEncoder::CalqEncoder(const Options &options)
-    : blockSize_(options.blockSize),
-      cqFile_(options.outputFileName, CQFile::MODE_WRITE),
-      inputFileName_(options.inputFileName),
-      polyploidy_(options.polyploidy),
-      qualityValueMin_(options.qualityValueMin),
-      qualityValueMax_(options.qualityValueMax),
-      qualityValueOffset_(options.qualityValueOffset),
-      referenceFileNames_(options.referenceFileNames),
-      samFile_(options.inputFileName),
-      fastaFile_(referenceFileNames_),
-      debug(options.debug),
-      filterRadius(options.filterSize),
-      quantMin(options.quantizationMin),
-      quantMax(options.quantizationMax),
-      quantType(options.quantizerType),
-      filterType(options.filterType),
-      squashed(options.squash) {
-    if (options.blockSize < 1) {
+CalqEncoder::CalqEncoder(const Options &opt)
+    : cqFile_(opt.outputFileName, CQFile::MODE_WRITE),
+      samFile_(opt.inputFileName),
+      fastaFile_(opt.referenceFileNames),
+      options(opt){
+    if (opt.blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
-    if (options.inputFileName.empty() == true) {
+    if (opt.inputFileName.empty() == true) {
         throwErrorException("inputFileName is empty");
     }
-    if (options.outputFileName.empty() == true) {
+    if (opt.outputFileName.empty() == true) {
         throwErrorException("outputFileName is empty");
     }
-    if (options.polyploidy < 1) {
+    if (opt.polyploidy < 1) {
         throwErrorException("polyploidy must be greater than zero");
     }
-    if (options.qualityValueMin < 0) {
+    if (opt.qualityValueMin < 0) {
         throwErrorException("qualityValueMin must be zero or greater");
     }
-    if (options.qualityValueMax < 0) {
+    if (opt.qualityValueMax < 0) {
         throwErrorException("qualityValueMax must be zero or greater");
     }
-    if (options.qualityValueOffset < 1) {
+    if (opt.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
     }
-    if (referenceFileNames_.empty() == true) {
+    if (opt.referenceFileNames.empty() == true) {
         throwErrorException("referenceFileNames is empty");
     }
 }
@@ -77,45 +64,45 @@ void CalqEncoder::encode(void) {
 
     // Write CQ file header
     CALQ_LOG("Writing CQ file header");
-    cqFile_.writeHeader(blockSize_);
+    cqFile_.writeHeader(options.blockSize);
 
-    while (samFile_.readBlock(blockSize_) != 0) {
+    while (samFile_.readBlock(options.blockSize) != 0) {
 //         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
 
-        ProbabilityDistribution pdf(qualityValueMin_, qualityValueMax_);
+        ProbabilityDistribution pdf(options.qualityValueMin, options.qualityValueMax);
 
         // Check quality value range
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
                 for (auto const &q : samRecord.qual) {
-                    if (((int)q-qualityValueOffset_) < qualityValueMin_) {
+                    if (((int)q-options.qualityValueOffset) < options.qualityValueMin) {
                         throwErrorException("Quality value too small");
                     }
-                    if (((int)q-qualityValueOffset_) > qualityValueMax_) {
+                    if (((int)q-options.qualityValueOffset) > options.qualityValueMax) {
                         throwErrorException("Quality value too large");
                     }
-                    pdf.addToPdf(((int)q-qualityValueOffset_));
+                    pdf.addToPdf(((int)q-options.qualityValueOffset));
                 }
             }
         }
 
         std::map<int, Quantizer> quantizers;
 
-        for (int i = quantMin; i <= quantMax; ++i) {
-            if (quantType == Options::QuantizerType::UNIFORM){
-                UniformMinMaxQuantizer quantizer(qualityValueMin_, qualityValueMax_, i);
-                quantizers.insert(std::pair<int, Quantizer>(i-quantMin, quantizer));
-            } else if (quantType == Options::QuantizerType::LLOYD_MAX) {
+        for (int i = options.quantizationMin; i <= options.quantizationMax; ++i) {
+            if (options.quantizerType == Options::QuantizerType::UNIFORM){
+                UniformMinMaxQuantizer quantizer(options.qualityValueMin, options.qualityValueMax, i);
+                quantizers.insert(std::pair<int, Quantizer>(i-options.quantizationMin, quantizer));
+            } else if (options.quantizerType == Options::QuantizerType::LLOYD_MAX) {
                 LloydMaxQuantizer quantizer(i);
                 quantizer.build(pdf);
-                quantizers.insert(std::pair<int, Quantizer>(i-quantMin, quantizer));
+                quantizers.insert(std::pair<int, Quantizer>(i-options.quantizationMin, quantizer));
             } else {
                 throwErrorException("Quantization Type not supported");
             }
         }
 
         // Encode the quality values
-        QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_, filterRadius, quantMin, quantMax, debug, quantizers, squashed, filterType);
+        QualEncoder qualEncoder(options, quantizers);
         for (auto const &samRecord : samFile_.currentBlock.records) {
             if (samRecord.isMapped() == true) {
                 qualEncoder.addMappedRecordToBlock(samRecord, this->fastaFile_);

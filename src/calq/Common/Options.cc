@@ -32,11 +32,24 @@ Options::Options(void)
       referenceFileNames(),
       // Options for only decompression
       decompress(false),
-      sideInformationFileName("") {}
+      sideInformationFileName(""),
+      version(Version::NONE),
+      versionStr(""){}
 
 Options::~Options(void) {}
 
 void Options::validate(void) {
+
+    if (versionStr == "v1") {
+        version = Version::V1;
+        CALQ_LOG("Using CALQ version 1");
+    } else if (versionStr == "v2") {
+        version = Version::V2;
+        CALQ_LOG("Using CALQ version 2");
+    } else {
+        throwErrorException("Unknown CALQ version");
+    }
+
     // force
     if (force == true) {
         CALQ_LOG("Force switch set - overwriting output file(s)");

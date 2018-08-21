@@ -24,26 +24,16 @@
 
 namespace calq {
 
-QualEncoder::QualEncoder(const int &polyploidy,
-                         const int &qualityValueMax,
-                         const int &qualityValueMin,
-                         const int &qualityValueOffset,
-                         const int &filterRadius,
-                         const int &quantizersMin,
-                         const int &quantizersMax,
-                         const bool &debug,
-                         const std::map<int, Quantizer>& quant,
-                         const bool &squashed,
-                         Options::FilterType filterType)
+QualEncoder::QualEncoder(const Options& options, const std::map<int, Quantizer>& quant)
     : compressedMappedQualSize_(0),
       compressedUnmappedQualSize_(0),
       nrMappedRecords_(0),
       nrUnmappedRecords_(0),
       uncompressedMappedQualSize_(0),
       uncompressedUnmappedQualSize_(0),
-      NR_QUANTIZERS(quantizersMax - quantizersMin + 1),
+      NR_QUANTIZERS(options.quantizationMax - options.quantizationMin + 1),
 
-      qualityValueOffset_(qualityValueOffset),
+      qualityValueOffset_(options.qualityValueOffset),
       posOffset_(0),
 
       unmappedQualityValues_(""),
@@ -52,23 +42,26 @@ QualEncoder::QualEncoder(const int &polyploidy,
 
       samPileupDeque_(),
 
-      haplotyper_(filterRadius, polyploidy, qualityValueOffset, NR_QUANTIZERS, 50, 7, 50, debug, squashed, filterType),
+      haplotyper_(options.filterSize, options.polyploidy, options.qualityValueOffset, NR_QUANTIZERS, 50, 7, 50, options.debug, options.squash, options.filterType),
+      genotyper_(options.polyploidy,options.qualityValueOffset,NR_QUANTIZERS),
       posCounter(0),
 
       quantizers_(quant),
 
       samRecordDeque_(),
-      debugOut(debug) {
-    if (polyploidy < 1) {
+      debugOut(options.debug),
+
+      version_(options.version){
+    if (options.polyploidy < 1) {
         throwErrorException("polyploidy must be greater than zero");
     }
-    if (qualityValueMax < 0) {
+    if (options.qualityValueMax < 0) {
         throwErrorException("qualityValueMax must be zero or greater");
     }
-    if (qualityValueMin < 0) {
+    if (options.qualityValueMin < 0) {
         throwErrorException("qualityValueMin must be zero or greater");
     }
-    if (qualityValueOffset < 1) {
+    if (options.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
     }
 
@@ -100,20 +93,36 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
     samRecord.addToPileupQueue(&samPileupDeque_, fasta, qualityValueOffset_);
     samRecordDeque_.push_back(samRecord);
 
-    while (samPileupDeque_.posMin() < samRecord.posMin) {
-        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
-                                 fasta.references.at(samRecord.rname)[samPileupDeque_.posMin()]);
-        ++posCounter;
-        // Start not until pipeline is full
-        if (posCounter > haplotyper_.getOffset()) {
-            mappedQuantizerIndices_.push_back(k);
+    if(version_ == Options::Version::V2) {
+        while (samPileupDeque_.posMin() < samRecord.posMin) {
+            int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
+                                     fasta.references.at(samRecord.rname)[samPileupDeque_.posMin()]);
+            ++posCounter;
+            // Start not until pipeline is full
+            if (posCounter > haplotyper_.getOffset()) {
+                mappedQuantizerIndices_.push_back(k);
+            }
+            samPileupDeque_.pop_front();
         }
-        samPileupDeque_.pop_front();
-    }
-    // Start not until pipeline is full
-    while (samRecordDeque_.front().posMax+haplotyper_.getOffset() < samPileupDeque_.posMin()) {
-        encodeMappedQual(samRecordDeque_.front());
-        samRecordDeque_.pop_front();
+        // Start not until pipeline is full
+        while (samRecordDeque_.front().posMax+haplotyper_.getOffset() < samPileupDeque_.posMin()) {
+            encodeMappedQual(samRecordDeque_.front());
+            samRecordDeque_.pop_front();
+        }
+    } else {
+        int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
+        mappedQuantizerIndices_.push_back(k);
+
+        while (samPileupDeque_.posMin() < samRecord.posMin) {
+            int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
+            mappedQuantizerIndices_.push_back(k);
+            samPileupDeque_.pop_front();
+        }
+
+        while (samRecordDeque_.front().posMax < samPileupDeque_.posMin()) {
+            encodeMappedQual(samRecordDeque_.front());
+            samRecordDeque_.pop_front();
+        }
     }
 
     uncompressedMappedQualSize_ += samRecord.qual.length();
@@ -122,21 +131,30 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
 
 void QualEncoder::finishBlock(const FASTAFile& fasta, const std::string& section) {
     // Compute all remaining quantizers
-    while (samPileupDeque_.empty() == false) {
-        int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
-                                 fasta.references.at(section)[samPileupDeque_.posMin()]);
-        ++posCounter;
-        if (posCounter > haplotyper_.getOffset()) {
+    if(version_ == Options::Version::V2) {
+        while (samPileupDeque_.empty() == false) {
+            int k = haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
+                                     fasta.references.at(section)[samPileupDeque_.posMin()]);
+            ++posCounter;
+            if (posCounter > haplotyper_.getOffset()) {
+                mappedQuantizerIndices_.push_back(k);
+            }
+            samPileupDeque_.pop_front();
+        }
+
+        // Empty pipeline
+        size_t offset = std::min(posCounter, haplotyper_.getOffset());
+        for (size_t i = 0; i < offset; ++i) {
+            int k = haplotyper_.push("", "", 0, 'N');
             mappedQuantizerIndices_.push_back(k);
         }
-        samPileupDeque_.pop_front();
-    }
-
-    // Empty pipeline
-    size_t offset = std::min(posCounter, haplotyper_.getOffset());
-    for (size_t i = 0; i < offset; ++i) {
-        int k = haplotyper_.push("", "", 0, 'N');
-        mappedQuantizerIndices_.push_back(k);
+    } else {
+        // Compute all remaining quantizers
+        while (samPileupDeque_.empty() == false) {
+            int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
+            mappedQuantizerIndices_.push_back(k);
+            samPileupDeque_.pop_front();
+        }
     }
 
     // TODO(muenteferi): borders of blocks probably too low activity

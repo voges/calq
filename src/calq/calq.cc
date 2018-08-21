@@ -48,14 +48,15 @@ int main(int argc, char *argv[]) {
 
         // TCLAP arguments (only compression)
         TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records). Default 10000", false, 10000, "int", cmd);
-        TCLAP::ValueArg<int> filterSizeArg("", "filterSize", "Haplotyper filter radius. Default 17", false, 17, "int", cmd);
+        TCLAP::ValueArg<int> filterSizeArg("", "filterSize", "Haplotyper filter radius. Default 17. (v2 only)", false, 17, "int", cmd);
         TCLAP::ValueArg<int> quantizationMinArg("", "quantizationMin", "Minimum quantization steps. Default 2", false, 2, "int", cmd);
         TCLAP::ValueArg<int> quantizationMaxArg("", "quantizationMax", "Maximum quantization steps. Default 8", false, 8, "int", cmd);
         TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy. Default 2", false, 2, "int", cmd);
         TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (Sanger: Phred+33 [0,40]; Illumina-1.3+: Phred+64 [0,40]; Illumina-1.5+: Phred+64 [0,40]; Illumina-1.8+: Phred+33 [0,41]; Max33: Phred+33 [0,93]; Max64: Phred+64 [0,62])", false, "Illumina-1.8+", "string", cmd);
-        TCLAP::ValueArg<std::string> referenceFileNamesArg("r", "referenceFileName", "Reference file (FASTA format)", false, "", "string", cmd);
-        TCLAP::ValueArg<std::string> filterTypeArg("", "filterType", "Haplotyper Filter Type (Gauss; Rectangle). Default Gauss", false, "Gauss", "string", cmd);
+        TCLAP::ValueArg<std::string> referenceFileNamesArg("r", "referenceFileName", "Reference file (FASTA format) (v2 only)", false, "", "string", cmd);
+        TCLAP::ValueArg<std::string> filterTypeArg("", "filterType", "Haplotyper Filter Type (Gauss; Rectangle). Default Gauss. (v2 only)", false, "Gauss", "string", cmd);
         TCLAP::ValueArg<std::string> quantizerTypeArg("", "quantizerType", "Quantizer type (Uniform; Lloyd). Default Uniform", false, "Uniform", "string", cmd);
+        TCLAP::ValueArg<std::string> versionArg("", "CALQ-Version", "v1 or v2. Default v1", false, "v1", "string", cmd);
         TCLAP::SwitchArg noSquash("", "noSquash", "Do not squash activityscores between 0.0 and 1.0, which is done by default", cmd, false);
 
         // TCLAP arguments (only decompression)
@@ -121,6 +122,7 @@ int main(int argc, char *argv[]) {
         options.decompress = decompressSwitch.getValue();
         options.sideInformationFileName = sideInformationFileNameArg.getValue();
         options.squash = !noSquash.getValue();
+        options.versionStr = versionArg.getValue();
 
         // Check the options
         options.validate();

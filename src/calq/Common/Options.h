@@ -30,6 +30,12 @@ struct Options {
         RECTANGLE
     };
 
+    enum struct Version {
+        NONE,
+        V1,
+        V2
+    };
+
     // Options for both compression and decompression
     bool force;
     bool debug;
@@ -55,6 +61,8 @@ struct Options {
     // Options for only decompression
     bool decompress;
     std::string sideInformationFileName;
+    Version version;
+    std::string versionStr;
 };
 
 }  // namespace calq
