@@ -6,11 +6,7 @@
 
 #include "QualCodec/QualDecoder.h"
 
-#include <map>
-#include <string>
-
-#include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

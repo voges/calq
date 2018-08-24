@@ -1,22 +1,30 @@
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 11)
 
+include(GNUInstallDirs)
+
 # Set up project-specific variables
 set(PROJECT_NAME "calq")
+set(MAIN_FILE "calq.cc")
 project(${PROJECT_NAME})
 set(PROJECT_VERSION_MAJOR 1)
-set(PROJECT_VERSION_MINOR 0)
+set(PROJECT_VERSION_MINOR 2)
 set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_DESCRIPTION "CALQ codec: lossy compression of sequencing quality values. See github.com/voges/calq for more details.")
+set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR})
 set(PROJECT_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(PROJECT_SOURCE_DIR ${PROJECT_ROOT_DIR}/src/calq)
 set(PROJECT_INCLUDE_DIR ${PROJECT_ROOT_DIR}/src/calq)
+set(PROJECT_API_DIR ${PROJECT_ROOT_DIR}/src/calq/API)
 
 # Get all source and header files (C and C++)
 file(GLOB_RECURSE C_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.c)
 file(GLOB_RECURSE CC_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.cc)
+list(REMOVE_ITEM CC_SOURCE_FILES ${PROJECT_SOURCE_DIR}/${MAIN_FILE})
 file(GLOB_RECURSE CPP_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE H_HEADER_FILES ${PROJECT_INCLUDE_DIR}/*.h)
+file(GLOB_RECURSE API_HEADER_FILES ${PROJECT_API_DIR}/*.h)
 file(GLOB_RECURSE HH_HEADER_FILES ${PROJECT_INCLUDE_DIR}/*.hh)
 file(GLOB_RECURSE HPP_HEADER_FILES ${PROJECT_INCLUDE_DIR}/*.hpp)
 set(PROJECT_SOURCE_FILES ${C_SOURCE_FILES} ${CC_SOURCE_FILES} ${CPP_SOURCE_FILES})
@@ -166,10 +174,38 @@ endif ()
 # Includes, targets, and dependencies
 include_directories(${PROJECT_BUILD_DIR})
 include_directories(${PROJECT_INCLUDE_DIR})
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES} ${PROJECT_HEADER_FILES})
+
+# Library
+add_library(${PROJECT_NAME}Core SHARED ${PROJECT_SOURCE_FILES})
+target_include_directories(${PROJECT_NAME}Core PRIVATE ${PROJECT_API_DIR})
+set_target_properties(${PROJECT_NAME}Core PROPERTIES VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
+set_target_properties(${PROJECT_NAME}Core PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+install(TARGETS ${PROJECT_NAME}Core
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY ${PROJECT_API_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/calq)
+configure_file(calq.pc.in calq.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/calq.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+
+# Executable
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/${MAIN_FILE} ${API_HEADER_FILES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_API_DIR})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}Core)
 add_dependencies(${PROJECT_NAME} timestamp)
 add_dependencies(${PROJECT_NAME} git)
 #add_dependencies(${PROJECT_NAME} doc)
 add_dependencies(${PROJECT_NAME} version)
 #target_link_libraries(${PROJECT_NAME} z)
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()

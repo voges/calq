@@ -5,8 +5,7 @@
 // Copyright 2015-2017 Leibniz Universitaet Hannover
 
 #include "Common/Options.h"
-#include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

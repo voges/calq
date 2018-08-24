@@ -6,8 +6,6 @@
 
 #include "IO/SAM/SAMPileupDeque.h"
 
-#include "Common/Exceptions.h"
-
 namespace calq {
 
 SAMPileupDeque::SAMPileupDeque(void) : pileups_() , posMax_(0) , posMin_(0) {}

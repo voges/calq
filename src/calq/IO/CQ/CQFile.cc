@@ -13,7 +13,7 @@
 #include <string>
 
 #include "Common/constants.h"
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 #include "Common/log.h"
 #include "Compressors/range/range.h"
 

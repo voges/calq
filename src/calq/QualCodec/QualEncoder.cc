@@ -6,19 +6,7 @@
 
 #include "QualCodec/QualEncoder.h"
 
-#include <math.h>
-
 #include <fstream>
-#include <map>
-#include <string>
-#include <utility>
-#include <algorithm>
-
-#include "Common/constants.h"
-#include "Common/Exceptions.h"
-#include "Common/log.h"
-#include "QualCodec/Quantizers/UniformQuantizer.h"
-#include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
 
 #include "IO/FASTA/FASTAFile.h"
 

@@ -8,11 +8,12 @@
 #define CALQ_CALQDECODER_H_
 
 #include "Common/Options.h"
-#include "IO/CQ/CQFile.h"
-#include "IO/File.h"
-#include "IO/SAM/SAMFile.h"
 
 namespace calq {
+
+class CQFile;
+class File;
+class SAMFile;
 
 class CalqDecoder {
  public:
@@ -22,9 +23,9 @@ class CalqDecoder {
     void decode(void);
 
  private:
-    CQFile cqFile_;
-    File qualFile_;
-    SAMFile sideInformationFile_;
+    CQFile* cqFile_;
+    File* qualFile_;
+    SAMFile* sideInformationFile_;
 };
 
 }  // namespace calq

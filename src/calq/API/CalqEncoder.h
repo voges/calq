@@ -11,11 +11,12 @@
 #include <vector>
 
 #include "Common/Options.h"
-#include "IO/CQ/CQFile.h"
-#include "IO/SAM/SAMFile.h"
-#include "IO/FASTA/FASTAFile.h"
 
 namespace calq {
+
+class CQFile;
+class FASTAFile;
+class SAMFile;
 
 class CalqEncoder {
  public:
@@ -25,9 +26,9 @@ class CalqEncoder {
     void encode(void);
 
  private:
-    CQFile cqFile_;
-    SAMFile samFile_;
-    FASTAFile fastaFile_;  // Reference
+    CQFile* cqFile_;
+    SAMFile* samFile_;
+    FASTAFile* fastaFile_;  // Reference
 
     const Options options;
 };

@@ -6,7 +6,7 @@
 
 #include "QualCodec/Quantizers/Quantizer.h"
 
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

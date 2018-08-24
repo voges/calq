@@ -6,12 +6,9 @@
 
 #include "IO/SAM/SAMRecord.h"
 
-#include <string.h>
 #include <queue>
-#include <limits>
 
-#include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/ErrorExceptionReporter.h"
 #include "IO/FASTA/FASTAFile.h"
 
 // If 1: consider softclips only at the end of the read. Id 0: consider softclips everywhere

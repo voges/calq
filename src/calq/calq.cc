@@ -6,12 +6,7 @@
 
 #include "CalqEncoder.h"
 #include "CalqDecoder.h"
-#include "cmake.h"
-#include "Common/Options.h"
-#include "Common/Exceptions.h"
-#include "Common/helpers.h"
-#include "Common/log.h"
-#include "QualCodec/HaplotyperTest.h"
+#include "Common/ErrorExceptionReporter.h"
 #include "tclap/CmdLine.h"
 
 static void printVersionAndCopyright(void) {

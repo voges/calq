@@ -6,12 +6,7 @@
 
 #include "IO/FASTA/FASTAFile.h"
 
-#include <string.h>
-
-#include <utility>
-#include <string>
-
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

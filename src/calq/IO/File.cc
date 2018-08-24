@@ -6,11 +6,6 @@
 
 #include "IO/File.h"
 
-#include <limits.h>
-
-#include "Common/Exceptions.h"
-#include "Common/os.h"
-
 namespace calq {
 
 File::File(void)
@@ -98,7 +93,7 @@ void File::advance(const size_t &offset) {
 
 bool File::eof(void) const {
     int eof = feof(fp_);
-    return eof != 0 ? true : false;
+    return eof != 0;
 }
 
 void * File::handle(void) const {

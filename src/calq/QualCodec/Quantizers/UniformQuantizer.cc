@@ -9,9 +9,6 @@
 #include <math.h>
 
 #include <queue>
-#include <utility>
-
-#include "Common/Exceptions.h"
 
 namespace calq {
 

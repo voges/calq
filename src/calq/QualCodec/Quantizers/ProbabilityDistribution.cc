@@ -6,10 +6,7 @@
 
 #include "QualCodec/Quantizers/ProbabilityDistribution.h"
 
-#include <utility>
-#include <algorithm>
-
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 
 
 // ----------------------------------------------------------------------------------------------------------------------

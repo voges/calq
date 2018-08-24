@@ -44,14 +44,14 @@ struct Options {
     std::string inputFileName;
     std::string outputFileName;
     // Options for only compression
-    int blockSize;
-    int filterSize;
-    int quantizationMin;
-    int quantizationMax;
-    int polyploidy;
-    int qualityValueMax;
-    int qualityValueMin;
-    int qualityValueOffset;
+    size_t blockSize;
+    size_t filterSize;
+    size_t quantizationMin;
+    size_t quantizationMax;
+    size_t polyploidy;
+    size_t qualityValueMax;
+    size_t qualityValueMin;
+    size_t qualityValueOffset;
     std::string qualityValueType;
     FilterType filterType;
     std::string filterTypeStr;

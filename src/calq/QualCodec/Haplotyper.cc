@@ -9,13 +9,6 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include <limits>
-#include <algorithm>
-#include <utility>
-
-#include <cmath>
-
-#include "Common/Exceptions.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 

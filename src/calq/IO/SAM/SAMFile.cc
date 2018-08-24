@@ -6,12 +6,7 @@
 
 #include "IO/SAM/SAMFile.h"
 
-#include <string.h>
-
-#include <string>
-
-#include "Common/Exceptions.h"
-#include "Common/log.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 
@@ -42,7 +37,7 @@ static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line) {
         c++;
     }
 
-    if (f == 11) { fields[f] = pc; }
+    //if (f == 11) { fields[f] = pc; }
 }
 
 SAMFile::SAMFile(const std::string &path, const Mode &mode)
