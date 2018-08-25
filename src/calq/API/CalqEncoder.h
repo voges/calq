@@ -7,8 +7,7 @@
 #ifndef CALQ_CALQENCODER_H_
 #define CALQ_CALQENCODER_H_
 
-#include <string>
-#include <vector>
+#include <memory>
 
 #include "Common/Options.h"
 
@@ -27,9 +26,9 @@ class CalqEncoder {
     void encode();
 
  private:
-    CQFile* cqFile_;
-    SAMFile* samFile_;
-    FASTAFile* fastaFile_;  // Reference
+    std::unique_ptr<CQFile> cqFile_;
+    std::unique_ptr<SAMFile> samFile_;
+    std::unique_ptr<FASTAFile> fastaFile_;  // Reference
 
     const Options options;
 };

@@ -29,32 +29,12 @@ CalqDecoder::CalqDecoder(const Options &options)
         throwErrorException("options.sideInformationFileName is empty");
     }
 
-    try {
-        cqFile_ = new CQFile(options.inputFileName, CQFile::MODE_READ);
-        qualFile_ = new File(options.outputFileName, File::MODE_WRITE);
-        sideInformationFile_ = new SAMFile(options.sideInformationFileName);
-    } catch (const Exception &e) {
-        if (cqFile_ != nullptr) {
-            delete cqFile_;
-            cqFile_ = nullptr;
-        }
-        if (qualFile_ != nullptr) {
-            delete qualFile_;
-            qualFile_ = nullptr;
-        }
-        if (sideInformationFile_ != nullptr) {
-            delete sideInformationFile_;
-            sideInformationFile_ = nullptr;
-        }
-        throw e;
-    }
+    cqFile_ = calq::make_unique<CQFile>(options.inputFileName, CQFile::MODE_READ);
+    qualFile_ = calq::make_unique<File>(options.outputFileName, File::MODE_WRITE);
+    sideInformationFile_ = calq::make_unique<SAMFile>(options.sideInformationFileName);
 }
 
-CalqDecoder::~CalqDecoder() {
-    delete cqFile_;
-    delete qualFile_;
-    delete sideInformationFile_;
-}
+CalqDecoder::~CalqDecoder() = default;
 
 void CalqDecoder::decode() {
     // Take time
@@ -70,12 +50,12 @@ void CalqDecoder::decode() {
 
         // Decode the quality values
         QualDecoder qualDecoder;
-        qualDecoder.readBlock(cqFile_);
+        qualDecoder.readBlock(cqFile_.get());
         for (auto const &samRecord : sideInformationFile_->currentBlock.records) {
             if (samRecord.isMapped()) {
-                qualDecoder.decodeMappedRecordFromBlock(samRecord, qualFile_);
+                qualDecoder.decodeMappedRecordFromBlock(samRecord, qualFile_.get());
             } else {
-                qualDecoder.decodeUnmappedRecordFromBlock(samRecord, qualFile_);
+                qualDecoder.decodeUnmappedRecordFromBlock(samRecord, qualFile_.get());
             }
         }
     }

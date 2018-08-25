@@ -10,12 +10,14 @@
 
 #include "Common/ErrorExceptionReporter.h"
 #include "Common/log.h"
+#include "Common/helpers.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
 #include "QualCodec/Quantizers/ProbabilityDistribution.h"
 #include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
 #include "QualCodec/Quantizers/LloydMaxQuantizer.h"
 #include "IO/SAM/SAMFile.h"
+
 
 namespace calq {
 
@@ -42,32 +44,12 @@ CalqEncoder::CalqEncoder(const Options &opt) : cqFile_(nullptr),
         throwErrorException("referenceFileNames is empty");
     }
 
-    try {
-        cqFile_ = new CQFile(opt.outputFileName, CQFile::MODE_WRITE);
-        samFile_ = new SAMFile(opt.inputFileName);
-        fastaFile_ = new FASTAFile(opt.referenceFileNames);
-    } catch (const Exception &e) {
-        if (cqFile_ != nullptr) {
-            delete cqFile_;
-            cqFile_ = nullptr;
-        }
-        if (samFile_ != nullptr) {
-            delete samFile_;
-            samFile_ = nullptr;
-        }
-        if (fastaFile_ != nullptr) {
-            delete fastaFile_;
-            fastaFile_ = nullptr;
-        }
-        throw e;
-    }
+    cqFile_ = calq::make_unique<CQFile>(opt.outputFileName, CQFile::MODE_WRITE);
+    samFile_ = calq::make_unique<SAMFile>(opt.inputFileName);
+    fastaFile_ = calq::make_unique<FASTAFile>(opt.referenceFileNames);
 }
 
-CalqEncoder::~CalqEncoder() {
-    delete cqFile_;
-    delete samFile_;
-    delete fastaFile_;
-}
+CalqEncoder::~CalqEncoder() = default;
 
 void CalqEncoder::encode() {
     size_t compressedMappedQualSize = 0;
@@ -128,7 +110,7 @@ void CalqEncoder::encode() {
             }
         }
         qualEncoder.finishBlock(*fastaFile_, samFile_->currentBlock.records.back().rname);
-        qualEncoder.writeBlock(cqFile_);
+        qualEncoder.writeBlock(cqFile_.get());
 
         // Update statistics
         compressedMappedQualSize += qualEncoder.compressedMappedQualSize();

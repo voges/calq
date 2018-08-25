@@ -7,6 +7,8 @@
 #ifndef CALQ_CALQDECODER_H_
 #define CALQ_CALQDECODER_H_
 
+#include <memory>
+
 #include "Common/Options.h"
 
 namespace calq {
@@ -25,9 +27,9 @@ class CalqDecoder {
     void decode();
 
  private:
-    CQFile* cqFile_;
-    File* qualFile_;
-    SAMFile* sideInformationFile_;
+    std::unique_ptr<CQFile> cqFile_;
+    std::unique_ptr<File> qualFile_;
+    std::unique_ptr<SAMFile> sideInformationFile_;
 };
 
 }  // namespace calq
