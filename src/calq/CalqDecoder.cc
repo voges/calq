@@ -10,6 +10,8 @@
 
 #include "QualCodec/QualDecoder.h"
 #include "IO/SAM/SAMFile.h"
+#include "Common/ErrorExceptionReporter.h"
+#include "Common/log.h"
 
 namespace calq {
 

@@ -9,6 +9,7 @@
 #include <queue>
 
 #include "Common/ErrorExceptionReporter.h"
+#include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 
 namespace calq {

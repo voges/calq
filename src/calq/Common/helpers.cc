@@ -9,6 +9,8 @@
 
 #include <fstream>
 
+#include "Common/ErrorExceptionReporter.h"
+
 namespace calq {
 
 std::string currentDateAndTime() {

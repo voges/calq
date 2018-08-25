@@ -8,6 +8,9 @@
 #include "CalqDecoder.h"
 #include "Common/ErrorExceptionReporter.h"
 #include "tclap/CmdLine.h"
+#include "cmake.h"
+#include "Common/log.h"
+#include "QualCodec/HaplotyperTest.h"
 
 static void printVersionAndCopyright() {
     printf("-----------------------------------------------\n");

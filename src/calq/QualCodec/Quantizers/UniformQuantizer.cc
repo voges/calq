@@ -7,6 +7,10 @@
 #include "QualCodec/Quantizers/UniformQuantizer.h"
 
 #include <queue>
+#include <cmath>
+#include <utility>
+
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

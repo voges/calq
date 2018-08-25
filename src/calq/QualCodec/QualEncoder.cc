@@ -7,8 +7,11 @@
 #include "QualCodec/QualEncoder.h"
 
 #include <fstream>
+#include <iostream>
+#include <algorithm>
 
 #include "IO/FASTA/FASTAFile.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

@@ -7,8 +7,12 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <limits>
+#include <algorithm>
 
 #include "QualCodec/Haplotyper.h"
+
+#include "Common/ErrorExceptionReporter.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 

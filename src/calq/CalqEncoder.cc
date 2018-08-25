@@ -9,12 +9,12 @@
 #include <chrono>
 
 #include "Common/ErrorExceptionReporter.h"
+#include "Common/log.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
 #include "QualCodec/Quantizers/ProbabilityDistribution.h"
 #include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
 #include "QualCodec/Quantizers/LloydMaxQuantizer.h"
-
 #include "IO/SAM/SAMFile.h"
 
 namespace calq {

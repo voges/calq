@@ -5,6 +5,7 @@
 // Copyright 2015-2017 Leibniz Universitaet Hannover
 
 #include "IO/SAM/SAMPileupDeque.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 

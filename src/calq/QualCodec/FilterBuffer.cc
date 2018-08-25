@@ -7,6 +7,7 @@
 #include "QualCodec/FilterBuffer.h"
 
 #include <cmath>
+#include <algorithm>
 
 #include "Common/ErrorExceptionReporter.h"
 

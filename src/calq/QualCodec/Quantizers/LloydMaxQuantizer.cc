@@ -6,6 +6,9 @@
 
 #include "QualCodec/Quantizers/LloydMaxQuantizer.h"
 
+#include <utility>
+#include <algorithm>
+
 // ----------------------------------------------------------------------------------------------------------------------
 
 namespace calq {

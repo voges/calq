@@ -6,6 +6,15 @@
 
 #include "IO/CQ/CQFile.h"
 
+#include <cstring>
+#include <cmath>
+#include <utility>
+
+#include "Common/ErrorExceptionReporter.h"
+#include "Common/constants.h"
+
+#include "Compressors/range/range.h"
+
 namespace calq {
 
 CQFile::CQFile(const std::string &path, const Mode &mode)

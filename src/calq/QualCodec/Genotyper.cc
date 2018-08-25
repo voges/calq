@@ -6,6 +6,9 @@
 
 #include "QualCodec/Genotyper.h"
 
+#include <cmath>
+#include <utility>
+
 #include "Common/ErrorExceptionReporter.h"
 
 

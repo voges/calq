@@ -4,6 +4,8 @@
 
 // Copyright 2015-2018 Leibniz Universitaet Hannover
 
+#include "QualCodec/HaplotyperTest.h"
+
 #include <iostream>
 
 #include "FilterBuffer.h"

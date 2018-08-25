@@ -6,10 +6,13 @@
 
 #include "IO/File.h"
 
+#include <climits>
+
+#include "Common/ErrorExceptionReporter.h"
+
 namespace calq {
 
 File::File() : fp_(nullptr), fsize_(0), isOpen_(false), mode_(File::MODE_READ), nrReadBytes_(0), nrWrittenBytes_(0) {
-
 }
 
 File::File(const std::string &path, Mode mode) : fp_(nullptr), fsize_(0), isOpen_(false), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
