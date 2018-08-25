@@ -17,9 +17,10 @@ namespace calq {
 class Exception : public std::exception {
  public:
     explicit Exception(const std::string &msg);
-    virtual ~Exception(void) throw();
-    virtual std::string getMessage(void) const;
-    virtual const char * what(void) const throw();
+    Exception(const Exception &e) noexcept;
+    ~Exception() noexcept override;
+    virtual std::string getMessage() const;
+    const char* what() const noexcept override;
 
  protected:
     std::string msg_;
@@ -27,7 +28,7 @@ class Exception : public std::exception {
 
 class ErrorException : public Exception {
  public:
-    explicit ErrorException(const std::string &msg): Exception(msg) {}
+    explicit ErrorException(const std::string &msg) : Exception(msg) {}
 };
 
 }  // namespace calq

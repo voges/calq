@@ -10,13 +10,13 @@
 
 namespace calq {
 
-Quantizer::Quantizer(void) : lut_() , inverseLut_() {}
+Quantizer::Quantizer() : lut_(), inverseLut_() {
+}
 
-Quantizer::Quantizer(const std::map<int, int> &inverseLut)
-    : lut_(),
-      inverseLut_(inverseLut) {}
+Quantizer::Quantizer(const std::map<int, int> &inverseLut) : lut_(), inverseLut_(inverseLut) {
+}
 
-Quantizer::~Quantizer(void) {}
+Quantizer::~Quantizer() = default;
 
 int Quantizer::valueToIndex(const int &value) const {
     if (lut_.find(value) == lut_.end()) {
@@ -40,11 +40,11 @@ int Quantizer::valueToReconstructionValue(const int &value) const {
     return lut_.at(value).second;
 }
 
-const std::map<int, int> & Quantizer::inverseLut(void) const {
+const std::map<int, int> &Quantizer::inverseLut() const {
     return inverseLut_;
 }
 
-void Quantizer::print(void) const {
+void Quantizer::print() const {
     std::cout << "LUT:" << std::endl;
     for (auto const &lutElem : lut_) {
         std::cout << "  " << lutElem.first << ": ";

@@ -17,13 +17,13 @@ class SAMBlock {
     friend class SAMFile;
 
  public:
-    SAMBlock(void);
-    ~SAMBlock(void);
+    SAMBlock();
+    ~SAMBlock();
 
-    size_t nrMappedRecords(void) const;
-    size_t nrUnmappedRecords(void) const;
-    size_t nrRecords(void) const;
-    void reset(void);
+    size_t nrMappedRecords() const;
+    size_t nrUnmappedRecords() const;
+    size_t nrRecords() const;
+    void reset();
 
     std::deque<SAMRecord> records;
 

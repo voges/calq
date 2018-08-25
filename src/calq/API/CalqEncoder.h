@@ -15,15 +15,16 @@
 namespace calq {
 
 class CQFile;
+
 class FASTAFile;
+
 class SAMFile;
 
 class CalqEncoder {
  public:
     explicit CalqEncoder(const Options &options);
-    ~CalqEncoder(void);
-
-    void encode(void);
+    ~CalqEncoder();
+    void encode();
 
  private:
     CQFile* cqFile_;

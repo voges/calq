@@ -1,4 +1,4 @@
-/** @file HplotyperTest.h
+/** @file HaplotyperTest.h
  *  @brief This file contains the definition of the Haplotyper test function.
  */
 

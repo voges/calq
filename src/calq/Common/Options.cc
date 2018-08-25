@@ -9,36 +9,36 @@
 
 namespace calq {
 
-Options::Options(void)
-      // Options for both compression and decompression
-    : force(false),
-      debug(false),
-      test(false),
-      inputFileName(""),
-      outputFileName(""),
-      // Options for only compression
-      blockSize(0),
-      filterSize(0),
-      quantizationMin(0),
-      quantizationMax(0),
-      polyploidy(0),
-      qualityValueMax(0),
-      qualityValueMin(0),
-      qualityValueOffset(0),
-      qualityValueType(""),
-      filterType(FilterType::NONE),
-      quantizerType(QuantizerType::NONE),
-      referenceFileNames(),
-      // Options for only decompression
-      decompress(false),
-      sideInformationFileName(""),
-      version(Version::NONE),
-      versionStr(""){}
+Options::Options()
+// Options for both compression and decompression
+        : force(false),
+          debug(false),
+          test(false),
+          inputFileName(""),
+          outputFileName(""),
+        // Options for only compression
+          blockSize(0),
+          filterSize(0),
+          quantizationMin(0),
+          quantizationMax(0),
+          polyploidy(0),
+          qualityValueMax(0),
+          qualityValueMin(0),
+          qualityValueOffset(0),
+          qualityValueType(""),
+          filterType(FilterType::NONE),
+          quantizerType(QuantizerType::NONE),
+          referenceFileNames(),
+        // Options for only decompression
+          decompress(false),
+          sideInformationFileName(""),
+          version(Version::NONE),
+          versionStr("") {
+}
 
-Options::~Options(void) {}
+Options::~Options() = default;
 
-void Options::validate(void) {
-
+void Options::validate() {
     if (versionStr == "v1") {
         version = Version::V1;
         CALQ_LOG("Using CALQ version 1");
@@ -50,19 +50,19 @@ void Options::validate(void) {
     }
 
     // force
-    if (force == true) {
+    if (force) {
         CALQ_LOG("Force switch set - overwriting output file(s)");
     }
 
-    if (debug == true) {
+    if (debug) {
         CALQ_LOG("Debug switch set - verbose output");
     }
 
-    if (test == true) {
+    if (test) {
         CALQ_LOG("Test switch set - running test cases instead of compression");
     }
 
-    if (squash == true) {
+    if (squash) {
         CALQ_LOG("Acitivity scores are squashed between 0.0 and 1.0");
     } else {
         CALQ_LOG("Acitivity scores are !NOT! squashed between 0.0 and 1.0");
@@ -70,10 +70,10 @@ void Options::validate(void) {
 
     // inputFileName
     CALQ_LOG("Input file name: %s", inputFileName.c_str());
-    if (inputFileName.empty() == true) {
+    if (inputFileName.empty()) {
         throwErrorException("No input file name provided");
     }
-    if (decompress == false) {
+    if (!decompress) {
         if (fileNameExtension(inputFileName) != std::string("sam")) {
             throwErrorException("Input file name extension must be 'sam'");
         }
@@ -83,71 +83,71 @@ void Options::validate(void) {
 //             throwErrorException("Input file name extension must be 'cq'");
         }
     }
-    if (fileExists(inputFileName) == false) {
+    if (!fileExists(inputFileName)) {
         throwErrorException("Cannot access input file");
     }
 
     // outputFileName
-    if (decompress == false) {
-        if (outputFileName.empty() == true) {
+    if (!decompress) {
+        if (outputFileName.empty()) {
             CALQ_LOG("No output file name provided - constructing output file name from input file name");
             outputFileName += inputFileName + ".cq";
         }
     } else {
-        if (outputFileName.empty() == true) {
+        if (outputFileName.empty()) {
             CALQ_LOG("No output file name provided - constructing output file name from input file name");
             outputFileName += inputFileName + ".qual";
         }
     }
     CALQ_LOG("Output file name: %s", outputFileName.c_str());
-    if (fileExists(outputFileName) == true) {
-        if (force == false) {
+    if (fileExists(outputFileName)) {
+        if (!force) {
             throwErrorException("Not overwriting output file (use option 'f' to force overwriting)");
         }
     }
 
     // blockSize
-    if (decompress == false) {
-        CALQ_LOG("Block size: %d", blockSize);
+    if (!decompress) {
+        CALQ_LOG("Block size: %d", static_cast<int>(blockSize));
         if (blockSize < 1) {
             throwErrorException("Block size must be greater than 0");
         }
     }
 
     // Haplotyper filter size
-    if (decompress == false) {
-        CALQ_LOG("Filter size: %d", filterSize);
+    if (!decompress) {
+        CALQ_LOG("Filter size: %d", static_cast<int>(filterSize));
         if (filterSize < 1) {
             throwErrorException("Filter size must be greater than 0");
         }
     }
 
     // Quantization
-    if (decompress == false) {
-        CALQ_LOG("Quantization min steps: %d", quantizationMin);
+    if (!decompress) {
+        CALQ_LOG("Quantization min steps: %d", static_cast<int>(quantizationMin));
         if (quantizationMin < 2) {
             throwErrorException("Quantization must be greater than 1");
         }
     }
 
     // Quantization
-    if (decompress == false) {
-        CALQ_LOG("Quantization max steps: %d", quantizationMax);
+    if (!decompress) {
+        CALQ_LOG("Quantization max steps: %d", static_cast<int>(quantizationMax));
         if (quantizationMax < 2 || quantizationMax < quantizationMin) {
             throwErrorException("Quantization must be greater than 1 and quantizationMin");
         }
     }
 
     // polyploidy
-    if (decompress == false) {
-        CALQ_LOG("Polyploidy: %d", polyploidy);
+    if (!decompress) {
+        CALQ_LOG("Polyploidy: %d", static_cast<int>(polyploidy));
         if (polyploidy < 1) {
             throwErrorException("Polyploidy must be greater than 0");
         }
     }
 
     // qualityValueType
-    if (decompress == false) {
+    if (!decompress) {
         CALQ_LOG("Filter type: %s", filterTypeStr.c_str());
         if (filterTypeStr == "Gauss") {
             filterType = FilterType::GAUSS;
@@ -159,7 +159,7 @@ void Options::validate(void) {
     }
 
     // qualityValueType
-    if (decompress == false) {
+    if (!decompress) {
         CALQ_LOG("Quantizer type: %s", quantizerTypeStr.c_str());
         if (quantizerTypeStr == "Uniform") {
             quantizerType = QuantizerType::UNIFORM;
@@ -171,7 +171,7 @@ void Options::validate(void) {
     }
 
     // qualityValueType
-    if (decompress == false) {
+    if (!decompress) {
         CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
         if (qualityValueType == "Sanger") {
             // Sanger: Phred+33 [0,40]
@@ -207,24 +207,24 @@ void Options::validate(void) {
         } else {
             throwErrorException("Quality value type not supported");
         }
-        CALQ_LOG("Quality value offset: %d", qualityValueOffset);
-        CALQ_LOG("Quality value range: [%d,%d]", qualityValueMin, qualityValueMax);
+        CALQ_LOG("Quality value offset: %d", static_cast<int>(qualityValueOffset));
+        CALQ_LOG("Quality value range: [%d,%d]", static_cast<int>(qualityValueMin), static_cast<int>(qualityValueMax));
 
         // referenceFiles
-        if (decompress == false) {
-            if (referenceFileNames.empty() == true) {
+        if (!decompress) {
+            if (referenceFileNames.empty()) {
                 CALQ_LOG("Operating without reference file");
             } else {
                 CALQ_LOG("Operating with reference file:");
                 CALQ_LOG("  %s", referenceFileNames.c_str());
-                if (referenceFileNames.empty() == true) {
-                    throwErrorException("Reference file name not proviced");
+                if (referenceFileNames.empty()) {
+                    throwErrorException("Reference file name not provided");
                 }
-                if (fileExists(referenceFileNames) == false) {
+                if (!fileExists(referenceFileNames)) {
                     throwErrorException("Cannot access reference file");
                 }
                 if (fileNameExtension(referenceFileNames) != std::string("fa")
-                        && fileNameExtension(referenceFileNames) != std::string("fasta")) {
+                    && fileNameExtension(referenceFileNames) != std::string("fasta")) {
                     throwErrorException("Reference file name extension must be 'fa' or 'fasta'");
                 }
             }
@@ -232,22 +232,22 @@ void Options::validate(void) {
     }
 
     // decompress
-    if (decompress == false) {
+    if (!decompress) {
         CALQ_LOG("Compressing");
     } else {
         CALQ_LOG("Decompressing");
     }
 
     // sideInformationFileName
-    if (decompress == true) {
+    if (decompress) {
         CALQ_LOG("Side information file name: %s", sideInformationFileName.c_str());
-        if (sideInformationFileName.empty() == true) {
+        if (sideInformationFileName.empty()) {
             throwErrorException("No side information file name provided");
         }
         if (fileNameExtension(sideInformationFileName) != std::string("sam")) {
             throwErrorException("Side information file name extension must be 'sam'");
         }
-        if (fileExists(sideInformationFileName) == false) {
+        if (!fileExists(sideInformationFileName)) {
             throwErrorException("Cannot access side information file");
         }
     }

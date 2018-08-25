@@ -13,10 +13,10 @@
 namespace calq {
 
 struct Options {
-    Options(void);
-    ~Options(void);
+    Options();
+    ~Options();
 
-    void validate(void);
+    void validate();
 
     enum struct QuantizerType {
         NONE,

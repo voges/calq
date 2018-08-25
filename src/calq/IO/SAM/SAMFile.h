@@ -19,21 +19,21 @@ namespace calq {
 class SAMFile : public File {
  public:
     explicit SAMFile(const std::string &path, const Mode &mode = MODE_READ);
-    ~SAMFile(void);
+    ~SAMFile() override;
 
-    size_t nrBlocksRead(void) const;
-    size_t nrMappedRecordsRead(void) const;
-    size_t nrUnmappedRecordsRead(void) const;
-    size_t nrRecordsRead(void) const;
+    size_t nrBlocksRead() const;
+    size_t nrMappedRecordsRead() const;
+    size_t nrUnmappedRecordsRead() const;
+    size_t nrRecordsRead() const;
     size_t readBlock(const size_t &blockSize);
 
     SAMBlock currentBlock;
     std::string header;
 
  private:
-    static const size_t LINE_SIZE = sizeof(char) * (1*MB);
+    static const size_t LINE_SIZE = sizeof(char) * (1 * MB);
 
-    char *line_;
+    char* line_;
     size_t nrBlocksRead_;
     size_t nrMappedRecordsRead_;
     size_t nrUnmappedRecordsRead_;

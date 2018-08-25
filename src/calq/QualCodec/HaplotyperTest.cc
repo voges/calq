@@ -4,8 +4,6 @@
 
 // Copyright 2015-2018 Leibniz Universitaet Hannover
 
-#include "QualCodec/HaplotyperTest.h"
-
 #include <iostream>
 
 #include "FilterBuffer.h"
@@ -18,7 +16,7 @@
 namespace calq {
 
 void equals(double a, double b, double EPSILON = 0.0001) {
-    if ((a-EPSILON) < b && (a+EPSILON) > b) {
+    if ((a - EPSILON) < b && (a + EPSILON) > b) {
         std::cout << "Test passed, " << a << " equals " << b << " !" << std::endl;
     } else {
         std::cout << "Test failed, " << a << " not equal to " << b << " !" << std::endl;
@@ -66,7 +64,7 @@ void gaussKernelTest() {
 // ----------------------------------------------------------------------------------------------------------------------
 
 void filterBufferTest() {
-    FilterBuffer buffer([](size_t pos, size_t size)->double{return pos/static_cast<double>(size-1);}, 3);
+    FilterBuffer buffer([](size_t pos, size_t size) -> double { return pos / static_cast<double>(size - 1); }, 3);
 
     // Test "Convolution"
     equals(buffer.filter(), 0);
@@ -113,7 +111,7 @@ void lloydQuantizerTest() {
     calq::LloydMaxQuantizer q(10);
     calq::ProbabilityDistribution pdf(0, 99);
     for (int i = 0; i <= 99; ++i) {
-        pdf.addToPdf(i);
+        pdf.addToPdf(static_cast<size_t>(i));
     }
     q.build(pdf);
 
@@ -127,7 +125,7 @@ void lloydQuantizerTest() {
     calq::LloydMaxQuantizer q2(10);
     calq::ProbabilityDistribution pdf2(1, 100);
     for (int i = 1; i <= 100; ++i) {
-        pdf2.addToPdf(i, pow(abs(i - 50), 4));
+        pdf2.addToPdf(static_cast<size_t>(i), static_cast<size_t>(pow(abs(i - 50), 4)));
     }
 
     q2.build(pdf2);
@@ -205,7 +203,7 @@ void fullHaploTest() {
 
     // push spreaded bases into filterbuffer
     for (int i = 0; i < 8; ++i) {
-         h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');  // Activity close to 0
+        h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');  // Activity close to 0
     }
     // Reach maximum
     equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 7);
@@ -214,7 +212,7 @@ void fullHaploTest() {
 
     // Reach minimum
     for (int i = 0; i < 9; ++i) {
-         h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');
+        h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C');
     }
 
     equals(h2.push("CCCCCCCCCCCCCC", "}}}}}}}}}}}}", 0, 'C'), 0);

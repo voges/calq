@@ -14,7 +14,7 @@
 // C-style debug macro
 // #define DBG
 #ifdef DBG
-    #define CALQ_DEBUG(c, ...) \
+#define CALQ_DEBUG(c, ...) \
         do { \
             fflush(stderr); \
             fprintf(stderr, \

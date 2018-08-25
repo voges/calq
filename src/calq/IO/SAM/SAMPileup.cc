@@ -6,34 +6,30 @@
 
 #include "IO/SAM/SAMPileup.h"
 
-#include <stdio.h>
-
 namespace calq {
-SAMPileup::SAMPileup(void) : pos(0), qual(""), seq(""), hq_softcounter(0) {}
+SAMPileup::SAMPileup() : pos(0), qual(""), seq(""), hq_softcounter(0) {}
 
-SAMPileup::~SAMPileup(void) {}
+SAMPileup::~SAMPileup() = default;
 
-bool SAMPileup::empty(void) const {
-    if (seq.empty() == true)
-        return true;
-    return false;
+bool SAMPileup::empty() const {
+    return seq.empty();
 }
 
-void SAMPileup::clear(void) {
+void SAMPileup::clear() {
     pos = 0;
     qual = "";
     seq = "";
 }
 
-void SAMPileup::print(void) const {
+void SAMPileup::print() const {
     printf("%6d: %s %s\n", pos, seq.c_str(), qual.c_str());
 }
 
-void SAMPileup::printQual(void) const {
+void SAMPileup::printQual() const {
     printf("%6d: %s\n", pos, qual.c_str());
 }
 
-void SAMPileup::printSeq(void) const {
+void SAMPileup::printSeq() const {
     printf("%6d: %s\n", pos, seq.c_str());
 }
 

@@ -11,7 +11,7 @@
 
 namespace calq {
 
-std::string currentDateAndTime(void);
+std::string currentDateAndTime();
 bool fileExists(const std::string &path);
 std::string fileBaseName(const std::string &path);
 std::string fileNameExtension(const std::string &path);

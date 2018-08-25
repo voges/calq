@@ -14,47 +14,47 @@
 namespace calq {
 
 CalqDecoder::CalqDecoder(const Options &options)
-    : cqFile_(NULL),
-      qualFile_(NULL),
-      sideInformationFile_(NULL) {
-    if (options.inputFileName.empty() == true) {
+        : cqFile_(nullptr),
+          qualFile_(nullptr),
+          sideInformationFile_(nullptr) {
+    if (options.inputFileName.empty()) {
         throwErrorException("options.inputFileName is empty");
     }
-    if (options.outputFileName.empty() == true) {
+    if (options.outputFileName.empty()) {
         throwErrorException("options.outputFileName is empty");
     }
-    if (options.sideInformationFileName.empty() == true) {
+    if (options.sideInformationFileName.empty()) {
         throwErrorException("options.sideInformationFileName is empty");
     }
 
-    try{
-        cqFile_    = new CQFile(options.inputFileName, CQFile::MODE_READ);
-        qualFile_   = new File(options.outputFileName, File::MODE_WRITE);
+    try {
+        cqFile_ = new CQFile(options.inputFileName, CQFile::MODE_READ);
+        qualFile_ = new File(options.outputFileName, File::MODE_WRITE);
         sideInformationFile_ = new SAMFile(options.sideInformationFileName);
     } catch (const Exception &e) {
-        if(cqFile_ != NULL) {
+        if (cqFile_ != nullptr) {
             delete cqFile_;
-            cqFile_ = NULL;
+            cqFile_ = nullptr;
         }
-        if(qualFile_ != NULL) {
+        if (qualFile_ != nullptr) {
             delete qualFile_;
-            qualFile_ = NULL;
+            qualFile_ = nullptr;
         }
-        if(sideInformationFile_ != NULL) {
+        if (sideInformationFile_ != nullptr) {
             delete sideInformationFile_;
-            sideInformationFile_ = NULL;
+            sideInformationFile_ = nullptr;
         }
         throw e;
     }
 }
 
-CalqDecoder::~CalqDecoder(void) {
+CalqDecoder::~CalqDecoder() {
     delete cqFile_;
     delete qualFile_;
     delete sideInformationFile_;
 }
 
-void CalqDecoder::decode(void) {
+void CalqDecoder::decode() {
     // Take time
     auto startTime = std::chrono::steady_clock::now();
 
@@ -70,7 +70,7 @@ void CalqDecoder::decode(void) {
         QualDecoder qualDecoder;
         qualDecoder.readBlock(cqFile_);
         for (auto const &samRecord : sideInformationFile_->currentBlock.records) {
-            if (samRecord.isMapped() == true) {
+            if (samRecord.isMapped()) {
                 qualDecoder.decodeMappedRecordFromBlock(samRecord, qualFile_);
             } else {
                 qualDecoder.decodeUnmappedRecordFromBlock(samRecord, qualFile_);
@@ -86,8 +86,9 @@ void CalqDecoder::decode(void) {
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
     CALQ_LOG("DECOMPRESSION STATISTICS");
-    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)((double)cqFile_->nrReadBytes()/(double)MB))/((double)diffTimeS));
+    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int) diffTimeMs, (int) diffTimeS, (int) diffTimeM, (int) diffTimeH);
+    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s",
+             ((static_cast<double>(cqFile_->nrReadBytes()) / static_cast<double>(MB))) / (static_cast<double>(diffTimeS)));
     CALQ_LOG("  Decoded %zu block(s)", sideInformationFile_->nrBlocksRead());
 }
 

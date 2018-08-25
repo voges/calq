@@ -14,7 +14,7 @@
 namespace calq {
 ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin, size_t rangeMax) {
     this->rangeMin = rangeMin;
-    this->pdf.resize(rangeMax-rangeMin + 1);
+    this->pdf.resize(rangeMax - rangeMin + 1);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -22,14 +22,14 @@ ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin, size_t rangeMa
 void ProbabilityDistribution::addToPdf(size_t qualScore, size_t number) {
     if (qualScore < rangeMin || qualScore > rangeMin + pdf.size() - 1)
         throwErrorException("PDF: Score not in range");
-    pdf[qualScore-rangeMin] += number;
+    pdf[qualScore - rangeMin] += number;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 
 void ProbabilityDistribution::resetPdf() {
-    for (size_t i = 0; i < pdf.size(); ++i) {
-        pdf[i] = 0;
+    for (size_t &i : pdf) {
+        i = 0;
     }
 }
 

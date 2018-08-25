@@ -8,7 +8,7 @@
 #define CALQ_QUALCODEC_FILTERBUFFER_H_
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <functional>
 
@@ -35,7 +35,7 @@ class GaussKernel {
     // Get gauss value at position pos and buffersize size with mean=size/2
     double calcValue(size_t pos, size_t size) const;
 
-    // Calcutes how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
+    // Calculates how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
     size_t calcMinSize(double threshold, size_t maximum = 101) const;
 };
 
@@ -53,7 +53,7 @@ class RectangleKernel {
     // Get gauss value at position pos and buffersize size with mean=size/2
     double calcValue(size_t pos, size_t size) const;
 
-    // Calcutes how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
+    // Calculates how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
     size_t calcMinSize(size_t maximum = 101) const;
 };
 
@@ -73,7 +73,7 @@ class FilterBuffer {
     double filter() const;
 
     // Initialize buffer and
-    FilterBuffer(const std::function<double(size_t, size_t)>& kernelBuilder, size_t kernelSize);
+    FilterBuffer(const std::function<double(size_t, size_t)> &kernelBuilder, size_t kernelSize);
 
     // Create dummy buffer
     FilterBuffer();
@@ -81,7 +81,7 @@ class FilterBuffer {
     // Buffer size
     size_t getSize() const;
 
-    // DIstance between buffer center and borders
+    // Distance between buffer center and borders
     size_t getOffset() const;
 };
 }  // namespace calq

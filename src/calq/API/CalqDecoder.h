@@ -12,15 +12,17 @@
 namespace calq {
 
 class CQFile;
+
 class File;
+
 class SAMFile;
 
 class CalqDecoder {
  public:
-    explicit CalqDecoder(const Options &pptions);
-    ~CalqDecoder(void);
+    explicit CalqDecoder(const Options &options);
+    ~CalqDecoder();
 
-    void decode(void);
+    void decode();
 
  private:
     CQFile* cqFile_;

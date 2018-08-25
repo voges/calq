@@ -9,7 +9,7 @@
 #include "Common/ErrorExceptionReporter.h"
 #include "tclap/CmdLine.h"
 
-static void printVersionAndCopyright(void) {
+static void printVersionAndCopyright() {
     printf("-----------------------------------------------\n");
     printf("Program: CALQ\n");
     printf("Version: %s\n", CALQ_VERSION);
@@ -25,7 +25,7 @@ static void printVersionAndCopyright(void) {
     printf("-----------------------------------------------\n");
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     printVersionAndCopyright();
 
     try {
@@ -42,14 +42,18 @@ int main(int argc, char *argv[]) {
         TCLAP::ValueArg<std::string> outputFileNameArg("o", "outputFileName", "Output file name", false, "", "string", cmd);
 
         // TCLAP arguments (only compression)
-        TCLAP::ValueArg<int> blockSizeArg("b", "blockSize", "Block size (in number of SAM records). Default 10000", false, 10000, "int", cmd);
-        TCLAP::ValueArg<int> filterSizeArg("", "filterSize", "Haplotyper filter radius. Default 17. (v2 only)", false, 17, "int", cmd);
-        TCLAP::ValueArg<int> quantizationMinArg("", "quantizationMin", "Minimum quantization steps. Default 2", false, 2, "int", cmd);
-        TCLAP::ValueArg<int> quantizationMaxArg("", "quantizationMax", "Maximum quantization steps. Default 8", false, 8, "int", cmd);
-        TCLAP::ValueArg<int> polyploidyArg("p", "polyploidy", "Polyploidy. Default 2", false, 2, "int", cmd);
-        TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (Sanger: Phred+33 [0,40]; Illumina-1.3+: Phred+64 [0,40]; Illumina-1.5+: Phred+64 [0,40]; Illumina-1.8+: Phred+33 [0,41]; Max33: Phred+33 [0,93]; Max64: Phred+64 [0,62])", false, "Illumina-1.8+", "string", cmd);
+        TCLAP::ValueArg<size_t> blockSizeArg("b", "blockSize", "Block size (in number of SAM records). Default 10000", false, 10000, "int", cmd);
+        TCLAP::ValueArg<size_t> filterSizeArg("", "filterSize", "Haplotyper filter radius. Default 17. (v2 only)", false, 17, "int", cmd);
+        TCLAP::ValueArg<size_t> quantizationMinArg("", "quantizationMin", "Minimum quantization steps. Default 2", false, 2, "int", cmd);
+        TCLAP::ValueArg<size_t> quantizationMaxArg("", "quantizationMax", "Maximum quantization steps. Default 8", false, 8, "int", cmd);
+        TCLAP::ValueArg<size_t> polyploidyArg("p", "polyploidy", "Polyploidy. Default 2", false, 2, "int", cmd);
+        TCLAP::ValueArg<std::string> qualityValueTypeArg("q", "qualityValueType", "Quality value type (Sanger: Phred+33 [0,40]; "
+                                                                                  "Illumina-1.3+: Phred+64 [0,40]; Illumina-1.5+: Phred+64 [0,40]; "
+                                                                                  "Illumina-1.8+: Phred+33 [0,41]; Max33: Phred+33 [0,93]; Max64: "
+                                                                                  "Phred+64 [0,62])", false, "Illumina-1.8+", "string", cmd);
         TCLAP::ValueArg<std::string> referenceFileNamesArg("r", "referenceFileName", "Reference file (FASTA format) (v2 only)", false, "", "string", cmd);
-        TCLAP::ValueArg<std::string> filterTypeArg("", "filterType", "Haplotyper Filter Type (Gauss; Rectangle). Default Gauss. (v2 only)", false, "Gauss", "string", cmd);
+        TCLAP::ValueArg<std::string> filterTypeArg("", "filterType", "Haplotyper Filter Type (Gauss; Rectangle). Default Gauss. (v2 only)",
+                                                   false, "Gauss", "string", cmd);
         TCLAP::ValueArg<std::string> quantizerTypeArg("", "quantizerType", "Quantizer type (Uniform; Lloyd). Default Uniform", false, "Uniform", "string", cmd);
         TCLAP::ValueArg<std::string> versionArg("", "CALQ-Version", "v1 or v2. Default v1", false, "v1", "string", cmd);
         TCLAP::SwitchArg noSquash("", "noSquash", "Do not squash activityscores between 0.0 and 1.0, which is done by default", cmd, false);
@@ -62,39 +66,39 @@ int main(int argc, char *argv[]) {
         cmd.parse(argc, argv);
 
         // Check for sanity in compression mode
-        if (decompressSwitch.isSet() == false) {
-            if (referenceFileNamesArg.isSet() == false) {
+        if (!decompressSwitch.isSet()) {
+            if (!referenceFileNamesArg.isSet()) {
                 throwErrorException("Argument 'r' required in compression mode");
             }
-            if (sideInformationFileNameArg.isSet() == true) {
+            if (sideInformationFileNameArg.isSet()) {
                 throwErrorException("Argument 's' forbidden in compression mode");
             }
         }
 
         // Check for sanity in decompression mode
-        if (decompressSwitch.isSet() == true) {
-            if (blockSizeArg.isSet() == true) {
+        if (decompressSwitch.isSet()) {
+            if (blockSizeArg.isSet()) {
                 throwErrorException("Argument 'b' forbidden in decompression mode");
             }
-            if (polyploidyArg.isSet() == true) {
+            if (polyploidyArg.isSet()) {
                 throwErrorException("Argument 'p' forbidden in decompression mode");
             }
-            if (qualityValueTypeArg.isSet() == true) {
+            if (qualityValueTypeArg.isSet()) {
                 throwErrorException("Argument 'q' forbidden in decompression mode");
             }
-            if (referenceFileNamesArg.isSet() == true) {
+            if (referenceFileNamesArg.isSet()) {
                 throwErrorException("Argument 'r' forbidden in decompression mode");
             }
-            if (sideInformationFileNameArg.isSet() == false) {
+            if (!sideInformationFileNameArg.isSet()) {
                 throwErrorException("Argument 's' required in decompression mode");
             }
-            if (filterSizeArg.isSet() == true) {
+            if (filterSizeArg.isSet()) {
                 throwErrorException("Argument 'filterSize' forbidden in decompression mode");
             }
-            if (filterTypeArg.isSet() == true) {
+            if (filterTypeArg.isSet()) {
                 throwErrorException("Argument 'filterType' forbidden in decompression mode");
             }
-            if (noSquash.isSet() == true) {
+            if (noSquash.isSet()) {
                 throwErrorException("Argument 'noSquash' forbidden in decompression mode");
             }
         }
@@ -126,7 +130,7 @@ int main(int argc, char *argv[]) {
         if (options.test) {
             calq::haplotyperTest();
             CALQ_LOG("Finished testing");
-        } else if (options.decompress == false) {
+        } else if (!options.decompress) {
             calq::CalqEncoder calqEncoder(options);
             calqEncoder.encode();
             CALQ_LOG("Finished encoding");
@@ -145,7 +149,7 @@ int main(int argc, char *argv[]) {
         CALQ_ERROR("Fatal: %s", stdException.what());
         return EXIT_FAILURE;
     } catch (...) {
-        CALQ_ERROR("Unkown error occured");
+        CALQ_ERROR("Unknown error occurred");
         return EXIT_FAILURE;
     }
 

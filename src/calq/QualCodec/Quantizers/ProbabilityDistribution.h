@@ -7,7 +7,7 @@
 #ifndef CALQ_QUALCODEC_QUANTIZERS_PROBABILITYDISTRIBUTION_H_
 #define CALQ_QUALCODEC_QUANTIZERS_PROBABILITYDISTRIBUTION_H_
 
-#include <stddef.h>
+#include <cstddef>
 
 #include <vector>
 

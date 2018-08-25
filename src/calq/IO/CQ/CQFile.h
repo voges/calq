@@ -18,10 +18,10 @@ namespace calq {
 class CQFile : public File {
  public:
     CQFile(const std::string &path, const Mode &mode);
-    ~CQFile(void);
+    ~CQFile() override;
 
-    size_t nrReadFileFormatBytes(void) const;
-    size_t nrWrittenFileFormatBytes(void) const;
+    size_t nrReadFileFormatBytes() const;
+    size_t nrWrittenFileFormatBytes() const;
 
     size_t readHeader(size_t *blockSize);
     size_t readQuantizers(std::map<int, Quantizer> *quantizers);

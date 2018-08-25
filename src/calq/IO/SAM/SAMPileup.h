@@ -16,20 +16,18 @@ namespace calq {
 
 class SAMPileup {
  public:
-    SAMPileup(void);
-    ~SAMPileup(void);
+    SAMPileup();
+    ~SAMPileup();
 
-    bool empty(void) const;
-    void clear(void);
-    void print(void) const;
-    void printQual(void) const;
-    void printSeq(void) const;
+    bool empty() const;
+    void clear();
+    void print() const;
+    void printQual() const;
+    void printSeq() const;
 
     uint32_t pos;  // 0-based position of this pileup
     std::string qual;
     std::string seq;
-
-    char ref;
 
     uint16_t hq_softcounter;  // High quality softclips next to this position
 };

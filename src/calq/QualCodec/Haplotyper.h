@@ -35,8 +35,6 @@ class Haplotyper {
     size_t polyploidy;
     const bool DEBUG;
 
-    double NO_INDEL_LIKELIHOOD;
-    double INDEL_LIKELIHOOD;
     const bool squashedActivity;
     double localDistortion;
 
@@ -51,11 +49,11 @@ class Haplotyper {
     size_t getOffset() const;
 
     // Pushes new activity score calculated using parameters and returns filtered acticityscore for (pos-offset)
-    size_t push(const std::string& seqPile, const std::string& qualPile, size_t hq_softclips, char reference);
+    size_t push(const std::string &seqPile, const std::string &qualPile, size_t hq_softclips, char reference);
 
-    std::vector<double> calcNonRefLikelihoods(char ref, const std::string& seqPile, const std::string& qualPile);
+    std::vector<double> calcNonRefLikelihoods(char ref, const std::string &seqPile, const std::string &qualPile);
 
-    double calcActivityScore(char ref, const std::string& seqPile, const std::string& qualPile, double heterozygosity);
+    double calcActivityScore(char ref, const std::string &seqPile, const std::string &qualPile, double heterozygosity);
 
     std::vector<double> calcPriors(double hetero);
 };
