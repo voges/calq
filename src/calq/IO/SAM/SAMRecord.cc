@@ -119,7 +119,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque* samPileupDeque_, size_t quality
                         ++softclips;
                     }
                 }
-                __attribute__((fallthrough));
+                /* fall through */
             case 'I':
                 idx += opLen;
                 break;
