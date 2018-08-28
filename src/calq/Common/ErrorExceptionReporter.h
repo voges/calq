@@ -1,36 +1,21 @@
-/** @file Exceptions.h
+/** @file ErrorExceptionReporter.h
  *  @brief This files contains the definitions of some custom exception
  *         classes.
  */
 
-// Copyright 2015-2017 Leibniz Universitaet Hannover
+// Copyright 2015-2018 Leibniz Universitaet Hannover
 
-#ifndef CALQ_COMMON_EXCEPTIONS_H_
-#define CALQ_COMMON_EXCEPTIONS_H_
+#ifndef CALQ_COMMON_ERROREXCEPTIONREPORTER_H_
+#define CALQ_COMMON_ERROREXCEPTIONREPORTER_H_
 
 #include <exception>
 #include <iostream>
 #include <string>
-
+#include <utility>
 #include "Common/helpers.h"
+#include "Common/Exceptions.h"
 
 namespace calq {
-
-class Exception : public std::exception {
- public:
-    explicit Exception(const std::string &msg);
-    virtual ~Exception(void) throw();
-    virtual std::string getMessage(void) const;
-    virtual const char * what(void) const throw();
-
- protected:
-    std::string msg_;
-};
-
-class ErrorException : public Exception {
- public:
-    explicit ErrorException(const std::string &msg): Exception(msg) {}
-};
 
 inline void throwErrorException(const std::string &msg) {
     std::cout.flush();
@@ -39,16 +24,10 @@ inline void throwErrorException(const std::string &msg) {
 
 class ErrorExceptionReporter {
  public:
-    ErrorExceptionReporter(const std::string &file,
-                           const std::string &function,
-                           const int &line)
-        : file_(file)
-        , function_(function)
-        , line_(line)
-    {}
+    ErrorExceptionReporter(std::string file, std::string function, const int &line) : file_(std::move(file)), function_(std::move(function)), line_(line) {}
 
     void operator()(const std::string &msg) {
-//         std::cerr << file << ":" << function << ":" << line << ": ";
+        // std::cerr << file << ":" << function << ":" << line << ": ";
         std::string tmp = fileBaseName(file_) + ":" + function_ + ":" + std::to_string(line_) + ": " + msg;
         // Can use the original name here, as it is still defined
         throwErrorException(tmp);
@@ -68,5 +47,5 @@ class ErrorExceptionReporter {
 #undef throwErrorException
 #define throwErrorException calq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
-#endif  // CALQ_COMMON_EXCEPTIONS_H_
+#endif  // CALQ_COMMON_ERROREXCEPTIONREPORTER_H_
 

@@ -6,48 +6,36 @@
 
 #include "IO/File.h"
 
-#include <limits.h>
+#include <climits>
 
-#include "Common/Exceptions.h"
-#include "Common/os.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 
-File::File(void)
-    : fp_(NULL),
-      fsize_(0),
-      isOpen_(false),
-      mode_(File::MODE_READ),
-      nrReadBytes_(0),
-      nrWrittenBytes_(0) {}
+File::File() : fp_(nullptr), fsize_(0), isOpen_(false), mode_(File::MODE_READ), nrReadBytes_(0), nrWrittenBytes_(0) {
+}
 
-File::File(const std::string &path, const Mode mode)
-    : fp_(NULL),
-      fsize_(0),
-      isOpen_(false),
-      mode_(mode),
-      nrReadBytes_(0),
-      nrWrittenBytes_(0) {
-    if (path.empty() == true) {
+File::File(const std::string &path, Mode mode) : fp_(nullptr), fsize_(0), isOpen_(false), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
 
     open(path, mode);
 }
 
-File::~File(void) {
+File::~File() {
     close();
 }
 
-void File::open(const std::string &path, const Mode mode) {
-    if (path.empty() == true) {
+void File::open(const std::string &path, Mode mode) {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
-    if (fp_ != NULL) {
+    if (fp_ != nullptr) {
         throwErrorException("File pointer already in use");
     }
 
-    const char *m;
+    const char* m = nullptr;
     if (mode == MODE_READ) {
         m = "rb";
         mode_ = mode;
@@ -55,7 +43,7 @@ void File::open(const std::string &path, const Mode mode) {
         m = "wb";
         mode_ = mode;
     } else {
-        throwErrorException("Unkown mode");
+        throwErrorException("Unknown mode");
     }
 
 #ifdef CQ_OS_WINDOWS
@@ -65,97 +53,93 @@ void File::open(const std::string &path, const Mode mode) {
     }
 #else
     fp_ = fopen(path.c_str(), m);
-    if (fp_ == NULL) {
+    if (fp_ == nullptr) {
         throwErrorException("Failed to open file");
     }
 #endif
 
     // Compute file size
     fseek(fp_, 0, SEEK_END);
-    fsize_ = ftell(fp_);
+    fsize_ = static_cast<size_t>(ftell(fp_));
     fseek(fp_, 0, SEEK_SET);
 
     isOpen_ = true;
 }
 
-void File::close(void) {
-    if (isOpen_ == true) {
-        if (fp_ != NULL) {
+void File::close() {
+    if (isOpen_) {
+        if (fp_ != nullptr) {
             fclose(fp_);
-            fp_ = NULL;
+            fp_ = nullptr;
         } else {
             throwErrorException("Failed to close file");
         }
     }
 }
 
-void File::advance(const size_t offset) {
-    int ret = fseek(fp_, (long int)offset, SEEK_CUR);
+void File::advance(size_t offset) {
+    int ret = fseek(fp_, (long int) offset, SEEK_CUR);
     if (ret != 0) {
         throwErrorException("fseek failed");
     }
 }
 
-bool File::eof(void) const {
+bool File::eof() const {
     int eof = feof(fp_);
-    return eof != 0 ? true : false;
+    return eof != 0;
 }
 
-void * File::handle(void) const {
+void* File::handle() const {
     return fp_;
 }
 
-void File::seek(const size_t pos) {
+void File::seek(size_t pos) {
     if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
     }
-    int ret = fseek(fp_, (long)pos, SEEK_SET);
+    int ret = fseek(fp_, (long) pos, SEEK_SET);
     if (ret != 0) {
         throwErrorException("fseek failed");
     }
 }
 
-size_t File::size(void) const {
+size_t File::size() const {
     return fsize_;
 }
 
-size_t File::tell(void) const {
+size_t File::tell() const {
     long int offset = ftell(fp_);
     if (offset == -1) {
         throwErrorException("ftell failed");
     }
-    return offset;
+    return static_cast<size_t>(offset);
 }
 
-size_t File::nrReadBytes(void) const {
+size_t File::nrReadBytes() const {
     if (mode_ != MODE_READ) {
         throwErrorException("File is not open in read mode");
     }
     return nrReadBytes_;
 }
 
-size_t File::nrWrittenBytes(void) const {
+size_t File::nrWrittenBytes() const {
     if (mode_ != MODE_WRITE) {
         throwErrorException("File is not open in write mode");
     }
     return nrWrittenBytes_;
 }
 
-bool File::isReadable(void) const {
-    if (isOpen_ == true && mode_ == MODE_READ)
-        return true;
-    return false;
+bool File::isReadable() const {
+    return isOpen_ && mode_ == MODE_READ;
 }
 
-bool File::isWritable(void) const {
-    if (isOpen_ == true && mode_ == MODE_WRITE)
-        return true;
-    return false;
+bool File::isWritable() const {
+    return isOpen_ && mode_ == MODE_WRITE;
 }
 
-size_t File::read(void *buffer, const size_t size) {
-    if (buffer == NULL) {
-        throwErrorException("buffer is NULL");
+size_t File::read(void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        throwErrorException("buffer is nullptr");
     }
     if (size == 0) {
         return 0;
@@ -168,9 +152,9 @@ size_t File::read(void *buffer, const size_t size) {
     return ret;
 }
 
-size_t File::write(void *buffer, const size_t size) {
-    if (buffer == NULL) {
-        throwErrorException("buffer is NULL");
+size_t File::write(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        throwErrorException("buffer is nullptr");
     }
     if (size == 0) {
         return 0;
@@ -183,7 +167,7 @@ size_t File::write(void *buffer, const size_t size) {
     return ret;
 }
 
-size_t File::readByte(unsigned char *byte) {
+size_t File::readByte(unsigned char* byte) {
     size_t ret = fread(byte, 1, 1, fp_);
     if (ret != sizeof(unsigned char)) {
         throwErrorException("fread failed");
@@ -192,13 +176,13 @@ size_t File::readByte(unsigned char *byte) {
     return ret;
 }
 
-size_t File::readUint8(uint8_t *byte) {
+size_t File::readUint8(uint8_t* byte) {
     return readByte(byte);
 }
 
-size_t File::readUint16(uint16_t *word) {
-    unsigned char *buffer = (unsigned char *)malloc(sizeof(uint16_t));
-    if (buffer == NULL) {
+size_t File::readUint16(uint16_t* word) {
+    auto* buffer = (unsigned char*) malloc(sizeof(uint16_t));
+    if (buffer == nullptr) {
         throwErrorException("malloc failed");
     }
 
@@ -208,16 +192,16 @@ size_t File::readUint16(uint16_t *word) {
         free(buffer);
         throwErrorException("read failed");
     } else {
-        *word = (uint16_t)buffer[0] <<  8 | (uint16_t)buffer[1];
+        *word = (uint16_t) buffer[0] << 8 | (uint16_t) buffer[1]; //NOLINT
         free(buffer);
     }
 
     return ret;
 }
 
-size_t File::readUint32(uint32_t *dword) {
-    unsigned char *buffer = (unsigned char *)malloc(sizeof(uint32_t));
-    if (buffer == NULL) {
+size_t File::readUint32(uint32_t* dword) {
+    auto* buffer = (unsigned char*) malloc(sizeof(uint32_t));
+    if (buffer == nullptr) {
         throwErrorException("malloc failed");
     }
 
@@ -227,19 +211,19 @@ size_t File::readUint32(uint32_t *dword) {
         free(buffer);
         throwErrorException("read failed");
     } else {
-        *dword = (uint32_t)buffer[0] << 24 |
-                 (uint32_t)buffer[1] << 16 |
-                 (uint32_t)buffer[2] <<  8 |
-                 (uint32_t)buffer[3];
+        *dword = (uint32_t) buffer[0] << 24 | //NOLINT
+                 (uint32_t) buffer[1] << 16 | //NOLINT
+                 (uint32_t) buffer[2] << 8 | //NOLINT
+                 (uint32_t) buffer[3];        //NOLINT
         free(buffer);
     }
 
     return ret;
 }
 
-size_t File::readUint64(uint64_t *qword) {
-    unsigned char *buffer = (unsigned char *)malloc(sizeof(uint64_t));
-    if (buffer == NULL) {
+size_t File::readUint64(uint64_t* qword) {
+    auto* buffer = (unsigned char*) malloc(sizeof(uint64_t));
+    if (buffer == nullptr) {
         throwErrorException("malloc failed");
     }
 
@@ -249,21 +233,21 @@ size_t File::readUint64(uint64_t *qword) {
         free(buffer);
         throwErrorException("read failed");
     } else {
-        *qword = (uint64_t)buffer[0] << 56 |
-                 (uint64_t)buffer[1] << 48 |
-                 (uint64_t)buffer[2] << 40 |
-                 (uint64_t)buffer[3] << 32 |
-                 (uint64_t)buffer[4] << 24 |
-                 (uint64_t)buffer[5] << 16 |
-                 (uint64_t)buffer[6] <<  8 |
-                 (uint64_t)buffer[7];
+        *qword = (uint64_t) buffer[0] << 56 | //NOLINT
+                 (uint64_t) buffer[1] << 48 | //NOLINT
+                 (uint64_t) buffer[2] << 40 | //NOLINT
+                 (uint64_t) buffer[3] << 32 | //NOLINT
+                 (uint64_t) buffer[4] << 24 | //NOLINT
+                 (uint64_t) buffer[5] << 16 | //NOLINT
+                 (uint64_t) buffer[6] << 8 | //NOLINT
+                 (uint64_t) buffer[7];        //NOLINT
         free(buffer);
     }
 
     return ret;
 }
 
-size_t File::writeByte(const unsigned char byte) {
+size_t File::writeByte(unsigned char byte) {
     size_t ret = fwrite(&byte, 1, 1, fp_);
     if (ret != sizeof(unsigned char)) {
         throwErrorException("fwrite failed");
@@ -272,36 +256,36 @@ size_t File::writeByte(const unsigned char byte) {
     return ret;
 }
 
-size_t File::writeUint8(const uint8_t byte) {
+size_t File::writeUint8(uint8_t byte) {
     return writeByte(byte);
 }
 
-size_t File::writeUint16(const uint16_t word) {
+size_t File::writeUint16(uint16_t word) {
     size_t ret = 0;
-    ret += writeByte((unsigned char)(word >> 8) & 0xFF);
-    ret += writeByte((unsigned char)(word)      & 0xFF);
+    ret += writeByte((unsigned char) (word >> 8) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (word) & 0xFF); //NOLINT
     return ret;
 }
 
-size_t File::writeUint32(const uint32_t dword) {
+size_t File::writeUint32(uint32_t dword) {
     size_t ret = 0;
-    ret += writeByte((unsigned char)(dword >> 24) & 0xFF);
-    ret += writeByte((unsigned char)(dword >> 16) & 0xFF);
-    ret += writeByte((unsigned char)(dword >>  8) & 0xFF);
-    ret += writeByte((unsigned char)(dword)       & 0xFF);
+    ret += writeByte((unsigned char) (dword >> 24) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (dword >> 16) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (dword >> 8) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (dword) & 0xFF); //NOLINT
     return ret;
 }
 
-size_t File::writeUint64(const uint64_t qword) {
+size_t File::writeUint64(uint64_t qword) {
     size_t ret = 0;
-    ret += writeByte((unsigned char)(qword >> 56) & 0xFF);
-    ret += writeByte((unsigned char)(qword >> 48) & 0xFF);
-    ret += writeByte((unsigned char)(qword >> 40) & 0xFF);
-    ret += writeByte((unsigned char)(qword >> 32) & 0xFF);
-    ret += writeByte((unsigned char)(qword >> 24) & 0xFF);
-    ret += writeByte((unsigned char)(qword >> 16) & 0xFF);
-    ret += writeByte((unsigned char)(qword >>  8) & 0xFF);
-    ret += writeByte((unsigned char)(qword)       & 0xFF);
+    ret += writeByte((unsigned char) (qword >> 56) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword >> 48) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword >> 40) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword >> 32) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword >> 24) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword >> 16) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword >> 8) & 0xFF); //NOLINT
+    ret += writeByte((unsigned char) (qword) & 0xFF); //NOLINT
     return ret;
 }
 

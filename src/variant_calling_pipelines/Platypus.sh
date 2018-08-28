@@ -32,7 +32,7 @@ if [ ! -f $input_bai ]; then printf "Error: BAM index file $input_bai is not a r
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/ssd/voges/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/voges/muenteferi/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 
 if [ ! -f $ref_fasta ]; then printf "Error: File $ref_fasta is not a regular file.\n"; exit -1; fi
@@ -55,18 +55,19 @@ if [ ! -x $python ]; then printf "Error: Binary file $python is not executable.\
 if [ ! -f $GenomeAnalysisTK_jar ]; then printf "Error: JAR file $GenomeAnalysisTK_jar is not a regular file.\n"; exit -1; fi
 if [ ! -f $Platypus_py ]; then printf "Error: JAR file $Platypus_py is not a regular file.\n"; exit -1; fi
 
-printf "Sourcing project_dna.config\n"
-source /project/dna/project_dna.config
+printf "Sourcing project_dna.cfg\n"
+source /project/dna/project_dna.cfg
 
 ###############################################################################
 #                         Variant calling with GATK                           #
 ###############################################################################
 
 printf "[1/2] Variant calling\n"
-$python $Platypus_py callVariants --nCPU=$num_threads --bamFiles=$input_bam --refFile=$ref_fasta --regions=$chromosome --output=$input_bam.raw_variants.vcf --logFileName=$log_txt &>>$log_txt
+$python $Platypus_py callVariants --nCPU=$num_threads --bamFiles=$input_bam --refFile=$ref_fasta --regions=$chromosome --output=$input_bam.platypus.raw_variants.vcf --logFileName=$log_txt &>>$log_txt
 
 printf "[2/2] SNP extraction\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.raw_variants.vcf -selectType SNP -o $input_bam.snps.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.platypus.raw_variants.vcf -selectType SNP -o $input_bam.platypus.snps.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.platypus.raw_variants.vcf -selectType INDEL -o $input_bam.platypus.indels.vcf &>>$log_txt
 
 ###############################################################################
 #                                   Cleanup                                   #

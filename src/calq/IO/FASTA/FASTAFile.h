@@ -18,14 +18,14 @@ namespace calq {
 class FASTAFile : public File {
  public:
     explicit FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
-    ~FASTAFile(void);
+    ~FASTAFile() override;
 
     std::map<std::string, std::string> references;
 
  private:
     static const size_t LINE_SIZE = sizeof(char) * (4*KB);
 
-    void parse(void);
+    void parse();
 
     char *line_;
 };

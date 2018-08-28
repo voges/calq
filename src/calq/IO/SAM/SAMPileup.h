@@ -8,23 +8,28 @@
 #define CALQ_IO_SAM_SAMPILEUP_H_
 
 #include <string>
+#include <vector>
+
+#include "Common/constants.h"
 
 namespace calq {
 
 class SAMPileup {
  public:
-    SAMPileup(void);
-    ~SAMPileup(void);
+    SAMPileup();
+    ~SAMPileup();
 
-    bool empty(void) const;
-    void clear(void);
-    void print(void) const;
-    void printQual(void) const;
-    void printSeq(void) const;
+    bool empty() const;
+    void clear();
+    void print() const;
+    void printQual() const;
+    void printSeq() const;
 
     uint32_t pos;  // 0-based position of this pileup
     std::string qual;
     std::string seq;
+
+    uint16_t hq_softcounter;  // High quality softclips next to this position
 };
 
 }  // namespace calq

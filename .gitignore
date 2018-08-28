@@ -3,3 +3,10 @@
 calq.kdev4
 .kdev4/
 build/
+calq.config
+calq.creator
+calq.creator.user
+calq.files
+calq.includes
+*.log
+.idea/

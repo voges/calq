@@ -13,7 +13,7 @@ namespace calq {
 
 class OneToOneMappingQuantizer : public Quantizer {
  public:
-    OneToOneMappingQuantizer(const int &valueMin, const int &valueMax);
+    OneToOneMappingQuantizer(int valueMin, int valueMax);
     ~OneToOneMappingQuantizer(void);
 };
 

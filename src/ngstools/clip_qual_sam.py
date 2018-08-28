@@ -11,7 +11,7 @@ sam_file_name = sys.argv[1]
 if not sam_file_name.endswith(".sam"):
     sys.exit("SAM file name must end with '.sam'")
 sam_file = open(sam_file_name, 'r')
-print("SAM file: {}".format(sam_file_name))
+#print("SAM file: {}".format(sam_file_name))
 
 sys.stderr.write("Clipping quality values into Illumina 1.8+ format ([0,41]+33)\n")
 

@@ -7,71 +7,51 @@
 #include "CalqEncoder.h"
 
 #include <chrono>
-#include <limits>
 
-#include "Common/constants.h"
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 #include "Common/log.h"
-#include "config.h"
+#include "Common/helpers.h"
 #include "IO/FASTA/FASTAFile.h"
 #include "QualCodec/QualEncoder.h"
+#include "QualCodec/Quantizers/ProbabilityDistribution.h"
+#include "QualCodec/Quantizers/UniformMinMaxQuantizer.h"
+#include "QualCodec/Quantizers/LloydMaxQuantizer.h"
+#include "IO/SAM/SAMFile.h"
+
 
 namespace calq {
 
-CalqEncoder::CalqEncoder(const Options &options)
-    : blockSize_(options.blockSize),
-      cqFile_(options.outputFileName, CQFile::MODE_WRITE),
-      inputFileName_(options.inputFileName),
-      polyploidy_(options.polyploidy),
-      qualityValueMin_(options.qualityValueMin),
-      qualityValueMax_(options.qualityValueMax),
-      qualityValueOffset_(options.qualityValueOffset),
-      referenceFileNames_(options.referenceFileNames),
-      samFile_(options.inputFileName) {
-    if (options.blockSize < 1) {
+CalqEncoder::CalqEncoder(const Options &opt) : cqFile_(nullptr),
+                                               samFile_(nullptr),
+                                               fastaFile_(nullptr),
+                                               options(opt) {
+    if (opt.blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
-    if (options.inputFileName.empty() == true) {
+    if (opt.inputFileName.empty()) {
         throwErrorException("inputFileName is empty");
     }
-    if (options.outputFileName.empty() == true) {
+    if (opt.outputFileName.empty()) {
         throwErrorException("outputFileName is empty");
     }
-    if (options.polyploidy < 1) {
+    if (opt.polyploidy < 1) {
         throwErrorException("polyploidy must be greater than zero");
     }
-    if (options.qualityValueMin < 0) {
-        throwErrorException("qualityValueMin must be zero or greater");
-    }
-    if (options.qualityValueMax < 0) {
-        throwErrorException("qualityValueMax must be zero or greater");
-    }
-    if (options.qualityValueOffset < 1) {
+    if (opt.qualityValueOffset < 1) {
         throwErrorException("qualityValueOffset must be greater than zero");
     }
-//     if (referenceFileNames.empty() == true) {
-//        throwErrorException("referenceFileNames is empty");
-//     }
-
-    // Check and, in case they are provided, get reference sequences
-    if (referenceFileNames_.empty() == true) {
-        CALQ_LOG("No reference file name(s) given - operating without reference sequence(s)");
-    } else {
-        CALQ_LOG("Looking in %zu reference file(s) for reference sequence(s)", referenceFileNames_.size());
-        for (auto const &referenceFileName : referenceFileNames_) {
-            CALQ_LOG("Parsing reference file: %s", referenceFileName.c_str());
-            FASTAFile fastaFile(referenceFileName);
-            CALQ_LOG("Found %zu reference(s):", fastaFile.references.size());
-            for (auto const &reference : fastaFile.references) {
-                CALQ_LOG("  %s (length: %zu)", reference.first.c_str(), reference.second.length());
-            }
-        }
+    if (opt.referenceFileNames.empty()) {
+        throwErrorException("referenceFileNames is empty");
     }
+
+    cqFile_ = calq::make_unique<CQFile>(opt.outputFileName, CQFile::MODE_WRITE);
+    samFile_ = calq::make_unique<SAMFile>(opt.inputFileName);
+    fastaFile_ = calq::make_unique<FASTAFile>(opt.referenceFileNames);
 }
 
-CalqEncoder::~CalqEncoder(void) {}
+CalqEncoder::~CalqEncoder() = default;
 
-void CalqEncoder::encode(void) {
+void CalqEncoder::encode() {
     size_t compressedMappedQualSize = 0;
     size_t compressedUnmappedQualSize = 0;
     size_t uncompressedMappedQualSize = 0;
@@ -82,36 +62,55 @@ void CalqEncoder::encode(void) {
 
     // Write CQ file header
     CALQ_LOG("Writing CQ file header");
-    cqFile_.writeHeader(blockSize_);
+    cqFile_->writeHeader(options.blockSize);
 
-    while (samFile_.readBlock(blockSize_) != 0) {
-//         CALQ_LOG("Processing block %zu", samFile_.nrBlocksRead()-1);
+    while (samFile_->readBlock(options.blockSize) != 0) {
+//         CALQ_LOG("Processing block %zu", samFile_->nrBlocksRead()-1);
+
+        ProbabilityDistribution pdf(options.qualityValueMin, options.qualityValueMax);
 
         // Check quality value range
-        for (auto const &samRecord : samFile_.currentBlock.records) {
-            if (samRecord.isMapped() == true) {
+        for (auto const &samRecord : samFile_->currentBlock.records) {
+            if (samRecord.isMapped()) {
                 for (auto const &q : samRecord.qual) {
-                    if (((int)q-qualityValueOffset_) < qualityValueMin_) {
+                    if ((static_cast<int>(q) - options.qualityValueOffset) < options.qualityValueMin) {
                         throwErrorException("Quality value too small");
                     }
-                    if (((int)q-qualityValueOffset_) > qualityValueMax_) {
+                    if ((static_cast<int>(q) - options.qualityValueOffset) > options.qualityValueMax) {
                         throwErrorException("Quality value too large");
                     }
+                    pdf.addToPdf((static_cast<int>(q) - options.qualityValueOffset));
                 }
             }
         }
 
+        std::map<int, Quantizer> quantizers;
+
+        for (auto i = static_cast<int>(options.quantizationMin); i <= static_cast<int>(options.quantizationMax); ++i) {
+            if (options.quantizerType == Options::QuantizerType::UNIFORM) {
+                UniformMinMaxQuantizer quantizer(static_cast<const int &>(options.qualityValueMin),
+                                                 static_cast<const int &>(options.qualityValueMax), i);
+                quantizers.insert(std::pair<int, Quantizer>(static_cast<const int &>(i - options.quantizationMin), quantizer));
+            } else if (options.quantizerType == Options::QuantizerType::LLOYD_MAX) {
+                LloydMaxQuantizer quantizer(static_cast<size_t>(i));
+                quantizer.build(pdf);
+                quantizers.insert(std::pair<int, Quantizer>(static_cast<const int &>(i - options.quantizationMin), quantizer));
+            } else {
+                throwErrorException("Quantization Type not supported");
+            }
+        }
+
         // Encode the quality values
-        QualEncoder qualEncoder(polyploidy_, qualityValueMax_, qualityValueMin_, qualityValueOffset_);
-        for (auto const &samRecord : samFile_.currentBlock.records) {
-            if (samRecord.isMapped() == true) {
-                qualEncoder.addMappedRecordToBlock(samRecord);
+        QualEncoder qualEncoder(options, quantizers);
+        for (auto const &samRecord : samFile_->currentBlock.records) {
+            if (samRecord.isMapped()) {
+                qualEncoder.addMappedRecordToBlock(samRecord, *fastaFile_);
             } else {
                 qualEncoder.addUnmappedRecordToBlock(samRecord);
             }
         }
-        qualEncoder.finishBlock();
-        qualEncoder.writeBlock(&cqFile_);
+        qualEncoder.finishBlock(*fastaFile_, samFile_->currentBlock.records.back().rname);
+        qualEncoder.writeBlock(cqFile_.get());
 
         // Update statistics
         compressedMappedQualSize += qualEncoder.compressedMappedQualSize();
@@ -128,28 +127,30 @@ void CalqEncoder::encode(void) {
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
     CALQ_LOG("COMPRESSION STATISTICS");
-    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((double)((double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize)/(double)MB))/((double)diffTimeS));
-    CALQ_LOG("  Wrote %zu block(s)", samFile_.nrBlocksRead());
-    CALQ_LOG("  Record(s):  %12zu", samFile_.nrRecordsRead());
-    CALQ_LOG("    Mapped:   %12zu", samFile_.nrMappedRecordsRead());
-    CALQ_LOG("    Unmapped: %12zu", samFile_.nrUnmappedRecordsRead());
-    CALQ_LOG("  Uncompressed size: %12zu", uncompressedMappedQualSize+uncompressedUnmappedQualSize);
+    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int) diffTimeMs, (int) diffTimeS, (int) diffTimeM, (int) diffTimeH);
+    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s", ((static_cast<double>(uncompressedMappedQualSize + uncompressedUnmappedQualSize) /
+                                                              static_cast<double>(MB))) / (static_cast<double>(diffTimeS)));
+    CALQ_LOG("  Wrote %zu block(s)", samFile_->nrBlocksRead());
+    CALQ_LOG("  Record(s):  %12zu", samFile_->nrRecordsRead());
+    CALQ_LOG("    Mapped:   %12zu", samFile_->nrMappedRecordsRead());
+    CALQ_LOG("    Unmapped: %12zu", samFile_->nrUnmappedRecordsRead());
+    CALQ_LOG("  Uncompressed size: %12zu", uncompressedMappedQualSize + uncompressedUnmappedQualSize);
     CALQ_LOG("    Mapped:          %12zu", uncompressedMappedQualSize);
     CALQ_LOG("    Unmapped:        %12zu", uncompressedUnmappedQualSize);
-    CALQ_LOG("  Compressed size: %12zu", cqFile_.nrWrittenBytes());
-    CALQ_LOG("    File format:   %12zu", cqFile_.nrWrittenFileFormatBytes());
+    CALQ_LOG("  Compressed size: %12zu", cqFile_->nrWrittenBytes());
+    CALQ_LOG("    File format:   %12zu", cqFile_->nrWrittenFileFormatBytes());
     CALQ_LOG("    Mapped:        %12zu", compressedMappedQualSize);
     CALQ_LOG("    Unmapped:      %12zu", compressedUnmappedQualSize);
-    CALQ_LOG("  Compression ratio: %4.2f%%", (double)cqFile_.nrWrittenBytes()*100/(double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize));
-    CALQ_LOG("    Mapped:          %4.2f%%", (double)compressedMappedQualSize*100/(double)(uncompressedMappedQualSize));
-    CALQ_LOG("    Unmapped:        %4.2f%%", (double)compressedUnmappedQualSize*100/(double)(uncompressedUnmappedQualSize));
-    CALQ_LOG("  Compression factor: %4.2f", (double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize)/(double)cqFile_.nrWrittenBytes());
-    CALQ_LOG("    Mapped:           %4.2f", (double)(uncompressedMappedQualSize)/(double)compressedMappedQualSize);
-    CALQ_LOG("    Unmapped:         %4.2f", (double)(uncompressedUnmappedQualSize)/(double)compressedUnmappedQualSize);
-    CALQ_LOG("  Bits per quality value: %2.4f", ((double)cqFile_.nrWrittenBytes() * 8)/(double)(uncompressedMappedQualSize+uncompressedUnmappedQualSize));
-    CALQ_LOG("    Mapped:               %2.4f", ((double)compressedMappedQualSize * 8)/(double)(uncompressedMappedQualSize));
-    CALQ_LOG("    Unmapped:             %2.4f", ((double)compressedUnmappedQualSize * 8)/(double)(uncompressedUnmappedQualSize));
+    CALQ_LOG("  Compression ratio: %4.2f%%", (double) cqFile_->nrWrittenBytes() * 100 / (double) (uncompressedMappedQualSize + uncompressedUnmappedQualSize));
+    CALQ_LOG("    Mapped:          %4.2f%%", (double) compressedMappedQualSize * 100 / (double) (uncompressedMappedQualSize));
+    CALQ_LOG("    Unmapped:        %4.2f%%", (double) compressedUnmappedQualSize * 100 / (double) (uncompressedUnmappedQualSize));
+    CALQ_LOG("  Compression factor: %4.2f", (double) (uncompressedMappedQualSize + uncompressedUnmappedQualSize) / (double) cqFile_->nrWrittenBytes());
+    CALQ_LOG("    Mapped:           %4.2f", (double) (uncompressedMappedQualSize) / (double) compressedMappedQualSize);
+    CALQ_LOG("    Unmapped:         %4.2f", (double) (uncompressedUnmappedQualSize) / (double) compressedUnmappedQualSize);
+    CALQ_LOG("  Bits per quality value: %2.4f",
+             (static_cast<double>(cqFile_->nrWrittenBytes()) * 8) / static_cast<double>(uncompressedMappedQualSize + uncompressedUnmappedQualSize));
+    CALQ_LOG("    Mapped:               %2.4f", (static_cast<double>(compressedMappedQualSize) * 8) / static_cast<double>(uncompressedMappedQualSize));
+    CALQ_LOG("    Unmapped:             %2.4f", (static_cast<double>(compressedUnmappedQualSize) * 8) / static_cast<double>(uncompressedUnmappedQualSize));
 }
 
 }  // namespace calq

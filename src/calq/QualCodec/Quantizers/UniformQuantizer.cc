@@ -6,34 +6,32 @@
 
 #include "QualCodec/Quantizers/UniformQuantizer.h"
 
-#include <math.h>
-
 #include <queue>
+#include <cmath>
 #include <utility>
 
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 
-UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const int &nrSteps)
-    : Quantizer() {
+UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const int &nrSteps) : Quantizer() {
     if ((valueMin > valueMax) || (nrSteps <= 1)) {
         throwErrorException("Error in quantizer initialization");
     }
 
     // Compute the step size
-    int stepSize = (int)floor(((double)(valueMax - valueMin)) / ((double)nrSteps));
+    auto stepSize = static_cast<int>(floor((static_cast<double>(valueMax - valueMin)) / (static_cast<double>(nrSteps))));
 
     // Compute the borders and the representative values
     std::queue<int> borders;
     std::queue<int> reconstructionValues;
     int newBorder = valueMin;
     borders.push(valueMin);
-    reconstructionValues.push(valueMin + (int)round(((double)stepSize)/((double)2)));
-    for (int i = 0; i < (nrSteps-1); i++) {
+    reconstructionValues.push(valueMin + static_cast<int>(round(static_cast<double>(stepSize) / 2.0)));
+    for (int i = 0; i < (nrSteps - 1); i++) {
         newBorder += stepSize;
         borders.push(newBorder);
-        reconstructionValues.push(newBorder + (int)round(((double)stepSize)/((double)2)));
+        reconstructionValues.push(newBorder + static_cast<int>(round((static_cast<double>(stepSize) / 2.0))));
     }
     borders.push(valueMax);
 
@@ -56,7 +54,7 @@ UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, con
     }
 }
 
-UniformQuantizer::~UniformQuantizer(void) {}
+UniformQuantizer::~UniformQuantizer() = default;
 
 }  // namespace calq
 

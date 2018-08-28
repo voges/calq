@@ -7,33 +7,30 @@
 #ifndef CALQ_CALQENCODER_H_
 #define CALQ_CALQENCODER_H_
 
-#include <string>
-#include <vector>
+#include <memory>
 
 #include "Common/Options.h"
-#include "config.h"
-#include "IO/CQ/CQFile.h"
-#include "IO/SAM/SAMFile.h"
 
 namespace calq {
+
+class CQFile;
+
+class FASTAFile;
+
+class SAMFile;
 
 class CalqEncoder {
  public:
     explicit CalqEncoder(const Options &options);
-    ~CalqEncoder(void);
-
-    void encode(void);
+    ~CalqEncoder();
+    void encode();
 
  private:
-    size_t blockSize_;
-    CQFile cqFile_;
-    std::string inputFileName_;
-    int polyploidy_;
-    int qualityValueMin_;
-    int qualityValueMax_;
-    int qualityValueOffset_;
-    std::vector<std::string> referenceFileNames_;
-    SAMFile samFile_;
+    std::unique_ptr<CQFile> cqFile_;
+    std::unique_ptr<SAMFile> samFile_;
+    std::unique_ptr<FASTAFile> fastaFile_;  // Reference
+
+    const Options options;
 };
 
 }  // namespace calq

@@ -34,7 +34,7 @@ if [ ! -f $input_bai ]; then printf "Error: BAM index file $input_bai is not a r
 #                                GATK bundle                                  #
 ###############################################################################
 
-gatk_bundle_path="/phys/ssd/voges/MPEG/GATK_bundle-2.8-b37"
+gatk_bundle_path="/data/voges/muenteferi/GATK_bundle-2.8-b37"
 ref_fasta="$gatk_bundle_path/human_g1k_v37.fasta"
 hapmap_vcf="$gatk_bundle_path/hapmap_3.3.b37.vcf"
 omni_vcf="$gatk_bundle_path/1000G_omni2.5.b37.vcf"
@@ -56,14 +56,14 @@ if [ ! -f $indels_vcf ]; then printf "Error: File $indels_vcf is not a regular f
 ###############################################################################
 
 # Binaries
-bowtie2="/project/dna/install/bowtie2-2.2.5/bowtie2"
+bowtie2="/project/omics/install/bowtie2-2.2.5/bowtie2"
 java="/usr/bin/java"
 java_opts=""
-samtools="/project/dna/install/samtools-1.3/bin/samtools"
+samtools="/project/omics/install/samtools-1.3/bin/samtools"
 
 # JAR files
-GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
-picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
+GenomeAnalysisTK_jar="/project/omics/install/gatk-3.6/GenomeAnalysisTK.jar"
+picard_jar="/project/omics/install/picard-tools-2.4.1/picard.jar"
 
 if [ ! -x $bowtie2 ]; then printf "Error: Binary file $bowtie2 is not executable.\n"; exit -1; fi
 if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
@@ -76,15 +76,19 @@ if [ ! -f $picard_jar ]; then printf "Error: JAR file $picard_jar is not a regul
 ###############################################################################
 
 printf "[1/3] Variant calling\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_fasta -L $chromosome -I $input_bam --dbsnp $dbsnps_vcf --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o $input_bam.raw_variants.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T HaplotypeCaller -nct $num_threads -R $ref_fasta -L $chromosome -I $input_bam --dbsnp $dbsnps_vcf --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o $input_bam.GATK.raw_variants.vcf &>>$log_txt
 
-printf "[2/3] SNP extraction\n"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.raw_variants.vcf -selectType SNP -o $input_bam.snps.vcf &>>$log_txt
+printf "[2/3] SNP / Indel extraction\n"
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.GATK.raw_variants.vcf -selectType SNP -o $input_bam.GATK.snps.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T SelectVariants -R $ref_fasta -L $chromosome -V $input_bam.GATK.raw_variants.vcf -selectType INDEL -o $input_bam.GATK.indels.vcf &>>$log_txt
 
 printf "[3/3] Hard filtering\n"
 filterExpression="QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0"
+indelFilterExpression="QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0"
 filterName="GATK_Recommended"
-$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantFiltration -R $ref_fasta -L $chromosome -V $input_bam.snps.vcf --filterExpression "$filterExpression" --filterName "$filterName" -o $input_bam.snps.hard_filtered.vcf &>>$log_txt
+indelFilterName="my_indel_filter"
+$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantFiltration -R $ref_fasta -L $chromosome -V $input_bam.GATK.snps.vcf --filterExpression "$filterExpression" --filterName "$filterName" -o $input_bam.GATK.snps.hard_filtered.vcf &>>$log_txt
+$java $java_opts -jar $GenomeAnalysisTK_jar -T VariantFiltration -R $ref_fasta -L $chromosome -V $input_bam.GATK.indels.vcf --filterExpression "$indelfilterExpression" --filterName "$indelFilterName" -o $input_bam.GATK.indels.hard_filtered.vcf &>>$log_txt 
 
 ###############################################################################
 #                                   Cleanup                                   #

@@ -8,49 +8,54 @@
 
 #include <chrono>
 
-#include "Common/Exceptions.h"
-#include "Common/log.h"
 #include "QualCodec/QualDecoder.h"
+#include "IO/SAM/SAMFile.h"
+#include "Common/ErrorExceptionReporter.h"
+#include "Common/log.h"
 
 namespace calq {
 
 CalqDecoder::CalqDecoder(const Options &options)
-    : cqFile_(options.inputFileName, CQFile::MODE_READ),
-      qualFile_(options.outputFileName, File::MODE_WRITE),
-      sideInformationFile_(options.sideInformationFileName) {
-    if (options.inputFileName.empty() == true) {
+        : cqFile_(nullptr),
+          qualFile_(nullptr),
+          sideInformationFile_(nullptr) {
+    if (options.inputFileName.empty()) {
         throwErrorException("options.inputFileName is empty");
     }
-    if (options.outputFileName.empty() == true) {
+    if (options.outputFileName.empty()) {
         throwErrorException("options.outputFileName is empty");
     }
-    if (options.sideInformationFileName.empty() == true) {
+    if (options.sideInformationFileName.empty()) {
         throwErrorException("options.sideInformationFileName is empty");
     }
+
+    cqFile_ = calq::make_unique<CQFile>(options.inputFileName, CQFile::MODE_READ);
+    qualFile_ = calq::make_unique<File>(options.outputFileName, File::MODE_WRITE);
+    sideInformationFile_ = calq::make_unique<SAMFile>(options.sideInformationFileName);
 }
 
-CalqDecoder::~CalqDecoder(void) {}
+CalqDecoder::~CalqDecoder() = default;
 
-void CalqDecoder::decode(void) {
+void CalqDecoder::decode() {
     // Take time
     auto startTime = std::chrono::steady_clock::now();
 
     // Read CQ file header
     CALQ_LOG("Reading CQ file header");
     size_t blockSize = 0;
-    cqFile_.readHeader(&blockSize);
+    cqFile_->readHeader(&blockSize);
 
-    while (sideInformationFile_.readBlock(blockSize) != 0) {
-//         CALQ_LOG("Decoding block %zu", sideInformationFile_.nrBlocksRead()-1);
+    while (sideInformationFile_->readBlock(blockSize) != 0) {
+//         CALQ_LOG("Decoding block %zu", sideInformationFile_->nrBlocksRead()-1);
 
         // Decode the quality values
         QualDecoder qualDecoder;
-        qualDecoder.readBlock(&cqFile_);
-        for (auto const &samRecord : sideInformationFile_.currentBlock.records) {
-            if (samRecord.isMapped() == true) {
-                qualDecoder.decodeMappedRecordFromBlock(samRecord, &qualFile_);
+        qualDecoder.readBlock(cqFile_.get());
+        for (auto const &samRecord : sideInformationFile_->currentBlock.records) {
+            if (samRecord.isMapped()) {
+                qualDecoder.decodeMappedRecordFromBlock(samRecord, qualFile_.get());
             } else {
-                qualDecoder.decodeUnmappedRecordFromBlock(samRecord, &qualFile_);
+                qualDecoder.decodeUnmappedRecordFromBlock(samRecord, qualFile_.get());
             }
         }
     }
@@ -63,9 +68,10 @@ void CalqDecoder::decode(void) {
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
     CALQ_LOG("DECOMPRESSION STATISTICS");
-    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s", ((double)((double)cqFile_.nrReadBytes()/(double)MB))/((double)diffTimeS));
-    CALQ_LOG("  Decoded %zu block(s)", sideInformationFile_.nrBlocksRead());
+    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int) diffTimeMs, (int) diffTimeS, (int) diffTimeM, (int) diffTimeH);
+    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s",
+             ((static_cast<double>(cqFile_->nrReadBytes()) / static_cast<double>(MB))) / (static_cast<double>(diffTimeS)));
+    CALQ_LOG("  Decoded %zu block(s)", sideInformationFile_->nrBlocksRead());
 }
 
 }  // namespace calq

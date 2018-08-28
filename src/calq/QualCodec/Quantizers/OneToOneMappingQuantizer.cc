@@ -11,12 +11,11 @@
 #include <queue>
 #include <utility>
 
-#include "Common/Exceptions.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 
-OneToOneMappingQuantizer::OneToOneMappingQuantizer(const int &valueMin, const int &valueMax)
-    : Quantizer() {
+OneToOneMappingQuantizer::OneToOneMappingQuantizer(int valueMin, int valueMax) : Quantizer() {
     if ((valueMin > valueMax)) {
         throwErrorException("Error in quantizer initialization");
     }

@@ -7,49 +7,40 @@
 #ifndef CALQ_QUALCODEC_QUALENCODER_H_
 #define CALQ_QUALCODEC_QUALENCODER_H_
 
-#define QUANTIZER_STEPS_MIN 2
-#define QUANTIZER_STEPS_MAX 8
-#define NR_QUANTIZERS (QUANTIZER_STEPS_MAX-QUANTIZER_STEPS_MIN+1)
-#define QUANTIZER_IDX_MIN 0
-#define QUANTIZER_IDX_MAX (NR_QUANTIZERS-1)
-
 #include <chrono>
 #include <deque>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "config.h"
 #include "IO/CQ/CQFile.h"
 #include "IO/SAM/SAMPileupDeque.h"
 #include "IO/SAM/SAMRecord.h"
 #include "QualCodec/Genotyper.h"
 #include "QualCodec/Quantizers/Quantizer.h"
+#include "Haplotyper.h"
 
 namespace calq {
 
 class QualEncoder {
  public:
-    explicit QualEncoder(const int &polyploidy,
-                         const int &qualityValueMax,
-                         const int &qualityValueMin,
-                         const int &qualityValueOffset);
-    ~QualEncoder(void);
+    explicit QualEncoder(const Options &options, const std::map<int, Quantizer> &quant);
+    ~QualEncoder();
 
     void addUnmappedRecordToBlock(const SAMRecord &samRecord);
-    void addMappedRecordToBlock(const SAMRecord &samRecord);
-    void finishBlock(void);
-    size_t writeBlock(CQFile *cqFile);
+    void addMappedRecordToBlock(const SAMRecord &samRecord, const FASTAFile &fasta);
+    void finishBlock(const FASTAFile &fasta, const std::string &section);
+    size_t writeBlock(CQFile* cqFile);
 
-    size_t compressedMappedQualSize(void) const;
-    size_t compressedUnmappedQualSize(void) const;
-    size_t compressedQualSize(void) const;
-    size_t nrMappedRecords(void) const;
-    size_t nrUnmappedRecords(void) const;
-    size_t nrRecords(void) const;
-    size_t uncompressedMappedQualSize(void) const;
-    size_t uncompressedUnmappedQualSize(void) const;
-    size_t uncompressedQualSize(void) const;
+    size_t compressedMappedQualSize() const;
+    size_t compressedUnmappedQualSize() const;
+    size_t compressedQualSize() const;
+    size_t nrMappedRecords() const;
+    size_t nrUnmappedRecords() const;
+    size_t nrRecords() const;
+    size_t uncompressedMappedQualSize() const;
+    size_t uncompressedUnmappedQualSize() const;
+    size_t uncompressedQualSize() const;
 
  private:
     void encodeMappedQual(const SAMRecord &samRecord);
@@ -64,6 +55,8 @@ class QualEncoder {
     size_t uncompressedMappedQualSize_;
     size_t uncompressedUnmappedQualSize_;
 
+    int NR_QUANTIZERS;
+
     // Quality value offset for this block
     int qualityValueOffset_;
 
@@ -73,13 +66,16 @@ class QualEncoder {
     // Buffers
     std::string unmappedQualityValues_;
     std::deque<int> mappedQuantizerIndices_;
-    std::vector< std::deque<int> > mappedQualityValueIndices_;
+    std::vector<std::deque<int> > mappedQualityValueIndices_;
 
     // Pileup
     SAMPileupDeque samPileupDeque_;
 
-    // Genotyper
+    Haplotyper haplotyper_;
+
     Genotyper genotyper_;
+
+    size_t posCounter;
 
     // Quantizers
     std::map<int, Quantizer> quantizers_;
@@ -87,6 +83,10 @@ class QualEncoder {
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded
     std::deque<SAMRecord> samRecordDeque_;
+
+    bool debugOut;
+
+    Options::Version version_;
 };
 
 }  // namespace calq

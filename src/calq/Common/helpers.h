@@ -8,14 +8,20 @@
 #define CALQ_COMMON_HELPERS_H_
 
 #include <string>
+#include <memory>
 
 namespace calq {
 
-std::string currentDateAndTime(void);
+std::string currentDateAndTime();
 bool fileExists(const std::string &path);
 std::string fileBaseName(const std::string &path);
 std::string fileNameExtension(const std::string &path);
 std::string removeFileNameExtension(const std::string &path);
+
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 
 }  // namespace calq
 

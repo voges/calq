@@ -4,21 +4,16 @@
 
 // Copyright 2015-2017 Leibniz Universitaet Hannover
 
-#include "IO/FASTA/FASTAFile.h"
-
-#include <string.h>
-
+#include <cstring>
 #include <utility>
-#include <string>
 
-#include "Common/Exceptions.h"
+#include "IO/FASTA/FASTAFile.h"
+#include "Common/ErrorExceptionReporter.h"
 
 namespace calq {
 
-FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
-    : File(path, mode),
-      line_(NULL) {
-    if (path.empty() == true) {
+FASTAFile::FASTAFile(const std::string &path, const Mode &mode) : File(path, mode), line_(nullptr) {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
     if (mode != FASTAFile::MODE_READ) {
@@ -27,8 +22,8 @@ FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
 
     // Usually, lines in a FASTA file should be limited to 80 chars, so 4 KB
     // should be enough
-    line_ = (char *)malloc(LINE_SIZE);
-    if (line_ == NULL) {
+    line_ = reinterpret_cast<char*>(malloc(LINE_SIZE));
+    if (line_ == nullptr) {
         throwErrorException("malloc failed");
     }
 
@@ -36,15 +31,15 @@ FASTAFile::FASTAFile(const std::string &path, const Mode &mode)
     parse();
 }
 
-FASTAFile::~FASTAFile(void) {
+FASTAFile::~FASTAFile() {
     free(line_);
 }
 
-void FASTAFile::parse(void) {
-    std::string currentHeader("");
-    std::string currentSequence("");
+void FASTAFile::parse() {
+    std::string currentHeader;
+    std::string currentSequence;
 
-    while (fgets(line_, LINE_SIZE, fp_) != NULL) {
+    while (fgets(line_, LINE_SIZE, fp_) != nullptr) {
         // Trim line
         size_t l = strlen(line_) - 1;
         while (l && (line_[l] == '\r' || line_[l] == '\n')) {
@@ -52,9 +47,9 @@ void FASTAFile::parse(void) {
         }
 
         if (line_[0] == '>') {
-            if (currentSequence.empty() == false) {
+            if (!currentSequence.empty()) {
                 // We have a sequence, check if we have a header
-                if (currentHeader.empty() == true) {
+                if (currentHeader.empty()) {
                     throwErrorException("Found sequence but no header");
                 }
 
@@ -72,7 +67,7 @@ void FASTAFile::parse(void) {
             // Store the header and trim it: do not take the leading '>' and
             // remove everything after the first space
             currentHeader = line_ + 1;
-            currentHeader = currentHeader.substr(0, currentHeader.find_first_of(" "));
+            currentHeader = currentHeader.substr(0, currentHeader.find_first_of(' '));
 
             // Reset sequence
             currentSequence = "";

@@ -40,7 +40,7 @@ if [ ! -f $golden_bed ]; then printf "Error: Golden BED file $golden_bed is not 
 ###############################################################################
 
 # Binaries
-python="/usr/bin/python"
+python="/home/muenteferi/happyEnv/bin/python"
 
 # Python scripts
 hap_py="/project/dna/install/hap.py-0.3.1/bin/hap.py"
