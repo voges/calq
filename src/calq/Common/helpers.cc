@@ -21,7 +21,7 @@ std::string currentDateAndTime() {
     if (currentTime == ((time_t) -1)) {
         throwErrorException("time failed");
     }
-    struct tm timeinfo{};
+    struct tm timeinfo{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, nullptr};
 
 #ifdef OS_WINDOWS
     errno_t err = gmtime_s(&timeinfo, &currentTime);
