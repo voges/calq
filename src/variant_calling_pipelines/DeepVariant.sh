@@ -25,7 +25,7 @@ log_txt="$input.bam.DeepVariant.log"
 printf "Log file: $log_txt\n"
 chromosome=$3
 printf "Chromosome: $chromosome\n"
-gpu=$3
+gpu=$4
 printf "GPU: $gpu\n"
 
 #Select GPU
@@ -59,7 +59,7 @@ java_opts=""
 
 # JAR files
 GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
-python="/home/muenteferi/Dokumente/deepvariant/dvariant/bin/python"
+python="/home/muenteferi/Dokumente/deepvariant/examplepy/bin/python"
 
 if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
 if [ ! -f $GenomeAnalysisTK_jar ]; then printf "Error: JAR file $GenomeAnalysisTK_jar is not a regular file.\n"; exit -1; fi
@@ -78,11 +78,11 @@ mkdir -p "${LOGDIR}"
 
 printf "[1/4] Extract candidate sites\n"
 
-if [ ! -f $input_bam.tfrecord-00000-of-0000$N_SHARDS.gz ] 
+if [ ! -f $input_bam.examples.tfrecord-00000-of-0000$N_SHARDS.gz ] 
 then
 
 time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
-  python $dv_examples \
+  $python $dv_examples \
     --mode calling \
     --ref "$ref_fasta" \
     --reads "$input_bam" \
@@ -93,6 +93,7 @@ else
 printf "Examples $input_bam.examples existing, skipping make_examples.\n"
 fi
 printf "[2/4] Variant calling\n"
+echo "$python $dv_calling --outfile \"$input_bam.examples.tfrecord_filtered.gz\"  --examples \"$input_bam.examples.tfrecord@${N_SHARDS}.gz\"  --checkpoint \"$dv_model\" &>>$log_txt"
 $python $dv_calling --outfile "$input_bam.examples.tfrecord_filtered.gz"  --examples "$input_bam.examples.tfrecord@${N_SHARDS}.gz"  --checkpoint "$dv_model" &>>$log_txt
 
 printf "[3/4] Postprocessing\n"

@@ -33,8 +33,9 @@ if [ ! -f $input_bai ]; then printf "Error: BAM index file $input_bai is not a r
 ###############################################################################
 
 gatk_bundle_path="/data/voges/muenteferi/GATK_bundle-2.8-b37"
-truth_file="$gatk_bundle_path/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.vcf.gz"
-bed_file="$gatk_bundle_path/GIAB-NA12878_HB001-NISTv3.2.2/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed"
+truth_bundle_path="/data/voges/muenteferi/GIAB-NA12878_HB001-NISTv3.2.2"
+truth_file="$truth_bundle_path/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.vcf.gz"
+bed_file="$truth_bundle_path/NA12878_GIAB_highconf_IllFB-IllGATKHC-CG-Ion-Solid_ALLCHROM_v3.2.2_highconf.bed"
 dv_bundle="/home/muenteferi/Dokumente/deepvariant"
 dv_examples="$dv_bundle/bin/make_examples.zip"
 dv_calling="$dv_bundle/bin/call_variants.zip"
@@ -76,7 +77,7 @@ printf "Extract candidate sites\n"
 if [ ! -f $input_bam.training.tfrecord-00000-of-0000$N_SHARDS.gz ] 
 then
 
-time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
+time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 -j4 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
   python $dv_examples \
     --mode training \
     --ref "$ref_fasta" \
@@ -88,6 +89,7 @@ time seq 0 $((N_SHARDS-1)) | parallel --eta --halt 2 --joblog "${LOGDIR}/log" --
 else
 printf "Examples $input_bam.examples existing, skipping make_examples.\n"
 fi
+
 
 
 

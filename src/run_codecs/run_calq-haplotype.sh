@@ -25,11 +25,11 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 calq="/home/muenteferi/Dokumente/calqBuild/calq"
 calq_string="calq-haplotype"
 python="/usr/bin/python"
-samtools="/project/dna/install/samtools-1.3/bin/samtools"
+samtools="/project/omics/install/samtools-1.3/bin/samtools"
 time="/usr/bin/time"
 
 #reference
-reference="/data/voges/muenteferi/GATK_bundle-2.8-b37/human_g1k_v37.20.fasta"
+reference="/data/voges/muenteferi/GATK_bundle-2.8-b37/human_g1k_v37.fasta"
 
 # Python scripts
 replace_qual_sam_py="/home/muenteferi/Dokumente/calq/src/ngstools/replace_qual_sam.py"
@@ -45,11 +45,11 @@ if [ ! -f $replace_qual_sam_py ]; then printf "Error: Python script $replace_qua
 ###############################################################################
 
 printf "Compressing with CALQ\n"
-cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string -r $reference -f"
+cmd="$calq -q $qual_type -p $polyploidy -b $block_size $input_sam -o $input_sam.$calq_string -r $reference -f --CALQ-Version v1"
 $time -v -o $input_sam.$calq_string.enc.time $cmd &> $input_sam.$calq_string.enc.log
 
 printf "Decompressing with CALQ\n"
-cmd="$calq -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual"
+cmd="$calq -d -s $input_sam $input_sam.$calq_string -o $input_sam.$calq_string.qual -f"
 $time -v -o $input_sam.$calq_string.dec.time $cmd &> $input_sam.$calq_string.dec.log
 
 printf "Constructing SAM file with reconstructed quality values\n"
