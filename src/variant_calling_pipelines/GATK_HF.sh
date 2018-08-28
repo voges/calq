@@ -56,14 +56,14 @@ if [ ! -f $indels_vcf ]; then printf "Error: File $indels_vcf is not a regular f
 ###############################################################################
 
 # Binaries
-bowtie2="/project/dna/install/bowtie2-2.2.5/bowtie2"
+bowtie2="/project/omics/install/bowtie2-2.2.5/bowtie2"
 java="/usr/bin/java"
 java_opts=""
-samtools="/project/dna/install/samtools-1.3/bin/samtools"
+samtools="/project/omics/install/samtools-1.3/bin/samtools"
 
 # JAR files
-GenomeAnalysisTK_jar="/project/dna/install/gatk-3.6/GenomeAnalysisTK.jar"
-picard_jar="/project/dna/install/picard-tools-2.4.1/picard.jar"
+GenomeAnalysisTK_jar="/project/omics/install/gatk-3.6/GenomeAnalysisTK.jar"
+picard_jar="/project/omics/install/picard-tools-2.4.1/picard.jar"
 
 if [ ! -x $bowtie2 ]; then printf "Error: Binary file $bowtie2 is not executable.\n"; exit -1; fi
 if [ ! -x $java ]; then printf "Error: Binary file $java is not executable.\n"; exit -1; fi
