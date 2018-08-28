@@ -257,7 +257,7 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord) {
                         qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
                     }
                     catch (...) {
-                        std::cerr << "259QualEnc" << std::endl;
+                        std::cerr << "259QualEnc" <<  quantizerIndex << std::endl;
                     }
                     try {
                         mappedQualityValueIndices_.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
