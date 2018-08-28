@@ -90,9 +90,6 @@ void QualEncoder::addMappedRecordToBlock(const SAMRecord &samRecord, const FASTA
             samRecordDeque_.pop_front();
         }
     } else {
-        int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
-        mappedQuantizerIndices_.push_back(k);
-
         while (samPileupDeque_.posMin() < samRecord.posMin) {
             int l = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
             mappedQuantizerIndices_.push_back(l);
@@ -252,19 +249,8 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord) {
                 for (size_t i = 0; i < opLen; i++) {
                     int q = static_cast<int>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
                     int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
-                    int qualityValueIndex = 0;
-                    try {
-                        qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
-                    }
-                    catch (...) {
-                        std::cerr << "259QualEnc" <<  quantizerIndex << std::endl;
-                    }
-                    try {
-                        mappedQualityValueIndices_.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
-                    }
-                    catch (...) {
-                        std::cerr << "266QualEnc" << std::endl;
-                    }
+                    int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
+                    mappedQualityValueIndices_.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
                 }
                 break;
             case 'I':
