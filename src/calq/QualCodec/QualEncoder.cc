@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include "IO/FASTA/FASTAFile.h"
 #include "Common/ErrorExceptionReporter.h"
@@ -251,8 +252,19 @@ void QualEncoder::encodeMappedQual(const SAMRecord &samRecord) {
                 for (size_t i = 0; i < opLen; i++) {
                     int q = static_cast<int>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
                     int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
-                    int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
-                    mappedQualityValueIndices_.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
+                    int qualityValueIndex = 0;
+                    try {
+                        qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
+                    }
+                    catch (...) {
+                        std::cerr << "259QualEnc" << std::endl;
+                    }
+                    try {
+                        mappedQualityValueIndices_.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
+                    }
+                    catch (...) {
+                        std::cerr << "266QualEnc" << std::endl;
+                    }
                 }
                 break;
             case 'I':
