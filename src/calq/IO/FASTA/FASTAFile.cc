@@ -39,7 +39,7 @@ void FASTAFile::parse() {
     std::string currentHeader;
     std::string currentSequence;
 
-    while (filestream.getline(line_, LINE_SIZE)) {
+    while (readLine(line_, LINE_SIZE)) {
         // Trim line
         size_t l = strlen(line_) - 1;
         while (l && (line_[l] == '\r' || line_[l] == '\n')) {

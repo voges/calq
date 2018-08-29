@@ -9,6 +9,8 @@
 #include <climits>
 
 #include "Common/ErrorExceptionReporter.h"
+#include "File.h"
+
 
 namespace calq {
 
@@ -48,7 +50,6 @@ void File::open(const std::string &path, Mode mode) {
 
 void File::close() {
     if (filestream.is_open()) {
-        filestream.clear();
         filestream.close();
         if (!filestream) {
             throwErrorException("Failed to close file");
@@ -157,6 +158,18 @@ size_t File::writeUint32(uint32_t dword) {
 
 size_t File::writeUint64(uint64_t qword) {
     return writeValue(&qword, 1);
+}
+
+bool File::readLine(char* s, std::streamsize n) {
+    filestream.getline(s, n);
+    if (filestream.eof()) {
+        filestream.setstate(std::ios_base::goodbit | std::ios_base::eofbit);
+        return false;
+    }
+    if (filestream.fail()) {
+        throwErrorException("getline failed");
+    }
+    return true;
 }
 
 }  // namespace calq

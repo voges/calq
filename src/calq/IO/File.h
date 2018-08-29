@@ -35,6 +35,8 @@ class File {
     size_t nrReadBytes() const;
     size_t nrWrittenBytes() const;
 
+    bool readLine(char* s, std::streamsize n );
+
     bool isReadable() const;
     bool isWritable() const;
 
