@@ -48,6 +48,7 @@ void File::open(const std::string &path, Mode mode) {
 
 void File::close() {
     if (filestream.is_open()) {
+        filestream.clear();
         filestream.close();
         if (!filestream) {
             throwErrorException("Failed to close file");
