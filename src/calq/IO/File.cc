@@ -15,9 +15,11 @@
 namespace calq {
 
 File::File() : fsize_(0), mode_(File::Mode::MODE_READ), nrReadBytes_(0), nrWrittenBytes_(0) {
+    filestream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 }
 
 File::File(const std::string &path, Mode mode) : fsize_(0), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
+    filestream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     open(path, mode);
 }
 
@@ -33,34 +35,36 @@ void File::open(const std::string &path, Mode mode) {
     mode_ = mode;
 
     auto m = (mode_ == Mode::MODE_READ) ? std::ifstream::in : std::ifstream::out;
-    filestream.open(path, m);
-
-    if (!filestream) {
-        throwErrorException("Error opening file");
+    try {
+        filestream.open(path, m);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("Error opening file: ") + e.what());
     }
 
-    filestream.seekg(0, std::ifstream::end);
-    fsize_ = static_cast<size_t>(filestream.tellg());
-    filestream.seekg(0, std::ifstream::beg);
-
-    if (!filestream) {
-        throwErrorException("Error obtaining file size");
+    try {
+        filestream.seekg(0, std::ifstream::end);
+        fsize_ = static_cast<size_t>(filestream.tellg());
+        filestream.seekg(0, std::ifstream::beg);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("Error obtaining file size: ") + e.what());
     }
 }
 
 void File::close() {
     if (filestream.is_open()) {
-        filestream.close();
-        if (!filestream) {
-            throwErrorException("Failed to close file");
+        try {
+            filestream.close();
+        } catch (std::exception &e) {
+            throwErrorException(std::string("Failed to close file: ") + e.what());
         }
     }
 }
 
 void File::advance(size_t offset) {
-    filestream.seekg(offset, std::ios_base::seekdir::_S_cur);
-    if (!filestream) {
-        throwErrorException("fseek failed");
+    try {
+        filestream.seekg(offset, std::ios_base::seekdir::_S_cur);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("Seek failed: ") + e.what());
     }
 }
 
@@ -72,9 +76,10 @@ void File::seek(size_t pos) {
     if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
     }
-    filestream.seekg(pos);
-    if (!filestream) {
-        throwErrorException("fseek failed");
+    try {
+        filestream.seekg(pos);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("Seek failed: ") + e.what());
     }
 }
 
@@ -83,11 +88,12 @@ size_t File::size() const {
 }
 
 size_t File::tell() {
-    auto pos = static_cast<size_t>(filestream.tellg());
-    if (!filestream) {
-        throwErrorException("ftell failed");
+    try {
+        return static_cast<size_t>(filestream.tellg());
+    } catch (std::exception &e) {
+        throwErrorException(std::string("Tell failed: ") + e.what());
     }
-    return pos;
+    return 0;
 }
 
 size_t File::nrReadBytes() const {
@@ -161,15 +167,12 @@ size_t File::writeUint64(uint64_t qword) {
 }
 
 bool File::readLine(char* s, std::streamsize n) {
-    filestream.getline(s, n);
-    if (filestream.eof()) {
-        filestream.setstate(std::ios_base::goodbit | std::ios_base::eofbit);
-        return false;
+    try {
+        filestream.getline(s, n);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("readLine failed: ") + e.what());
     }
-    if (filestream.fail()) {
-        throwErrorException("getline failed");
-    }
-    return true;
+    return eof();
 }
 
 }  // namespace calq

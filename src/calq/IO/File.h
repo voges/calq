@@ -35,7 +35,7 @@ class File {
     size_t nrReadBytes() const;
     size_t nrWrittenBytes() const;
 
-    bool readLine(char* s, std::streamsize n );
+    bool readLine(char* s, std::streamsize n);
 
     bool isReadable() const;
     bool isWritable() const;
@@ -43,9 +43,10 @@ class File {
     template<typename T>
     size_t readValue(T* dword, size_t number = 1) {
         size_t ret = sizeof(T) * number;
-        filestream.read(reinterpret_cast<char*>(dword), sizeof(T) * number);
-        if (!filestream) {
-            throwErrorException("fstream read failed");
+        try {
+            filestream.read(reinterpret_cast<char*>(dword), sizeof(T) * number);
+        } catch (std::exception &e) {
+            throwErrorException(std::string("Read failed: ") + e.what());
         }
         nrReadBytes_ += ret;
         return ret;
@@ -54,9 +55,10 @@ class File {
     template<typename T>
     size_t writeValue(const T* dword, size_t number = 1) {
         size_t ret = sizeof(T) * number;
-        filestream.write(reinterpret_cast<const char*>(dword), sizeof(T) * number);
-        if (!filestream) {
-            throwErrorException("fstream read failed");
+        try {
+            filestream.write(reinterpret_cast<const char*>(dword), sizeof(T) * number);
+        } catch (std::exception &e) {
+            throwErrorException(std::string("Write failed: ") + e.what());
         }
         nrWrittenBytes_ += ret;
         return ret;
