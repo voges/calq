@@ -9,7 +9,6 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
-#include <iostream>
 
 #include "IO/FASTA/FASTAFile.h"
 #include "Common/ErrorExceptionReporter.h"

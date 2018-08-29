@@ -17,7 +17,7 @@ namespace calq {
 
 class FASTAFile : public File {
  public:
-    explicit FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
+    explicit FASTAFile(const std::string &path, const Mode &mode = Mode::MODE_READ);
     ~FASTAFile() override;
 
     std::map<std::string, std::string> references;

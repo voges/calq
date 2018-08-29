@@ -7,13 +7,15 @@
 #ifndef CALQ_IO_FILE_H_
 #define CALQ_IO_FILE_H_
 
+#include <fstream>
 #include <string>
+#include <Common/ErrorExceptionReporter.h>
 
 namespace calq {
 
 class File {
  public:
-    enum Mode {
+    enum class Mode {
         MODE_READ = 0, MODE_WRITE = 1
     };
 
@@ -26,16 +28,37 @@ class File {
 
     void advance(size_t offset);
     bool eof() const;
-    void* handle() const;
     void seek(size_t pos);
     size_t size() const;
-    size_t tell() const;
+    size_t tell();
 
     size_t nrReadBytes() const;
     size_t nrWrittenBytes() const;
 
     bool isReadable() const;
     bool isWritable() const;
+
+    template<typename T>
+    size_t readValue(T* dword, size_t number = 1) {
+        size_t ret = sizeof(T) * number;
+        filestream.read(reinterpret_cast<char*>(dword), sizeof(T) * number);
+        if (!filestream) {
+            throwErrorException("fstream read failed");
+        }
+        nrReadBytes_ += ret;
+        return ret;
+    }
+
+    template<typename T>
+    size_t writeValue(const T* dword, size_t number = 1) {
+        size_t ret = sizeof(T) * number;
+        filestream.write(reinterpret_cast<const char*>(dword), sizeof(T) * number);
+        if (!filestream) {
+            throwErrorException("fstream read failed");
+        }
+        nrWrittenBytes_ += ret;
+        return ret;
+    }
 
     size_t read(void* buffer, size_t size);
     size_t write(const void* buffer, size_t size);
@@ -53,12 +76,11 @@ class File {
     size_t writeUint64(uint64_t qword);
 
  protected:
-    FILE* fp_;
     size_t fsize_;
-    bool isOpen_;
     Mode mode_;
     size_t nrReadBytes_;
     size_t nrWrittenBytes_;
+    std::fstream filestream;
 };
 
 }  // namespace calq

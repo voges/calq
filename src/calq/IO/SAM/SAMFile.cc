@@ -69,7 +69,7 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
     if (path.empty()) {
         throwErrorException("path is empty");
     }
-    if (mode != MODE_READ) {
+    if (mode != Mode::MODE_READ) {
         throwErrorException("Currently only MODE_READ supported");
     }
 
@@ -83,7 +83,7 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
     size_t fpos = 0;
     for (;;) {
         fpos = tell();
-        if (fgets(line_, LINE_SIZE, fp_) != nullptr) {
+        if (filestream.getline(line_, LINE_SIZE)) {
             // Trim line
             size_t l = strlen(line_) - 1;
             while (l && (line_[l] == '\r' || line_[l] == '\n')) {
@@ -138,7 +138,7 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
 
     for (size_t i = 0; i < blockSize; i++) {
         size_t fpos = tell();
-        if (fgets(line_, LINE_SIZE, fp_) != nullptr) {
+        if (filestream.getline(line_, LINE_SIZE)) {
             // Trim line
             size_t l = strlen(line_) - 1;
             while (l && (line_[l] == '\r' || line_[l] == '\n')) {

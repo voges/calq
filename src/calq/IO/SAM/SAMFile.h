@@ -18,7 +18,7 @@ namespace calq {
 
 class SAMFile : public File {
  public:
-    explicit SAMFile(const std::string &path, const Mode &mode = MODE_READ);
+    explicit SAMFile(const std::string &path, const Mode &mode = Mode::MODE_READ);
     ~SAMFile() override;
 
     size_t nrBlocksRead() const;

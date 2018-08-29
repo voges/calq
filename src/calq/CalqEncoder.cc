@@ -44,7 +44,7 @@ CalqEncoder::CalqEncoder(const Options &opt) : cqFile_(nullptr),
         throwErrorException("referenceFileNames is empty");
     }
 
-    cqFile_ = calq::make_unique<CQFile>(opt.outputFileName, CQFile::MODE_WRITE);
+    cqFile_ = calq::make_unique<CQFile>(opt.outputFileName, CQFile::Mode::MODE_WRITE);
     samFile_ = calq::make_unique<SAMFile>(opt.inputFileName);
     fastaFile_ = calq::make_unique<FASTAFile>(opt.referenceFileNames);
 }
