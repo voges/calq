@@ -95,7 +95,7 @@ size_t File::tell() {
             throwErrorException(std::string("Tell failed: ") + e.what());
         filestream.clear(std::ios_base::goodbit | std::ios_base::eofbit);
     }
-    return 0;
+    return fsize_;
 }
 
 size_t File::nrReadBytes() const {
