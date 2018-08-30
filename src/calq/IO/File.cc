@@ -91,7 +91,7 @@ size_t File::tell() {
     try {
         return static_cast<size_t>(filestream.tellg());
     } catch (std::exception &e) {
-        if(!eof())
+        if (!eof())
             throwErrorException(std::string("Tell failed: ") + e.what());
         filestream.clear(std::ios_base::goodbit | std::ios_base::eofbit);
     }
@@ -172,7 +172,7 @@ bool File::readLine(char* s, std::streamsize n) {
     try {
         filestream.getline(s, n);
     } catch (std::exception &e) {
-        if(!eof())
+        if (!eof())
             throwErrorException(std::string("readLine failed: ") + e.what());
         filestream.clear(std::ios_base::goodbit | std::ios_base::eofbit);
         return false;

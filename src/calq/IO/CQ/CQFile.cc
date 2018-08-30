@@ -9,6 +9,7 @@
 #include <cstring>
 #include <cmath>
 #include <utility>
+#include <memory>
 
 #include "Common/ErrorExceptionReporter.h"
 #include "Common/constants.h"
@@ -114,20 +115,18 @@ size_t CQFile::readQualBlock(std::string* block) {
         if (compressed == 0) {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
-            auto* tmp = (unsigned char*) malloc(tmpSize);
-            ret += read(tmp, tmpSize);
-            *block += std::string((const char*) tmp, tmpSize);
-            free(tmp);
+            auto tmp = make_unique<unsigned char[]> (tmpSize);
+            ret += read(tmp.get(), tmpSize);
+            *block += std::string((const char*) tmp.get(), tmpSize);
 //             CALQ_LOG("Read uncompressed sub-block (%u byte(s))", tmpSize);
         } else if (compressed == 1) {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
-            auto* tmp = (unsigned char*) malloc(tmpSize);
-            ret += read(tmp, tmpSize);
+            auto tmp = make_unique<unsigned char[]> (tmpSize);
+            ret += read(tmp.get(), tmpSize);
 //             CALQ_LOG("Read compressed sub-block (%u byte(s))", tmpSize);
             unsigned int uncompressedSize = 0;
-            unsigned char* uncompressed = range_decompress_o1(tmp, &uncompressedSize);
-            free(tmp);
+            unsigned char* uncompressed = range_decompress_o1(tmp.get(), &uncompressedSize);
             *block += std::string((const char*) uncompressed, uncompressedSize);
             free(uncompressed);
 //             CALQ_LOG("Uncompressed size was: %u", uncompressedSize);

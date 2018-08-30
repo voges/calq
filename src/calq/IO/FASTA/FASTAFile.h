@@ -9,6 +9,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 #include "Common/constants.h"
 #include "IO/File.h"
@@ -27,7 +28,7 @@ class FASTAFile : public File {
 
     void parse();
 
-    char *line_;
+    std::unique_ptr<char[]> line_;
 };
 
 }  // namespace calq

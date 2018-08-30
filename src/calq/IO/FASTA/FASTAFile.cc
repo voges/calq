@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <utility>
+#include <memory>
 
 #include "IO/FASTA/FASTAFile.h"
 #include "Common/ErrorExceptionReporter.h"
@@ -22,26 +23,25 @@ FASTAFile::FASTAFile(const std::string &path, const Mode &mode) : File(path, mod
 
     // Usually, lines in a FASTA file should be limited to 80 chars, so 4 KB
     // should be enough
-    line_ = reinterpret_cast<char*>(malloc(LINE_SIZE));
-    if (line_ == nullptr) {
-        throwErrorException("malloc failed");
+    try {
+        line_ = make_unique<char[]>(LINE_SIZE);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("New failed: ") + e.what());
     }
 
-    // Parse the complete FASTA file
+// Parse the complete FASTA file
     parse();
 }
 
-FASTAFile::~FASTAFile() {
-    free(line_);
-}
+FASTAFile::~FASTAFile() = default;
 
 void FASTAFile::parse() {
     std::string currentHeader;
     std::string currentSequence;
 
-    while (readLine(line_, LINE_SIZE)) {
+    while (readLine(line_.get(), LINE_SIZE)) {
         // Trim line
-        size_t l = strlen(line_) - 1;
+        size_t l = strlen(line_.get()) - 1;
         while (l && (line_[l] == '\r' || line_[l] == '\n')) {
             line_[l--] = '\0';
         }
@@ -66,13 +66,13 @@ void FASTAFile::parse() {
 
             // Store the header and trim it: do not take the leading '>' and
             // remove everything after the first space
-            currentHeader = line_ + 1;
+            currentHeader = line_.get() + 1;
             currentHeader = currentHeader.substr(0, currentHeader.find_first_of(' '));
 
             // Reset sequence
             currentSequence = "";
         } else {
-            currentSequence += line_;
+            currentSequence += line_.get();
         }
     }
 
