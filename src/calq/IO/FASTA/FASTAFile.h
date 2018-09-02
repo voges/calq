@@ -9,6 +9,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 #include "Common/constants.h"
 #include "IO/File.h"
@@ -17,7 +18,7 @@ namespace calq {
 
 class FASTAFile : public File {
  public:
-    explicit FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
+    explicit FASTAFile(const std::string &path, const Mode &mode = Mode::MODE_READ);
     ~FASTAFile() override;
 
     std::map<std::string, std::string> references;
@@ -27,7 +28,7 @@ class FASTAFile : public File {
 
     void parse();
 
-    char *line_;
+    std::unique_ptr<char[]> line_;
 };
 
 }  // namespace calq

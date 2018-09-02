@@ -29,8 +29,8 @@ CalqDecoder::CalqDecoder(const Options &options)
         throwErrorException("options.sideInformationFileName is empty");
     }
 
-    cqFile_ = calq::make_unique<CQFile>(options.inputFileName, CQFile::MODE_READ);
-    qualFile_ = calq::make_unique<File>(options.outputFileName, File::MODE_WRITE);
+    cqFile_ = calq::make_unique<CQFile>(options.inputFileName, CQFile::Mode::MODE_READ);
+    qualFile_ = calq::make_unique<File>(options.outputFileName, File::Mode::MODE_WRITE);
     sideInformationFile_ = calq::make_unique<SAMFile>(options.sideInformationFileName);
 }
 

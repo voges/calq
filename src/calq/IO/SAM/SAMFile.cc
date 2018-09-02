@@ -69,29 +69,30 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
     if (path.empty()) {
         throwErrorException("path is empty");
     }
-    if (mode != MODE_READ) {
+    if (mode != Mode::MODE_READ) {
         throwErrorException("Currently only MODE_READ supported");
     }
 
-    // 1 million chars should be enough
-    line_ = reinterpret_cast<char*>(malloc(LINE_SIZE));
-    if (line_ == nullptr) {
-        throwErrorException("malloc failed");
+    try {
+        // 1 million chars should be enough
+        line_ = make_unique<char[]>(LINE_SIZE);
+    } catch (std::exception &e) {
+        throwErrorException(std::string("New failed: ") + e.what());
     }
 
     // Read SAM header
     size_t fpos = 0;
     for (;;) {
         fpos = tell();
-        if (fgets(line_, LINE_SIZE, fp_) != nullptr) {
+        if (readLine(line_.get(), LINE_SIZE)) {
             // Trim line
-            size_t l = strlen(line_) - 1;
+            size_t l = strlen(line_.get()) - 1;
             while (l && (line_[l] == '\r' || line_[l] == '\n')) {
                 line_[l--] = '\0';
             }
 
             if (line_[0] == '@') {
-                header += line_;
+                header += line_.get();
                 header += "\n";
             } else {
                 break;
@@ -106,9 +107,7 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
     }
 }
 
-SAMFile::~SAMFile() {
-    free(line_);
-}
+SAMFile::~SAMFile() = default;
 
 size_t SAMFile::nrBlocksRead() const {
     return nrBlocksRead_;
@@ -138,16 +137,16 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
 
     for (size_t i = 0; i < blockSize; i++) {
         size_t fpos = tell();
-        if (fgets(line_, LINE_SIZE, fp_) != nullptr) {
+        if (readLine(line_.get(), LINE_SIZE)) {
             // Trim line
-            size_t l = strlen(line_) - 1;
+            size_t l = strlen(line_.get()) - 1;
             while (l && (line_[l] == '\r' || line_[l] == '\n')) {
                 line_[l--] = '\0';
             }
 
             // Parse line and construct samRecord
             char* fields[SAMRecord::NUM_FIELDS];
-            parseLine(fields, line_);
+            parseLine(fields, line_.get());
             SAMRecord samRecord(fields);
 
             if (samRecord.isMapped()) {

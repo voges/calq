@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <string>
+#include <memory>
 
 #include "Common/constants.h"
 #include "IO/File.h"
@@ -18,7 +19,7 @@ namespace calq {
 
 class SAMFile : public File {
  public:
-    explicit SAMFile(const std::string &path, const Mode &mode = MODE_READ);
+    explicit SAMFile(const std::string &path, const Mode &mode = Mode::MODE_READ);
     ~SAMFile() override;
 
     size_t nrBlocksRead() const;
@@ -33,7 +34,7 @@ class SAMFile : public File {
  private:
     static const size_t LINE_SIZE = sizeof(char) * (1 * MB);
 
-    char* line_;
+    std::unique_ptr<char[]> line_;
     size_t nrBlocksRead_;
     size_t nrMappedRecordsRead_;
     size_t nrUnmappedRecordsRead_;
