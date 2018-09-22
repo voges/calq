@@ -1,10 +1,10 @@
 # CALQ
 
-**C**overage-**A**daptive **L**ossy **Q**uality value compression
+Coverage-adaptive lossy quality value compression
 
 ---
 
-This is the official repository for the development of the CALQ software. It is hosted at GitHub (https://github.com/voges/calq) and Bitbucket (https://bitbucket.org/voges/calq).
+This is the official repository for the development of the CALQ software. It is hosted at GitHub (https://github.com/voges/calq).
 
 ## Build instructions
 
@@ -79,4 +79,3 @@ This produces a new SAM file ``file.sam.cq.sam`` containing the reconstructed qu
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
 
 Mikel Hernaez <[mhernaez@illinois.edu](mailto:mhernaez@illinois.edu)>
-
