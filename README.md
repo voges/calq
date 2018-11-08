@@ -2,31 +2,18 @@
 
 Coverage-adaptive lossy quality value compression
 
+[![Build Status](https://travis-ci.com/voges/calq-closed.svg?branch=develop)](https://travis-ci.com/voges/calq-closed)
+
 ---
 
-This is the official repository for the development of the CALQ software. It is hosted at GitHub (https://github.com/voges/calq).
-
 ## Build instructions
-
-We provide a ``CMakeLists.txt`` to build the CALQ with CMake (https://cmake.org/). At least CMake version 3.1 is required.
-
-CALQ has been tested on the following systems:
-
-* openSUSE Leap 42.1 with GCC 4.8.5
-* openSUSE Tumbleweed 20170308 with GCC 6.3.1
-* macOS Sierra (version 10.12.3) with Apple LLVM (i.e., Clang) version 8.0.0.
 
 Clone the CALQ repository with either
 
     git clone https://github.com/voges/calq.git
 
-or
-
-    git clone https://bitbucket.org/voges/calq.git
-
 Build the executable from the command line with the following commands; alternatively use the CMake GUI.
 
-    cd calq
     mkdir build
     cd build
     cmake ..
@@ -40,7 +27,7 @@ As usual, a list of the available command line options can be obtained via ``cal
 
 ### Compression
 
-The CALQ encoder accepts input files in the SAM format (see also https://github.com/samtools/hts-specs).
+The CALQ encoder accepts input files in the SAM format.
 
 Basically, the following command can be used to compress the quality values from the SAM file ``file.sam``.
 

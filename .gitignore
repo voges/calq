@@ -1,12 +1,8 @@
+# Linux Dolphin directory attributes files
 .directory
+
+# macOS Finder directory attributes files
 .DS_Store
-calq.kdev4
-.kdev4/
+
+# CMake build directory
 build/
-calq.config
-calq.creator
-calq.creator.user
-calq.files
-calq.includes
-*.log
-.idea/
