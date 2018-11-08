@@ -137,8 +137,8 @@ set(tests_source_files ${tests_source_files} ${tests_source_dir}/main.cpp)
 # set(tests_header_files ${tests_header_files} ${tests_header_dir}/whatever.h)
 
 # Group the source and header files
-source_group("Test Source Files" FILES ${tests_source_files})
-# source_group("Test Header Files" FILES ${tests_header_files})
+source_group("Tests Source Files" FILES ${tests_source_files})
+# source_group("Tests Header Files" FILES ${tests_header_files})
 
 # Set up the target
 add_executable(${tests} EXCLUDE_FROM_ALL ${tests_source_files})
