@@ -62,7 +62,8 @@ void File::close() {
 
 void File::advance(size_t offset) {
     try {
-        filestream.seekg(offset, std::ios_base::seekdir::cur);
+        // filestream.seekg(offset, std::ios_base::seekdir::cur);
+        filestream.seekg(offset, std::ios_base::cur);
     } catch (std::exception &e) {
         throwErrorException(std::string("Seek failed: ") + e.what());
     }
