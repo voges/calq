@@ -2,7 +2,7 @@
 
 Coverage-adaptive lossy quality value compression
 
-[![Build Status](https://travis-ci.com/voges/calq-closed.svg?branch=develop)](https://travis-ci.com/voges/calq-closed)
+[![Build Status](https://travis-ci.com/voges/calq-closed.svg?token=GduwvyBbRmwxKZ5dTnUU&branch=develop)](https://travis-ci.com/voges/calq-closed)
 
 ---
 
