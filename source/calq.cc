@@ -4,13 +4,13 @@
 
 // Copyright 2015-2017 Leibniz Universitaet Hannover
 
-#include "CalqEncoder.h"
-#include "CalqDecoder.h"
-#include "ErrorExceptionReporter.h"
+#include "calq_encoder.h"
+#include "calq_decoder.h"
+#include "error_exception_reporter.h"
 #include "tclap/CmdLine.h"
 // #include "cmake.h"
 #include "log.h"
-#include "HaplotyperTest.h"
+#include "haplotyper_test.h"
 
 static void printVersionAndCopyright() {
     printf("-----------------------------------------------\n");

@@ -9,7 +9,7 @@
 
 #include <fstream>
 
-#include "ErrorExceptionReporter.h"
+#include "error_exception_reporter.h"
 
 namespace calq {
 
