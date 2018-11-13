@@ -1,4 +1,4 @@
-    #==============================================================================
+#==============================================================================
 # Generic
 #==============================================================================
 
@@ -18,7 +18,7 @@ project("calq")
 # Compiler
 #==============================================================================
 
-message(STATUS "CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})")
+message(STATUS "CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
@@ -26,8 +26,8 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
-     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 else()
     message(FATAL_ERROR "C++ compiler currently not supported by CMake build")
 endif()
@@ -65,7 +65,7 @@ execute_process(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
 )
 if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
 endif()
 execute_process(
     COMMAND ${CMAKE_COMMAND} --build .
@@ -73,7 +73,7 @@ execute_process(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
 )
 if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
 endif()
 
 # Prevent overriding the parent project's compiler/linker settings on Windows

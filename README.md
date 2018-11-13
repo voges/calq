@@ -6,9 +6,9 @@ Coverage-adaptive lossy quality value compression
 
 ---
 
-## Build instructions
+## Quick start on Linux
 
-Clone the CALQ repository with either
+Clone the CALQ repository with
 
     git clone https://github.com/voges/calq.git
 
@@ -19,7 +19,7 @@ Build the executable from the command line with the following commands; alternat
     cmake ..
     make
 
-This generates a CALQ executable named ``calq`` in the ``build`` folder.
+This generates an executable named ``calq`` in the ``build`` folder.
 
 ## Usage examples
 
