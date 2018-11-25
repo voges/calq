@@ -1,4 +1,4 @@
-# Contributing to TSC
+# Contributing to CALQ
 
 First off, thanks for taking the time to contribute!
 
