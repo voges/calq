@@ -28,7 +28,7 @@ done
 
 
 # -----------------------------------------------------------------------------
-# Check if cppcheck, cpplint.py and pycodestyle.py are available
+# Check if cppcheck and cpplint.py are available
 # -----------------------------------------------------------------------------
 
 # cppcheck
