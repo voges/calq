@@ -28,7 +28,7 @@ done
 
 
 # -----------------------------------------------------------------------------
-# Check if cppcheck, cpplint.py and pycodestyle.py are available
+# Check if cppcheck and cpplint.py are available
 # -----------------------------------------------------------------------------
 
 # cppcheck
@@ -52,7 +52,7 @@ fi
 
 # Do the work
 for cpp_file in "${cpp_files[@]}"; do
-    printf "Running cppcheck on: %s\\n" "$cpp_file"
+    printf "Running cppcheck on: %s\\n" "$cpp_file"    
     "$cppcheck" \
         --enable=all \
         --language=c++ \
