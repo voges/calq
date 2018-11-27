@@ -38,4 +38,3 @@ script:
   - make
   - make tests
   - ./tests
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then shellcheck ../scripts/*.sh; fi
