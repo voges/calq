@@ -4,6 +4,8 @@
 #include "calq/tclap/CmdLine.h"
 #include "calq/log.h"
 
+#include "calq/SAMFileHandler.h"
+
 int main(int argc, char* argv[]) {
     try {
         calq::Options options;
@@ -103,8 +105,30 @@ int main(int argc, char* argv[]) {
 
         // Compress or decompress
         if (!options.decompress) {
-            calq::CalqEncoder calqEncoder(options);
-            calqEncoder.encode();
+            calq::SAMFileHandler sH(options.inputFileName);
+            while (sH.readBlock(options.blockSize) != 0) {
+
+                // Container to be filled by lib
+                std::vector<uint8_t> quantizerIndices;
+                std::vector<std::vector<uint8_t>> stepIndices;
+                std::vector<std::vector<uint8_t>> codeBooks;
+
+                std::string test = sH.getSequences().at(0);
+                std::cout << test << std::endl;
+
+                // To-DO: Implement this:
+                /* calqEncoder.encode( sH.getPositions(),
+                                    sH.getSequences(),
+                                    sH.getCigars(),
+                                    sH.getQualityScores(),
+                                    Other Params,
+                                    &quantizerIndices,
+                                    &codeBooks);
+                */
+
+            // calq::CalqEncoder calqEncoder(options);
+            // calqEncoder.encode();
+            }
             CALQ_LOG("Finished encoding");
         } else {
             calq::CalqDecoder calqDecoder(options);
