@@ -101,8 +101,8 @@ endif()
 
 # Set the paths
 set(calq "calq")
-set(calq_source_dir ${CMAKE_SOURCE_DIR}/source)
-set(calq_header_dir ${CMAKE_SOURCE_DIR}/source)
+set(calq_source_dir ${CMAKE_SOURCE_DIR}/source/calq)
+set(calq_header_dir ${CMAKE_SOURCE_DIR}/source/calq)
 set(calq_include_dir ${CMAKE_SOURCE_DIR}/source)
 
 # Get all source and header files
@@ -117,6 +117,7 @@ source_group("CALQ Header Files" FILES ${calq_header_files})
 # Set up the target
 add_executable(${calq} ${calq_c_source_files} ${calq_cc_source_files})
 target_include_directories(${calq} PRIVATE ${calq_include_dir})
+target_include_directories(${calq} PRIVATE ${calq_include_dir}/calq)
 
 
 #==============================================================================

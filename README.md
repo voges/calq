@@ -2,7 +2,7 @@
 
 Coverage-adaptive lossy quality value compression
 
-[![Build Status](https://travis-ci.com/voges/calq-closed.svg?token=GduwvyBbRmwxKZ5dTnUU&branch=develop)](https://travis-ci.com/voges/calq-closed)
+[![Build Status](https://travis-ci.org/voges/calq.svg?branch=master)](https://travis-ci.org/voges/calq)
 
 ---
 
@@ -27,7 +27,7 @@ As usual, a list of the available command line options can be obtained via ``cal
 
 ### Compression
 
-The CALQ encoder accepts input files in the SAM format.
+The CALQ encoder accepts input files in the SAM format (see also https://github.com/samtools/hts-specs).
 
 Basically, the following command can be used to compress the quality values from the SAM file ``file.sam``.
 
