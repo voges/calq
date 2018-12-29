@@ -2,7 +2,7 @@
  *  @brief This file contains the implementation of the SAMFileHandler class->
  */
 
-#include "calq/SAMFileHandler.h"
+#include "calqapp/SAMFileHandler.h"
 #include "calq/helpers.h"
 #include "calq/sam_file.h"
 

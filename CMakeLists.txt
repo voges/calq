@@ -52,6 +52,11 @@ message(STATUS "Additional C++ compiler flags for build type 'RelWithDebInfo': $
 message(STATUS "Additional C++ compiler flags for build type 'MinSizeRel': ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 message(STATUS "Selected build type: ${CMAKE_BUILD_TYPE}")
 
+#==============================================================================
+# Boost
+#==============================================================================
+
+find_package(Boost 1.54 COMPONENTS program_options REQUIRED)
 
 #==============================================================================
 # Google Test
@@ -106,19 +111,86 @@ set(calq_header_dir ${CMAKE_SOURCE_DIR}/source/calq)
 set(calq_include_dir ${CMAKE_SOURCE_DIR}/source)
 
 # Get all source and header files
-file(GLOB_RECURSE calq_c_source_files ${calq_source_dir}/*.c)
 file(GLOB_RECURSE calq_cc_source_files ${calq_source_dir}/*.cc)
 file(GLOB_RECURSE calq_header_files ${calq_header_dir}/*.h)
 
 # Group the source and header files
-source_group("CALQ Source Files" FILES ${calq_c_source_files} ${calq_cc_source_files})
+source_group("CALQ Source Files" FILES ${calq_cc_source_files})
 source_group("CALQ Header Files" FILES ${calq_header_files})
 
-# Set up the target
-add_executable(${calq} ${calq_c_source_files} ${calq_cc_source_files})
-target_include_directories(${calq} PRIVATE ${calq_include_dir})
-target_include_directories(${calq} PRIVATE ${calq_include_dir}/calq)
 
+set(CALQ_BUILD_SHARED_LIB OFF CACHE BOOL "Build shared CALQ library.")
+if (${CALQ_BUILD_SHARED_LIB})
+    message(STATUS "Configured build of CALQ as *shared* library")
+    add_library(${calq} SHARED ${calq_source_files} ${calq_header_files})
+    set_target_properties(${calq} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${calq} PROPERTIES POSITION_INDEPENDENT_CODE 1)
+else ()
+    message(STATUS "Configured build of calq as *static* library")
+    add_library(${calq} STATIC ${calq_source_files} ${calq_header_files})
+    set_target_properties(${calq} PROPERTIES LINKER_LANGUAGE CXX)
+endif ()
+
+target_include_directories(${calq} PRIVATE ${calq_include_dir})
+target_include_directories(${calq} PRIVATE ${CMAKE_BINARY_DIR})
+
+#==============================================================================
+# calq exe
+#==============================================================================
+
+set(calqapp "calqapp")
+set(calqapp_source_dir ${CMAKE_SOURCE_DIR}/source/calqapp)
+set(calqapp_header_dir ${CMAKE_SOURCE_DIR}/source/calqapp)
+set(calqapp_include_dir ${CMAKE_SOURCE_DIR}/source)
+
+# List all source files (alphabetically)
+set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/calq.cc)
+set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/SAMFileHandler.cc)
+
+# List all header files (alphabetically)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/SAMFileHandler.h)
+
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Arg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ArgException.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ArgTraits.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/CmdLine.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/CmdLineInterface.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/CmdLineOutput.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Constraint.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/DocBookOutput.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/HelpVisitor.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/IgnoreRestVisitor.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Makefile.am)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Makefile.in)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/MultiArg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/MultiSwitchArg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/OptionalUnlabeledTracker.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/StandardTraits.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/StdOutput.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/SwitchArg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/UnlabeledMultiArg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/UnlabeledValueArg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ValueArg.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ValuesConstraint.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/VersionVisitor.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Visitor.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/XorHandler.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ZshCompletionOutput.h)
+
+
+
+source_group("Source files" FILES ${calqapp_source_files})
+source_group("Header files" FILES ${calqapp_header_files})
+
+add_executable(${calqapp} EXCLUDE_FROM_ALL ${calqapp_source_files} ${calqapp_header_files})
+
+target_include_directories(${calqapp} PRIVATE ${calqapp_include_dir})
+target_include_directories(${calqapp} PRIVATE ${calq_include_dir})
+target_include_directories(${calqapp} PRIVATE ${Boost_INCLUDE_DIR})
+target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
+
+target_link_libraries(${calqapp} ${calq})
+target_link_libraries(${calqapp} Boost::program_options)
 
 #==============================================================================
 # tests

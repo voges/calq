@@ -1,15 +1,19 @@
 #include "calq/calq_encoder.h"
 #include "calq/calq_decoder.h"
 #include "calq/error_exception_reporter.h"
-#include "calq/tclap/CmdLine.h"
+#include "calq/options.h"
+/*
+#include "tclap/CmdLine.h"
+*/
 #include "calq/log.h"
 
-#include "calq/SAMFileHandler.h"
+#include "calqapp/SAMFileHandler.h"
 
 int main(int argc, char* argv[]) {
     try {
         calq::Options options;
 
+        /*
         // TCLAP class
         TCLAP::CmdLine cmd("CALQ", ' ', "");
 
@@ -42,7 +46,7 @@ int main(int argc, char* argv[]) {
 
         // Let the TCLAP class parse the provided arguments
         cmd.parse(argc, argv);
-
+        
         // Check for sanity in compression mode
         if (!decompressSwitch.isSet()) {
             if (!referenceFileNamesArg.isSet()) {
@@ -102,7 +106,7 @@ int main(int argc, char* argv[]) {
 
         // Check the options
         options.validate();
-
+        */
         // Compress or decompress
         if (!options.decompress) {
             calq::SAMFileHandler sH(options.inputFileName);
@@ -135,9 +139,10 @@ int main(int argc, char* argv[]) {
             calqDecoder.decode();
             CALQ_LOG("Finished decoding");
         }
-    } catch (TCLAP::ArgException &tclapException) {
+   /* } catch (TCLAP::ArgException &tclapException) {
         CALQ_ERROR("%s (argument: %s)", tclapException.error().c_str(), tclapException.argId().c_str());
         return EXIT_FAILURE;
+    */
     } catch (const calq::ErrorException &errorException) {
         CALQ_ERROR("%s", errorException.what());
         return EXIT_FAILURE;
