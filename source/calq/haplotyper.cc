@@ -16,21 +16,21 @@ namespace calq {
 // Returns score, takes seq and qual pileup and position
 Haplotyper::Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
                        size_t minHQSoftclip_streak, size_t gaussRadius,
-                       bool debug, bool squashed, Options::FilterType filterType) : /*SIGMA(sigma),*/
+                       bool debug, bool squashed, EncodingOptions::FilterType filterType) : /*SIGMA(sigma),*/
                                                                                     spreader(maxHQSoftclip_propagation, minHQSoftclip_streak, squashed),
                                                                                     genotyper(static_cast<const int &>(ploidy),
                                                                                               static_cast<const int &>(qualOffset),
                                                                                               static_cast<const int &>(nrQuantizers)),
                                                                                     nr_quantizers(nrQuantizers), polyploidy(ploidy), DEBUG(debug),
                                                                                     squashedActivity(squashed) {
-    if (filterType == Options::FilterType::GAUSS) {
+    if (filterType == EncodingOptions::FilterType::GAUSS) {
         GaussKernel kernel(sigma);
         double THRESHOLD = 0.0000001;
         size_t size = kernel.calcMinSize(THRESHOLD, gaussRadius * 2 + 1);
 
         buffer = FilterBuffer([kernel](size_t pos, size_t size) -> double { return kernel.calcValue(pos, size); }, size);
         localDistortion = kernel.calcValue((size - 1) / 2, size);
-    } else if (filterType == Options::FilterType::RECTANGLE) {
+    } else if (filterType == EncodingOptions::FilterType::RECTANGLE) {
         RectangleKernel kernel(sigma);
         size_t size = kernel.calcMinSize(gaussRadius * 2 + 1);
 

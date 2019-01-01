@@ -18,12 +18,12 @@ namespace calq {
 
 class QualEncoder {
  public:
-    explicit QualEncoder(const Options &options, const std::map<int, Quantizer> &quant);
+    explicit QualEncoder(const EncodingOptions &options, const std::map<int, Quantizer> &quant);
     ~QualEncoder();
 
-    void addUnmappedRecordToBlock(const SAMRecord &samRecord);
-    void addMappedRecordToBlock(const SAMRecord &samRecord, const FASTAFile &fasta);
-    void finishBlock(const FASTAFile &fasta, const std::string &section);
+    void addUnmappedRecordToBlock(const EncodingRead &samRecord);
+    void addMappedRecordToBlock(const EncodingRead &samRecord, const std::string& ref);
+   void finishBlock(uint32_t pos, const std::string& ref);
     size_t writeBlock(CQFile* cqFile);
 
     size_t compressedMappedQualSize() const;
@@ -37,7 +37,7 @@ class QualEncoder {
     size_t uncompressedQualSize() const;
 
  private:
-    void encodeMappedQual(const SAMRecord &samRecord);
+    void encodeMappedQual(const EncodingRead &samRecord);
     void encodeUnmappedQual(const std::string &qual);
 
  private:
@@ -76,11 +76,11 @@ class QualEncoder {
 
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded
-    std::deque<SAMRecord> samRecordDeque_;
+    std::deque<EncodingRead> samRecordDeque_;
 
     bool debugOut;
 
-    Options::Version version_;
+    EncodingOptions::Version version_;
 };
 
 }  // namespace calq

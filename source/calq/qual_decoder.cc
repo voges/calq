@@ -1,4 +1,5 @@
 #include "calq/qual_decoder.h"
+#include "calq/structs.h"
 
 #include "calq/error_exception_reporter.h"
 
@@ -17,7 +18,7 @@ QualDecoder::QualDecoder()
 
 QualDecoder::~QualDecoder() = default;
 
-void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File* qualFile) {
+void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead &samRecord) {
     std::string qual;
 
     size_t cigarIdx = 0;
@@ -65,9 +66,6 @@ void QualDecoder::decodeMappedRecordFromBlock(const SAMRecord &samRecord, File* 
         }
         opLen = 0;
     }
-
-    qualFile->write((unsigned char*) qual.c_str(), qual.length());
-    qualFile->writeByte('\n');
 }
 
 void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File* qualFile) {

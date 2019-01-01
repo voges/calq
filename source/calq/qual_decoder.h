@@ -10,12 +10,14 @@
 
 namespace calq {
 
+struct DecodingRead;
+
 class QualDecoder {
  public:
     QualDecoder();
     ~QualDecoder();
 
-    void decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
+    void decodeMappedRecordFromBlock(const DecodingRead &samRecord);
     void decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
     size_t readBlock(CQFile *cqFile);
 

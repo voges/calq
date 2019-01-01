@@ -1,31 +1,15 @@
 #ifndef CALQ_CALQ_ENCODER_H_
 #define CALQ_CALQ_ENCODER_H_
 
-#include <memory>
-
-#include "calq/options.h"
+#include "calq/structs.h"
 
 namespace calq {
 
-class CQFile;
-
-class FASTAFile;
-
-class SAMFile;
-
-class CalqEncoder {
- public:
-    explicit CalqEncoder(const Options &options);
-    ~CalqEncoder();
-    void encode();
-
- private:
-    std::unique_ptr<CQFile> cqFile_;
-    std::unique_ptr<SAMFile> samFile_;
-    std::unique_ptr<FASTAFile> fastaFile_;  // Reference
-
-    const Options options;
-};
+void encode(const EncodingOptions& opt,
+            const EncodingSideInformation& sideInformation,
+            const EncodingBlock& input,
+            DecodingBlock *output
+);
 
 }  // namespace calq
 

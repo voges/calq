@@ -135,8 +135,7 @@ int main(int argc, char* argv[]) {
             }
             CALQ_LOG("Finished encoding");
         } else {
-            calq::CalqDecoder calqDecoder(options);
-            calqDecoder.decode();
+         //   calq::decode();
             CALQ_LOG("Finished decoding");
         }
    /* } catch (TCLAP::ArgException &tclapException) {

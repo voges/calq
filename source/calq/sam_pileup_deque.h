@@ -7,6 +7,8 @@
 
 namespace calq {
 
+struct EncodingRead;
+
 class SAMPileupDeque {
     friend class SAMRecord;
 
@@ -31,6 +33,8 @@ class SAMPileupDeque {
 
     void setPosMax(const uint32_t &posMax);
     void setPosMin(const uint32_t &posMin);
+    
+    void add (const EncodingRead& r, uint8_t qvalOffset);
 
  private:
     std::deque<SAMPileup> pileups_;
