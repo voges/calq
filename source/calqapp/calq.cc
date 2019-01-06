@@ -1,8 +1,11 @@
+#include <boost/program_options.hpp>
+
 #include "calq/calq_encoder.h"
 #include "calq/calq_decoder.h"
 #include "calq/structs.h"
 #include "calq/error_exception_reporter.h"
 #include "calq/options.h"
+#include "calqapp/program_options.h"
 /*
 #include "tclap/CmdLine.h"
 */
@@ -136,8 +139,6 @@ size_t readBlock(calq::CQFile* cqFile, calq::DecodingBlock* out, calq::DecodingS
 int main(int argc, char *argv[]){
     try
     {
-        calq::Options options;
-
         /*
         // TCLAP class
         TCLAP::CmdLine cmd("CALQ", ' ', "");
@@ -233,6 +234,10 @@ int main(int argc, char *argv[]){
         options.validate();
         */
         // Compress or decompress
+
+        calqapp::ProgramOptions ProgramOptions(argc, argv);
+        ProgramOptions.validate();
+        /*
         if (!options.decompress)
         {
             calq::SAMFileHandler sH(options.inputFileName);

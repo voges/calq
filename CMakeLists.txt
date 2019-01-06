@@ -56,7 +56,7 @@ message(STATUS "Selected build type: ${CMAKE_BUILD_TYPE}")
 # Boost
 #==============================================================================
 
-find_package(Boost 1.54 COMPONENTS program_options REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 #==============================================================================
 # Google Test
@@ -148,36 +148,11 @@ set(calqapp_include_dir ${CMAKE_SOURCE_DIR}/source)
 # List all source files (alphabetically)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/calq.cc)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/SAMFileHandler.cc)
+set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/program_options.cc)
 
 # List all header files (alphabetically)
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/SAMFileHandler.h)
-
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Arg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ArgException.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ArgTraits.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/CmdLine.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/CmdLineInterface.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/CmdLineOutput.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Constraint.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/DocBookOutput.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/HelpVisitor.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/IgnoreRestVisitor.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Makefile.am)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Makefile.in)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/MultiArg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/MultiSwitchArg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/OptionalUnlabeledTracker.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/StandardTraits.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/StdOutput.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/SwitchArg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/UnlabeledMultiArg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/UnlabeledValueArg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ValueArg.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ValuesConstraint.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/VersionVisitor.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/Visitor.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/XorHandler.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_source_dir}/tclap/ZshCompletionOutput.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/program_options.h)
 
 
 
@@ -192,7 +167,7 @@ target_include_directories(${calqapp} PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
 
 target_link_libraries(${calqapp} ${calq})
-target_link_libraries(${calqapp} Boost::program_options)
+target_link_libraries(${calqapp} ${Boost_LIBRARIES})
 
 #==============================================================================
 # tests
