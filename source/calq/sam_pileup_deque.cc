@@ -1,6 +1,8 @@
 #include "calq/sam_pileup_deque.h"
 #include "calq/error_exception_reporter.h"
 
+#include "calq/structs.h"
+
 namespace calq {
 
 SAMPileupDeque::SAMPileupDeque() : pileups_(), posMax_(0), posMin_(0) {}
@@ -96,6 +98,76 @@ void SAMPileupDeque::setPosMin(const uint32_t &posMin) {
         for (uint32_t i = posMin_; i < posMin; i++) {
             pop_front();
         }
+    }
+}
+
+void SAMPileupDeque::add (const EncodingRead& r,  uint8_t qvalOffset) {
+    if (this->empty()) {
+        throwErrorException("samPileupQueue is empty");
+    }
+    if ((this->posMin() > r.posMin) || (this->posMax() < r.posMax)) {
+        throwErrorException("samPileupQueue does not overlap record");
+    }
+
+    size_t cigarIdx = 0;
+    size_t cigarLen = r.cigar.length();
+    size_t opLen = 0;  // length of current CIGAR operation
+    size_t idx = 0;
+    size_t pileupIdx = r.posMin - this->posMin();
+
+    size_t softclips = 0;
+
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(r.cigar[cigarIdx])) {
+            opLen = opLen * 10 + (size_t) r.cigar[cigarIdx] - (size_t) '0';
+            continue;
+        }
+
+        const auto HQ_SOFTCLIP_THRESHOLD = static_cast<const char>(29 + qvalOffset);
+
+
+        switch (r.cigar[cigarIdx]) {
+            case 'M':
+            case '=':
+            case 'X':
+                for (size_t i = 0; i < opLen; i++) {
+                    this->pileups_[pileupIdx].pos
+                            = static_cast<uint32_t>(this->posMin() + pileupIdx);
+                    this->pileups_[pileupIdx].seq += r.sequence[idx];
+                    this->pileups_[pileupIdx].qual += r.qvalues[idx];
+
+                    idx++;
+                    pileupIdx++;
+                }
+                break;
+
+            case 'S':
+                for (int l = 0; l < static_cast<int>(opLen); ++l) {
+                    if (r.qvalues[idx + l] >= HQ_SOFTCLIP_THRESHOLD) {
+                        ++softclips;
+                    }
+                }
+                /* fall through */
+            case 'I':
+                idx += opLen;
+                break;
+            case 'D':
+            case 'N':
+                pileupIdx += opLen;
+                break;
+            case 'H':
+            case 'P':
+                break;  // these have been clipped
+            default:
+                throwErrorException("Bad CIGAR string");
+        }
+
+        opLen = 0;
+    }
+
+    // Write clips
+    for (size_t i = r.posMin - this->posMin(); i <= pileupIdx; ++i) {
+        this->pileups_[pileupIdx].hq_softcounter += softclips;
     }
 }
 

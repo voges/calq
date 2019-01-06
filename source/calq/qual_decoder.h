@@ -10,27 +10,30 @@
 
 namespace calq {
 
+struct DecodingRead;
+
+struct EncodingBlock;
+
+struct DecodingBlock;
+
 class QualDecoder {
  public:
-    QualDecoder();
+    QualDecoder(const DecodingBlock& in, EncodingBlock* out);
     ~QualDecoder();
 
-    void decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
-    void decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
-    size_t readBlock(CQFile *cqFile);
+    void decodeMappedRecordFromBlock(const DecodingRead &samRecord);
 
  private:
     uint32_t posOffset_;
     int qualityValueOffset_;
 
-    std::string uqv_;
-    std::string qvci_;
-    std::vector< std::string > qvi_;
-
     size_t uqvIdx_;
-    std::vector< size_t > qviIdx_;
+    std::vector<size_t> qviIdx_;
 
     std::map<int, Quantizer> quantizers_;
+
+    EncodingBlock* out;
+    const DecodingBlock& in;
 };
 
 }  // namespace calq

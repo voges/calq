@@ -11,6 +11,7 @@
 #include "calq/genotyper.h"
 #include "calq/softclip_spreader.h"
 #include "calq/options.h"
+#include "calq_encoder.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 
@@ -37,7 +38,7 @@ class Haplotyper {
  public:
     // Init
     Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
-               size_t minHQSoftclip_streak, size_t gaussRadius, bool debug, bool squashed, Options::FilterType filterType);
+               size_t minHQSoftclip_streak, size_t gaussRadius, bool debug, bool squashed, EncodingOptions::FilterType filterType);
 
     // Returns offset between activity scores' position and front
     size_t getOffset() const;

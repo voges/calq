@@ -16,38 +16,21 @@
 
 namespace calq {
 
-class QualEncoder {
+class QualEncoder
+{
  public:
-    explicit QualEncoder(const Options &options, const std::map<int, Quantizer> &quant);
+    explicit QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* out);
     ~QualEncoder();
-
-    void addUnmappedRecordToBlock(const SAMRecord &samRecord);
-    void addMappedRecordToBlock(const SAMRecord &samRecord, const FASTAFile &fasta);
-    void finishBlock(const FASTAFile &fasta, const std::string &section);
-    size_t writeBlock(CQFile* cqFile);
-
-    size_t compressedMappedQualSize() const;
-    size_t compressedUnmappedQualSize() const;
-    size_t compressedQualSize() const;
+    void addMappedRecordToBlock(const EncodingRead& samRecord);
+    void finishBlock(const EncodingSideInformation& inf);
     size_t nrMappedRecords() const;
-    size_t nrUnmappedRecords() const;
-    size_t nrRecords() const;
-    size_t uncompressedMappedQualSize() const;
-    size_t uncompressedUnmappedQualSize() const;
-    size_t uncompressedQualSize() const;
 
  private:
-    void encodeMappedQual(const SAMRecord &samRecord);
-    void encodeUnmappedQual(const std::string &qual);
+    void encodeMappedQual(const EncodingRead& samRecord);
 
  private:
     // Sizes & counters
-    size_t compressedMappedQualSize_;
-    size_t compressedUnmappedQualSize_;
     size_t nrMappedRecords_;
-    size_t nrUnmappedRecords_;
-    size_t uncompressedMappedQualSize_;
-    size_t uncompressedUnmappedQualSize_;
 
     int NR_QUANTIZERS;
 
@@ -57,17 +40,14 @@ class QualEncoder {
     // 0-based position offset of this block
     uint32_t posOffset_;
 
-    // Buffers
-    std::string unmappedQualityValues_;
-    std::deque<int> mappedQuantizerIndices_;
-    std::vector<std::deque<int> > mappedQualityValueIndices_;
-
     // Pileup
     SAMPileupDeque samPileupDeque_;
 
     Haplotyper haplotyper_;
 
     Genotyper genotyper_;
+
+    DecodingBlock* out;
 
     size_t posCounter;
 
@@ -76,11 +56,11 @@ class QualEncoder {
 
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded
-    std::deque<SAMRecord> samRecordDeque_;
+    std::deque<EncodingRead> samRecordDeque_;
 
     bool debugOut;
 
-    Options::Version version_;
+    EncodingOptions::Version version_;
 };
 
 }  // namespace calq

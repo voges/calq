@@ -114,6 +114,8 @@ set(calq_include_dir ${CMAKE_SOURCE_DIR}/source)
 file(GLOB_RECURSE calq_cc_source_files ${calq_source_dir}/*.cc)
 file(GLOB_RECURSE calq_header_files ${calq_header_dir}/*.h)
 
+set(calq_cc_source_files ${calq_cc_source_files} ${calq_source_dir}/range/range.c source/calq/structs.h)
+
 # Group the source and header files
 source_group("CALQ Source Files" FILES ${calq_cc_source_files})
 source_group("CALQ Header Files" FILES ${calq_header_files})
@@ -122,12 +124,12 @@ source_group("CALQ Header Files" FILES ${calq_header_files})
 set(CALQ_BUILD_SHARED_LIB OFF CACHE BOOL "Build shared CALQ library.")
 if (${CALQ_BUILD_SHARED_LIB})
     message(STATUS "Configured build of CALQ as *shared* library")
-    add_library(${calq} SHARED ${calq_source_files} ${calq_header_files})
+    add_library(${calq} SHARED ${calq_cc_source_files} ${calq_header_files})
     set_target_properties(${calq} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${calq} PROPERTIES POSITION_INDEPENDENT_CODE 1)
 else ()
     message(STATUS "Configured build of calq as *static* library")
-    add_library(${calq} STATIC ${calq_source_files} ${calq_header_files})
+    add_library(${calq} STATIC ${calq_cc_source_files} ${calq_header_files})
     set_target_properties(${calq} PROPERTIES LINKER_LANGUAGE CXX)
 endif ()
 
