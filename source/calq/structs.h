@@ -17,7 +17,7 @@ struct EncodingSideInformation
     std::vector<std::string> sequences; // Sequences of reads
     std::vector<std::string> cigars; // CIGARS of reads
     std::string reference; // Reference from positionStart to positionEnd
-    uint64_t positionStart = 0; // Block starting position
+    uint64_t positionStart; // Block starting position
 };
 
 struct EncodingRead
@@ -78,6 +78,8 @@ struct DecodingSideInformation
 {
     std::vector<uint64_t> positions; // Starting positions of reads in respect to genome
     std::vector<std::string> cigars; // CIGARS of reads
+    uint32_t posOffset;
+    uint8_t qualOffset;
 };
 
 struct DecodingRead

@@ -7,7 +7,7 @@ namespace calq {
 
 void decode(const DecodingSideInformation& sideInformation,
             const DecodingBlock& input,
-            DecodingBlock* output
+            EncodingBlock* output
 );
 
 }  // namespace calq
