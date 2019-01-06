@@ -5,20 +5,20 @@
 
 namespace calq {
 
-QualDecoder::QualDecoder()
+QualDecoder::QualDecoder(const DecodingBlock& b, EncodingBlock* o)
         : posOffset_(0),
-          qualityValueOffset_(0),
-          uqv_(""),
-          qvci_(""),
-          qvi_(),
-          uqvIdx_(0),
-          qviIdx_(),
-          quantizers_() {
+        qualityValueOffset_(0),
+        uqvIdx_(0),
+        qviIdx_(b.stepindices.size(), 0),
+        quantizers_(),
+        out(o),
+        in(b){
+    out->qvalues.clear();
 }
 
 QualDecoder::~QualDecoder() = default;
 
-void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead &samRecord) {
+void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord){
     std::string qual;
 
     size_t cigarIdx = 0;
@@ -38,8 +38,8 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead &samRecord) {
             case 'X':
                 // Decode opLen quality value indices with computed quantizer indices
                 for (size_t i = 0; i < opLen; i++) {
-                    int quantizerIndex = qvci_[qvciPos++] - '0';
-                    int qualityValueIndex = qvi_.at(static_cast<size_t>(quantizerIndex))[qviIdx_[quantizerIndex]++] - '0';
+                    int quantizerIndex = in.quantizerIndices[qvciPos++] - '0';
+                    int qualityValueIndex = in.stepindices.at(static_cast<size_t>(quantizerIndex))[qviIdx_[quantizerIndex]++] - '0';
                     int q = quantizers_.at(quantizerIndex).indexToReconstructionValue(qualityValueIndex);
                     qual += static_cast<char>(q + qualityValueOffset_);
                 }
@@ -48,7 +48,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead &samRecord) {
             case 'S':
                 // Decode opLen quality values with max quantizer index
                 for (size_t i = 0; i < opLen; i++) {
-                    int qualityValueIndex = qvi_.at(quantizers_.size() - 1)[qviIdx_[quantizers_.size() - 1]++] - '0';
+                    int qualityValueIndex = in.stepindices.at(quantizers_.size() - 1)[qviIdx_[quantizers_.size() - 1]++] - '0';
                     int q = quantizers_.at(
                             static_cast<const int &>(quantizers_.size() - 1)).indexToReconstructionValue(qualityValueIndex);
                     qual += static_cast<char>(q + qualityValueOffset_);
@@ -66,61 +66,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead &samRecord) {
         }
         opLen = 0;
     }
-}
-
-void QualDecoder::decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File* qualFile) {
-    // Get the read length from SEQ (CIGAR might be unavailable for an
-    // unmapped record)
-    size_t qualLen = samRecord.seq.length();
-
-    // Get the quality values
-    std::string qual = uqv_.substr(uqvIdx_, qualLen);
-    if (qual.empty()) {
-        throwErrorException("Decoding quality values failed");
-    }
-    uqvIdx_ += qualLen;
-
-    // Write the quality values
-    qualFile->write((unsigned char*) qual.c_str(), qual.length());
-    qualFile->writeByte('\n');
-}
-
-size_t QualDecoder::readBlock(CQFile* cqFile) {
-    size_t ret = 0;
-
-    // Read block parameters
-    ret += cqFile->readUint32(&posOffset_);
-    ret += cqFile->readUint32(reinterpret_cast<uint32_t*>(&qualityValueOffset_));
-
-    // Read inverse quantization LUTs
-    cqFile->readQuantizers(&quantizers_);
-
-    // Read unmapped quality values
-    uint8_t uqvFlags = 0;
-    ret += cqFile->readUint8(&uqvFlags);
-    if (uqvFlags & 0x01) { //NOLINT
-        ret += cqFile->readQualBlock(&uqv_);
-    }
-
-    // Read mapped quantizer indices
-    uint8_t mqiFlags = 0;
-    ret += cqFile->readUint8(&mqiFlags);
-    if (mqiFlags & 0x1) { //NOLINT
-        ret += cqFile->readQualBlock(&qvci_);
-    }
-
-    // Read mapped quality value indices
-    for (int i = 0; i < static_cast<int>(quantizers_.size()); ++i) {
-        qvi_.emplace_back("");
-        qviIdx_.push_back(0);
-        uint8_t mqviFlags = 0;
-        ret += cqFile->readUint8(&mqviFlags);
-        if (mqviFlags & 0x1) { //NOLINT
-            ret += cqFile->readQualBlock(&qvi_[i]);
-        }
-    }
-
-    return ret;
+    out->qvalues.push_back(std::move(qual));
 }
 
 }  // namespace calq

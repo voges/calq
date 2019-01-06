@@ -10,22 +10,12 @@
 
 namespace calq {
 
-QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant)
-        : compressedMappedQualSize_(0),
-        compressedUnmappedQualSize_(0),
-        nrMappedRecords_(0),
-        nrUnmappedRecords_(0),
-        uncompressedMappedQualSize_(0),
-        uncompressedUnmappedQualSize_(0),
+QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* o)
+        : nrMappedRecords_(0),
         NR_QUANTIZERS(static_cast<int>(options.quantizationMax - options.quantizationMin + 1)),
 
         qualityValueOffset_(static_cast<int>(options.qualityValueOffset)),
         posOffset_(0),
-
-        unmappedQualityValues_(""),
-        mappedQuantizerIndices_(),
-        mappedQualityValueIndices_(),
-
         samPileupDeque_(),
 
         haplotyper_(
@@ -37,6 +27,9 @@ QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Qua
                 static_cast<const int&>(options.qualityValueOffset),
                 NR_QUANTIZERS
         ),
+
+        out(o),
+
         posCounter(0),
 
         quantizers_(quant),
@@ -45,28 +38,30 @@ QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Qua
         debugOut(options.debug),
 
         version_(options.version){
-    // Initialize a buffer for mapped quality value indices per quantizer
-    for (int i = 0; i < NR_QUANTIZERS; ++i)
-    {
-        mappedQualityValueIndices_.emplace_back();
-    }
+
 }
 
 QualEncoder::~QualEncoder() = default;
 
-void QualEncoder::addUnmappedRecordToBlock(const EncodingRead& samRecord){
-    encodeUnmappedQual(samRecord.qvalues);
-    uncompressedUnmappedQualSize_ += samRecord.qvalues.length();
-    nrUnmappedRecords_++;
-}
-
-void QualEncoder::addMappedRecordToBlock(const EncodingRead& r, const std::string& reference
+void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
 ){
     if (nrMappedRecords() == 0)
     {
         posOffset_ = r.posMin;
         samPileupDeque_.setPosMin(r.posMin);
         samPileupDeque_.setPosMax(r.posMax);
+
+        out->codeBooks.clear();
+
+        for(int i=0; i < NR_QUANTIZERS; ++i) {
+            const auto& map = quantizers_[i].inverseLut();
+            out->codeBooks.emplace_back();
+            for(const auto& pair : map) {
+                out->codeBooks.back().push_back(pair.second);
+            }
+        }
+        out->quantizerIndices.clear();
+        out->stepindices.clear();
     }
 
     if (r.posMax > samPileupDeque_.posMax())
@@ -85,13 +80,13 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r, const std::strin
         {
             auto k = static_cast<int>(haplotyper_.push(
                     samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
-                    reference[samPileupDeque_.posMin() - r.posMin]
+                    r.reference[samPileupDeque_.posMin() - r.posMin]
             ));
             ++posCounter;
             // Start not until pipeline is full
             if (posCounter > haplotyper_.getOffset())
             {
-                mappedQuantizerIndices_.push_back(k);
+                out->quantizerIndices.push_back(k);
             }
             samPileupDeque_.pop_front();
         }
@@ -107,7 +102,7 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r, const std::strin
         while (samPileupDeque_.posMin() < r.posMin)
         {
             int l = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
-            mappedQuantizerIndices_.push_back(l);
+            out->quantizerIndices.push_back(l);
             samPileupDeque_.pop_front();
         }
 
@@ -118,11 +113,10 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r, const std::strin
         }
     }
 
-    uncompressedMappedQualSize_ += r.qvalues.length();
     nrMappedRecords_++;
 }
 
-void QualEncoder::finishBlock(uint32_t pos, const std::string& ref){
+void QualEncoder::finishBlock(const EncodingSideInformation& inf){
     // Compute all remaining quantizers
     if (version_ == EncodingOptions::Version::V2)
     {
@@ -130,12 +124,12 @@ void QualEncoder::finishBlock(uint32_t pos, const std::string& ref){
         {
             auto k = static_cast<int>(haplotyper_.push(
                     samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
-                    ref[samPileupDeque_.posMin() - pos]
+                    inf.reference[samPileupDeque_.posMin() - inf.positionStart]
             ));
             ++posCounter;
             if (posCounter > haplotyper_.getOffset())
             {
-                mappedQuantizerIndices_.push_back(k);
+                out->quantizerIndices.push_back(k);
             }
             samPileupDeque_.pop_front();
         }
@@ -145,7 +139,7 @@ void QualEncoder::finishBlock(uint32_t pos, const std::string& ref){
         for (size_t i = 0; i < offset; ++i)
         {
             int k = static_cast<int>(haplotyper_.push("", "", 0, 'N'));
-            mappedQuantizerIndices_.push_back(k);
+            out->quantizerIndices.push_back(k);
         }
     }
     else
@@ -154,7 +148,7 @@ void QualEncoder::finishBlock(uint32_t pos, const std::string& ref){
         while (!samPileupDeque_.empty())
         {
             int k = genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual);
-            mappedQuantizerIndices_.push_back(k);
+            out->quantizerIndices.push_back(k);
             samPileupDeque_.pop_front();
         }
     }
@@ -171,121 +165,8 @@ void QualEncoder::finishBlock(uint32_t pos, const std::string& ref){
     posCounter = 0;
 }
 
-size_t QualEncoder::writeBlock(CQFile *cqFile){
-    compressedMappedQualSize_ = 0;
-    compressedUnmappedQualSize_ = 0;
-
-    // Write block parameters
-    compressedMappedQualSize_ += cqFile->writeUint32(posOffset_);
-    compressedMappedQualSize_ += cqFile->writeUint32((uint32_t) qualityValueOffset_);
-
-    // Write inverse quantization LUTs
-    // compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
-
-    if (debugOut)
-    {
-        std::cerr << "New block. Quantizers:" << std::endl;
-        for (auto& q : quantizers_)
-        {
-            std::cerr << "Quantizer " << q.first << ", " << q.second.inverseLut().size() << " steps:" << std::endl;
-            for (auto& lut : q.second.inverseLut())
-            {
-                std::cerr << lut.first << ": " << lut.second << std::endl;
-            }
-        }
-    }
-
-    // Write unmapped quality values
-    auto *uqv = (unsigned char *) unmappedQualityValues_.c_str();
-    size_t uqvSize = unmappedQualityValues_.length();
-    if (uqvSize > 0)
-    {
-        compressedUnmappedQualSize_ += cqFile->writeUint8(0x01);
-        compressedUnmappedQualSize_ += cqFile->writeQualBlock(uqv, uqvSize);
-    }
-    else
-    {
-        compressedUnmappedQualSize_ += cqFile->writeUint8(0x00);
-    }
-
-    // Write mapped quantizer indices
-    std::string mqiString;
-    for (auto const& mappedQuantizerIndex : mappedQuantizerIndices_)
-    {
-        mqiString += std::to_string(mappedQuantizerIndex);
-    }
-    auto *mqi = (unsigned char *) mqiString.c_str();
-    size_t mqiSize = mqiString.length();
-    if (mqiSize > 0)
-    {
-        compressedMappedQualSize_ += cqFile->writeUint8(0x01);
-        compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
-    }
-    else
-    {
-        compressedMappedQualSize_ += cqFile->writeUint8(0x00);
-    }
-
-    // Write mapped quality value indices
-    for (int i = 0; i < NR_QUANTIZERS; ++i)
-    {
-        std::deque<int> mqviStream = mappedQualityValueIndices_[i];
-        std::string mqviString;
-        for (auto const& mqviInt : mqviStream)
-        {
-            mqviString += std::to_string(mqviInt);
-        }
-        auto *mqvi = (unsigned char *) mqviString.c_str();
-        size_t mqviSize = mqviString.length();
-        if (mqviSize > 0)
-        {
-            compressedMappedQualSize_ += cqFile->writeUint8(0x01);
-            compressedMappedQualSize_ += cqFile->writeQualBlock(mqvi, mqviSize);
-            // compressedMappedQualSize_ += cqFile->write(mqvi, mqviSize);
-        }
-        else
-        {
-            compressedMappedQualSize_ += cqFile->writeUint8(0x00);
-        }
-    }
-
-    return compressedQualSize();
-}
-
-size_t QualEncoder::compressedMappedQualSize() const{
-    return compressedMappedQualSize_;
-}
-
-size_t QualEncoder::compressedUnmappedQualSize() const{
-    return compressedUnmappedQualSize_;
-}
-
-size_t QualEncoder::compressedQualSize() const{
-    return (compressedMappedQualSize_ + compressedUnmappedQualSize_);
-}
-
 size_t QualEncoder::nrMappedRecords() const{
     return nrMappedRecords_;
-}
-
-size_t QualEncoder::nrUnmappedRecords() const{
-    return nrUnmappedRecords_;
-}
-
-size_t QualEncoder::nrRecords() const{
-    return (nrMappedRecords_ + nrUnmappedRecords_);
-}
-
-size_t QualEncoder::uncompressedMappedQualSize() const{
-    return uncompressedMappedQualSize_;
-}
-
-size_t QualEncoder::uncompressedUnmappedQualSize() const{
-    return uncompressedUnmappedQualSize_;
-}
-
-size_t QualEncoder::uncompressedQualSize() const{
-    return (uncompressedMappedQualSize_ + uncompressedUnmappedQualSize_);
 }
 
 void QualEncoder::encodeMappedQual(const EncodingRead& samRecord){
@@ -312,9 +193,9 @@ void QualEncoder::encodeMappedQual(const EncodingRead& samRecord){
                 for (size_t i = 0; i < opLen; i++)
                 {
                     int q = static_cast<int>(samRecord.qvalues[qualIdx++]) - qualityValueOffset_;
-                    int quantizerIndex = mappedQuantizerIndices_[quantizerIndicesIdx++];
+                    int quantizerIndex = out->quantizerIndices[quantizerIndicesIdx++];
                     int qualityValueIndex = quantizers_.at(quantizerIndex).valueToIndex(q);
-                    mappedQualityValueIndices_.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
+                    out->stepindices.at(static_cast<size_t>(quantizerIndex)).push_back(qualityValueIndex);
                 }
                 break;
             case 'I':
@@ -324,7 +205,7 @@ void QualEncoder::encodeMappedQual(const EncodingRead& samRecord){
                 {
                     int q = static_cast<int>(samRecord.qvalues[qualIdx++]) - qualityValueOffset_;
                     int qualityValueIndex = quantizers_.at(NR_QUANTIZERS - 1).valueToIndex(q);
-                    mappedQualityValueIndices_.at(static_cast<size_t>(NR_QUANTIZERS - 1)).push_back(qualityValueIndex);
+                    out->stepindices.at(static_cast<size_t>(NR_QUANTIZERS - 1)).push_back(qualityValueIndex);
                 }
                 break;
             case 'D':
@@ -339,10 +220,6 @@ void QualEncoder::encodeMappedQual(const EncodingRead& samRecord){
         }
         opLen = 0;
     }
-}
-
-void QualEncoder::encodeUnmappedQual(const std::string& qual){
-    unmappedQualityValues_ += qual;
 }
 
 }  // namespace calq

@@ -16,10 +16,11 @@ void decode(const DecodingSideInformation& sideInformation,
 ){
 
     // Decode the quality values
-    QualDecoder qualDecoder;
+    QualDecoder qualDecoder(input, output);
+    output->qvalues.clear();
     for (size_t i = 0; i < sideInformation.positions.size(); ++i)
     {
-        DecodingRead r;// = {};
+        DecodingRead r = {sideInformation.positions[i], sideInformation.cigars[i]};
         qualDecoder.decodeMappedRecordFromBlock(r);
     }
 }

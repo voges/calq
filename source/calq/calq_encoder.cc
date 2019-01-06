@@ -24,12 +24,15 @@ uint32_t computeLength(const std::string& cigar){
     size_t cigarLen = cigar.length();
     uint32_t opLen = 0;  // length of current CIGAR operation
 
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-        if (isdigit(cigar[cigarIdx])) {
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++)
+    {
+        if (isdigit(cigar[cigarIdx]))
+        {
             opLen = opLen * 10 + (uint32_t) cigar[cigarIdx] - (uint32_t) '0';
             continue;
         }
-        switch (cigar[cigarIdx]) {
+        switch (cigar[cigarIdx])
+        {
             case 'M':
             case '=':
             case 'X':
@@ -111,12 +114,21 @@ void encode(const EncodingOptions& opt,
     }
 
     // Encode the quality values
-    QualEncoder qualEncoder(opt, quantizers);
+    QualEncoder qualEncoder(opt, quantizers, output);
     for (size_t i = 0; i < sideInformation.positions.size(); ++i)
     {
-        EncodingRead r = {sideInformation.positions[i], sideInformation.positions[i] +  computeLength(sideInformation.cigars[i]), input.qvalues[i], sideInformation.cigars[i], sideInformation.sequences[i]};
-        qualEncoder.addMappedRecordToBlock(r, sideInformation.reference.substr(r.posMin - sideInformation.positionStart, r.posMax - r.posMin));
+        size_t len = computeLength(sideInformation.cigars[i]);
+        EncodingRead r = {sideInformation.positions[i],
+                          sideInformation.positions[i] + len,
+                          input.qvalues[i],
+                          sideInformation.cigars[i],
+                          sideInformation.sequences[i],
+                          sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positionStart, len)};
+        qualEncoder.addMappedRecordToBlock(r);
     }
+
+    qualEncoder.finishBlock(sideInformation);
+
 }
 
 }  // namespace calq
