@@ -26,7 +26,13 @@ SAMFileHandler::~SAMFileHandler() = default;
 
 size_t SAMFileHandler::readBlock(const size_t &blockSize) {
 	size_t returnCode = samFile_->readBlock(blockSize);
+
+
 	for (auto const &samRecord : samFile_->currentBlock.records) {
+		// TO-DO:	differentiate between mapped and unmapped
+		//			generate one qualityScore stream for unmapped/mapped
+		// 			mapped -> directly to calq lib
+		//			unmapped -> to gabac (?) - possibly quantized
 		positions.push_back(samRecord.pos);
 		sequences.push_back(samRecord.seq);
 		cigars.push_back(samRecord.cigar);

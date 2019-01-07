@@ -237,6 +237,9 @@ int main(int argc, char *argv[]){
 
         calqapp::ProgramOptions ProgramOptions(argc, argv);
         ProgramOptions.validate();
+
+        // TO-Do: Fill structs below with information from SAMFileHandler
+
         /*
         if (!options.decompress)
         {

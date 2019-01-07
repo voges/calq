@@ -342,6 +342,7 @@ void ProgramOptions::processCommandLine(
     if (optionsMap.count("help") || optionsMap.count("h")) {
         writeUsage(std::cout);
         std::cout << options;
+        // TO-DO: Change this to Error instead of log. Program should terminate here. 
         CALQ_LOG("aborting program after printing help");
     }
 
