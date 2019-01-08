@@ -168,9 +168,7 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
 
         std::cerr << "unmapped qvalues:" << std::endl;
 
-        for(auto c : unmappedQualityValues_) {
-            std::cerr << uint32_t (c) << std::endl;
-        }
+        std::cerr << unmappedQualityValues_;
 
         std::cerr <<  std::endl;
 
@@ -190,9 +188,7 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
         compressedMappedQualSize_ += cqFile->writeUint8(0x01);
         std::cerr << "quantizer indices:" << std::endl;
 
-        for(auto c : mappedQuantizerIndices_) {
-            std::cerr << uint32_t (c) << std::endl;
-        }
+        std::cerr << mqiString;
 
         std::cerr <<  std::endl;
         compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
@@ -213,10 +209,7 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
         std::cerr << "Step indices" << i << ":" << std::endl;
 
 
-        for(auto c : mqviStream) {
-            std::cerr << uint32_t (c) << std::endl;
-        }
-
+        std::cerr << mqviString;
         std::cerr <<  std::endl;
 
         if (mqviSize > 0) {
