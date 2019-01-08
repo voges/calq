@@ -154,8 +154,8 @@ int main(int argc, char *argv[]){
 
                 // Container to be filled by lib
                 std::string reference; // TODO: read from file and cut for block
-                std::string unmappedQualityScores; // TODO: Read
-                calq::EncodingBlock encBlock{sH.getQualityScores()};
+                std::string unmappedQualityScores = sH.getUnmappedQualityScores(); // TODO: Read
+                calq::EncodingBlock encBlock{sH.getMappedQualityScores()};
                 calq::DecodingBlock decBlock;
                 calq::EncodingSideInformation encSide{
                         sH.getPositions(),
