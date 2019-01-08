@@ -124,7 +124,7 @@ void QualEncoder::finishBlock(const EncodingSideInformation& inf){
         {
             auto k = static_cast<int>(haplotyper_.push(
                     samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
-                    inf.reference[samPileupDeque_.posMin() - inf.positionStart]
+                    inf.reference[samPileupDeque_.posMin() - inf.positions[0]]
             ));
             ++posCounter;
             if (posCounter > haplotyper_.getOffset())
