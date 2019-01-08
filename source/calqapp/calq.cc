@@ -43,6 +43,15 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     size_t uqvSize = unmappedQualityValues_.length();
     if (uqvSize > 0) {
         cqFile->writeUint8(0x01);
+
+        std::cerr << "unmapped qvalues:" << std::endl;
+
+        for(auto c : unmappedQualityValues_) {
+            std::cerr << uint32_t (c) << std::endl;
+        }
+
+        std::cerr <<  std::endl;
+
         cqFile->writeQualBlock(uqv, uqvSize);
     } else {
         cqFile->writeUint8(0x00);
@@ -50,6 +59,15 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
 
     // Write mapped quantizer indices
     std::string mqiString;
+
+    std::cerr << "quantizer indices:" << std::endl;
+
+    for(auto c : block.quantizerIndices) {
+        std::cerr << uint32_t (c) << std::endl;
+    }
+
+    std::cerr <<  std::endl;
+
     for (auto const &mappedQuantizerIndex : block.quantizerIndices) {
         mqiString += std::to_string(mappedQuantizerIndex);
     }
@@ -66,6 +84,16 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     for (int i = 0; i < opts.quantizationMax - opts.quantizationMin + 1; ++i) {
         std::vector<uint8_t> mqviStream = block.stepindices[i];
         std::string mqviString;
+
+        std::cerr << "Step indices" << i << ":" << std::endl;
+
+
+        for(auto c : block.stepindices[i]) {
+            std::cerr << uint32_t (c) << std::endl;
+        }
+
+        std::cerr <<  std::endl;
+
         for (auto const &mqviInt : mqviStream) {
             mqviString += std::to_string(mqviInt);
         }

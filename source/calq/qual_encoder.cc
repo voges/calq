@@ -45,6 +45,8 @@ QualEncoder::~QualEncoder() = default;
 
 void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
 ){
+    try
+    {
     if (nrMappedRecords() == 0)
     {
         posOffset_ = r.posMin;
@@ -52,16 +54,16 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
         samPileupDeque_.setPosMax(r.posMax);
 
         out->codeBooks.clear();
-
+        out->stepindices.clear();
         for(int i=0; i < NR_QUANTIZERS; ++i) {
             const auto& map = quantizers_[i].inverseLut();
             out->codeBooks.emplace_back();
+            out->stepindices.emplace_back();
             for(const auto& pair : map) {
                 out->codeBooks.back().push_back(pair.second);
             }
         }
         out->quantizerIndices.clear();
-        out->stepindices.clear();
     }
 
     if (r.posMax > samPileupDeque_.posMax())
@@ -70,7 +72,7 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
     }
 
 
-    samPileupDeque_.add(r, static_cast<size_t>(qualityValueOffset_));
+        samPileupDeque_.add(r, static_cast<size_t>(qualityValueOffset_));
 
     samRecordDeque_.push_back(r);
 
@@ -114,6 +116,10 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
     }
 
     nrMappedRecords_++;
+
+    } catch (...) {
+        std::cout << "error" << std::endl;
+    }
 }
 
 void QualEncoder::finishBlock(const EncodingSideInformation& inf){

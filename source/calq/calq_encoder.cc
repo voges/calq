@@ -123,11 +123,12 @@ void encode(const EncodingOptions& opt,
                           input.qvalues[i],
                           sideInformation.cigars[i],
                           sideInformation.sequences[i],
-                          sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len)};
+                          ""//sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len)
+        };
         qualEncoder.addMappedRecordToBlock(r);
     }
 
-    qualEncoder.finishBlock(sideInformation);
+   qualEncoder.finishBlock(sideInformation);
 
 }
 
