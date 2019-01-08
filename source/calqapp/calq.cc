@@ -20,7 +20,7 @@
 size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& block, const calq::EncodingSideInformation& side, const std::string& unmappedQualityValues_, calq::CQFile* cqFile) {
 
     // Write block parameters
-    cqFile->writeUint32(side.positionStart);
+    cqFile->writeUint32(side.positions[0]);
     cqFile->writeUint32((uint32_t) opts.qualityValueOffset);
 
     // Write inverse quantization LUTs
@@ -155,15 +155,13 @@ int main(int argc, char *argv[]){
                 // Container to be filled by lib
                 std::string reference; // TODO: read from file and cut for block
                 std::string unmappedQualityScores; // TODO: Read
-                uint64_t blockStartPosition = 0; // TODO: Calculate
                 calq::EncodingBlock encBlock{sH.getQualityScores()};
                 calq::DecodingBlock decBlock;
                 calq::EncodingSideInformation encSide{
                         sH.getPositions(),
                         sH.getSequences(),
                         sH.getCigars(),
-                        reference,
-                        blockStartPosition
+                        reference
                 };
 
                 calq::encode(ProgramOptions.options, encSide, encBlock, &decBlock);
