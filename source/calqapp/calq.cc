@@ -20,7 +20,7 @@
 size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& block, const calq::EncodingSideInformation& side, const std::string& unmappedQualityValues_, calq::CQFile* cqFile) {
 
     // Write block parameters
-    cqFile->writeUint32(side.positions[0]);
+    cqFile->writeUint32(side.positions[0] - 1);
     cqFile->writeUint32((uint32_t) opts.qualityValueOffset);
 
     // Write inverse quantization LUTs
@@ -46,9 +46,7 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
 
         std::cerr << "unmapped qvalues:" << std::endl;
 
-        for(auto c : unmappedQualityValues_) {
-            std::cerr << uint32_t (c) << std::endl;
-        }
+        std::cerr << unmappedQualityValues_;
 
         std::cerr <<  std::endl;
 
@@ -60,17 +58,16 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     // Write mapped quantizer indices
     std::string mqiString;
 
-    std::cerr << "quantizer indices:" << std::endl;
-
-    for(auto c : block.quantizerIndices) {
-        std::cerr << uint32_t (c) << std::endl;
-    }
-
-    std::cerr <<  std::endl;
-
     for (auto const &mappedQuantizerIndex : block.quantizerIndices) {
         mqiString += std::to_string(mappedQuantizerIndex);
     }
+
+    std::cerr << "quantizer indices:" << std::endl;
+
+    std::cerr << mqiString;
+
+    std::cerr <<  std::endl;
+
     auto* mqi = (unsigned char*) mqiString.c_str();
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
@@ -85,20 +82,19 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
         std::vector<uint8_t> mqviStream = block.stepindices[i];
         std::string mqviString;
 
-        std::cerr << "Step indices" << i << ":" << std::endl;
-
-
-        for(auto c : block.stepindices[i]) {
-            std::cerr << uint32_t (c) << std::endl;
-        }
-
-        std::cerr <<  std::endl;
 
         for (auto const &mqviInt : mqviStream) {
             mqviString += std::to_string(mqviInt);
         }
         auto* mqvi = (unsigned char*) mqviString.c_str();
         size_t mqviSize = mqviString.length();
+
+        std::cerr << "Step indices" << i << ":" << std::endl;
+
+
+        std::cerr << mqviString;
+
+        std::cerr <<  std::endl;
         if (mqviSize > 0) {
             cqFile->writeUint8(0x01);
             cqFile->writeQualBlock(mqvi, mqviSize);
@@ -195,6 +191,8 @@ int main(int argc, char *argv[]){
                 calq::encode(ProgramOptions.options, encSide, encBlock, &decBlock);
 
                 calq::CQFile file(ProgramOptions.outputFilePath, calq::File::Mode::MODE_WRITE);
+
+                file.writeHeader(ProgramOptions.blockSize);
 
                 writeBlock(ProgramOptions.options, decBlock, encSide, unmappedQualityScores, &file);
 
