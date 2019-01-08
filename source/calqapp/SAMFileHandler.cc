@@ -8,18 +8,15 @@
 
 namespace calq {
 
-SAMFileHandler::SAMFileHandler(const std::string inputFileName) :  samFile_(nullptr)
-																// positions(),
-																// sequences(),
-																// cigars(),
-																// qualityScores(),
+SAMFileHandler::SAMFileHandler(const std::string inputFileName) :  samFile_(nullptr),
+																   positions(),
+																   sequences(),
+																   cigars(),
+																   mappedQualityScores(),
+																   unmappedQualityScores()
 																// otherParams(),
-																// quantizerIndices(),
-																// stepIndices(),
-																// codeBooks() 
 {
 	samFile_ = calq::make_unique<SAMFile>(inputFileName);
-
 }
 
 SAMFileHandler::~SAMFileHandler() = default;
@@ -33,10 +30,14 @@ size_t SAMFileHandler::readBlock(const size_t &blockSize) {
 		//			generate one qualityScore stream for unmapped/mapped
 		// 			mapped -> directly to calq lib
 		//			unmapped -> to gabac (?) - possibly quantized
-		positions.push_back(samRecord.pos);
-		sequences.push_back(samRecord.seq);
-		cigars.push_back(samRecord.cigar);
-		qualityScores.push_back(samRecord.qual);
+		if (samRecord.isMapped() == true) {
+			positions.push_back(samRecord.pos);
+			sequences.push_back(samRecord.seq);
+			cigars.push_back(samRecord.cigar);
+			mappedQualityScores.push_back(samRecord.qual);
+		} else {
+			unmappedQualityScores.push_back(samRecord.qual);
+		}
 	}
 	return returnCode;
 }
@@ -53,8 +54,12 @@ std::vector<std::string> SAMFileHandler::getCigars() {
 	return this->cigars;
 }
 
-std::vector<std::string> SAMFileHandler::getQualityScores() {
-	return this->qualityScores;
+std::vector<std::string> SAMFileHandler::getMappedQualityScores() {
+	return this->mappedQualityScores;
+}
+
+std::vector<std::string> SAMFileHandler::getUnmappedQualityScores() {
+	return this->unmappedQualityScores;
 }
 /*
 paramStruct& SamFileHandler::getOtherParams() {
