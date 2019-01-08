@@ -164,6 +164,16 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
     size_t uqvSize = unmappedQualityValues_.length();
     if (uqvSize > 0) {
         compressedUnmappedQualSize_ += cqFile->writeUint8(0x01);
+
+
+        std::cerr << "unmapped qvalues:" << std::endl;
+
+        for(auto c : unmappedQualityValues_) {
+            std::cerr << uint32_t (c) << std::endl;
+        }
+
+        std::cerr <<  std::endl;
+
         compressedUnmappedQualSize_ += cqFile->writeQualBlock(uqv, uqvSize);
     } else {
         compressedUnmappedQualSize_ += cqFile->writeUint8(0x00);
@@ -178,6 +188,13 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
         compressedMappedQualSize_ += cqFile->writeUint8(0x01);
+        std::cerr << "quantizer indices:" << std::endl;
+
+        for(auto c : mappedQuantizerIndices_) {
+            std::cerr << uint32_t (c) << std::endl;
+        }
+
+        std::cerr <<  std::endl;
         compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
     } else {
         compressedMappedQualSize_ += cqFile->writeUint8(0x00);
@@ -192,6 +209,16 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
         }
         auto* mqvi = (unsigned char*) mqviString.c_str();
         size_t mqviSize = mqviString.length();
+
+        std::cerr << "Step indices" << i << ":" << std::endl;
+
+
+        for(auto c : mqviStream) {
+            std::cerr << uint32_t (c) << std::endl;
+        }
+
+        std::cerr <<  std::endl;
+
         if (mqviSize > 0) {
             compressedMappedQualSize_ += cqFile->writeUint8(0x01);
             compressedMappedQualSize_ += cqFile->writeQualBlock(mqvi, mqviSize);
