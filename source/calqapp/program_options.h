@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "calq/structs.h"
 
 namespace calqapp {
 
@@ -20,46 +21,19 @@ class ProgramOptions
     ~ProgramOptions();
 
     void validate();
-    
-    enum struct QuantizerType {
-        NONE,
-        UNIFORM,
-        LLOYD_MAX
-    };
 
-    enum struct FilterType {
-        NONE,
-        GAUSS,
-        RECTANGLE
-    };
-
-    enum struct Version {
-        NONE,
-        V1,
-        V2
-    };
+    calq::EncodingOptions options;
 
     bool force;
     bool verbose;
     bool test;
-    bool squash;
     std::string inputFilePath;
     std::string outputFilePath;
     size_t blockSize;
-    size_t filterSize;
-    size_t quantizationMin;
-    size_t quantizationMax;
-    size_t polyploidy;
-    size_t qualityValueMax;
-    size_t qualityValueMin;
-    size_t qualityValueOffset;
     std::string qualityValueType;
     std::string referenceFilePath;
-    FilterType filterType;
     std::string filterTypeStr;
-    QuantizerType quantizerType;
     std::string quantizerTypeStr;
-    Version version;
     std::string versionStr;
     bool decompress;
     std::string sideInformationFilePath;

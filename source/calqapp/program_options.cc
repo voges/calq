@@ -16,24 +16,13 @@ ProgramOptions::ProgramOptions(
     : force(),
       verbose(),
       test(false),
-      squash(false),
       inputFilePath(),
       outputFilePath(),
       blockSize(),
-      filterSize(),
-      quantizationMin(),
-      quantizationMax(),
-      polyploidy(),
-      qualityValueMax(),
-      qualityValueMin(),
-      qualityValueOffset(),
       qualityValueType(),
       referenceFilePath(),
-      filterType(),
       filterTypeStr(),
-      quantizerType(),
       quantizerTypeStr(),
-      version(),
       versionStr(),
       decompress(),
       sideInformationFilePath()
@@ -48,10 +37,10 @@ ProgramOptions::~ProgramOptions() = default;
 void ProgramOptions::validate(void)
 {
     if (versionStr == "v1") {
-        version = Version::V1;
+        options.version = calq::EncodingOptions::Version::V1;
         CALQ_LOG("Using CALQ version 1");
     } else if (versionStr == "v2") {
-        version = Version::V2;
+        options.version = calq::EncodingOptions::Version::V2;
         CALQ_LOG("Using CALQ version 2");
     } else {
         throwErrorException("Unknown CALQ version");
@@ -70,7 +59,7 @@ void ProgramOptions::validate(void)
         CALQ_LOG("Test switch set - running test cases instead of compression");
     }
 
-    if (squash) {
+    if (options.squash) {
         CALQ_LOG("Acitivity scores are squashed between 0.0 and 1.0");
     } else {
         CALQ_LOG("Acitivity scores are !NOT! squashed between 0.0 and 1.0");
@@ -124,32 +113,32 @@ void ProgramOptions::validate(void)
 
     // Haplotyper filter size
     if (!decompress) {
-        CALQ_LOG("Filter size: %d", static_cast<int>(filterSize));
-        if (filterSize < 1) {
+        CALQ_LOG("Filter size: %d", static_cast<int>(options.filterSize));
+        if (options.filterSize < 1) {
             throwErrorException("Filter size must be greater than 0");
         }
     }
 
     // Quantization
     if (!decompress) {
-        CALQ_LOG("Quantization min steps: %d", static_cast<int>(quantizationMin));
-        if (quantizationMin < 2) {
+        CALQ_LOG("Quantization min steps: %d", static_cast<int>(options.quantizationMin));
+        if (options.quantizationMin < 2) {
             throwErrorException("Quantization must be greater than 1");
         }
     }
 
     // Quantization
     if (!decompress) {
-        CALQ_LOG("Quantization max steps: %d", static_cast<int>(quantizationMax));
-        if (quantizationMax < 2 || quantizationMax < quantizationMin) {
+        CALQ_LOG("Quantization max steps: %d", static_cast<int>(options.quantizationMax));
+        if (options.quantizationMax < 2 || options.quantizationMax < options.quantizationMin) {
             throwErrorException("Quantization must be greater than 1 and quantizationMin");
         }
     }
 
     // polyploidy
     if (!decompress) {
-        CALQ_LOG("Polyploidy: %d", static_cast<int>(polyploidy));
-        if (polyploidy < 1) {
+        CALQ_LOG("Polyploidy: %d", static_cast<int>(options.polyploidy));
+        if (options.polyploidy < 1) {
             throwErrorException("Polyploidy must be greater than 0");
         }
     }
@@ -158,9 +147,9 @@ void ProgramOptions::validate(void)
     if (!decompress) {
         CALQ_LOG("Filter type: %s", filterTypeStr.c_str());
         if (filterTypeStr == "Gauss") {
-            filterType = FilterType::GAUSS;
+            options.filterType = calq::EncodingOptions::FilterType::GAUSS;
         } else if (filterTypeStr == "Rectangle") {
-            filterType = FilterType::RECTANGLE;
+            options.filterType = calq::EncodingOptions::FilterType::RECTANGLE;
         } else {
             throwErrorException("Filter type not supported");
         }
@@ -170,9 +159,9 @@ void ProgramOptions::validate(void)
     if (!decompress) {
         CALQ_LOG("Quantizer type: %s", quantizerTypeStr.c_str());
         if (quantizerTypeStr == "Uniform") {
-            quantizerType = QuantizerType::UNIFORM;
+            options.quantizerType = calq::EncodingOptions::QuantizerType::UNIFORM;
         } else if (quantizerTypeStr == "Lloyd") {
-            quantizerType = QuantizerType::LLOYD_MAX;
+            options.quantizerType = calq::EncodingOptions::QuantizerType::LLOYD_MAX;
         } else {
             throwErrorException("Quantizer type not supported");
         }
@@ -183,40 +172,40 @@ void ProgramOptions::validate(void)
         CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
         if (qualityValueType == "Sanger") {
             // Sanger: Phred+33 [0,40]
-            qualityValueOffset = 33;
-            qualityValueMin = 0;
-            qualityValueMax = 40;
+            options.qualityValueOffset = 33;
+            options.qualityValueMin = 0;
+            options.qualityValueMax = 40;
         } else if (qualityValueType == "Illumina-1.3+") {
             // Illumina 1.3+: Phred+64 [0,40]
-            qualityValueOffset = 64;
-            qualityValueMin = 0;
-            qualityValueMax = 40;
+            options.qualityValueOffset = 64;
+            options.qualityValueMin = 0;
+            options.qualityValueMax = 40;
         } else if (qualityValueType == "Illumina-1.5+") {
             // Illumina 1.5+: Phred+64 [0,40] with 0=unused, 1=unused, 2=Read Segment Quality Control Indicator ('B')
             CALQ_LOG("Warning: Read Segment Quality Control Indicator will not be treated specifically by CALQ");
-            qualityValueOffset = 64;
-            qualityValueMin = 0;
-            qualityValueMax = 40;
+            options.qualityValueOffset = 64;
+            options.qualityValueMin = 0;
+            options.qualityValueMax = 40;
         } else if (qualityValueType == "Illumina-1.8+") {
             // Illumina 1.8+ Phred+33 [0,41]
-            qualityValueOffset = 33;
-            qualityValueMin = 0;
-            qualityValueMax = 41;
+            options.qualityValueOffset = 33;
+            options.qualityValueMin = 0;
+            options.qualityValueMax = 41;
         } else if (qualityValueType == "Max33") {
             // Max33 Phred+33 [0,93]
-            qualityValueOffset = 33;
-            qualityValueMin = 0;
-            qualityValueMax = 93;
+            options.qualityValueOffset = 33;
+            options.qualityValueMin = 0;
+            options.qualityValueMax = 93;
         } else if (qualityValueType == "Max64") {
             // Max64 Phred+64 [0,62]
-            qualityValueOffset = 64;
-            qualityValueMin = 0;
-            qualityValueMax = 62;
+            options.qualityValueOffset = 64;
+            options.qualityValueMin = 0;
+            options.qualityValueMax = 62;
         } else {
             throwErrorException("Quality value type not supported");
         }
-        CALQ_LOG("Quality value offset: %d", static_cast<int>(qualityValueOffset));
-        CALQ_LOG("Quality value range: [%d,%d]", static_cast<int>(qualityValueMin), static_cast<int>(qualityValueMax));
+        CALQ_LOG("Quality value offset: %d", static_cast<int>(options.qualityValueOffset));
+        CALQ_LOG("Quality value range: [%d,%d]", static_cast<int>(options.qualityValueMin), static_cast<int>(options.qualityValueMax));
 
         // referenceFiles
         if (!decompress) {
@@ -296,16 +285,16 @@ void ProgramOptions::processCommandLine(
             po::value<size_t>(&(this->blockSize))->default_value(10000),
             "Block size (in number of SAM records). Default 10000.")
         ("filtersize",
-            po::value<size_t>(&(this->filterSize))->default_value(17),
+            po::value<size_t>(&(this->options.filterSize))->default_value(17),
             "Haplotyper filter radius. Default 17. (v2 only)")
         ("quantization_min",
-            po::value<size_t>(&(this->quantizationMin))->default_value(2),
+            po::value<uint8_t>(&(this->options.quantizationMin))->default_value(2),
             "Minimum quantization steps. Default 2.")
         ("quantization_max",
-            po::value<size_t>(&(this->quantizationMax))->default_value(8),
+            po::value<uint8_t>(&(this->options.quantizationMax))->default_value(8),
             "Maximum quantization steps. Default 8.")
         ("polyploidy,p",
-            po::value<size_t>(&(this->polyploidy))->default_value(2),
+            po::value<uint8_t>(&(this->options.polyploidy))->default_value(2),
             "Polyploidy. Default 2.")
         ("quality_value_type,q",
             po::value<std::string>(&(this->qualityValueType))->default_value("Illumina-1.8+"),

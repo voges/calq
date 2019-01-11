@@ -30,13 +30,13 @@ size_t SAMFileHandler::readBlock(const size_t &blockSize) {
 		//			generate one qualityScore stream for unmapped/mapped
 		// 			mapped -> directly to calq lib
 		//			unmapped -> to gabac (?) - possibly quantized
-		if (samRecord.isMapped() == true) {
+		if (samRecord.isMapped()) {
 			positions.push_back(samRecord.pos);
 			sequences.push_back(samRecord.seq);
 			cigars.push_back(samRecord.cigar);
 			mappedQualityScores.push_back(samRecord.qual);
 		} else {
-			unmappedQualityScores.push_back(samRecord.qual);
+			unmappedQualityScores+=samRecord.qual;
 		}
 	}
 	return returnCode;
@@ -58,7 +58,7 @@ std::vector<std::string> SAMFileHandler::getMappedQualityScores() {
 	return this->mappedQualityScores;
 }
 
-std::vector<std::string> SAMFileHandler::getUnmappedQualityScores() {
+std::string SAMFileHandler::getUnmappedQualityScores() {
 	return this->unmappedQualityScores;
 }
 /*

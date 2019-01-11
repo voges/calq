@@ -17,7 +17,6 @@ struct EncodingSideInformation
     std::vector<std::string> sequences; // Sequences of reads
     std::vector<std::string> cigars; // CIGARS of reads
     std::string reference; // Reference from positionStart to positionEnd
-    uint64_t positionStart; // Block starting position
 };
 
 struct EncodingRead
