@@ -4,6 +4,7 @@
 #include <cmath>
 #include <utility>
 #include <memory>
+#include <vector>
 
 #include "calq/error_exception_reporter.h"
 #include "calq/constants.h"
@@ -149,7 +150,7 @@ size_t CQFile::writeHeader(const size_t &blockSize) {
     return ret;
 }
 
-size_t CQFile::writeQuantizers(const std::map<int, Quantizer> &quantizers) {
+size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers, size_t quantMin) {
     if (quantizers.empty()) {
         throwErrorException("lut is empty");
     }
@@ -161,12 +162,12 @@ size_t CQFile::writeQuantizers(const std::map<int, Quantizer> &quantizers) {
     size_t nrQuantizers = quantizers.size();
     ret += writeUint64(nrQuantizers);
 
-    for (auto const &quantizer : quantizers) {
-        ret += writeUint64((const uint64_t &) quantizer.first);
-        ret += writeUint64(quantizer.second.inverseLut().size());
-        for (auto const &inverseLutEntry : quantizer.second.inverseLut()) {
-            ret += writeUint8((const uint8_t &) inverseLutEntry.first);
-            ret += writeUint8(static_cast<const uint8_t &>(inverseLutEntry.second));
+    for (size_t i = 0; i < quantizers.size(); ++i) {
+        ret += writeUint64((const uint64_t &) i + quantMin);
+        ret += writeUint64(quantizers[i].size());
+        for (size_t j = 0; j < quantizers[i].size(); ++j) {
+            ret += writeUint8((const uint8_t &) j);
+            ret += writeUint8(static_cast<const uint8_t &>(quantizers[i][j]));
         }
     }
 

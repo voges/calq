@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "calq/file.h"
 #include "calq/quantizer.h"
@@ -22,7 +23,7 @@ class CQFile : public File {
     size_t readQualBlock(std::string *block);
 
     size_t writeHeader(const size_t &blockSize);
-    size_t writeQuantizers(const std::map<int, Quantizer> &quantizers);
+    size_t writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers, size_t offset);
     size_t writeQualBlock(unsigned char *block, const size_t &blockSize);
 
  private:

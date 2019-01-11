@@ -20,12 +20,13 @@
 
 size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& block, const calq::EncodingSideInformation& side, const std::string& unmappedQualityValues_, calq::CQFile* cqFile) {
 
+    size_t fileSize = 0;
     // Write block parameters
-    cqFile->writeUint32(side.positions[0] - 1);
-    cqFile->writeUint32((uint32_t) opts.qualityValueOffset);
+    fileSize += cqFile->writeUint32(side.positions[0] - 1);
+    fileSize += cqFile->writeUint32((uint32_t) opts.qualityValueOffset);
 
     // Write inverse quantization LUTs
-    // compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
+    fileSize += cqFile->writeQuantizers(block.codeBooks, opts.quantizationMin);
 
     if (opts.debug) {
         std::cerr << "New block. Quantizers:" << std::endl;
@@ -43,7 +44,7 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     auto* uqv = (unsigned char*) unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
     if (uqvSize > 0) {
-        cqFile->writeUint8(0x01);
+        fileSize += cqFile->writeUint8(0x01);
 
         std::cerr << "unmapped qvalues:" << std::endl;
 
@@ -51,9 +52,9 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
 
         std::cerr <<  std::endl;
 
-        cqFile->writeQualBlock(uqv, uqvSize);
+        fileSize += cqFile->writeQualBlock(uqv, uqvSize);
     } else {
-        cqFile->writeUint8(0x00);
+        fileSize += cqFile->writeUint8(0x00);
     }
 
     // Write mapped quantizer indices
@@ -72,10 +73,10 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     auto* mqi = (unsigned char*) mqiString.c_str();
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
-        cqFile->writeUint8(0x01);
-        cqFile->writeQualBlock(mqi, mqiSize);
+        fileSize += cqFile->writeUint8(0x01);
+        fileSize += cqFile->writeQualBlock(mqi, mqiSize);
     } else {
-        cqFile->writeUint8(0x00);
+        fileSize += cqFile->writeUint8(0x00);
     }
 
     // Write mapped quality value indices
@@ -97,15 +98,14 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
 
         std::cerr <<  std::endl;
         if (mqviSize > 0) {
-            cqFile->writeUint8(0x01);
-            cqFile->writeQualBlock(mqvi, mqviSize);
-            // compressedMappedQualSize_ += cqFile->write(mqvi, mqviSize);
+            fileSize += cqFile->writeUint8(0x01);
+            fileSize += cqFile->writeQualBlock(mqvi, mqviSize);
         } else {
-            cqFile->writeUint8(0x00);
+            fileSize += cqFile->writeUint8(0x00);
         }
     }
 
-    return 0; // TODO: Add statistics
+    return fileSize;
 }
 
 
@@ -170,25 +170,28 @@ int main(int argc, char *argv[]){
         ProgramOptions.validate();
 
         // TO-Do: Fill structs below with information from SAMFileHandler
-        
-        calq::FASTAFile fastaFile(ProgramOptions.referenceFilePath);
-
 
         if (!ProgramOptions.decompress)
         {
             calq::SAMFileHandler sH(ProgramOptions.inputFilePath);
 
+            std::unique_ptr<calq::FASTAFile> fastaFile;
+
+            if(ProgramOptions.options.version == calq::EncodingOptions::Version::V2) {
+                fastaFile = std::unique_ptr<calq::FASTAFile>(new calq::FASTAFile(ProgramOptions.referenceFilePath));
+            }
+
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
             {
 
                 // Container to be filled by lib
-                std::string reference; // TODO: read from file and cut for block
-                std::string unmappedQualityScores = sH.getUnmappedQualityScores(); // TODO: Read
+                std::string reference;
+                if(ProgramOptions.options.version == calq::EncodingOptions::Version::V2) {
+                    reference = fastaFile->getReferencesInRange(sH.getRname(), sH.getRefStart(), sH.getRefEnd());
+                }
+                std::string unmappedQualityScores = sH.getUnmappedQualityScores();
                 calq::EncodingBlock encBlock{sH.getMappedQualityScores()};
                 calq::DecodingBlock decBlock;
-
-                // get reference
-                reference = fastaFile.getReferencesInRange(sH.getRname(), sH.getRefStart(), sH.getRefEnd());
 
                 calq::EncodingSideInformation encSide{
                         sH.getPositions(),
