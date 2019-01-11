@@ -147,7 +147,7 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
     compressedMappedQualSize_ += cqFile->writeUint32((uint32_t) qualityValueOffset_);
 
     // Write inverse quantization LUTs
-    // compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
+    compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
 
     if (debugOut) {
         std::cerr << "New block. Quantizers:" << std::endl;
