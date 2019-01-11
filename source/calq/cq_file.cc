@@ -150,7 +150,7 @@ size_t CQFile::writeHeader(const size_t &blockSize) {
     return ret;
 }
 
-size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers, size_t quantMin) {
+size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers) {
     if (quantizers.empty()) {
         throwErrorException("lut is empty");
     }
@@ -163,7 +163,7 @@ size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantize
     ret += writeUint64(nrQuantizers);
 
     for (size_t i = 0; i < quantizers.size(); ++i) {
-        ret += writeUint64((const uint64_t &) i + quantMin);
+        ret += writeUint64((const uint64_t &) i);
         ret += writeUint64(quantizers[i].size());
         for (size_t j = 0; j < quantizers[i].size(); ++j) {
             ret += writeUint8((const uint8_t &) j);

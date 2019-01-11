@@ -26,7 +26,7 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     fileSize += cqFile->writeUint32((uint32_t) opts.qualityValueOffset);
 
     // Write inverse quantization LUTs
-    fileSize += cqFile->writeQuantizers(block.codeBooks, opts.quantizationMin);
+    fileSize += cqFile->writeQuantizers(block.codeBooks);
 
     if (opts.debug) {
         std::cerr << "New block. Quantizers:" << std::endl;
