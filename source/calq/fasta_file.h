@@ -17,6 +17,8 @@ class FASTAFile : public File {
 
     std::map<std::string, std::string> references;
 
+    std::string getReferencesInRange(const std::string &header, const size_t &start, const size_t &end);
+
  private:
     static const size_t LINE_SIZE = sizeof(char) * (4*KB);
 

@@ -23,7 +23,9 @@ class SAMFileHandler {
   	std::vector<std::string> getCigars();
   	std::vector<std::string> getMappedQualityScores();
     std::string getUnmappedQualityScores();
-
+    size_t getRefStart();
+    size_t getRefEnd();
+    std::string getRname();
   	// paramStruct& getOtherParams();
 
   
@@ -35,6 +37,9 @@ class SAMFileHandler {
   	std::vector<std::string> cigars;
   	std::vector<std::string> mappedQualityScores;
     std::string unmappedQualityScores;
+    size_t refStart;
+    size_t refEnd;
+    std::string rname;
   	//paramStruct& otherParams;
 };
 

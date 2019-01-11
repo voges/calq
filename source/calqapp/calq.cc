@@ -12,6 +12,7 @@
 #include "calq/log.h"
 
 #include "calq/cq_file.h"
+#include "calq/fasta_file.h"
 
 
 #include "calqapp/SAMFileHandler.h"
@@ -169,10 +170,14 @@ int main(int argc, char *argv[]){
         ProgramOptions.validate();
 
         // TO-Do: Fill structs below with information from SAMFileHandler
+        
+        calq::FASTAFile fastaFile(ProgramOptions.referenceFilePath);
+
 
         if (!ProgramOptions.decompress)
         {
             calq::SAMFileHandler sH(ProgramOptions.inputFilePath);
+
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
             {
 
@@ -181,6 +186,10 @@ int main(int argc, char *argv[]){
                 std::string unmappedQualityScores = sH.getUnmappedQualityScores(); // TODO: Read
                 calq::EncodingBlock encBlock{sH.getMappedQualityScores()};
                 calq::DecodingBlock decBlock;
+
+                // get reference
+                reference = fastaFile.getReferencesInRange(sH.getRname(), sH.getRefStart(), sH.getRefEnd());
+
                 calq::EncodingSideInformation encSide{
                         sH.getPositions(),
                         sH.getSequences(),

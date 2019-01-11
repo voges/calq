@@ -73,4 +73,8 @@ void FASTAFile::parse() {
     references.insert(std::pair<std::string, std::string>(currentHeader, currentSequence));
 }
 
+std::string FASTAFile::getReferencesInRange(const std::string &header, const size_t &start, const size_t &end) {
+    return references.at(header).substr(start, end);
+}
+
 }  // namespace calq
