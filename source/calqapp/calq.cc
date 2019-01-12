@@ -17,6 +17,7 @@
 
 #include "calqapp/SAMFileHandler.h"
 
+#define STREAMOUT 1
 
 size_t writeBlock(const calq::EncodingOptions& opts,
                   const calq::DecodingBlock& block,
@@ -55,7 +56,7 @@ size_t writeBlock(const calq::EncodingOptions& opts,
     {
         fileSize += cqFile->writeUint8(0x01);
 
-        if (opts.debug)
+        if (STREAMOUT)
         {
             std::cerr << "unmapped qvalues:" << std::endl;
 
@@ -79,7 +80,7 @@ size_t writeBlock(const calq::EncodingOptions& opts,
         mqiString += std::to_string(mappedQuantizerIndex);
     }
 
-    if (opts.debug)
+    if (STREAMOUT)
     {
         std::cerr << "quantizer indices:" << std::endl;
 
@@ -114,7 +115,7 @@ size_t writeBlock(const calq::EncodingOptions& opts,
         auto *mqvi = (unsigned char *) mqviString.c_str();
         size_t mqviSize = mqviString.length();
 
-        if (opts.debug)
+        if (STREAMOUT)
         {
             std::cerr << "Step indices" << i << ":" << std::endl;
 
