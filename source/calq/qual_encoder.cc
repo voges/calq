@@ -7,6 +7,8 @@
 #include "calq/fasta_file.h"
 #include "calq/error_exception_reporter.h"
 
+#define STREAMOUT 0
+
 namespace calq {
 
 QualEncoder::QualEncoder(const Options &options, const std::map<int, Quantizer> &quant)
@@ -165,12 +167,15 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
     if (uqvSize > 0) {
         compressedUnmappedQualSize_ += cqFile->writeUint8(0x01);
 
+        if(STREAMOUT)
+        {
 
-        std::cerr << "unmapped qvalues:" << std::endl;
+            std::cerr << "unmapped qvalues:" << std::endl;
 
-        std::cerr << unmappedQualityValues_;
+            std::cerr << unmappedQualityValues_;
 
-        std::cerr <<  std::endl;
+            std::cerr << std::endl;
+        }
 
         compressedUnmappedQualSize_ += cqFile->writeQualBlock(uqv, uqvSize);
     } else {
@@ -186,11 +191,16 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
         compressedMappedQualSize_ += cqFile->writeUint8(0x01);
-        std::cerr << "quantizer indices:" << std::endl;
 
-        std::cerr << mqiString;
+        if(STREAMOUT)
+        {
 
-        std::cerr <<  std::endl;
+            std::cerr << "quantizer indices:" << std::endl;
+
+            std::cerr << mqiString;
+
+            std::cerr << std::endl;
+        }
         compressedMappedQualSize_ += cqFile->writeQualBlock(mqi, mqiSize);
     } else {
         compressedMappedQualSize_ += cqFile->writeUint8(0x00);
@@ -206,12 +216,14 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
         auto* mqvi = (unsigned char*) mqviString.c_str();
         size_t mqviSize = mqviString.length();
 
-        std::cerr << "Step indices" << i << ":" << std::endl;
+        if(STREAMOUT)
+        {
+            std::cerr << "Step indices" << i << ":" << std::endl;
 
 
-        std::cerr << mqviString;
-        std::cerr <<  std::endl;
-
+            std::cerr << mqviString;
+            std::cerr << std::endl;
+        }
         if (mqviSize > 0) {
             compressedMappedQualSize_ += cqFile->writeUint8(0x01);
             compressedMappedQualSize_ += cqFile->writeQualBlock(mqvi, mqviSize);

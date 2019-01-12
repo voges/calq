@@ -10,6 +10,7 @@
 
 #include "calq/range/range.h"
 
+
 namespace calq {
 
 CQFile::CQFile(const std::string &path, const Mode &mode)
