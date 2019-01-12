@@ -18,14 +18,14 @@ class SAMFileHandler {
   	~SAMFileHandler();
 
     size_t readBlock(const size_t &blocksize);
-  	std::vector<uint64_t> getPositions();
-  	std::vector<std::string> getSequences();
-  	std::vector<std::string> getCigars();
-  	std::vector<std::string> getMappedQualityScores();
-    std::string getUnmappedQualityScores();
+  	void getPositions(std::vector<uint64_t>* var);
+  	void getSequences(std::vector<std::string>* var);
+  	void getCigars(std::vector<std::string>* var);
+  	void getMappedQualityScores(std::vector<std::string>* var);
+    void getUnmappedQualityScores(std::string* var);
     size_t getRefStart();
     size_t getRefEnd();
-    std::string getRname();
+    void getRname(std::string* var);
   	// paramStruct& getOtherParams();
 
   

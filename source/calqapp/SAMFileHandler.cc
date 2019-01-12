@@ -93,24 +93,29 @@ size_t SAMFileHandler::readBlock(const size_t &blockSize) {
 	return returnCode;
 }
 
-std::vector<uint64_t> SAMFileHandler::getPositions() {
-	return this->positions;
+void SAMFileHandler::getPositions(std::vector<uint64_t>* var) {
+	var->clear();
+	var->swap(this->positions);
 }
 
-std::vector<std::string> SAMFileHandler::getSequences() {
-	return this->sequences;
+void SAMFileHandler::getSequences(std::vector<std::string>* var) {
+	var->clear();
+	var->swap(this->sequences);
 }
 
-std::vector<std::string> SAMFileHandler::getCigars() {
-	return this->cigars;
+void SAMFileHandler::getCigars(std::vector<std::string>* var) {
+	var->clear();
+	var->swap(this->cigars);
 }
 
-std::vector<std::string> SAMFileHandler::getMappedQualityScores() {
-	return this->mappedQualityScores;
+void SAMFileHandler::getMappedQualityScores(std::vector<std::string>* var) {
+	var->clear();
+	var->swap(this->mappedQualityScores);
 }
 
-std::string SAMFileHandler::getUnmappedQualityScores() {
-	return this->unmappedQualityScores;
+void SAMFileHandler::getUnmappedQualityScores(std::string* var) {
+	var->clear();
+	var->swap(this->unmappedQualityScores);
 }
 
 size_t SAMFileHandler::getRefStart() {
@@ -121,8 +126,9 @@ size_t SAMFileHandler::getRefEnd() {
 	return this->refEnd;
 }
 
-std::string SAMFileHandler::getRname() {
-	return this->rname;
+void SAMFileHandler::getRname(std::string* var) {
+	var->clear();
+	var->swap(this->rname);
 }
 /*
 paramStruct& SamFileHandler::getOtherParams() {

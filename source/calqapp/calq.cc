@@ -18,7 +18,12 @@
 #include "calqapp/SAMFileHandler.h"
 
 
-size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& block, const calq::EncodingSideInformation& side, const std::string& unmappedQualityValues_, calq::CQFile* cqFile) {
+size_t writeBlock(const calq::EncodingOptions& opts,
+                  const calq::DecodingBlock& block,
+                  const calq::EncodingSideInformation& side,
+                  const std::string& unmappedQualityValues_,
+                  calq::CQFile *cqFile
+){
 
     size_t fileSize = 0;
     // Write block parameters
@@ -28,12 +33,15 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     // Write inverse quantization LUTs
     fileSize += cqFile->writeQuantizers(block.codeBooks);
 
-    if (opts.debug) {
+    if (opts.debug)
+    {
         std::cerr << "New block. Quantizers:" << std::endl;
-        for (auto &q : block.codeBooks) {
+        for (auto& q : block.codeBooks)
+        {
             std::cerr << "Quantizer " << ", " << q.size() << " steps:" << std::endl;
             size_t ctr = 0;
-            for (auto &lut : q) {
+            for (auto& lut : q)
+            {
                 std::cerr << ctr << ": " << lut << std::endl;
                 ctr++;
             }
@@ -41,66 +49,87 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
     }
 
     // Write unmapped quality values
-    auto* uqv = (unsigned char*) unmappedQualityValues_.c_str();
+    auto *uqv = (unsigned char *) unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
-    if (uqvSize > 0) {
+    if (uqvSize > 0)
+    {
         fileSize += cqFile->writeUint8(0x01);
 
-        std::cerr << "unmapped qvalues:" << std::endl;
+        if (opts.debug)
+        {
+            std::cerr << "unmapped qvalues:" << std::endl;
 
-        std::cerr << unmappedQualityValues_;
+            std::cerr << unmappedQualityValues_;
 
-        std::cerr <<  std::endl;
+            std::cerr << std::endl;
+        }
 
         fileSize += cqFile->writeQualBlock(uqv, uqvSize);
-    } else {
+    }
+    else
+    {
         fileSize += cqFile->writeUint8(0x00);
     }
 
     // Write mapped quantizer indices
     std::string mqiString;
 
-    for (auto const &mappedQuantizerIndex : block.quantizerIndices) {
+    for (auto const& mappedQuantizerIndex : block.quantizerIndices)
+    {
         mqiString += std::to_string(mappedQuantizerIndex);
     }
 
-    std::cerr << "quantizer indices:" << std::endl;
+    if (opts.debug)
+    {
+        std::cerr << "quantizer indices:" << std::endl;
 
-    std::cerr << mqiString;
+        std::cerr << mqiString;
 
-    std::cerr <<  std::endl;
+        std::cerr << std::endl;
+    }
 
-    auto* mqi = (unsigned char*) mqiString.c_str();
+    auto *mqi = (unsigned char *) mqiString.c_str();
     size_t mqiSize = mqiString.length();
-    if (mqiSize > 0) {
+    if (mqiSize > 0)
+    {
         fileSize += cqFile->writeUint8(0x01);
         fileSize += cqFile->writeQualBlock(mqi, mqiSize);
-    } else {
+    }
+    else
+    {
         fileSize += cqFile->writeUint8(0x00);
     }
 
     // Write mapped quality value indices
-    for (int i = 0; i < opts.quantizationMax - opts.quantizationMin + 1; ++i) {
+    for (int i = 0; i < opts.quantizationMax - opts.quantizationMin + 1; ++i)
+    {
         std::vector<uint8_t> mqviStream = block.stepindices[i];
         std::string mqviString;
 
 
-        for (auto const &mqviInt : mqviStream) {
+        for (auto const& mqviInt : mqviStream)
+        {
             mqviString += std::to_string(mqviInt);
         }
-        auto* mqvi = (unsigned char*) mqviString.c_str();
+        auto *mqvi = (unsigned char *) mqviString.c_str();
         size_t mqviSize = mqviString.length();
 
-        std::cerr << "Step indices" << i << ":" << std::endl;
+        if (opts.debug)
+        {
+            std::cerr << "Step indices" << i << ":" << std::endl;
 
 
-        std::cerr << mqviString;
+            std::cerr << mqviString;
 
-        std::cerr <<  std::endl;
-        if (mqviSize > 0) {
+            std::cerr << std::endl;
+        }
+        if (mqviSize > 0)
+        {
             fileSize += cqFile->writeUint8(0x01);
             fileSize += cqFile->writeQualBlock(mqvi, mqviSize);
-        } else {
+        }
+        else
+        {
             fileSize += cqFile->writeUint8(0x00);
         }
     }
@@ -109,20 +138,26 @@ size_t writeBlock(const calq::EncodingOptions& opts, const calq::DecodingBlock& 
 }
 
 
-size_t readBlock(calq::CQFile* cqFile, calq::DecodingBlock* out, calq::DecodingSideInformation* side, std::string* unmapped) {
+size_t readBlock(calq::CQFile *cqFile,
+                 calq::DecodingBlock *out,
+                 calq::DecodingSideInformation *side,
+                 std::string *unmapped
+){
     size_t ret = 0;
 
     std::string buffer;
 
     // Read block parameters
     ret += cqFile->readUint32(&side->posOffset);
-    ret += cqFile->readUint32(reinterpret_cast<uint32_t*>(&side->qualOffset));
+    ret += cqFile->readUint32(reinterpret_cast<uint32_t *>(&side->qualOffset));
 
     std::map<int, calq::Quantizer> quantizers_;
 
-    for (size_t i = 0; i < quantizers_.size(); ++i) {
+    for (size_t i = 0; i < quantizers_.size(); ++i)
+    {
         out->codeBooks.emplace_back();
-        for(size_t j = 0; j < quantizers_[i].inverseLut().size(); ++j) {
+        for (size_t j = 0; j < quantizers_[i].inverseLut().size(); ++j)
+        {
             out->codeBooks[i].push_back(quantizers_[i].inverseLut().at(j));
         }
     }
@@ -133,25 +168,29 @@ size_t readBlock(calq::CQFile* cqFile, calq::DecodingBlock* out, calq::DecodingS
     // Read unmapped quality values
     uint8_t uqvFlags = 0;
     ret += cqFile->readUint8(&uqvFlags);
-    if (uqvFlags & 0x01) { //NOLINT
+    if (uqvFlags & 0x01)
+    { //NOLINT
         ret += cqFile->readQualBlock(unmapped);
     }
 
     // Read mapped quantizer indices
     uint8_t mqiFlags = 0;
     ret += cqFile->readUint8(&mqiFlags);
-    if (mqiFlags & 0x1) { //NOLINT
+    if (mqiFlags & 0x1)
+    { //NOLINT
         ret += cqFile->readQualBlock(&buffer);
         std::copy(buffer.begin(), buffer.end(), out->quantizerIndices.begin());
         buffer.clear();
     }
 
     // Read mapped quality value indices
-    for (int i = 0; i < static_cast<int>(quantizers_.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(quantizers_.size()); ++i)
+    {
         out->stepindices.emplace_back();
         uint8_t mqviFlags = 0;
         ret += cqFile->readUint8(&mqviFlags);
-        if (mqviFlags & 0x1) { //NOLINT
+        if (mqviFlags & 0x1)
+        { //NOLINT
             ret += cqFile->readQualBlock(&buffer);
             std::copy(buffer.begin(), buffer.end(), out->stepindices[i].begin());
             buffer.clear();
@@ -177,38 +216,46 @@ int main(int argc, char *argv[]){
 
             std::unique_ptr<calq::FASTAFile> fastaFile;
 
-            if(ProgramOptions.options.version == calq::EncodingOptions::Version::V2) {
+            if (ProgramOptions.options.version == calq::EncodingOptions::Version::V2)
+            {
                 fastaFile = std::unique_ptr<calq::FASTAFile>(new calq::FASTAFile(ProgramOptions.referenceFilePath));
             }
+
+            calq::CQFile file(ProgramOptions.outputFilePath, calq::File::Mode::MODE_WRITE);
 
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
             {
 
                 // Container to be filled by lib
                 std::string reference;
-                if(ProgramOptions.options.version == calq::EncodingOptions::Version::V2) {
-                    reference = fastaFile->getReferencesInRange(sH.getRname(), sH.getRefStart(), sH.getRefEnd());
+                std::string rname;
+                if (ProgramOptions.options.version == calq::EncodingOptions::Version::V2)
+                {
+                    sH.getRname(&rname);
+                    reference = fastaFile->getReferencesInRange(rname, sH.getRefStart(), sH.getRefEnd());
                 }
-                std::string unmappedQualityScores = sH.getUnmappedQualityScores();
-                calq::EncodingBlock encBlock{sH.getMappedQualityScores()};
+                std::string unmappedQualityScores;
+                sH.getUnmappedQualityScores(&unmappedQualityScores);
+                calq::EncodingBlock encBlock;
+                sH.getMappedQualityScores(&encBlock.qvalues);
                 calq::DecodingBlock decBlock;
 
-                calq::EncodingSideInformation encSide{
-                        sH.getPositions(),
-                        sH.getSequences(),
-                        sH.getCigars(),
-                        reference
-                };
+                calq::EncodingSideInformation encSide;
+                sH.getPositions(&encSide.positions);
+                sH.getSequences(&encSide.sequences);
+                sH.getCigars(&encSide.cigars);
+                encSide.reference = reference;
 
                 calq::encode(ProgramOptions.options, encSide, encBlock, &decBlock);
-
-                calq::CQFile file(ProgramOptions.outputFilePath, calq::File::Mode::MODE_WRITE);
 
                 file.writeHeader(ProgramOptions.blockSize);
 
                 writeBlock(ProgramOptions.options, decBlock, encSide, unmappedQualityScores, &file);
 
             }
+
+            file.close();
+
             CALQ_LOG("Finished encoding");
         }
         else
