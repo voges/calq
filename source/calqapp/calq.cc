@@ -223,6 +223,7 @@ int main(int argc, char *argv[]){
             }
 
             calq::CQFile file(ProgramOptions.outputFilePath, calq::File::Mode::MODE_WRITE);
+            file.writeHeader(ProgramOptions.blockSize);
 
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
             {
@@ -248,8 +249,6 @@ int main(int argc, char *argv[]){
                 encSide.reference = reference;
 
                 calq::encode(ProgramOptions.options, encSide, encBlock, &decBlock);
-
-                file.writeHeader(ProgramOptions.blockSize);
 
                 writeBlock(ProgramOptions.options, decBlock, encSide, unmappedQualityScores, &file);
 
