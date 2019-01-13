@@ -171,7 +171,7 @@ void SAMPileupDeque::add (const EncodingRead& r,  uint8_t qvalOffset) {
 
     // Write clips
     for (size_t i = r.posMin - this->posMin(); i <= pileupIdx; ++i) {
-        this->pileups_[pileupIdx].hq_softcounter += softclips;
+        this->pileups_[i].hq_softcounter += softclips;
     }
 }
 

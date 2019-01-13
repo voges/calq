@@ -33,22 +33,7 @@ size_t writeBlock(const calq::EncodingOptions& opts,
 
     // Write inverse quantization LUTs
     fileSize += cqFile->writeQuantizers(block.codeBooks);
-
-    if (opts.debug)
-    {
-        std::cerr << "New block. Quantizers:" << std::endl;
-        for (auto& q : block.codeBooks)
-        {
-            std::cerr << "Quantizer " << ", " << q.size() << " steps:" << std::endl;
-            size_t ctr = 0;
-            for (auto& lut : q)
-            {
-                std::cerr << ctr << ": " << lut << std::endl;
-                ctr++;
-            }
-        }
-    }
-
+    
     // Write unmapped quality values
     auto *uqv = (unsigned char *) unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
