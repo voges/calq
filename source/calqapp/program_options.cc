@@ -322,6 +322,7 @@ void ProgramOptions::processCommandLine(
             "Side information file path");
 
     this->options.debug = true;
+    this->options.squash = true;
 
 
 
