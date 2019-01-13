@@ -74,7 +74,7 @@ void FASTAFile::parse() {
 }
 
 std::string FASTAFile::getReferencesInRange(const std::string &header, const size_t &start, const size_t &end) {
-    return references.at(header).substr(start, end);
+    return references.at(header).substr(start - 1, end - start);
 }
 
 }  // namespace calq

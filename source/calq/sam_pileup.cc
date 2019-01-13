@@ -1,7 +1,7 @@
 #include "calq/sam_pileup.h"
 
 namespace calq {
-SAMPileup::SAMPileup() : pos(0), qual(""), seq(""), hq_softcounter(0) {}
+SAMPileup::SAMPileup() : pos(0), qual(""), seq(""), ref('N'), hq_softcounter(0) {}
 
 SAMPileup::~SAMPileup() = default;
 
@@ -13,6 +13,7 @@ void SAMPileup::clear() {
     pos = 0;
     qual = "";
     seq = "";
+    ref = 'N';
 }
 
 void SAMPileup::print() const {

@@ -321,6 +321,8 @@ void ProgramOptions::processCommandLine(
             po::value<std::string>(&(this->sideInformationFilePath)),
             "Side information file path");
 
+    this->options.debug = true;
+
 
 
     // Parse the command line

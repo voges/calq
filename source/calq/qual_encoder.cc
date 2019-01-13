@@ -10,7 +10,7 @@
 
 namespace calq {
 
-QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* o)
+QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock *o)
         : nrMappedRecords_(0),
         NR_QUANTIZERS(static_cast<int>(options.quantizationMax - options.quantizationMin + 1)),
 
@@ -45,8 +45,7 @@ QualEncoder::~QualEncoder() = default;
 
 void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
 ){
-    try
-    {
+
     if (nrMappedRecords() == 0)
     {
         posOffset_ = r.posMin;
@@ -55,11 +54,13 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
 
         out->codeBooks.clear();
         out->stepindices.clear();
-        for(int i=0; i < NR_QUANTIZERS; ++i) {
+        for (int i = 0; i < NR_QUANTIZERS; ++i)
+        {
             const auto& map = quantizers_[i].inverseLut();
             out->codeBooks.emplace_back();
             out->stepindices.emplace_back();
-            for(const auto& pair : map) {
+            for (const auto& pair : map)
+            {
                 out->codeBooks.back().push_back(pair.second);
             }
         }
@@ -72,7 +73,7 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
     }
 
 
-        samPileupDeque_.add(r, static_cast<size_t>(qualityValueOffset_));
+    samPileupDeque_.add(r, static_cast<size_t>(qualityValueOffset_));
 
     samRecordDeque_.push_back(r);
 
@@ -81,8 +82,10 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
         while (samPileupDeque_.posMin() < r.posMin)
         {
             auto k = static_cast<int>(haplotyper_.push(
-                    samPileupDeque_.front().seq, samPileupDeque_.front().qual, samPileupDeque_.front().hq_softcounter,
-                    r.reference[samPileupDeque_.posMin() - r.posMin]
+                    samPileupDeque_.front().seq,
+                    samPileupDeque_.front().qual,
+                    samPileupDeque_.front().hq_softcounter,
+                    samPileupDeque_.front().ref
             ));
             ++posCounter;
             // Start not until pipeline is full
@@ -116,10 +119,6 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
     }
 
     nrMappedRecords_++;
-
-    } catch (...) {
-        std::cout << "error" << std::endl;
-    }
 }
 
 void QualEncoder::finishBlock(const EncodingSideInformation& inf){

@@ -135,6 +135,10 @@ void SAMPileupDeque::add (const EncodingRead& r,  uint8_t qvalOffset) {
                             = static_cast<uint32_t>(this->posMin() + pileupIdx);
                     this->pileups_[pileupIdx].seq += r.sequence[idx];
                     this->pileups_[pileupIdx].qual += r.qvalues[idx];
+                    if(this->pileups_[pileupIdx].ref != 'N' && this->pileups_[pileupIdx].ref != r.reference[pileupIdx + this->posMin() - r.posMin]) {
+                        throwErrorException("Non matching reference between reads!");
+                    }
+                    this->pileups_[pileupIdx].ref = r.reference[pileupIdx + this->posMin() - r.posMin];
 
                     idx++;
                     pileupIdx++;

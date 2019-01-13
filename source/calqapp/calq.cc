@@ -17,7 +17,7 @@
 
 #include "calqapp/SAMFileHandler.h"
 
-#define STREAMOUT 1
+#define STREAMOUT 0
 
 size_t writeBlock(const calq::EncodingOptions& opts,
                   const calq::DecodingBlock& block,
@@ -235,6 +235,7 @@ int main(int argc, char *argv[]){
                 {
                     sH.getRname(&rname);
                     reference = fastaFile->getReferencesInRange(rname, sH.getRefStart(), sH.getRefEnd());
+                    std::transform(reference.begin(), reference.end(),reference.begin(), ::toupper);
                 }
                 std::string unmappedQualityScores;
                 sH.getUnmappedQualityScores(&unmappedQualityScores);
@@ -246,7 +247,7 @@ int main(int argc, char *argv[]){
                 sH.getPositions(&encSide.positions);
                 sH.getSequences(&encSide.sequences);
                 sH.getCigars(&encSide.cigars);
-                encSide.reference = reference;
+                encSide.reference.swap(reference);
 
                 calq::encode(ProgramOptions.options, encSide, encBlock, &decBlock);
 

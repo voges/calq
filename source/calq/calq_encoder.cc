@@ -53,7 +53,6 @@ uint32_t computeLength(const std::string& cigar){
         }
         opLen = 0;
     }
-    posMax -= 1;
     return posMax;
 }
 
@@ -123,7 +122,7 @@ void encode(const EncodingOptions& opt,
                           input.qvalues[i],
                           sideInformation.cigars[i],
                           sideInformation.sequences[i],
-                          ""//sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len)
+                          sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len)
         };
         qualEncoder.addMappedRecordToBlock(r);
     }

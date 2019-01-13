@@ -63,7 +63,6 @@ uint32_t computeRefLength(const std::string& cigar){
         }
         opLen = 0;
     }
-    posMax -= 1;
     return posMax;
 }
 

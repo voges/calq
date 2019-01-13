@@ -22,6 +22,7 @@ class SAMPileup {
     uint32_t pos;  // 0-based position of this pileup
     std::string qual;
     std::string seq;
+    char ref;
 
     uint16_t hq_softcounter;  // High quality softclips next to this position
 };
