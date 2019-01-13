@@ -151,16 +151,6 @@ size_t QualEncoder::writeBlock(CQFile* cqFile) {
     // Write inverse quantization LUTs
     compressedMappedQualSize_ += cqFile->writeQuantizers(quantizers_);
 
-    if (debugOut) {
-        std::cerr << "New block. Quantizers:" << std::endl;
-        for (auto &q : quantizers_) {
-            std::cerr << "Quantizer " << q.first << ", " << q.second.inverseLut().size() << " steps:" << std::endl;
-            for (auto &lut : q.second.inverseLut()) {
-                std::cerr << lut.first << ": " << lut.second << std::endl;
-            }
-        }
-    }
-
     // Write unmapped quality values
     auto* uqv = (unsigned char*) unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
