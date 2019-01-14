@@ -116,13 +116,17 @@ void encode(const EncodingOptions& opt,
     QualEncoder qualEncoder(opt, quantizers, output);
     for (size_t i = 0; i < sideInformation.positions.size(); ++i)
     {
+        std::string ref = "";
         size_t len = computeLength(sideInformation.cigars[i]);
+        if(opt.version == EncodingOptions::Version::V2) {
+            ref = sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len);
+        }
         EncodingRead r = {sideInformation.positions[i],
                           sideInformation.positions[i] + len,
                           input.qvalues[i],
                           sideInformation.cigars[i],
                           sideInformation.sequences[i],
-                          sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len)
+                          ref
         };
         qualEncoder.addMappedRecordToBlock(r);
     }
