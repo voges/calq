@@ -133,7 +133,7 @@ void SAMRecord::addToPileupQueue(SAMPileupDeque* samPileupDeque_, size_t quality
     }
 
     // Write clips
-    for (size_t i = posMin - samPileupDeque_->posMin(); i <= pileupIdx; ++i) {
+    for (size_t i = posMin - samPileupDeque_->posMin(); i < pileupIdx; ++i) {
         samPileupDeque_->pileups_[i].hq_softcounter += softclips;
     }
 }
