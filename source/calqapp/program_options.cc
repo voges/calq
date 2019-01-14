@@ -321,7 +321,7 @@ void ProgramOptions::processCommandLine(
             po::value<std::string>(&(this->sideInformationFilePath)),
             "Side information file path");
 
-    this->options.debug = true;
+    this->options.debug = false;
     this->options.squash = true;
 
 

@@ -50,7 +50,7 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
     {
         posOffset_ = r.posMin;
         samPileupDeque_.setPosMin(r.posMin);
-        samPileupDeque_.setPosMax(r.posMax);
+        samPileupDeque_.setPosMax(r.posMax - 1);
 
         out->codeBooks.clear();
         out->stepindices.clear();
@@ -67,9 +67,9 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
         out->quantizerIndices.clear();
     }
 
-    if (r.posMax > samPileupDeque_.posMax())
+    if (r.posMax - 1 > samPileupDeque_.posMax())
     {
-        samPileupDeque_.setPosMax(r.posMax);
+        samPileupDeque_.setPosMax(r.posMax - 1);
     }
 
 

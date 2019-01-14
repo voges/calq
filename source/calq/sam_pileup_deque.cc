@@ -105,7 +105,7 @@ void SAMPileupDeque::add (const EncodingRead& r,  uint8_t qvalOffset) {
     if (this->empty()) {
         throwErrorException("samPileupQueue is empty");
     }
-    if ((this->posMin() > r.posMin) || (this->posMax() < r.posMax)) {
+    if ((this->posMin() > r.posMin) || (this->posMax() < r.posMax - 1)) {
         throwErrorException("samPileupQueue does not overlap record");
     }
 
