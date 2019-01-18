@@ -68,8 +68,6 @@ uint32_t computeRefLength(const std::string& cigar){
 
 size_t SAMFileHandler::readBlock(const size_t &blockSize) {
 	size_t returnCode = samFile_->readBlock(blockSize);
-
-	refStart = samFile_->currentBlock.records[0].pos;
 	refEnd = 0;
 	rname = samFile_->currentBlock.records[0].rname;
 	for (auto const &samRecord : samFile_->currentBlock.records) {
@@ -78,6 +76,9 @@ size_t SAMFileHandler::readBlock(const size_t &blockSize) {
 		// 			mapped -> directly to calq lib
 		//			unmapped -> to gabac (?) - possibly quantized
 		if (samRecord.isMapped()) {
+			if(positions.empty()) {
+				refStart = samRecord.pos;
+			}
 			positions.push_back(samRecord.pos);
 			sequences.push_back(samRecord.seq);
 			cigars.push_back(samRecord.cigar);
