@@ -138,6 +138,10 @@ double Haplotyper::calcActivityScore(char ref, const std::string &seqPile, const
       if (posteriori0 > CUTOFF)
           return 0.0;*/
 
+    if(std::isnan(posteriori0)) {
+        return 1.0;
+    }
+    
     return 1.0 - pow(10, posteriori0);
 }
 
