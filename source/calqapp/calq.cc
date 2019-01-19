@@ -1,22 +1,24 @@
 #include <boost/program_options.hpp>
 
+// -----------------------------------------------------------------------------
+
 #include "calq/calq_encoder.h"
 #include "calq/calq_decoder.h"
 #include "calq/structs.h"
-#include "calq/error_exception_reporter.h"
-#include "calqapp/program_options.h"
-/*
-#include "tclap/CmdLine.h"
-*/
 #include "calq/log.h"
 
-#include "cq_file.h"
-#include "fasta_file.h"
+// -----------------------------------------------------------------------------
 
-
+#include "calqapp/cq_file.h"
+#include "calqapp/fasta_file.h"
 #include "calqapp/SAMFileHandler.h"
+#include "calqapp/program_options.h"
+
+// -----------------------------------------------------------------------------
 
 #define STREAMOUT 0
+
+// -----------------------------------------------------------------------------
 
 size_t writeBlock(const calq::EncodingOptions& opts,
                   const calq::DecodingBlock& block,
@@ -32,7 +34,7 @@ size_t writeBlock(const calq::EncodingOptions& opts,
 
     // Write inverse quantization LUTs
     fileSize += cqFile->writeQuantizers(block.codeBooks);
-    
+
     // Write unmapped quality values
     auto *uqv = (unsigned char *) unmappedQualityValues_.c_str();
     size_t uqvSize = unmappedQualityValues_.length();
@@ -122,6 +124,7 @@ size_t writeBlock(const calq::EncodingOptions& opts,
     return fileSize;
 }
 
+// -----------------------------------------------------------------------------
 
 size_t readBlock(calq::CQFile *cqFile,
                  calq::DecodingBlock *out,
@@ -177,7 +180,10 @@ size_t readBlock(calq::CQFile *cqFile,
         if (mqviFlags & 0x1)
         { //NOLINT
             ret += cqFile->readQualBlock(&buffer);
-            std::copy(buffer.begin(), buffer.end(), out->stepindices[i].begin());
+            std::copy(
+                    buffer.begin(),
+                    buffer.end(),
+                    out->stepindices[i].begin());
             buffer.clear();
         }
     }
@@ -185,7 +191,11 @@ size_t readBlock(calq::CQFile *cqFile,
     return ret;
 }
 
-int main(int argc, char *argv[]){
+// -----------------------------------------------------------------------------
+
+int main(int argc,
+         char *argv[]
+){
     try
     {
         // Compress or decompress
@@ -201,12 +211,18 @@ int main(int argc, char *argv[]){
 
             std::unique_ptr<calq::FASTAFile> fastaFile;
 
-            if (ProgramOptions.options.version == calq::EncodingOptions::Version::V2)
+            if (ProgramOptions.options.version
+                == calq::EncodingOptions::Version::V2)
             {
-                fastaFile = std::unique_ptr<calq::FASTAFile>(new calq::FASTAFile(ProgramOptions.referenceFilePath));
+                fastaFile = std::unique_ptr<calq::FASTAFile>(
+                        new calq::FASTAFile(ProgramOptions.referenceFilePath)
+                );
             }
 
-            calq::CQFile file(ProgramOptions.outputFilePath, calq::File::Mode::MODE_WRITE);
+            calq::CQFile file(
+                    ProgramOptions.outputFilePath,
+                    calq::File::Mode::MODE_WRITE
+            );
             file.writeHeader(ProgramOptions.blockSize);
 
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
@@ -215,11 +231,21 @@ int main(int argc, char *argv[]){
                 // Container to be filled by lib
                 std::string reference;
                 std::string rname;
-                if (ProgramOptions.options.version == calq::EncodingOptions::Version::V2)
+                if (ProgramOptions.options.version
+                    == calq::EncodingOptions::Version::V2)
                 {
                     sH.getRname(&rname);
-                    reference = fastaFile->getReferencesInRange(rname, sH.getRefStart(), sH.getRefEnd());
-                    std::transform(reference.begin(), reference.end(),reference.begin(), ::toupper);
+                    reference = fastaFile->getReferencesInRange(
+                            rname,
+                            sH.getRefStart(),
+                            sH.getRefEnd()
+                    );
+                    std::transform(
+                            reference.begin(),
+                            reference.end(),
+                            reference.begin(),
+                            ::toupper
+                    );
                 }
                 std::string unmappedQualityScores;
                 sH.getUnmappedQualityScores(&unmappedQualityScores);
@@ -233,9 +259,20 @@ int main(int argc, char *argv[]){
                 sH.getCigars(&encSide.cigars);
                 encSide.reference.swap(reference);
 
-                calq::encode(ProgramOptions.options, encSide, encBlock, &decBlock);
+                calq::encode(
+                        ProgramOptions.options,
+                        encSide,
+                        encBlock,
+                        &decBlock
+                );
 
-                writeBlock(ProgramOptions.options, decBlock, encSide, unmappedQualityScores, &file);
+                writeBlock(
+                        ProgramOptions.options,
+                        decBlock,
+                        encSide,
+                        unmappedQualityScores,
+                        &file
+                );
 
             }
 
@@ -250,7 +287,10 @@ int main(int argc, char *argv[]){
             calq::DecodingSideInformation side; // TODO: Load from file
             std::string unmappedValues;
 
-            calq::CQFile file(ProgramOptions.inputFilePath, calq::File::Mode::MODE_READ);
+            calq::CQFile file(
+                    ProgramOptions.inputFilePath,
+                    calq::File::Mode::MODE_READ
+            );
 
             readBlock(&file, &input, &side, &unmappedValues);
 
@@ -278,3 +318,6 @@ int main(int argc, char *argv[]){
 
     return EXIT_SUCCESS;
 }
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

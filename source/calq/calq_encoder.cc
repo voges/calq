@@ -1,19 +1,24 @@
 #include "calq/calq_encoder.h"
 
+// -----------------------------------------------------------------------------
+
 #include <chrono>
+
+// -----------------------------------------------------------------------------
 
 #include "calq/error_exception_reporter.h"
 #include "calq/log.h"
 #include "calq/helpers.h"
-#include "calqapp/fasta_file.h"
 #include "calq/qual_encoder.h"
 #include "calq/probability_distribution.h"
 #include "calq/uniform_min_max_quantizer.h"
 #include "calq/lloyd_max_quantizer.h"
-#include "calqapp/sam_file.h"
 
+// -----------------------------------------------------------------------------
 
 namespace calq {
+
+// -----------------------------------------------------------------------------
 
 uint32_t computeLength(const std::string& cigar){
     // Compute 0-based first position and 0-based last position this record
@@ -56,6 +61,8 @@ uint32_t computeLength(const std::string& cigar){
     return posMax;
 }
 
+// -----------------------------------------------------------------------------
+
 void encode(const EncodingOptions& opt,
             const EncodingSideInformation& sideInformation,
             const EncodingBlock& input,
@@ -68,11 +75,13 @@ void encode(const EncodingOptions& opt,
     {
         for (auto const& q : samRecord)
         {
-            if ((static_cast<int>(q) - opt.qualityValueOffset) < opt.qualityValueMin)
+            if ((static_cast<int>(q) - opt.qualityValueOffset)
+                < opt.qualityValueMin)
             {
                 throwErrorException("Quality value too small");
             }
-            if ((static_cast<int>(q) - opt.qualityValueOffset) > opt.qualityValueMax)
+            if ((static_cast<int>(q) - opt.qualityValueOffset)
+                > opt.qualityValueMax)
             {
                 throwErrorException("Quality value too large");
             }
@@ -82,7 +91,8 @@ void encode(const EncodingOptions& opt,
 
     std::map<int, Quantizer> quantizers;
 
-    for (auto i = static_cast<int>(opt.quantizationMin); i <= static_cast<int>(opt.quantizationMax); ++i)
+    for (auto i = static_cast<int>(opt.quantizationMin);
+         i <= static_cast<int>(opt.quantizationMax); ++i)
     {
         if (opt.quantizerType == EncodingOptions::QuantizerType::UNIFORM)
         {
@@ -118,8 +128,12 @@ void encode(const EncodingOptions& opt,
     {
         std::string ref = "";
         size_t len = computeLength(sideInformation.cigars[i]);
-        if(opt.version == EncodingOptions::Version::V2) {
-            ref = sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len);
+        if (opt.version == EncodingOptions::Version::V2)
+        {
+            ref = sideInformation.reference.substr(
+                    sideInformation.positions[i]
+                    - sideInformation.positions[0], len
+            );
         }
         EncodingRead r = {sideInformation.positions[i],
                           sideInformation.positions[i] + len,
@@ -131,8 +145,13 @@ void encode(const EncodingOptions& opt,
         qualEncoder.addMappedRecordToBlock(r);
     }
 
-   qualEncoder.finishBlock(sideInformation);
+    qualEncoder.finishBlock();
 
 }
 
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

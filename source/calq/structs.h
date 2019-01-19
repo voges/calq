@@ -1,23 +1,28 @@
-//
-// Created by fabian on 1/1/19.
-//
-
 #ifndef CALQ_STRUCTS_H
 #define CALQ_STRUCTS_H
+
+// -----------------------------------------------------------------------------
 
 #include <string>
 #include <vector>
 
+// -----------------------------------------------------------------------------
+
 namespace calq {
+
+// -----------------------------------------------------------------------------
 
 // Side Information for encoding
 struct EncodingSideInformation
 {
-    std::vector<uint64_t> positions; // Starting positions of reads in respect to genome
+    // Starting positions of reads in respect to genome
+    std::vector<uint64_t> positions;
     std::vector<std::string> sequences; // Sequences of reads
     std::vector<std::string> cigars; // CIGARS of reads
     std::string reference; // Reference from positionStart to positionEnd
 };
+
+// -----------------------------------------------------------------------------
 
 struct EncodingRead
 {
@@ -29,10 +34,14 @@ struct EncodingRead
     std::string reference;
 };
 
+// -----------------------------------------------------------------------------
+
 struct EncodingBlock
 {
     std::vector<std::string> qvalues;
 };
+
+// -----------------------------------------------------------------------------
 
 struct EncodingOptions
 {
@@ -72,14 +81,19 @@ struct EncodingOptions
     Version version = Version::V1;
 };
 
+// -----------------------------------------------------------------------------
+
 // Side Information for encoding
 struct DecodingSideInformation
 {
-    std::vector<uint64_t> positions; // Starting positions of reads in respect to genome
+    // Starting positions of reads in respect to genome
+    std::vector<uint64_t> positions;
     std::vector<std::string> cigars; // CIGARS of reads
     uint32_t posOffset;
     uint8_t qualOffset;
 };
+
+// -----------------------------------------------------------------------------
 
 struct DecodingRead
 {
@@ -87,13 +101,27 @@ struct DecodingRead
     std::string cigar;
 };
 
+// -----------------------------------------------------------------------------
+
 struct DecodingBlock
 {
-    std::vector<uint8_t> quantizerIndices; // Quantizer Index for each genome position in block
-    std::vector<std::vector<uint8_t>> stepindices; // Step index for each position in each read
-    std::vector<std::vector<uint8_t>> codeBooks; // Code books -> representative value for each step for each quantizer
+    // Quantizer Index for each genome position in block
+    std::vector<uint8_t> quantizerIndices;
+
+    // Step index for each position in each read
+    std::vector<std::vector<uint8_t>> stepindices;
+
+    // Code books -> representative value for each step for each quantizer
+    std::vector<std::vector<uint8_t>> codeBooks;
 };
+
+// -----------------------------------------------------------------------------
 
 }
 
+// -----------------------------------------------------------------------------
+
 #endif //CALQ_STRUCTS_H
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

@@ -1,28 +1,35 @@
 #ifndef CALQ_QUAL_ENCODER_H_
 #define CALQ_QUAL_ENCODER_H_
 
+// -----------------------------------------------------------------------------
+
 #include <chrono>
 #include <deque>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "calqapp/cq_file.h"
-#include "sam_pileup_deque.h"
-#include "calqapp/sam_record.h"
-#include "genotyper.h"
-#include "quantizer.h"
-#include "haplotyper.h"
+#include "calq/sam_pileup_deque.h"
+#include "calq/genotyper.h"
+#include "calq/quantizer.h"
+#include "calq/haplotyper.h"
+
+// -----------------------------------------------------------------------------
 
 namespace calq {
+
+// -----------------------------------------------------------------------------
 
 class QualEncoder
 {
  public:
-    explicit QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* out);
+    explicit QualEncoder(const EncodingOptions& options,
+                         const std::map<int, Quantizer>& quant,
+                         DecodingBlock *out
+    );
     ~QualEncoder();
     void addMappedRecordToBlock(const EncodingRead& samRecord);
-    void finishBlock(const EncodingSideInformation& inf);
+    void finishBlock();
     size_t nrMappedRecords() const;
 
  private:
@@ -47,7 +54,7 @@ class QualEncoder
 
     Genotyper genotyper_;
 
-    DecodingBlock* out;
+    DecodingBlock *out;
 
     size_t posCounter;
 
@@ -63,6 +70,13 @@ class QualEncoder
     EncodingOptions::Version version_;
 };
 
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
 
+// -----------------------------------------------------------------------------
+
 #endif  // CALQ_QUAL_ENCODER_H_
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

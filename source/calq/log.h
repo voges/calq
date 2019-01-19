@@ -1,9 +1,15 @@
 #ifndef CALQ_LOG_H_
 #define CALQ_LOG_H_
 
+// -----------------------------------------------------------------------------
+
 #include <string>
 
+// -----------------------------------------------------------------------------
+
 #include "calq/helpers.h"
+
+// -----------------------------------------------------------------------------
 
 // C-style debug macro
 // #define DBG
@@ -23,6 +29,8 @@
     #define CALQ_DEBUG(c, ...) do { } while (false)
 #endif
 
+// -----------------------------------------------------------------------------
+
 // C-style log macro
 #define CALQ_LOG(c, ...) \
     do {\
@@ -30,9 +38,12 @@
         fprintf(stdout, \
                 "LOG  %s %s: " c"\n", \
                 calq::currentDateAndTime().c_str(), \
-                calq::removeFileNameExtension(calq::fileBaseName(std::string(__FILE__))).c_str(), \
+                calq::removeFileNameExtension( \
+                calq::fileBaseName(std::string(__FILE__))).c_str(), \
                 ##__VA_ARGS__); \
     } while (false)
+
+// -----------------------------------------------------------------------------
 
 // C-style error macro
 #define CALQ_ERROR(c, ...) \
@@ -44,4 +55,9 @@
                 ##__VA_ARGS__); \
     } while (false)
 
+// -----------------------------------------------------------------------------
+
 #endif  // CALQ_LOG_H_
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

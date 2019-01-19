@@ -1,25 +1,36 @@
 #ifndef CALQ_SAM_FILE_H_
 #define CALQ_SAM_FILE_H_
 
+// -----------------------------------------------------------------------------
+
 #include <chrono>
 #include <string>
 #include <memory>
 
-#include "file.h"
-#include "sam_block.h"
+// -----------------------------------------------------------------------------
+
+#include "calqapp/file.h"
+#include "calqapp/sam_block.h"
+
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
-class SAMFile : public File {
+// -----------------------------------------------------------------------------
+
+class SAMFile : public File
+{
  public:
-    explicit SAMFile(const std::string &path, const Mode &mode = Mode::MODE_READ);
+    explicit SAMFile(const std::string& path,
+                     const Mode& mode = Mode::MODE_READ
+    );
     ~SAMFile() override;
 
     size_t nrBlocksRead() const;
     size_t nrMappedRecordsRead() const;
     size_t nrUnmappedRecordsRead() const;
     size_t nrRecordsRead() const;
-    size_t readBlock(const size_t &blockSize);
+    size_t readBlock(const size_t& blockSize);
 
     SAMBlock currentBlock;
     std::string header;
@@ -35,6 +46,13 @@ class SAMFile : public File {
     std::chrono::steady_clock::time_point startTime_;
 };
 
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
 
+// -----------------------------------------------------------------------------
+
 #endif  // CALQ_SAM_FILE_H_
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

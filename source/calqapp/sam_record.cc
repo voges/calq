@@ -1,32 +1,43 @@
-#include "sam_record.h"
+#include "calqapp/sam_record.h"
+
+// -----------------------------------------------------------------------------
 
 #include <queue>
 
-#include "calq/error_exception_reporter.h"
+// -----------------------------------------------------------------------------
+
 #include "calq/log.h"
+
+// -----------------------------------------------------------------------------
+
 #include "calqapp/fasta_file.h"
+
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
-SAMRecord::SAMRecord(char* fields[NUM_FIELDS])
+// -----------------------------------------------------------------------------
+
+SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
         : qname(fields[0]),
-          flag((uint16_t) strtol(fields[1], nullptr, 10)),
-          rname(fields[2]),
-          pos((uint32_t) strtol(fields[3], nullptr, 10)),
-          mapq((uint8_t) strtol(fields[4], nullptr, 10)),
-          cigar(fields[5]),
-          rnext(fields[6]),
-          pnext((uint32_t) strtol(fields[7], nullptr, 10)),
-          tlen((int64_t) strtol(fields[8], nullptr, 10)),
-          seq(fields[9]),
-          qual(fields[10]),
-          opt(fields[11]),
-          posMin(0),
-          posMax(0),
-          mapped_(false) {
+        flag((uint16_t) strtol(fields[1], nullptr, 10)),
+        rname(fields[2]),
+        pos((uint32_t) strtol(fields[3], nullptr, 10)),
+        mapq((uint8_t) strtol(fields[4], nullptr, 10)),
+        cigar(fields[5]),
+        rnext(fields[6]),
+        pnext((uint32_t) strtol(fields[7], nullptr, 10)),
+        tlen((int64_t) strtol(fields[8], nullptr, 10)),
+        seq(fields[9]),
+        qual(fields[10]),
+        opt(fields[11]),
+        posMin(0),
+        posMax(0),
+        mapped_(false){
     check();
 
-    if (mapped_) {
+    if (mapped_)
+    {
         // Compute 0-based first position and 0-based last position this record
         // is mapped to on the reference used for alignment
         posMin = pos - 1;
@@ -36,12 +47,16 @@ SAMRecord::SAMRecord(char* fields[NUM_FIELDS])
         size_t cigarLen = cigar.length();
         uint32_t opLen = 0;  // length of current CIGAR operation
 
-        for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
-            if (isdigit(cigar[cigarIdx])) {
-                opLen = opLen * 10 + (uint32_t) cigar[cigarIdx] - (uint32_t) '0';
+        for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++)
+        {
+            if (isdigit(cigar[cigarIdx]))
+            {
+                opLen = opLen * 10 + (uint32_t) cigar[cigarIdx]
+                        - (uint32_t) '0';
                 continue;
             }
-            switch (cigar[cigarIdx]) {
+            switch (cigar[cigarIdx])
+            {
                 case 'M':
                 case '=':
                 case 'X':
@@ -66,20 +81,28 @@ SAMRecord::SAMRecord(char* fields[NUM_FIELDS])
     }
 }
 
+// -----------------------------------------------------------------------------
+
 SAMRecord::~SAMRecord() = default;
 
-bool SAMRecord::isMapped() const {
+// -----------------------------------------------------------------------------
+
+bool SAMRecord::isMapped() const{
     return mapped_;
 }
 
-void SAMRecord::printLong() const {
+// -----------------------------------------------------------------------------
+
+void SAMRecord::printLong() const{
     printShort();
     printf("isMapped: %d, ", mapped_);
     printf("posMin: %d, ", posMin);
     printf("posMax: %d\n", posMax);
 }
 
-void SAMRecord::printShort() const {
+// -----------------------------------------------------------------------------
+
+void SAMRecord::printShort() const{
     printf("%s\t", qname.c_str());
     printf("%d\t", flag);
     printf("%s\t", rname.c_str());
@@ -95,52 +118,77 @@ void SAMRecord::printShort() const {
     printf("\n");
 }
 
-void SAMRecord::printSeqWithPositionOffset() const {
+// -----------------------------------------------------------------------------
+
+void SAMRecord::printSeqWithPositionOffset() const{
     printf("%s %6d-%6d|", rname.c_str(), posMin, posMax);
-    for (unsigned int i = 0; i < posMin; i++) {
+    for (unsigned int i = 0; i < posMin; i++)
+    {
         printf(" ");
     }
     printf("%s\n", seq.c_str());
 }
 
-void SAMRecord::check() {
+// -----------------------------------------------------------------------------
+
+void SAMRecord::check(){
     // Check all fields
-    if (qname.empty()) {
+    if (qname.empty())
+    {
         throwErrorException("qname is empty");
     }
     // flag
-    if (rname.empty()) {
+    if (rname.empty())
+    {
         throwErrorException("rname is empty");
     }
     // pos
     // mapq
-    if (cigar.empty()) {
+    if (cigar.empty())
+    {
         throwErrorException("cigar is empty");
     }
-    if (rnext.empty()) {
+    if (rnext.empty())
+    {
         throwErrorException("rnext is empty");
     }
     // pnext
     // tlen
-    if (seq.empty()) {
+    if (seq.empty())
+    {
         throwErrorException("seq is empty");
     }
-    if (qual.empty()) {
+    if (qual.empty())
+    {
         throwErrorException("qual is empty");
     }
-    if (opt.empty()) {
+    if (opt.empty())
+    {
         CALQ_LOG("opt is empty");
     }
 
     // Check if this record is mapped
-    if ((flag & 0x4) != 0) { //NOLINT
+    if ((flag & 0x4) != 0)
+    { //NOLINT
         mapped_ = false;
-    } else {
+    }
+    else
+    {
         mapped_ = true;
-        if (rname == "*" || pos == 0 || cigar == "*" || seq == "*" || qual == "*") {
+        if (rname == "*" ||
+            pos == 0 ||
+            cigar == "*" ||
+            seq == "*" ||
+            qual == "*")
+        {
             throwErrorException("Corrupted record");
         }
     }
 }
 
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
