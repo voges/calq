@@ -1,4 +1,4 @@
-#include "calq/cq_file.h"
+#include "cq_file.h"
 
 #include <cstring>
 #include <cmath>
@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "calq/error_exception_reporter.h"
-#include "calq/constants.h"
 
 #include "calq/range/range.h"
 
@@ -185,6 +184,8 @@ size_t CQFile::writeQualBlock(unsigned char* block, const size_t &blockSize) {
 //     CALQ_LOG("Writing block");
 
     size_t ret = 0;
+
+    const size_t MB = 1000000;
 
     auto nrBlocks = static_cast<size_t>(ceil(static_cast<double>(blockSize) / static_cast<double>(1 * MB)));
     ret = writeUint64((uint64_t) nrBlocks);

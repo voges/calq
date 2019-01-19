@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-#include "cq_file.h"
+#include "calqapp/cq_file.h"
 #include "sam_pileup_deque.h"
-#include "sam_record.h"
+#include "calqapp/sam_record.h"
 #include "genotyper.h"
 #include "quantizer.h"
 #include "haplotyper.h"

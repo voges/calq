@@ -1,10 +1,10 @@
-#include "calq/sam_record.h"
+#include "sam_record.h"
 
 #include <queue>
 
 #include "calq/error_exception_reporter.h"
 #include "calq/log.h"
-#include "calq/fasta_file.h"
+#include "calqapp/fasta_file.h"
 
 namespace calq {
 

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "calq/file.h"
+#include "file.h"
 #include "calq/quantizer.h"
 
 namespace calq {

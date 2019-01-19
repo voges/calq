@@ -5,12 +5,12 @@
 #include "calq/error_exception_reporter.h"
 #include "calq/log.h"
 #include "calq/helpers.h"
-#include "calq/fasta_file.h"
+#include "calqapp/fasta_file.h"
 #include "calq/qual_encoder.h"
 #include "calq/probability_distribution.h"
 #include "calq/uniform_min_max_quantizer.h"
 #include "calq/lloyd_max_quantizer.h"
-#include "calq/sam_file.h"
+#include "calqapp/sam_file.h"
 
 
 namespace calq {

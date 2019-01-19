@@ -4,7 +4,7 @@
 
 #include "calqapp/SAMFileHandler.h"
 #include "calq/helpers.h"
-#include "calq/sam_file.h"
+#include "sam_file.h"
 #include "calq/calq_encoder.h"
 
 namespace calq {

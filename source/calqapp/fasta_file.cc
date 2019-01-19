@@ -2,7 +2,7 @@
 #include <utility>
 #include <memory>
 
-#include "calq/fasta_file.h"
+#include "fasta_file.h"
 #include "calq/error_exception_reporter.h"
 
 namespace calq {

@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include "calq/sam_file.h"
+#include "sam_file.h"
 #include "calq/error_exception_reporter.h"
 #include "calq/log.h"
 

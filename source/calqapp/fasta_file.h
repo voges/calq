@@ -5,8 +5,7 @@
 #include <string>
 #include <memory>
 
-#include "calq/constants.h"
-#include "calq/file.h"
+#include "file.h"
 
 namespace calq {
 
@@ -20,7 +19,7 @@ class FASTAFile : public File {
     std::string getReferencesInRange(const std::string &header, const size_t &start, const size_t &end);
 
  private:
-    static const size_t LINE_SIZE = sizeof(char) * (4*KB);
+    static const size_t LINE_SIZE = sizeof(char) * (4*1000); // 4 KB
 
     void parse();
 

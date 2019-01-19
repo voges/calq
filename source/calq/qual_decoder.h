@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "calq/cq_file.h"
-#include "calq/sam_record.h"
+#include "calqapp/cq_file.h"
+#include "calqapp/sam_record.h"
 
 namespace calq {
 

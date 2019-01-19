@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "calq/fasta_file.h"
+#include "calqapp/fasta_file.h"
 #include "calq/error_exception_reporter.h"
 #include "calq_encoder.h"
 

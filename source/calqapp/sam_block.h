@@ -3,7 +3,7 @@
 
 #include <deque>
 
-#include "calq/sam_record.h"
+#include "sam_record.h"
 
 namespace calq {
 

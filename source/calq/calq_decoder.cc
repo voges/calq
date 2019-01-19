@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "calq/qual_decoder.h"
-#include "calq/sam_file.h"
+#include "calqapp/sam_file.h"
 #include "calq/error_exception_reporter.h"
 #include "calq/log.h"
 #include "calq/structs.h"

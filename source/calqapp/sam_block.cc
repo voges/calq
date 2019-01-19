@@ -1,4 +1,4 @@
-#include "calq/sam_block.h"
+#include "sam_block.h"
 
 namespace calq {
 

@@ -10,7 +10,6 @@
 #include "calq/filter_buffer.h"
 #include "calq/genotyper.h"
 #include "calq/softclip_spreader.h"
-#include "calq/options.h"
 #include "calq_encoder.h"
 
 // ----------------------------------------------------------------------------------------------------------------------

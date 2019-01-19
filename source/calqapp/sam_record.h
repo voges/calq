@@ -7,7 +7,6 @@
 #include <string>
 
 #include "calq/sam_pileup_deque.h"
-#include "calq/constants.h"
 
 namespace calq {
 

@@ -5,9 +5,8 @@
 #include <string>
 #include <memory>
 
-#include "calq/constants.h"
-#include "calq/file.h"
-#include "calq/sam_block.h"
+#include "file.h"
+#include "sam_block.h"
 
 namespace calq {
 
@@ -26,7 +25,7 @@ class SAMFile : public File {
     std::string header;
 
  private:
-    static const size_t LINE_SIZE = sizeof(char) * (1 * MB);
+    static const size_t LINE_SIZE = sizeof(char) * (1 * 1000000); // 1 MB
 
     std::unique_ptr<char[]> line_;
     size_t nrBlocksRead_;

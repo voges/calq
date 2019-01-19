@@ -4,15 +4,14 @@
 #include "calq/calq_decoder.h"
 #include "calq/structs.h"
 #include "calq/error_exception_reporter.h"
-#include "calq/options.h"
 #include "calqapp/program_options.h"
 /*
 #include "tclap/CmdLine.h"
 */
 #include "calq/log.h"
 
-#include "calq/cq_file.h"
-#include "calq/fasta_file.h"
+#include "cq_file.h"
+#include "fasta_file.h"
 
 
 #include "calqapp/SAMFileHandler.h"

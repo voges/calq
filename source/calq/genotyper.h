@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "calq/constants.h"
-
 namespace calq {
 
 class Genotyper {
