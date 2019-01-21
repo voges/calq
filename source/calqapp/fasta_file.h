@@ -1,11 +1,15 @@
-#ifndef CALQ_EXCEPTIONS_H_
-#define CALQ_EXCEPTIONS_H_
+#ifndef CALQ_FASTA_FILE_H_
+#define CALQ_FASTA_FILE_H_
 
 // -----------------------------------------------------------------------------
 
-#include <exception>
-#include <iostream>
+#include <map>
 #include <string>
+#include <memory>
+
+// -----------------------------------------------------------------------------
+
+#include "calqapp/file.h"
 
 // -----------------------------------------------------------------------------
 
@@ -13,28 +17,27 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-class Exception : public std::exception
+class FASTAFile : public File
 {
  public:
-    explicit Exception(const std::string& msg);
-    Exception(const Exception& e) noexcept;
-    ~Exception() noexcept override;
+    explicit FASTAFile(const std::string& path,
+                       const Mode& mode = Mode::MODE_READ
+    );
+    ~FASTAFile() override;
 
-    virtual std::string getMessage() const;
-    const char *what() const noexcept override;
+    std::map<std::string, std::string> references;
 
- protected:
-    std::string msg_;
-};
+    std::string getReferencesInRange(const std::string& header,
+                                     const size_t& start,
+                                     const size_t& end
+    );
 
-// -----------------------------------------------------------------------------
+ private:
+    static const size_t LINE_SIZE = sizeof(char) * (4 * 1000); // 4 KB
 
-class ErrorException : public Exception
-{
- public:
-    explicit ErrorException(const std::string& msg)
-            : Exception(msg){
-    }
+    void parse();
+
+    std::unique_ptr<char[]> line_;
 };
 
 // -----------------------------------------------------------------------------
@@ -43,7 +46,7 @@ class ErrorException : public Exception
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_EXCEPTIONS_H_
+#endif  // CALQ_FASTA_FILE_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-#include "calq/sam_pileup.h"
+#include "calqapp/sam_block.h"
 
 // -----------------------------------------------------------------------------
 
@@ -6,49 +6,40 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-SAMPileup::SAMPileup()
-        : pos(0),
-        qual(""),
-        seq(""),
-        ref('N'),
-        hq_softcounter(0){
+SAMBlock::SAMBlock()
+        : records(),
+        nrMappedRecords_(0),
+        nrUnmappedRecords_(0){
 }
 
 // -----------------------------------------------------------------------------
 
-SAMPileup::~SAMPileup() = default;
+SAMBlock::~SAMBlock() = default;
 
 // -----------------------------------------------------------------------------
 
-bool SAMPileup::empty() const{
-    return seq.empty();
+size_t SAMBlock::nrMappedRecords() const{
+    return nrMappedRecords_;
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::clear(){
-    pos = 0;
-    qual = "";
-    seq = "";
-    ref = 'N';
+size_t SAMBlock::nrUnmappedRecords() const{
+    return nrUnmappedRecords_;
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::print() const{
-    printf("%6d: %s %s\n", pos, seq.c_str(), qual.c_str());
+size_t SAMBlock::nrRecords() const{
+    return (nrMappedRecords_ + nrUnmappedRecords_);
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::printQual() const{
-    printf("%6d: %s\n", pos, qual.c_str());
-}
-
-// -----------------------------------------------------------------------------
-
-void SAMPileup::printSeq() const{
-    printf("%6d: %s\n", pos, seq.c_str());
+void SAMBlock::reset(){
+    records.clear();
+    nrMappedRecords_ = 0;
+    nrUnmappedRecords_ = 0;
 }
 
 // -----------------------------------------------------------------------------

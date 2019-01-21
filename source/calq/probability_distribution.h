@@ -1,17 +1,21 @@
 #ifndef CALQ_PROBABILITY_DISTRIBUTION_H_
 #define CALQ_PROBABILITY_DISTRIBUTION_H_
 
+// -----------------------------------------------------------------------------
+
 #include <cstddef>
+
+// -----------------------------------------------------------------------------
 
 #include <vector>
 
-
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
 // Samples a probability distribution
-class ProbabilityDistribution {
+class ProbabilityDistribution
+{
  private:
     std::vector<size_t> pdf;
 
@@ -19,10 +23,14 @@ class ProbabilityDistribution {
     size_t rangeMin;
 
  public:
-    ProbabilityDistribution(size_t rangeMin, size_t rangeMax);
+    ProbabilityDistribution(size_t rangeMin,
+                            size_t rangeMax
+    );
 
     // Increases counter of value
-    void addToPdf(size_t qualScore, size_t number = 1);
+    void addToPdf(size_t qualScore,
+                  size_t number = 1
+    );
 
     // Reset all counters to zero
     void resetPdf();
@@ -42,8 +50,14 @@ class ProbabilityDistribution {
     // Greatest possible value
     size_t getRangeMax() const;
 };
+
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #endif  // CALQ_PROBABILITY_DISTRIBUTION_H_
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

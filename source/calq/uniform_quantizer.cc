@@ -1,21 +1,35 @@
 #include "calq/uniform_quantizer.h"
 
+// -----------------------------------------------------------------------------
+
 #include <queue>
 #include <cmath>
 #include <utility>
 
+// -----------------------------------------------------------------------------
+
 #include "calq/error_exception_reporter.h"
+
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
-UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, const int &nrSteps) : Quantizer() {
-    if ((valueMin > valueMax) || (nrSteps <= 1)) {
+// -----------------------------------------------------------------------------
+
+UniformQuantizer::UniformQuantizer(const int& valueMin,
+                                   const int& valueMax,
+                                   const int& nrSteps
+)
+        : Quantizer(){
+    if ((valueMin > valueMax) || (nrSteps <= 1))
+    {
         throwErrorException("Error in quantizer initialization");
     }
 
     // Compute the step size
     auto stepSize = static_cast<int>(
-        floor((static_cast<double>(valueMax - valueMin)) / (static_cast<double>(nrSteps)))
+            floor((static_cast<double>(valueMax - valueMin))
+                  / (static_cast<double>(nrSteps)))
     );
 
     // Compute the borders and the representative values
@@ -23,11 +37,18 @@ UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, con
     std::queue<int> reconstructionValues;
     int newBorder = valueMin;
     borders.push(valueMin);
-    reconstructionValues.push(valueMin + static_cast<int>(round(static_cast<double>(stepSize) / 2.0)));
-    for (int i = 0; i < (nrSteps - 1); i++) {
+    reconstructionValues.push(
+            valueMin +
+            static_cast<int>(round(static_cast<double>(stepSize) / 2.0))
+    );
+    for (int i = 0; i < (nrSteps - 1); i++)
+    {
         newBorder += stepSize;
         borders.push(newBorder);
-        reconstructionValues.push(newBorder + static_cast<int>(round((static_cast<double>(stepSize) / 2.0))));
+        reconstructionValues.push(
+                newBorder +
+                static_cast<int>(round((static_cast<double>(stepSize) / 2.0)))
+        );
     }
     borders.push(valueMax);
 
@@ -36,8 +57,10 @@ UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, con
     int currentIndex = 0;
     int currentReconstructionValue = reconstructionValues.front();
     int currentBorder = borders.front();
-    for (int value = valueMin; value <= valueMax; ++value) {
-        if (value > currentBorder) {
+    for (int value = valueMin; value <= valueMax; ++value)
+    {
+        if (value > currentBorder)
+        {
             currentIndex++;
             reconstructionValues.pop();
             borders.pop();
@@ -50,6 +73,13 @@ UniformQuantizer::UniformQuantizer(const int &valueMin, const int &valueMax, con
     }
 }
 
+// -----------------------------------------------------------------------------
+
 UniformQuantizer::~UniformQuantizer() = default;
 
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

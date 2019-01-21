@@ -114,8 +114,6 @@ set(calq_include_dir ${CMAKE_SOURCE_DIR}/source)
 file(GLOB_RECURSE calq_cc_source_files ${calq_source_dir}/*.cc)
 file(GLOB_RECURSE calq_header_files ${calq_header_dir}/*.h)
 
-set(calq_cc_source_files ${calq_cc_source_files} ${calq_source_dir}/range/range.c source/calq/structs.h)
-
 # Group the source and header files
 source_group("CALQ Source Files" FILES ${calq_cc_source_files})
 source_group("CALQ Header Files" FILES ${calq_header_files})
@@ -146,14 +144,8 @@ set(calqapp_header_dir ${CMAKE_SOURCE_DIR}/source/calqapp)
 set(calqapp_include_dir ${CMAKE_SOURCE_DIR}/source)
 
 # List all source files (alphabetically)
-set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/calq.cc)
-set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/SAMFileHandler.cc)
-set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/program_options.cc)
-
-# List all header files (alphabetically)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/SAMFileHandler.h)
-set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/program_options.h)
-
+file(GLOB_RECURSE calqapp_source_files ${calqapp_source_dir}/*.cc ${calqapp_source_dir}/*.c)
+file(GLOB_RECURSE calqapp_header_files ${calqapp_header_dir}/*.h)
 
 
 source_group("Source files" FILES ${calqapp_source_files})

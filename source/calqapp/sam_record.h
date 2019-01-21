@@ -1,26 +1,32 @@
 #ifndef CALQ_SAM_RECORD_H_
 #define CALQ_SAM_RECORD_H_
 
+// -----------------------------------------------------------------------------
+
 #include <cinttypes>
+
+// -----------------------------------------------------------------------------
 
 #include <deque>
 #include <string>
 
-#include "calq/sam_pileup_deque.h"
-#include "calq/constants.h"
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
+// -----------------------------------------------------------------------------
+
 class FASTAFile;
 
-class SAMRecord {
+// -----------------------------------------------------------------------------
+
+class SAMRecord
+{
  public:
     static const int NUM_FIELDS = 12;
 
-    explicit SAMRecord(char* fields[NUM_FIELDS]);
+    explicit SAMRecord(char *fields[NUM_FIELDS]);
     ~SAMRecord();
-
-    void addToPileupQueue(SAMPileupDeque* samPileupDeque, size_t qualityOffset) const;
 
     bool isMapped() const;
     void printLong() const;
@@ -48,6 +54,13 @@ class SAMRecord {
     bool mapped_;
 };
 
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
 
+// -----------------------------------------------------------------------------
+
 #endif  // CALQ_SAM_RECORD_H_
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

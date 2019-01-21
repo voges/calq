@@ -1,29 +1,34 @@
-/** @file SamFileHandler.cc
- *  @brief This file contains the implementation of the SAMFileHandler class->
- */
-
 #include "calqapp/SAMFileHandler.h"
-#include "calq/helpers.h"
-#include "calq/sam_file.h"
-#include "calq/calq_encoder.h"
+
+// -----------------------------------------------------------------------------
+
+#include "calqapp/sam_file.h"
+
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
-SAMFileHandler::SAMFileHandler(const std::string inputFileName) :  samFile_(nullptr),
-																   positions(),
-																   sequences(),
-																   cigars(),
-																   mappedQualityScores(),
-																   unmappedQualityScores(),
-																   refStart(),
-																   refEnd(),
-																   rname()
-																// otherParams(),
+// -----------------------------------------------------------------------------
+
+SAMFileHandler::SAMFileHandler(const std::string& inputFileName)
+        : samFile_(nullptr),
+        positions(),
+        sequences(),
+        cigars(),
+        mappedQualityScores(),
+        unmappedQualityScores(),
+        refStart(),
+        refEnd(),
+        rname()
 {
-	samFile_ = calq::make_unique<SAMFile>(inputFileName);
+    samFile_ = calq::make_unique<SAMFile>(inputFileName);
 }
 
+// -----------------------------------------------------------------------------
+
 SAMFileHandler::~SAMFileHandler() = default;
+
+// -----------------------------------------------------------------------------
 
 uint32_t computeRefLength(const std::string& cigar){
     // Compute 0-based first position and 0-based last position this record
@@ -63,71 +68,97 @@ uint32_t computeRefLength(const std::string& cigar){
         }
         opLen = 0;
     }
-    posMax -= 1;
     return posMax;
 }
 
-size_t SAMFileHandler::readBlock(const size_t &blockSize) {
-	size_t returnCode = samFile_->readBlock(blockSize);
+// -----------------------------------------------------------------------------
 
-	refStart = samFile_->currentBlock.records[0].pos;
-	refEnd = 0;
-	rname = samFile_->currentBlock.records[0].rname;
-	for (auto const &samRecord : samFile_->currentBlock.records) {
-		// TO-DO:	differentiate between mapped and unmapped
-		//			generate one qualityScore stream for unmapped/mapped
-		// 			mapped -> directly to calq lib
-		//			unmapped -> to gabac (?) - possibly quantized
-		if (samRecord.isMapped()) {
-			positions.push_back(samRecord.pos);
-			sequences.push_back(samRecord.seq);
-			cigars.push_back(samRecord.cigar);
-			mappedQualityScores.push_back(samRecord.qual);
-			if ((samRecord.pos + computeRefLength(samRecord.cigar)) > refEnd) {
-				refEnd = samRecord.pos + computeRefLength(samRecord.cigar);
-			}
-		} else {
-			unmappedQualityScores+=samRecord.qual;
-		}
-	}
-	return returnCode;
-}
-
-std::vector<uint64_t> SAMFileHandler::getPositions() {
-	return this->positions;
-}
-
-std::vector<std::string> SAMFileHandler::getSequences() {
-	return this->sequences;
+size_t SAMFileHandler::readBlock(const size_t& blockSize){
+    size_t returnCode = samFile_->readBlock(blockSize);
+    refEnd = 0;
+    rname = samFile_->currentBlock.records[0].rname;
+    for (auto const& samRecord : samFile_->currentBlock.records)
+    {
+        if (samRecord.isMapped())
+        {
+            if (positions.empty())
+            {
+                refStart = samRecord.pos;
+            }
+            positions.push_back(samRecord.pos);
+            sequences.push_back(samRecord.seq);
+            cigars.push_back(samRecord.cigar);
+            mappedQualityScores.push_back(samRecord.qual);
+            if ((samRecord.pos + computeRefLength(samRecord.cigar)) > refEnd)
+            {
+                refEnd = samRecord.pos + computeRefLength(samRecord.cigar);
+            }
+        }
+        else
+        {
+            unmappedQualityScores += samRecord.qual;
+        }
+    }
+    return returnCode;
 }
 
-std::vector<std::string> SAMFileHandler::getCigars() {
-	return this->cigars;
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getPositions(std::vector<uint64_t> *var){
+    var->clear();
+    var->swap(this->positions);
 }
 
-std::vector<std::string> SAMFileHandler::getMappedQualityScores() {
-	return this->mappedQualityScores;
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getSequences(std::vector<std::string> *var){
+    var->clear();
+    var->swap(this->sequences);
 }
 
-std::string SAMFileHandler::getUnmappedQualityScores() {
-	return this->unmappedQualityScores;
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getCigars(std::vector<std::string> *var){
+    var->clear();
+    var->swap(this->cigars);
 }
 
-size_t SAMFileHandler::getRefStart() {
-	return this->refStart;
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getMappedQualityScores(std::vector<std::string> *var){
+    var->clear();
+    var->swap(this->mappedQualityScores);
 }
 
-size_t SAMFileHandler::getRefEnd() {
-	return this->refEnd;
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getUnmappedQualityScores(std::string *var){
+    var->clear();
+    var->swap(this->unmappedQualityScores);
 }
 
-std::string SAMFileHandler::getRname() {
-	return this->rname;
+// -----------------------------------------------------------------------------
+
+size_t SAMFileHandler::getRefStart(){
+    return this->refStart;
 }
-/*
-paramStruct& SamFileHandler::getOtherParams() {
-	return this->otherParams;
+
+// -----------------------------------------------------------------------------
+
+size_t SAMFileHandler::getRefEnd(){
+    return this->refEnd;
 }
-*/
+
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getRname(std::string *var){
+    var->clear();
+    var->swap(this->rname);
+}
+
+// -----------------------------------------------------------------------------
 
 } // namespace calq
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

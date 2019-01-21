@@ -7,17 +7,19 @@
 #include <string>
 #include <vector>
 
+// -----------------------------------------------------------------------------
+
 #include "calq/filter_buffer.h"
 #include "calq/genotyper.h"
 #include "calq/softclip_spreader.h"
-#include "calq/options.h"
 #include "calq_encoder.h"
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
-class Haplotyper {
+class Haplotyper
+{
  private:
     // const size_t SIGMA;
 
@@ -37,25 +39,49 @@ class Haplotyper {
 
  public:
     // Init
-    Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t nrQuantizers, size_t maxHQSoftclip_propagation,
-               size_t minHQSoftclip_streak, size_t gaussRadius, bool debug, bool squashed, EncodingOptions::FilterType filterType);
+    Haplotyper(size_t sigma,
+               size_t ploidy,
+               size_t qualOffset,
+               size_t nrQuantizers,
+               size_t maxHQSoftclip_propagation,
+               size_t minHQSoftclip_streak,
+               size_t gaussRadius,
+               bool debug,
+               bool squashed,
+               EncodingOptions::FilterType filterType
+    );
 
     // Returns offset between activity scores' position and front
     size_t getOffset() const;
 
-    // Pushes new activity score calculated using parameters and returns filtered acticityscore for (pos-offset)
-    size_t push(const std::string &seqPile, const std::string &qualPile, size_t hq_softclips, char reference);
+    // Pushes new activity score calculated using parameters and
+    // returns filtered acticityscore for (pos-offset)
+    size_t push(const std::string& seqPile,
+                const std::string& qualPile,
+                size_t hq_softclips,
+                char reference
+    );
 
-    std::vector<double> calcNonRefLikelihoods(char ref, const std::string &seqPile, const std::string &qualPile);
+    std::vector<double> calcNonRefLikelihoods(char ref,
+                                              const std::string& seqPile,
+                                              const std::string& qualPile
+    );
 
-    double calcActivityScore(char ref, const std::string &seqPile, const std::string &qualPile, double heterozygosity);
+    double calcActivityScore(char ref,
+                             const std::string& seqPile,
+                             const std::string& qualPile,
+                             double heterozygosity
+    );
 
     std::vector<double> calcPriors(double hetero);
 };
+
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #endif  // CALQ_HAPLOTYPER_H_
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------

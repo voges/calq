@@ -1,19 +1,25 @@
 #ifndef CALQ_FILTER_BUFFER_H_
 #define CALQ_FILTER_BUFFER_H_
 
+// -----------------------------------------------------------------------------
+
 #include <cstddef>
 #include <vector>
 #include <functional>
 
+// -----------------------------------------------------------------------------
+
 #include "calq/circular_buffer.h"
 
-
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 namespace calq {
 
+// -----------------------------------------------------------------------------
+
 // Samples a normal distribution
-class GaussKernel {
+class GaussKernel
+{
  private:
     const double SIGMA;
 
@@ -26,16 +32,22 @@ class GaussKernel {
     explicit GaussKernel(double sigma = 1.0);
 
     // Get gauss value at position pos and buffersize size with mean=size/2
-    double calcValue(size_t pos, size_t size) const;
+    double calcValue(size_t pos,
+                     size_t size
+    ) const;
 
-    // Calculates how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
-    size_t calcMinSize(double threshold, size_t maximum = 101) const;
+    // Calculates how big a buffer must be to contain all values above
+    // threshold. No size greater than maximum is returned.
+    size_t calcMinSize(double threshold,
+                       size_t maximum = 101
+    ) const;
 };
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // Samples an uniform distribution
-class RectangleKernel {
+class RectangleKernel
+{
  private:
     const double SIZE;
 
@@ -44,16 +56,20 @@ class RectangleKernel {
     explicit RectangleKernel(double size = 1.0);
 
     // Get gauss value at position pos and buffersize size with mean=size/2
-    double calcValue(size_t pos, size_t size) const;
+    double calcValue(size_t pos,
+                     size_t size
+    ) const;
 
-    // Calculates how big a buffer must be to contain all values above threshold. No size greater than maximum is returned.
+    // Calculates how big a buffer must be to contain all values above
+    // threshold. No size greater than maximum is returned.
     size_t calcMinSize(size_t maximum = 101) const;
 };
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // Filters an input signal using a filter kernel
-class FilterBuffer {
+class FilterBuffer
+{
  private:
     std::vector<double> kernel;
     CircularBuffer<double> buffer;
@@ -66,7 +82,9 @@ class FilterBuffer {
     double filter() const;
 
     // Initialize buffer and
-    FilterBuffer(const std::function<double(size_t, size_t)> &kernelBuilder, size_t kernelSize);
+    FilterBuffer(const std::function<double(size_t, size_t)>& kernelBuilder,
+                 size_t kernelSize
+    );
 
     // Create dummy buffer
     FilterBuffer();
@@ -77,8 +95,14 @@ class FilterBuffer {
     // Distance between buffer center and borders
     size_t getOffset() const;
 };
+
+// -----------------------------------------------------------------------------
+
 }  // namespace calq
 
-// ----------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 #endif  // CALQ_FILTER_BUFFER_H_
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
