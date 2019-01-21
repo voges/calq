@@ -139,8 +139,9 @@ size_t readBlock(calq::CQFile *cqFile,
     ret += cqFile->readUint32(&side->posOffset);
     ret += cqFile->readUint32(reinterpret_cast<uint32_t *>(&side->qualOffset));
 
-    std::map<int, calq::Quantizer> quantizers_;
-
+    // Read inverse quantization LUTs
+    cqFile->readQuantizers(&out->quantizers);
+    /*    
     for (size_t i = 0; i < quantizers_.size(); ++i)
     {
         out->codeBooks.emplace_back();
@@ -149,9 +150,7 @@ size_t readBlock(calq::CQFile *cqFile,
             out->codeBooks[i].push_back(quantizers_[i].inverseLut().at(j));
         }
     }
-
-    // Read inverse quantization LUTs
-    cqFile->readQuantizers(&quantizers_);
+    */
 
     // Read unmapped quality values
     uint8_t uqvFlags = 0;
@@ -167,12 +166,12 @@ size_t readBlock(calq::CQFile *cqFile,
     if (mqiFlags & 0x1)
     { //NOLINT
         ret += cqFile->readQualBlock(&buffer);
-        std::copy(buffer.begin(), buffer.end(), out->quantizerIndices.begin());
+        std::copy(buffer.begin(), buffer.end(), std::back_inserter(out->quantizerIndices));
         buffer.clear();
     }
 
     // Read mapped quality value indices
-    for (int i = 0; i < static_cast<int>(quantizers_.size()); ++i)
+    for (int i = 0; i < static_cast<int>(out->quantizers.size()); ++i)
     {
         out->stepindices.emplace_back();
         uint8_t mqviFlags = 0;
@@ -183,11 +182,11 @@ size_t readBlock(calq::CQFile *cqFile,
             std::copy(
                     buffer.begin(),
                     buffer.end(),
-                    out->stepindices[i].begin());
+                    std::back_inserter(out->stepindices[i]));
             buffer.clear();
         }
     }
-
+    
     return ret;
 }
 
@@ -284,17 +283,30 @@ int main(int argc,
         {
             calq::DecodingBlock input;
             calq::EncodingBlock output;
-            calq::DecodingSideInformation side; // TODO: Load from file
+            calq::DecodingSideInformation side;
             std::string unmappedValues;
 
             calq::CQFile file(
                     ProgramOptions.inputFilePath,
                     calq::File::Mode::MODE_READ
             );
+            file.readHeader(&ProgramOptions.blockSize);
 
-            readBlock(&file, &input, &side, &unmappedValues);
+            calq::SAMFileHandler sH(ProgramOptions.sideInformationFilePath);
 
-            calq::decode(side, input, &output);
+            while (sH.readBlock(ProgramOptions.blockSize) != 0) {
+                //file side
+
+                sH.getPositions(&side.positions); 
+                sH.getCigars(&side.cigars); 
+                side.posOffset = 0;
+                side.qualOffset = 0;
+                input.quantizerIndices.clear();
+                readBlock(&file, &input, &side, &unmappedValues);
+                calq::decode(side, input, &output);
+            }
+
+
 
             //TODO: Write output & unmappedValues to file
             CALQ_LOG("Finished decoding");

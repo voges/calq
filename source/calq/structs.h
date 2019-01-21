@@ -4,7 +4,12 @@
 // -----------------------------------------------------------------------------
 
 #include <string>
+#include <map>
 #include <vector>
+
+// -----------------------------------------------------------------------------
+
+#include "calq/quantizer.h"
 
 // -----------------------------------------------------------------------------
 
@@ -106,13 +111,15 @@ struct DecodingRead
 struct DecodingBlock
 {
     // Quantizer Index for each genome position in block
-    std::vector<uint8_t> quantizerIndices;
+    std::vector<uint8_t> quantizerIndices; // qvci
 
     // Step index for each position in each read
-    std::vector<std::vector<uint8_t>> stepindices;
+    std::vector<std::vector<uint8_t>> stepindices; //qvi
 
     // Code books -> representative value for each step for each quantizer
     std::vector<std::vector<uint8_t>> codeBooks;
+
+    std::map<int, calq::Quantizer> quantizers;
 };
 
 // -----------------------------------------------------------------------------
