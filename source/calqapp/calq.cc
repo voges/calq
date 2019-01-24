@@ -131,6 +131,12 @@ size_t readBlock(calq::CQFile *cqFile,
                  calq::DecodingSideInformation *side,
                  std::string *unmapped
 ){
+    out->codeBooks.clear();
+    out->stepindices.clear();
+    out->quantizerIndices.clear();
+
+    unmapped->clear();
+
     size_t ret = 0;
 
     std::string buffer;
