@@ -23,7 +23,7 @@ void decode(const DecodingSideInformation& sideInformation,
 ){
 
     // Decode the quality values
-    QualDecoder qualDecoder(input, output);
+    QualDecoder qualDecoder(input, sideInformation.positions[0], sideInformation.qualOffset, output);
     output->qvalues.clear();
     for (size_t i = 0; i < sideInformation.positions.size(); ++i)
     {

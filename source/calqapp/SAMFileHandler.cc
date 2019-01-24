@@ -74,11 +74,19 @@ uint32_t computeRefLength(const std::string& cigar){
 // -----------------------------------------------------------------------------
 
 size_t SAMFileHandler::readBlock(const size_t& blockSize){
+    this->mappedFlags.clear();
+    this->positions.clear();
+    this->cigars.clear();
+    this->sequences.clear();
+    this->mappedQualityScores.clear();
+    this->unmappedQualityScores.clear();
+
     size_t returnCode = samFile_->readBlock(blockSize);
     refEnd = 0;
     rname = samFile_->currentBlock.records[0].rname;
     for (auto const& samRecord : samFile_->currentBlock.records)
     {
+        mappedFlags.push_back(samRecord.isMapped());
         if (samRecord.isMapped())
         {
             if (positions.empty())
@@ -96,7 +104,7 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
         }
         else
         {
-            unmappedQualityScores += samRecord.qual;
+            unmappedQualityScores.push_back(samRecord.qual);
         }
     }
     return returnCode;
@@ -107,6 +115,13 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
 void SAMFileHandler::getPositions(std::vector<uint64_t> *var){
     var->clear();
     var->swap(this->positions);
+}
+
+// -----------------------------------------------------------------------------
+
+void SAMFileHandler::getMappedFlags(std::vector<bool> *var){
+    var->clear();
+    var->swap(this->mappedFlags);
 }
 
 // -----------------------------------------------------------------------------
@@ -132,7 +147,7 @@ void SAMFileHandler::getMappedQualityScores(std::vector<std::string> *var){
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getUnmappedQualityScores(std::string *var){
+void SAMFileHandler::getUnmappedQualityScores(std::vector<std::string> *var){
     var->clear();
     var->swap(this->unmappedQualityScores);
 }

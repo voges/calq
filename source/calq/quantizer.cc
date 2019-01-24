@@ -39,7 +39,6 @@ int Quantizer::valueToIndex(const int& value) const{
 // -----------------------------------------------------------------------------
 
 int Quantizer::indexToReconstructionValue(const int& index) const{
-    std::cout << "index: " << index << std::endl;
     if (inverseLut_.find(index) == inverseLut_.end())
     {
         throwErrorException("Index not found");

@@ -140,7 +140,7 @@ size_t readBlock(calq::CQFile *cqFile,
     ret += cqFile->readUint32(reinterpret_cast<uint32_t *>(&side->qualOffset));
 
     // Read inverse quantization LUTs
-    cqFile->readQuantizers(&out->quantizers);
+    cqFile->readQuantizers(&out->codeBooks);
     /*    
     for (size_t i = 0; i < quantizers_.size(); ++i)
     {
@@ -171,7 +171,7 @@ size_t readBlock(calq::CQFile *cqFile,
     }
 
     // Read mapped quality value indices
-    for (int i = 0; i < static_cast<int>(out->quantizers.size()); ++i)
+    for (int i = 0; i < static_cast<int>(out->codeBooks.size()); ++i)
     {
         out->stepindices.emplace_back();
         uint8_t mqviFlags = 0;
@@ -186,7 +186,7 @@ size_t readBlock(calq::CQFile *cqFile,
             buffer.clear();
         }
     }
-    
+
     return ret;
 }
 
@@ -246,7 +246,7 @@ int main(int argc,
                             ::toupper
                     );
                 }
-                std::string unmappedQualityScores;
+                std::vector<std::string> unmappedQualityScores;
                 sH.getUnmappedQualityScores(&unmappedQualityScores);
                 calq::EncodingBlock encBlock;
                 sH.getMappedQualityScores(&encBlock.qvalues);
@@ -265,11 +265,18 @@ int main(int argc,
                         &decBlock
                 );
 
+                // Build single string out of unmapped q-values
+                std::string unmappedString;
+                for (const auto& s : unmappedQualityScores)
+                {
+                    unmappedString += s;
+                }
+
                 writeBlock(
                         ProgramOptions.options,
                         decBlock,
                         encSide,
-                        unmappedQualityScores,
+                        unmappedString,
                         &file
                 );
 
@@ -290,25 +297,56 @@ int main(int argc,
                     ProgramOptions.inputFilePath,
                     calq::File::Mode::MODE_READ
             );
+
+            calq::File qualFile(
+                    ProgramOptions.outputFilePath,
+                    calq::File::Mode::MODE_WRITE
+            );
+
             file.readHeader(&ProgramOptions.blockSize);
 
             calq::SAMFileHandler sH(ProgramOptions.sideInformationFilePath);
 
-            while (sH.readBlock(ProgramOptions.blockSize) != 0) {
+            while (sH.readBlock(ProgramOptions.blockSize) != 0)
+            {
                 //file side
 
-                sH.getPositions(&side.positions); 
-                sH.getCigars(&side.cigars); 
-                side.posOffset = 0;
-                side.qualOffset = 0;
+                sH.getPositions(&side.positions);
+                sH.getCigars(&side.cigars);
+                side.posOffset = side.positions[0];
+                side.qualOffset = ProgramOptions.options.qualityValueOffset;
                 input.quantizerIndices.clear();
+
                 readBlock(&file, &input, &side, &unmappedValues);
                 calq::decode(side, input, &output);
+
+                std::vector<bool> mappedFlags;
+                sH.getMappedFlags(&mappedFlags);
+
+                std::vector<std::string> unmappedOriginal;
+                sH.getUnmappedQualityScores(&unmappedOriginal);
+
+                auto mappedIt = output.qvalues.begin();
+                auto unmappedPos = 0;
+                auto unmappedSideIt = unmappedOriginal.begin();
+                for (const auto& b : mappedFlags)
+                {
+                    if (b)
+                    {
+                        qualFile.write(mappedIt->c_str(), mappedIt->length());
+                        qualFile.writeByte('\n');
+                        ++mappedIt;
+                    } else {
+                        std::string read = unmappedValues.substr(unmappedPos, unmappedSideIt->length());
+                        qualFile.write(read.c_str(), read.length());
+                        qualFile.writeByte('\n');
+
+                        unmappedPos += read.length();
+                        ++unmappedSideIt;
+                    }
+                }
             }
 
-
-
-            //TODO: Write output & unmappedValues to file
             CALQ_LOG("Finished decoding");
         }
     }

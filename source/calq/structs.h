@@ -118,8 +118,6 @@ struct DecodingBlock
 
     // Code books -> representative value for each step for each quantizer
     std::vector<std::vector<uint8_t>> codeBooks;
-
-    std::map<int, calq::Quantizer> quantizers;
 };
 
 // -----------------------------------------------------------------------------

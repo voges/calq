@@ -27,6 +27,8 @@ class QualDecoder
 {
  public:
     QualDecoder(const DecodingBlock& in,
+                size_t positionOffset,
+                size_t qualityOffset,
                 EncodingBlock *out
     );
     ~QualDecoder();
@@ -40,7 +42,7 @@ class QualDecoder
     size_t uqvIdx_;
     std::vector<size_t> qviIdx_;
 
-    std::map<int, Quantizer> quantizers_;
+    std::vector<Quantizer> quantizers_;
 
     EncodingBlock *out;
     const DecodingBlock& in;

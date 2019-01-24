@@ -12,16 +12,25 @@ namespace calq {
 // -----------------------------------------------------------------------------
 
 QualDecoder::QualDecoder(const DecodingBlock& b,
+                         size_t positionOffset,
+                         size_t qualityOffset,
                          EncodingBlock *o
 )
-        : posOffset_(0),
-        qualityValueOffset_(0),
+        : posOffset_(positionOffset),
+        qualityValueOffset_(qualityOffset),
         uqvIdx_(0),
         qviIdx_(b.stepindices.size(), 0),
-        quantizers_(b.quantizers),
+        quantizers_(0),
         out(o),
         in(b){
     out->qvalues.clear();
+    for(const auto &q : b.codeBooks) {
+        std::map<int, int> steps;
+        for(unsigned int i = 0; i < q.size(); ++i) {
+            steps[i] = q[i];
+        }
+        quantizers_.emplace_back(steps);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -57,18 +66,13 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord){
                 for (size_t i = 0; i < opLen; i++)
                 {   
                     int quantizerIndex = in.quantizerIndices[qvciPos++] - '0';
-                    std::cout << "quantizer index: " << quantizerIndex << std::endl;
 
-                    for (auto i = in.quantizerIndices.begin(); i != in.quantizerIndices.end(); ++i)
-                            std::cout << *i << ' ';
-                    std::cout << std::endl;
 
                     int qualityValueIndex =
                             in.stepindices.at(
                                     static_cast<size_t>(quantizerIndex)
                             )[qviIdx_[quantizerIndex]++] - '0';
 
-                    std::cout << "qualityValueIndex: " << qualityValueIndex << std::endl;
 
                     int q = quantizers_.at(quantizerIndex)
                             .indexToReconstructionValue(qualityValueIndex);

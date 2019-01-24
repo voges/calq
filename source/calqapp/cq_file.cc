@@ -78,7 +78,7 @@ size_t CQFile::readHeader(size_t *blockSize){
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::readQuantizers(std::map<int, Quantizer> *quantizers){
+size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>>* const quantizers){
     if (!quantizers->empty())
     {
         throwErrorException("quantizers is not empty");
@@ -96,7 +96,7 @@ size_t CQFile::readQuantizers(std::map<int, Quantizer> *quantizers){
         uint64_t quantizerIdx = 0;
         ret += readUint64(&quantizerIdx);
 
-        std::map<int, int> inverseLut;
+        std::vector<uint8_t> inverseLut;
         uint64_t nrInverseLutEntries = 0;
         ret += readUint64(&nrInverseLutEntries);
         for (uint64_t j = 0; j < nrInverseLutEntries; ++j)
@@ -105,20 +105,9 @@ size_t CQFile::readQuantizers(std::map<int, Quantizer> *quantizers){
             ret += readUint8(&qualityValueIndex);
             uint8_t reconstructionValue = 0;
             ret += readUint8(&reconstructionValue);
-            inverseLut.insert(
-                    std::pair<int, int>(
-                            qualityValueIndex,
-                            reconstructionValue
-                    )
-            );
+            inverseLut.push_back(reconstructionValue);
         }
-
-        Quantizer quantizer(inverseLut);
-        quantizers->insert(
-                std::pair<int, Quantizer>(
-                        static_cast<int>(quantizerIdx), quantizer
-                )
-        );
+        quantizers->push_back(inverseLut);
     }
 
     return ret;
