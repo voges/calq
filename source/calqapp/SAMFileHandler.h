@@ -41,6 +41,10 @@ class SAMFileHandler
     void getMappedBlock(calq::EncodingBlock *var);
     void getUnmappedBlock(UnmappedInformation *var);
     void getSideInformation(calq::SideInformation *var);
+    size_t nrBlocksRead() const;
+    size_t nrMappedRecordsRead() const;
+    size_t nrUnmappedRecordsRead() const;
+    size_t nrRecordsRead() const;
 
  private:
     std::unique_ptr<SAMFile> samFile_;

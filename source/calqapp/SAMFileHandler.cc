@@ -103,9 +103,10 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
             side.sequences.push_back(samRecord.seq);
             side.cigars.push_back(samRecord.cigar);
             encBlock.qvalues.push_back(samRecord.qual);
-            if ((samRecord.pos + computeRefLength(samRecord.cigar)) > refEnd)
+            auto endTmp = samRecord.pos + computeRefLength(samRecord.cigar);
+            if (endTmp > refEnd)
             {
-                refEnd = samRecord.pos + computeRefLength(samRecord.cigar);
+                refEnd = endTmp;
             }
         }
         else
@@ -165,6 +166,24 @@ void SAMFileHandler::getSideInformation(calq::SideInformation *var){
     side.reference.swap(var->reference);
     var->posOffset = side.posOffset;
     var->qualOffset = side.qualOffset;
+}
+
+// -----------------------------------------------------------------------------
+
+size_t SAMFileHandler::nrBlocksRead() const{
+    return this->samFile_->nrBlocksRead();
+}
+
+size_t SAMFileHandler::nrMappedRecordsRead() const{
+    return this->samFile_->nrMappedRecordsRead();
+}
+
+size_t SAMFileHandler::nrUnmappedRecordsRead() const{
+    return this->samFile_->nrUnmappedRecordsRead();
+}
+
+size_t SAMFileHandler::nrRecordsRead() const{
+    return this->samFile_->nrRecordsRead();
 }
 
 // -----------------------------------------------------------------------------
