@@ -55,7 +55,7 @@ class RectangleKernel
     // init
     explicit RectangleKernel(double size = 1.0);
 
-    // Get gauss value at position pos and buffersize size with mean=size/2
+    // Get rect value at position pos and buffersize size with mean=size/2
     double calcValue(size_t pos,
                      size_t size
     ) const;

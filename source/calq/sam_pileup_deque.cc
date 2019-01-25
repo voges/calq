@@ -156,7 +156,8 @@ void SAMPileupDeque::setPosMin(const uint32_t& posMin){
 // -----------------------------------------------------------------------------
 
 void SAMPileupDeque::add(const EncodingRead& r,
-                         uint8_t qvalOffset
+                         uint8_t qvalOffset,
+                         uint8_t hqSoftClipThreshold
 ){
     if (this->empty())
     {
@@ -184,7 +185,7 @@ void SAMPileupDeque::add(const EncodingRead& r,
         }
 
         const auto HQ_SOFTCLIP_THRESHOLD =
-                static_cast<const char>(29 + qvalOffset);
+                static_cast<const char>(hqSoftClipThreshold + qvalOffset);
 
 
         switch (r.cigar[cigarIdx])

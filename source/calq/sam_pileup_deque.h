@@ -46,7 +46,8 @@ class SAMPileupDeque
     void setPosMin(const uint32_t& posMin);
 
     void add(const EncodingRead& r,
-             uint8_t qvalOffset
+             uint8_t qvalOffset,
+             uint8_t hqSoftClipThreshold
     );
 
  private:

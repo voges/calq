@@ -30,7 +30,7 @@ Haplotyper::Haplotyper(size_t sigma,
                        size_t nrQuantizers,
                        size_t maxHQSoftclip_propagation,
                        size_t minHQSoftclip_streak,
-                       size_t gaussRadius,
+                       size_t filterCutOff,
                        bool debug,
                        bool squashed,
                        FilterType filterType
@@ -43,7 +43,8 @@ Haplotyper::Haplotyper(size_t sigma,
         genotyper(
                 static_cast<const int&>(ploidy),
                 static_cast<const int&>(qualOffset),
-                static_cast<const int&>(nrQuantizers)
+                static_cast<const int&>(nrQuantizers),
+                debug
         ),
         nr_quantizers(nrQuantizers),
         polyploidy(ploidy),
@@ -53,7 +54,7 @@ Haplotyper::Haplotyper(size_t sigma,
     {
         GaussKernel kernel(sigma);
         double THRESHOLD = 0.0000001;
-        size_t size = kernel.calcMinSize(THRESHOLD, gaussRadius * 2 + 1);
+        size_t size = kernel.calcMinSize(THRESHOLD, filterCutOff * 2 + 1);
 
         buffer = FilterBuffer(
                 [kernel](size_t pos, size_t size) -> double
@@ -66,7 +67,7 @@ Haplotyper::Haplotyper(size_t sigma,
     else if (filterType == FilterType::RECTANGLE)
     {
         RectangleKernel kernel(sigma);
-        size_t size = kernel.calcMinSize(gaussRadius * 2 + 1);
+        size_t size = kernel.calcMinSize(filterCutOff * 2 + 1);
 
         buffer = FilterBuffer(
                 [kernel](size_t pos, size_t size) -> double
@@ -255,7 +256,7 @@ size_t Haplotyper::push(const std::string& seqPile,
 
         std::string out = debug.push(s.str());
 
-        s.clear();
+        s.str("");
         if (out != "\n")
         {
             s << out << " " << std::fixed << std::setw(6)

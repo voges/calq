@@ -70,12 +70,11 @@ class QualEncoder
     SAMPileupDeque samPileupDeque_;
 
     Haplotyper haplotyper_;
-
     Genotyper genotyper_;
-
     DecodingBlock *out;
-
     size_t posCounter;
+
+    uint8_t hqSoftClipThreshold;
 
     // Quantizers
     std::map<int, Quantizer> quantizers_;

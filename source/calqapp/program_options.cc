@@ -21,7 +21,6 @@ ProgramOptions::ProgramOptions(
         char *argv[]
 )
         : force(),
-        verbose(),
         test(false),
         inputFilePath(),
         outputFilePath(),
@@ -42,7 +41,30 @@ ProgramOptions::~ProgramOptions() = default;
 
 // -----------------------------------------------------------------------------
 
-void ProgramOptions::validate(void){
+void ProgramOptions::validate(){
+
+    this->options.squash = !this->options.squash;
+    if(this->quantizationMin > 255) {
+        throwErrorException("Option quantizationMin too big");
+    }
+    this->options.quantizationMin = uint8_t(this->quantizationMin);
+
+    if(this->quantizationMax > 255) {
+        throwErrorException("Option quantizationMax too big");
+    }
+    this->options.quantizationMax = uint8_t(this->quantizationMax);
+
+    if(this->polyploidy > 255) {
+        throwErrorException("Option polyploidy too big");
+    }
+    this->options.polyploidy = uint8_t(this->polyploidy);
+
+    if(this->hqSoftClipThreshold > 255) {
+        throwErrorException("Option hqSoftClipThreshold too big");
+    }
+    this->options.hqSoftClipThreshold = uint8_t(this->hqSoftClipThreshold);
+
+
     if (versionStr == "v1")
     {
         options.version = calq::Version::V1;
@@ -62,11 +84,6 @@ void ProgramOptions::validate(void){
     if (force)
     {
         CALQ_LOG("Force switch set - overwriting output file(s)");
-    }
-
-    if (verbose)
-    {
-        CALQ_LOG("Debug switch set - verbose output");
     }
 
     if (test)
@@ -393,9 +410,14 @@ void ProgramOptions::processCommandLine(
                     "Force overwriting of output files."
             )
             (
-                    "verbose,v",
-                    po::bool_switch(&(this->verbose))->default_value(false),
-                    "Be verbose."
+                    "pileup",
+                    po::bool_switch(&(this->options.debugPileup))->default_value(false),
+                    "Be verbose and print pileup"
+            )
+            (
+                    "streams",
+                    po::bool_switch(&(this->debugStreams))->default_value(false),
+                    "Be verbose and print raw streams"
             )
             (
                     "input_file_path,i",
@@ -413,26 +435,20 @@ void ProgramOptions::processCommandLine(
                     "Block size (in number of SAM records). Default 10000."
             )
             (
-                    "filtersize",
-                    po::value<size_t>(&(this->options.filterSize))->
-                            default_value(17),
-                    "Haplotyper filter radius. Default 17. (v2 only)"
-            )
-            (
                     "quantization_min",
-                    po::value<uint8_t>(&(this->options.quantizationMin))->
+                    po::value<size_t>(&(this->quantizationMin))->
                             default_value(2),
                     "Minimum quantization steps. Default 2."
             )
             (
                     "quantization_max",
-                    po::value<uint8_t>(&(this->options.quantizationMax))->
+                    po::value<size_t>(&(this->quantizationMax))->
                             default_value(8),
                     "Maximum quantization steps. Default 8."
             )
             (
                     "polyploidy,p",
-                    po::value<uint8_t>(&(this->options.polyploidy))->
+                    po::value<size_t>(&(this->polyploidy))->
                             default_value(2),
                     "Polyploidy. Default 2."
             )
@@ -447,25 +463,13 @@ void ProgramOptions::processCommandLine(
                     " Max64: Phred+64 [0,62])"
             )
             (
-                    "reference_file_path,r",
-                    po::value<std::string>(&(this->referenceFilePath)),
-                    "Reference file (FASTA format) (v2 only)"
-            )
-            (
-                    "filter_type",
-                    po::value<std::string>(&(this->filterTypeStr))->
-                            default_value("Gauss"),
-                    "Haplotyper Filter Type (Gauss; Rectangle). "
-                    "Default Gauss. (v2 only)"
-            )
-            (
                     "quantizer_type",
                     po::value<std::string>(&(this->quantizerTypeStr))->
                             default_value("Uniform"),
                     "Quantizer type (Uniform; Lloyd). Default Uniform."
             )
             (
-                    "CALQ-version",
+                    "calq_version",
                     po::value<std::string>(&(this->versionStr))->
                             default_value("v1"),
                     "v1 or v2. Default v1"
@@ -479,12 +483,57 @@ void ProgramOptions::processCommandLine(
                     "side_information_file_path,s",
                     po::value<std::string>(&(this->sideInformationFilePath)),
                     "Side information file path"
+            )
+            (
+                    "filter_size",
+                    po::value<size_t>(&(this->options.filterSize))->
+                            default_value(17),
+                    "Haplotyper filter radius. Default 17. (v2 only)"
+            )
+            (
+                    "filter_type",
+                    po::value<std::string>(&(this->filterTypeStr))->
+                            default_value("Gauss"),
+                    "Haplotyper Filter Type (Gauss; Rectangle). "
+                    "Default Gauss. (v2 only)"
+            )
+            (
+                    "filter_cutoff",
+                    po::value<size_t>(&(this->options.filterCutOff))->
+                            default_value(50),
+                    "Haplotyper filter cutoff radius. Default 50. (v2 only)"
+            )
+            (
+                    "hq_softclip_threshold",
+                    po::value<size_t>(&(this->hqSoftClipThreshold))->
+                            default_value(29),
+                    "Quality (without offset) at which a softclip is considered"
+                    " high quality. Default 29. (v2 only)"
+            )
+            (
+                    "hq_softclip_streak",
+                    po::value<size_t>(&(this->options.hqSoftClipStreak))->
+                            default_value(7),
+                    "Number of hq-softclips in one position which triggers "
+                    "spreading of activity values. Default 7. (v2 only)"
+            )
+            (
+                    "hq_softclip_propagation",
+                    po::value<size_t>(&(this->options.hqSoftClipPropagation))->
+                            default_value(50),
+                    "Distance at which hq-softclips impact "
+                    "the activity score (v2 only)"
+            )
+            (
+                    "reference_file_path,r",
+                    po::value<std::string>(&(this->referenceFilePath)),
+                    "Reference file (FASTA format) (v2 only)"
+            )
+            (
+                    "no_squash",
+                    po::bool_switch(&(this->options.squash))->default_value(false),
+                    "Don't squash activity values between 0.0 and 1.0 (v2 only)"
             );
-
-    this->options.debug = false;
-    this->options.squash = true;
-
-
 
     // Parse the command line
     po::variables_map optionsMap;
@@ -504,11 +553,6 @@ void ProgramOptions::processCommandLine(
     // call it after printing the help
     po::notify(optionsMap);
 
-    // Yes, we are verbose
-    if (this->verbose)
-    {
-        std::cout << "calqapp: yes, we are verbose" << std::endl;
-    }
 }
 
 // -----------------------------------------------------------------------------

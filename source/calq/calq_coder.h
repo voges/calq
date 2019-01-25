@@ -119,20 +119,48 @@ enum struct Version
 struct EncodingOptions
 {
     /**
-     * Output additional information (warning: very verbose)
+     * Output additional pileup information (warning: very verbose)
      */
-    bool debug = false;
+    bool debugPileup = false;
 
     /**
      * Calq V2: Squash activity values between 0.0 and 1.0, so that they can be
      * treated as probabilities
      */
-    bool squash = false;
+    bool squash = true;
 
     /**
-     * Calq V2: Filter Radius
+     * Calq V2: Filter Radius. How big should the filter be? For gauss this
+     * is sigma, for rect filter it is the radius similar to cutoff.
      */
-    size_t filterSize = 50;
+    size_t filterSize = 17;
+
+    /**
+     * Calq V2: Filter Cutoff. How big should the filter kernel be? Infinite
+     * filters like gauss will be cut off at that point. The value specified
+     * here will be the radius of the kernel, so the kernel size is
+     * filterCutOff*2 + 1.
+     */
+    size_t filterCutOff = 50;
+
+    /**
+     * Calq V2: Quality value (without offset) at which a soft clip is
+     * considered "high quality"
+     */
+    uint8_t hqSoftClipThreshold = 29;
+
+    /**
+     * Calq V2: How many bases the activity values are supposed to be spread
+     * once the streak limit has been reached
+     */
+    size_t hqSoftClipPropagation = 50;
+
+    /**
+     * Calq V2: How many high quality softclips there have to be at one position
+     * to trigger the propagation
+     */
+    size_t hqSoftClipStreak = 7;
+
 
     /**
      * Lowest Quantization step number
@@ -152,7 +180,7 @@ struct EncodingOptions
     /**
      * Maximum quality value for the used format
      */
-    uint8_t qualityValueMax = 93;
+    uint8_t qualityValueMax = 41;
 
     /**
      * Minimum quality value for the used format

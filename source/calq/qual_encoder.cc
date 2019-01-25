@@ -27,33 +27,33 @@ QualEncoder::QualEncoder(const EncodingOptions& options,
         qualityValueOffset_(options.qualityValueOffset),
         posOffset_(0),
         samPileupDeque_(),
-
         haplotyper_(
                 options.filterSize,
                 options.polyploidy,
                 options.qualityValueOffset,
                 static_cast<size_t>(NR_QUANTIZERS),
-                50,
-                7,
-                50,
-                options.debug,
+                options.hqSoftClipPropagation,
+                options.hqSoftClipStreak,
+                options.filterCutOff,
+                options.debugPileup,
                 options.squash,
                 options.filterType
         ),
         genotyper_(
                 static_cast<const int&>(options.polyploidy),
                 static_cast<const int&>(options.qualityValueOffset),
-                NR_QUANTIZERS
+                NR_QUANTIZERS,
+                options.debugPileup
         ),
 
         out(o),
 
         posCounter(0),
-
+        hqSoftClipThreshold(options.hqSoftClipThreshold),
         quantizers_(quant),
 
         samRecordDeque_(),
-        debugOut(options.debug),
+        debugOut(options.debugPileup),
 
         version_(options.version){
 
@@ -95,7 +95,7 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r
     }
 
 
-    samPileupDeque_.add(r, qualityValueOffset_);
+    samPileupDeque_.add(r, qualityValueOffset_, hqSoftClipThreshold);
 
     samRecordDeque_.push_back(r);
 

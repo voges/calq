@@ -19,14 +19,11 @@
 
 // -----------------------------------------------------------------------------
 
-#define STREAMOUT 0
-
-// -----------------------------------------------------------------------------
-
 size_t writeBlock(const calq::EncodingOptions& opts,
                   const calq::DecodingBlock& block,
                   const calq::SideInformation& side,
                   const std::string& unmappedQualityValues_,
+                  bool STREAMOUT,
                   calqapp::CQFile *cqFile,
                   size_t *compressedSizeMapped,
                   size_t *compressedSizeUnmapped
@@ -209,6 +206,7 @@ int main(int argc,
 ){
     try
     {
+       // calq::setLogging(calq::loggingPresets::getSilent());
         // Compress or decompress
 
         calqapp::ProgramOptions ProgramOptions(argc, argv);
@@ -266,6 +264,7 @@ int main(int argc,
                         decBlock,
                         encSide,
                         unmappedString,
+                        ProgramOptions.debugStreams,
                         &file,
                         &mappedSize,
                         &unmappedSize

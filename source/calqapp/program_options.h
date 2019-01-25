@@ -31,7 +31,7 @@ class ProgramOptions
     calq::EncodingOptions options;
 
     bool force;
-    bool verbose;
+    bool debugStreams;
     bool test;
     std::string inputFilePath;
     std::string outputFilePath;
@@ -43,6 +43,12 @@ class ProgramOptions
     std::string versionStr;
     bool decompress;
     std::string sideInformationFilePath;
+
+
+    size_t quantizationMin;
+    size_t quantizationMax;
+    size_t polyploidy;
+    size_t hqSoftClipThreshold;
 
  private:
     void processCommandLine(

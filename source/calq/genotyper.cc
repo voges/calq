@@ -6,11 +6,14 @@
 
 // -----------------------------------------------------------------------------
 
+#include <iomanip>
 #include <utility>
+#include <sstream>
 
 // -----------------------------------------------------------------------------
 
 #include "calq/error_exception_reporter.h"
+#include "calq/log.h"
 
 // -----------------------------------------------------------------------------
 
@@ -66,7 +69,8 @@ static int combinationsWithRepetitions(std::vector<std::string> *genoAlphabet,
 
 Genotyper::Genotyper(const int& polyploidy,
                      const int& qualOffset,
-                     const int& nrQuantizers
+                     const int& nrQuantizers,
+                     const bool debug
 )
         : alleleAlphabet_(ALLELE_ALPHABET),
         alleleLikelihoods_(),
@@ -74,7 +78,8 @@ Genotyper::Genotyper(const int& polyploidy,
         genotypeLikelihoods_(),
         nrQuantizers_(nrQuantizers),
         polyploidy_(polyploidy),
-        qualOffset_(qualOffset){
+        qualOffset_(qualOffset),
+        DEBUG(debug){
     if (nrQuantizers < 1)
     {
         throwErrorException("nrQuantizers must be greater than zero");
@@ -172,7 +177,29 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup,
     double confidence = largestGenotypeLikelihood
                         - secondLargestGenotypeLikelihood;
 
-    return static_cast<int>((1 - confidence) * (nrQuantizers_ - 1));
+    int quant = static_cast<int>((1 - confidence) * (nrQuantizers_ - 1));
+
+    if (DEBUG)
+    {
+        std::stringstream s;
+        s << 'N' << " " << seqPileup << " ";
+
+        s << std::fixed << std::setw(6) << std::setprecision(4)
+          << std::setfill('0') << 1 - confidence;
+
+        s << " " << std::fixed << std::setw(6)
+          << std::setprecision(4) << std::setfill('0')
+          << 1 - confidence << " " << quant << std::endl;
+
+
+        std::string line;
+        while (std::getline(s, line))
+        {
+            getLogging().errorOut(line);
+        }
+    }
+
+    return quant;
 }
 
 // -----------------------------------------------------------------------------

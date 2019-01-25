@@ -53,7 +53,7 @@ class Haplotyper
                size_t nrQuantizers,
                size_t maxHQSoftclip_propagation,
                size_t minHQSoftclip_streak,
-               size_t gaussRadius,
+               size_t filterCutOff,
                bool debug,
                bool squashed,
                FilterType filterType
