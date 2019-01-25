@@ -44,103 +44,81 @@ ProgramOptions::~ProgramOptions() = default;
 void ProgramOptions::validate(){
 
     this->options.squash = !this->options.squash;
-    if(this->quantizationMin > 255) {
+    if (this->quantizationMin > 255) {
         throwErrorException("Option quantizationMin too big");
     }
     this->options.quantizationMin = uint8_t(this->quantizationMin);
 
-    if(this->quantizationMax > 255) {
+    if (this->quantizationMax > 255) {
         throwErrorException("Option quantizationMax too big");
     }
     this->options.quantizationMax = uint8_t(this->quantizationMax);
 
-    if(this->polyploidy > 255) {
+    if (this->polyploidy > 255) {
         throwErrorException("Option polyploidy too big");
     }
     this->options.polyploidy = uint8_t(this->polyploidy);
 
-    if(this->hqSoftClipThreshold > 255) {
+    if (this->hqSoftClipThreshold > 255) {
         throwErrorException("Option hqSoftClipThreshold too big");
     }
     this->options.hqSoftClipThreshold = uint8_t(this->hqSoftClipThreshold);
 
 
-    if (versionStr == "v1")
-    {
+    if (versionStr == "v1") {
         options.version = calq::Version::V1;
         CALQ_LOG("Using CALQ version 1");
-    }
-    else if (versionStr == "v2")
-    {
+    } else if (versionStr == "v2") {
         options.version = calq::Version::V2;
         CALQ_LOG("Using CALQ version 2");
-    }
-    else
-    {
+    } else {
         throwErrorException("Unknown CALQ version");
     }
 
     // force
-    if (force)
-    {
+    if (force) {
         CALQ_LOG("Force switch set - overwriting output file(s)");
     }
 
-    if (test)
-    {
+    if (test) {
         CALQ_LOG("Test switch set - running test cases instead of compression");
     }
 
-    if (options.squash)
-    {
+    if (options.squash) {
         CALQ_LOG("Acitivity scores are squashed between 0.0 and 1.0");
-    }
-    else
-    {
+    } else {
         CALQ_LOG("Acitivity scores are !NOT! squashed between 0.0 and 1.0");
     }
 
     // inputFileName
     CALQ_LOG("Input file name: %s", inputFilePath.c_str());
-    if (inputFilePath.empty())
-    {
+    if (inputFilePath.empty()) {
         throwErrorException("No input file name provided");
     }
-    if (!decompress)
-    {
-        if (calqapp::fileNameExtension(inputFilePath) != std::string("sam"))
-        {
+    if (!decompress) {
+        if (calqapp::fileNameExtension(inputFilePath) != std::string("sam")) {
             throwErrorException("Input file name extension must be 'sam'");
         }
-    }
-    else
-    {
-        if (calqapp::fileNameExtension(inputFilePath) != std::string("cq"))
-        {
+    } else {
+        if (calqapp::fileNameExtension(inputFilePath) != std::string("cq")) {
             CALQ_LOG("Warning: Input file name extension is not 'cq'");
 //             throwErrorException("Input file name extension must be 'cq'");
         }
     }
-    if (!calqapp::fileExists(inputFilePath))
-    {
+    if (!calqapp::fileExists(inputFilePath)) {
         throwErrorException("Cannot access input file");
     }
 
     // outputFileName
-    if (!decompress)
-    {
-        if (outputFilePath.empty())
-        {
+    if (!decompress) {
+        if (outputFilePath.empty()) {
             CALQ_LOG("No output file name provided - constructing output"
                      " file name from input file name"
             );
             outputFilePath += inputFilePath + ".cq";
         }
-    }
-    else
-    {
-        if (outputFilePath.empty())
-        {
+    } else {
+        if (outputFilePath.empty()) {
             CALQ_LOG("No output file name provided - constructing output"
                      " file name from input file name"
             );
@@ -148,10 +126,8 @@ void ProgramOptions::validate(){
         }
     }
     CALQ_LOG("Output file name: %s", outputFilePath.c_str());
-    if (calqapp::fileExists(outputFilePath))
-    {
-        if (!force)
-        {
+    if (calqapp::fileExists(outputFilePath)) {
+        if (!force) {
             throwErrorException(
                     "Not overwriting output file "
                     "(use option 'f' to force overwriting)"
@@ -160,44 +136,36 @@ void ProgramOptions::validate(){
     }
 
     // blockSize
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Block size: %d", static_cast<int>(blockSize));
-        if (blockSize < 1)
-        {
+        if (blockSize < 1) {
             throwErrorException("Block size must be greater than 0");
         }
     }
 
     // Haplotyper filter size
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Filter size: %d", static_cast<int>(options.filterSize));
-        if (options.filterSize < 1)
-        {
+        if (options.filterSize < 1) {
             throwErrorException("Filter size must be greater than 0");
         }
     }
 
     // Quantization
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Quantization min steps: %d",
                  static_cast<int>(options.quantizationMin));
-        if (options.quantizationMin < 2)
-        {
+        if (options.quantizationMin < 2) {
             throwErrorException("Quantization must be greater than 1");
         }
     }
 
     // Quantization
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Quantization max steps: %d",
                  static_cast<int>(options.quantizationMax));
         if (options.quantizationMax < 2
-            || options.quantizationMax < options.quantizationMin)
-        {
+            || options.quantizationMax < options.quantizationMin) {
             throwErrorException(
                     "Quantization must be greater than"
                     " 1 and quantizationMin"
@@ -206,73 +174,53 @@ void ProgramOptions::validate(){
     }
 
     // polyploidy
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Polyploidy: %d", static_cast<int>(options.polyploidy));
-        if (options.polyploidy < 1)
-        {
+        if (options.polyploidy < 1) {
             throwErrorException("Polyploidy must be greater than 0");
         }
     }
 
     // qualityValueType
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Filter type: %s", filterTypeStr.c_str());
-        if (filterTypeStr == "Gauss")
-        {
+        if (filterTypeStr == "Gauss") {
             options.filterType = calq::FilterType::GAUSS;
-        }
-        else if (filterTypeStr == "Rectangle")
-        {
+        } else if (filterTypeStr == "Rectangle") {
             options.filterType = calq::FilterType::RECTANGLE;
-        }
-        else
-        {
+        } else {
             throwErrorException("Filter type not supported");
         }
     }
 
     // qualityValueType
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Quantizer type: %s", quantizerTypeStr.c_str());
-        if (quantizerTypeStr == "Uniform")
-        {
+        if (quantizerTypeStr == "Uniform") {
             options.quantizerType =
                     calq::QuantizerType::UNIFORM;
-        }
-        else if (quantizerTypeStr == "Lloyd")
-        {
+        } else if (quantizerTypeStr == "Lloyd") {
             options.quantizerType =
                     calq::QuantizerType::LLOYD_MAX;
-        }
-        else
-        {
+        } else {
             throwErrorException("Quantizer type not supported");
         }
     }
 
     // qualityValueType
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
-        if (qualityValueType == "Sanger")
-        {
+        if (qualityValueType == "Sanger") {
             // Sanger: Phred+33 [0,40]
             options.qualityValueOffset = 33;
             options.qualityValueMin = 0;
             options.qualityValueMax = 40;
-        }
-        else if (qualityValueType == "Illumina-1.3+")
-        {
+        } else if (qualityValueType == "Illumina-1.3+") {
             // Illumina 1.3+: Phred+64 [0,40]
             options.qualityValueOffset = 64;
             options.qualityValueMin = 0;
             options.qualityValueMax = 40;
-        }
-        else if (qualityValueType == "Illumina-1.5+")
-        {
+        } else if (qualityValueType == "Illumina-1.5+") {
             // Illumina 1.5+: Phred+64 [0,40] with 0=unused,
             // 1=unused, 2=Read Segment Quality Control Indicator ('B')
             CALQ_LOG("Warning: Read Segment Quality Control Indicator"
@@ -281,30 +229,22 @@ void ProgramOptions::validate(){
             options.qualityValueOffset = 64;
             options.qualityValueMin = 0;
             options.qualityValueMax = 40;
-        }
-        else if (qualityValueType == "Illumina-1.8+")
-        {
+        } else if (qualityValueType == "Illumina-1.8+") {
             // Illumina 1.8+ Phred+33 [0,41]
             options.qualityValueOffset = 33;
             options.qualityValueMin = 0;
             options.qualityValueMax = 41;
-        }
-        else if (qualityValueType == "Max33")
-        {
+        } else if (qualityValueType == "Max33") {
             // Max33 Phred+33 [0,93]
             options.qualityValueOffset = 33;
             options.qualityValueMin = 0;
             options.qualityValueMax = 93;
-        }
-        else if (qualityValueType == "Max64")
-        {
+        } else if (qualityValueType == "Max64") {
             // Max64 Phred+64 [0,62]
             options.qualityValueOffset = 64;
             options.qualityValueMin = 0;
             options.qualityValueMax = 62;
-        }
-        else
-        {
+        } else {
             throwErrorException("Quality value type not supported");
         }
         CALQ_LOG("Quality value offset: %d",
@@ -315,29 +255,22 @@ void ProgramOptions::validate(){
                  static_cast<int>(options.qualityValueMax));
 
         // referenceFiles
-        if (!decompress)
-        {
-            if (referenceFilePath.empty())
-            {
+        if (!decompress) {
+            if (referenceFilePath.empty()) {
                 CALQ_LOG("Operating without reference file");
-            }
-            else
-            {
+            } else {
                 CALQ_LOG("Operating with reference file:");
                 CALQ_LOG("  %s", referenceFilePath.c_str());
-                if (referenceFilePath.empty())
-                {
+                if (referenceFilePath.empty()) {
                     throwErrorException("Reference file name not provided");
                 }
-                if (!calqapp::fileExists(referenceFilePath))
-                {
+                if (!calqapp::fileExists(referenceFilePath)) {
                     throwErrorException("Cannot access reference file");
                 }
                 if (calqapp::fileNameExtension(referenceFilePath)
                     != std::string("fa")
                     && calqapp::fileNameExtension(referenceFilePath)
-                       != std::string("fasta"))
-                {
+                       != std::string("fasta")) {
                     throwErrorException(
                             "Reference file name extension must "
                             "be 'fa' or 'fasta'"
@@ -348,35 +281,28 @@ void ProgramOptions::validate(){
     }
 
     // decompress
-    if (!decompress)
-    {
+    if (!decompress) {
         CALQ_LOG("Compressing");
-    }
-    else
-    {
+    } else {
         CALQ_LOG("Decompressing");
     }
 
     // sideInformationFilePath
-    if (decompress)
-    {
+    if (decompress) {
         CALQ_LOG("Side information file name: %s",
                  sideInformationFilePath.c_str()
         );
-        if (sideInformationFilePath.empty())
-        {
+        if (sideInformationFilePath.empty()) {
             throwErrorException("No side information file name provided");
         }
         if (calqapp::fileNameExtension(sideInformationFilePath)
-            != std::string("sam"))
-        {
+            != std::string("sam")) {
             throwErrorException(
                     "Side information file name "
                     "extension must be 'sam'"
             );
         }
-        if (!calqapp::fileExists(sideInformationFilePath))
-        {
+        if (!calqapp::fileExists(sideInformationFilePath)) {
             throwErrorException("Cannot access side information file");
         }
     }
@@ -540,8 +466,7 @@ void ProgramOptions::processCommandLine(
     po::store(po::parse_command_line(argc, argv, options), optionsMap);
 
     // First thing to do is to print the help
-    if (optionsMap.count("help") || optionsMap.count("h"))
-    {
+    if (optionsMap.count("help") || optionsMap.count("h")) {
         writeUsage(std::cout);
         std::cout << options;
         // TO-DO: Change this to Error instead of log.

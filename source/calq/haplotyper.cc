@@ -2,10 +2,6 @@
 
 // -----------------------------------------------------------------------------
 
-#include <cmath>
-
-// -----------------------------------------------------------------------------
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -50,8 +46,7 @@ Haplotyper::Haplotyper(size_t sigma,
         polyploidy(ploidy),
         DEBUG(debug),
         squashedActivity(squashed){
-    if (filterType == FilterType::GAUSS)
-    {
+    if (filterType == FilterType::GAUSS) {
         GaussKernel kernel(sigma);
         double THRESHOLD = 0.0000001;
         size_t size = kernel.calcMinSize(THRESHOLD, filterCutOff * 2 + 1);
@@ -63,9 +58,7 @@ Haplotyper::Haplotyper(size_t sigma,
                 }, size
         );
         localDistortion = kernel.calcValue((size - 1) / 2, size);
-    }
-    else if (filterType == FilterType::RECTANGLE)
-    {
+    } else if (filterType == FilterType::RECTANGLE) {
         RectangleKernel kernel(sigma);
         size_t size = kernel.calcMinSize(filterCutOff * 2 + 1);
 
@@ -76,9 +69,7 @@ Haplotyper::Haplotyper(size_t sigma,
                 }, size
         );
         localDistortion = kernel.calcValue((size - 1) / 2, size);
-    }
-    else
-    {
+    } else {
         throwErrorException("FilterType not supported by haplotyper");
     }
 }
@@ -94,12 +85,9 @@ size_t Haplotyper::getOffset() const{
 double log10sum(double a,
                 double b
 ){
-    if (a > b)
-    {
+    if (a > b) {
         return log10sum(b, a);
-    }
-    else if (a == -std::numeric_limits<double>::infinity())
-    {
+    } else if (a == -std::numeric_limits<double>::infinity()) {
         return b;
     }
     return b + log10(1 + pow(10.0, -(b - a)));
@@ -112,8 +100,7 @@ std::vector<double> Haplotyper::calcPriors(double hetero){
     hetero = log10(hetero);
     std::vector<double> result(polyploidy + 1, hetero);
     double sum = -std::numeric_limits<double>::infinity();
-    for (size_t i = 1; i < polyploidy + 1; ++i)
-    {
+    for (size_t i = 1; i < polyploidy + 1; ++i) {
         result[i] -= log10(i);
         sum = log10sum(sum, result[i]);
     }
@@ -133,15 +120,13 @@ Haplotyper::calcNonRefLikelihoods(char ref,
     std::map<std::string, double> SNPlikelihoods =
             genotyper.getGenotypelikelihoods(seqPile, qualPile);
 
-    for (const auto& m : SNPlikelihoods)
-    {
+    for (const auto& m : SNPlikelihoods) {
         size_t altCount = polyploidy
                           - std::count(m.first.begin(), m.first.end(), ref);
         result[altCount] += m.second;
     }
 
-    for (double& i : result)
-    {
+    for (double& i : result) {
         i = log10(i);
     }
 
@@ -155,41 +140,35 @@ double Haplotyper::calcActivityScore(char ref,
                                      const std::string& qualPile,
                                      double heterozygosity
 ){
-    if (ref == 'N')
-    {
+    if (ref == 'N') {
         return 1.0;
     }
 
     std::vector<double> likelihoods =
             calcNonRefLikelihoods(ref, seqPile, qualPile);
     static std::vector<double> priors;
-    if (priors.empty())
-    {
+    if (priors.empty()) {
         priors = calcPriors(heterozygosity);
     }
 
     // --------------Calc Posteriors like in GATK ------------------------------
     double posteriori0 = likelihoods[0] + priors[0];
     bool map0 = true;
-    for (size_t i = 1; i < polyploidy + 1; ++i)
-    {
-        if (likelihoods[i] + priors[i] > posteriori0)
-        {
+    for (size_t i = 1; i < polyploidy + 1; ++i) {
+        if (likelihoods[i] + priors[i] > posteriori0) {
             map0 = false;
             break;
         }
     }
 
-    if (map0)
-    {
+    if (map0) {
         return 0.0;
     }
 
     double altLikelihoodSum = -std::numeric_limits<double>::infinity();
     double altPriorSum = -std::numeric_limits<double>::infinity();
 
-    for (size_t i = 1; i < polyploidy + 1; ++i)
-    {
+    for (size_t i = 1; i < polyploidy + 1; ++i) {
         altLikelihoodSum = log10sum(altLikelihoodSum, likelihoods[i]);
         altPriorSum = log10sum(altPriorSum, priors[i]);
     }
@@ -216,8 +195,7 @@ size_t Haplotyper::push(const std::string& seqPile,
                         char reference
 ){
     // Empty input
-    if (seqPile.empty())
-    {
+    if (seqPile.empty()) {
         buffer.push(spreader.push(0.0, 0));
         return 0;
     }
@@ -237,15 +215,13 @@ size_t Haplotyper::push(const std::string& seqPile,
     // Filter activity score
     buffer.push(spreader.push(altProb, hq_softclips / qualPile.size()));
     double activity = buffer.filter();
-    if (squashedActivity)
-    {
+    if (squashedActivity) {
         activity = std::min(activity, 1.0);
     }
 
     size_t quant = getQuantizerIndex(activity);
 
-    if (DEBUG)
-    {
+    if (DEBUG) {
         static CircularBuffer<std::string> debug(this->getOffset(), "\n");
         std::stringstream s;
 
@@ -257,21 +233,18 @@ size_t Haplotyper::push(const std::string& seqPile,
         std::string out = debug.push(s.str());
 
         s.str("");
-        if (out != "\n")
-        {
+        if (out != "\n") {
             s << out << " " << std::fixed << std::setw(6)
               << std::setprecision(4) << std::setfill('0')
               << activity << " " << quant << std::endl;
         }
 
-        if (hq_softclips > 0)
-        {
+        if (hq_softclips > 0) {
             s << hq_softclips << " softclips detected!" << std::endl;
         }
 
         std::string line;
-        while(std::getline(s, line))
-        {
+        while (std::getline(s, line)) {
             getLogging().errorOut(line);
         }
     }

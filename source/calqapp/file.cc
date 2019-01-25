@@ -42,8 +42,7 @@ File::~File(){
 void File::open(const std::string& path,
                 Mode mode
 ){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
 
@@ -52,23 +51,19 @@ void File::open(const std::string& path,
     auto m = (mode_ == Mode::MODE_READ) ?
              std::ifstream::in :
              std::ifstream::out;
-    try
-    {
+    try {
         filestream.open(path, m);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         throwErrorException(std::string("Error opening file: ") + e.what());
     }
 
-    try
-    {
+    try {
         filestream.seekg(0, std::ifstream::end);
         fsize_ = static_cast<size_t>(filestream.tellg());
         filestream.seekg(0, std::ifstream::beg);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         throwErrorException(
                 std::string("Error obtaining file size: ")
                 + e.what()
@@ -79,14 +74,11 @@ void File::open(const std::string& path,
 // -----------------------------------------------------------------------------
 
 void File::close(){
-    if (filestream.is_open())
-    {
-        try
-        {
+    if (filestream.is_open()) {
+        try {
             filestream.close();
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throwErrorException(
                     std::string("Failed to close file: ")
                     + e.what()
@@ -98,13 +90,11 @@ void File::close(){
 // -----------------------------------------------------------------------------
 
 void File::advance(size_t offset){
-    try
-    {
+    try {
         // filestream.seekg(offset, std::ios_base::seekdir::cur);
         filestream.seekg(offset, std::ios_base::cur);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         throwErrorException(std::string("Seek failed: ") + e.what());
     }
 }
@@ -118,16 +108,13 @@ bool File::eof() const{
 // -----------------------------------------------------------------------------
 
 void File::seek(size_t pos){
-    if (pos > LONG_MAX)
-    {
+    if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
     }
-    try
-    {
+    try {
         filestream.seekg(pos);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         throwErrorException(std::string("Seek failed: ") + e.what());
     }
 }
@@ -141,12 +128,10 @@ size_t File::size() const{
 // -----------------------------------------------------------------------------
 
 size_t File::tell(){
-    try
-    {
+    try {
         return static_cast<size_t>(filestream.tellg());
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         if (!eof())
             throwErrorException(std::string("Tell failed: ") + e.what());
         filestream.clear(std::ios_base::goodbit | std::ios_base::eofbit);
@@ -157,8 +142,7 @@ size_t File::tell(){
 // -----------------------------------------------------------------------------
 
 size_t File::nrReadBytes() const{
-    if (mode_ != Mode::MODE_READ)
-    {
+    if (mode_ != Mode::MODE_READ) {
         throwErrorException("File is not open in read mode");
     }
     return nrReadBytes_;
@@ -167,8 +151,7 @@ size_t File::nrReadBytes() const{
 // -----------------------------------------------------------------------------
 
 size_t File::nrWrittenBytes() const{
-    if (mode_ != Mode::MODE_WRITE)
-    {
+    if (mode_ != Mode::MODE_WRITE) {
         throwErrorException("File is not open in write mode");
     }
     return nrWrittenBytes_;
@@ -267,12 +250,10 @@ size_t File::writeUint64(uint64_t qword){
 bool File::readLine(char *s,
                     std::streamsize n
 ){
-    try
-    {
+    try {
         filestream.getline(s, n);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         if (!eof())
             throwErrorException(std::string("readLine failed: ") + e.what());
         filestream.clear(std::ios_base::goodbit | std::ios_base::eofbit);

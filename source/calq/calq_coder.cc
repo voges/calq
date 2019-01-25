@@ -3,6 +3,7 @@
 // -----------------------------------------------------------------------------
 
 #include <map>
+#include <utility>
 
 // -----------------------------------------------------------------------------
 
@@ -27,15 +28,12 @@ static uint32_t computeLength(const std::string& cigar){
     size_t cigarLen = cigar.length();
     uint32_t opLen = 0;  // length of current CIGAR operation
 
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++)
-    {
-        if (isdigit(cigar[cigarIdx]))
-        {
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
             opLen = opLen * 10 + (uint32_t) cigar[cigarIdx] - (uint32_t) '0';
             continue;
         }
-        switch (cigar[cigarIdx])
-        {
+        switch (cigar[cigarIdx]) {
             case 'M':
             case '=':
             case 'X':
@@ -69,18 +67,14 @@ void encode(const EncodingOptions& opt,
     ProbabilityDistribution pdf(opt.qualityValueMin, opt.qualityValueMax);
 
     // Check quality value range
-    for (auto const& samRecord : input.qvalues)
-    {
-        for (auto const& q : samRecord)
-        {
+    for (auto const& samRecord : input.qvalues) {
+        for (auto const& q : samRecord) {
             if ((static_cast<int>(q) - opt.qualityValueOffset)
-                < opt.qualityValueMin)
-            {
+                < opt.qualityValueMin) {
                 throwErrorException("Quality value too small");
             }
             if ((static_cast<int>(q) - opt.qualityValueOffset)
-                > opt.qualityValueMax)
-            {
+                > opt.qualityValueMax) {
                 throwErrorException("Quality value too large");
             }
             pdf.addToPdf((static_cast<size_t>(q) - opt.qualityValueOffset));
@@ -90,10 +84,8 @@ void encode(const EncodingOptions& opt,
     std::map<int, Quantizer> quantizers;
 
     for (auto i = static_cast<int>(opt.quantizationMin);
-         i <= static_cast<int>(opt.quantizationMax); ++i)
-    {
-        if (opt.quantizerType == QuantizerType::UNIFORM)
-        {
+         i <= static_cast<int>(opt.quantizationMax); ++i) {
+        if (opt.quantizerType == QuantizerType::UNIFORM) {
             UniformMinMaxQuantizer quantizer(
                     static_cast<const int&>(opt.qualityValueMin),
                     static_cast<const int&>(opt.qualityValueMax), i
@@ -103,9 +95,7 @@ void encode(const EncodingOptions& opt,
                             static_cast<const int&>(i - opt.quantizationMin),
                             quantizer
                     ));
-        }
-        else if (opt.quantizerType == QuantizerType::LLOYD_MAX)
-        {
+        } else if (opt.quantizerType == QuantizerType::LLOYD_MAX) {
             LloydMaxQuantizer quantizer(static_cast<size_t>(i));
             quantizer.build(pdf);
             quantizers.insert(
@@ -113,21 +103,17 @@ void encode(const EncodingOptions& opt,
                             static_cast<const int&>(i - opt.quantizationMin),
                             quantizer
                     ));
-        }
-        else
-        {
+        } else {
             throwErrorException("Quantization Type not supported");
         }
     }
 
     // Encode the quality values
     QualEncoder qualEncoder(opt, quantizers, output);
-    for (size_t i = 0; i < sideInformation.positions.size(); ++i)
-    {
+    for (size_t i = 0; i < sideInformation.positions.size(); ++i) {
         std::string ref;
         uint32_t len = computeLength(sideInformation.cigars[i]);
-        if (opt.version == Version::V2)
-        {
+        if (opt.version == Version::V2) {
             ref = sideInformation.reference.substr(
                     sideInformation.positions[i]
                     - sideInformation.positions[0], len
@@ -144,7 +130,6 @@ void encode(const EncodingOptions& opt,
     }
 
     qualEncoder.finishBlock();
-
 }
 
 // -----------------------------------------------------------------------------
@@ -154,7 +139,6 @@ void decode(const DecodingOptions&,
             const DecodingBlock& input,
             EncodingBlock *output
 ){
-
     // Decode the quality values
     QualDecoder qualDecoder(
             input,
@@ -163,8 +147,7 @@ void decode(const DecodingOptions&,
             output
     );
     output->qvalues.clear();
-    for (size_t i = 0; i < sideInformation.positions.size(); ++i)
-    {
+    for (size_t i = 0; i < sideInformation.positions.size(); ++i) {
         DecodingRead r = {
                 sideInformation.positions[i],
                 sideInformation.cigars[i]

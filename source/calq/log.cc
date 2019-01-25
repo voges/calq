@@ -17,8 +17,7 @@ void setLogging(const LogConfiguration& c){
 // -----------------------------------------------------------------------------
 
 LogConfiguration getLogging(){
-    if (!currentConfig)
-    {
+    if (!currentConfig) {
         setLogging(loggingPresets::getStandard());
     }
     return *currentConfig;

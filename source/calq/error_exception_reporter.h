@@ -27,9 +27,6 @@ inline void throwErrorException(const std::string& msg){
 
 class ErrorExceptionReporter
 {
-
-    // -------------------------------------------------------------------------
-
  public:
     ErrorExceptionReporter(std::string file,
                            std::string function,

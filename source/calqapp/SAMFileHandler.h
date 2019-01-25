@@ -17,11 +17,13 @@ namespace calqapp {
 // -----------------------------------------------------------------------------
 
 class SAMFile;
+
 class FASTAFile;
 
 // -----------------------------------------------------------------------------
 
-struct UnmappedInformation {
+struct UnmappedInformation
+{
     std::vector<bool> mappedFlags;
     std::vector<std::string> unmappedQualityScores;
 };

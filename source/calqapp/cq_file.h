@@ -29,7 +29,7 @@ class CQFile : public File
     size_t nrWrittenFileFormatBytes() const;
 
     size_t readHeader(size_t *blockSize);
-    size_t readQuantizers(std::vector<std::vector<uint8_t>>* quantizers);
+    size_t readQuantizers(std::vector<std::vector<uint8_t>> *quantizers);
     size_t readQualBlock(std::string *block);
 
     size_t writeHeader(const size_t& blockSize);

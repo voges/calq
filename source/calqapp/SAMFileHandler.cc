@@ -24,8 +24,7 @@ SAMFileHandler::SAMFileHandler(const std::string& inputFileName,
         refEnd(),
         rname(){
     samFile_ = std::unique_ptr<SAMFile>(new SAMFile(inputFileName));
-    if (!referenceFileName.empty())
-    {
+    if (!referenceFileName.empty()) {
         fastaFile = std::unique_ptr<FASTAFile>(new FASTAFile(referenceFileName));
     }
 }
@@ -45,15 +44,12 @@ uint32_t computeRefLength(const std::string& cigar){
     size_t cigarLen = cigar.length();
     uint32_t opLen = 0;  // length of current CIGAR operation
 
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++)
-    {
-        if (isdigit(cigar[cigarIdx]))
-        {
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
             opLen = opLen * 10 + (uint32_t) cigar[cigarIdx] - (uint32_t) '0';
             continue;
         }
-        switch (cigar[cigarIdx])
-        {
+        switch (cigar[cigarIdx]) {
             case 'M':
             case '=':
             case 'X':
@@ -90,13 +86,10 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
     size_t returnCode = samFile_->readBlock(blockSize);
     refEnd = 0;
     rname = samFile_->currentBlock.records[0].rname;
-    for (auto const& samRecord : samFile_->currentBlock.records)
-    {
+    for (auto const& samRecord : samFile_->currentBlock.records) {
         unmapped.mappedFlags.push_back(samRecord.isMapped());
-        if (samRecord.isMapped())
-        {
-            if (side.positions.empty())
-            {
+        if (samRecord.isMapped()) {
+            if (side.positions.empty()) {
                 refStart = samRecord.pos;
             }
             side.positions.push_back(samRecord.pos);
@@ -104,19 +97,15 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
             side.cigars.push_back(samRecord.cigar);
             encBlock.qvalues.push_back(samRecord.qual);
             auto endTmp = samRecord.pos + computeRefLength(samRecord.cigar);
-            if (endTmp > refEnd)
-            {
+            if (endTmp > refEnd) {
                 refEnd = endTmp;
             }
-        }
-        else
-        {
+        } else {
             unmapped.unmappedQualityScores.push_back(samRecord.qual);
         }
     }
 
-    if (!fastaFile)
-    {
+    if (!fastaFile) {
         return returnCode;
     }
 
@@ -132,12 +121,9 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
             ::toupper
     );
 
-    if (side.positions.empty())
-    {
+    if (side.positions.empty()) {
         side.posOffset = 0;
-    }
-    else
-    {
+    } else {
         side.posOffset = side.positions[0];
     }
 

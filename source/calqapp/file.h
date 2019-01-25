@@ -64,12 +64,10 @@ class File
                      size_t number = 1
     ){
         size_t ret = sizeof(T) * number;
-        try
-        {
+        try {
             filestream.read(reinterpret_cast<char *>(dword), sizeof(T) * number);
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throwErrorException(std::string("Read failed: ") + e.what());
         }
         nrReadBytes_ += ret;
@@ -83,15 +81,13 @@ class File
                       size_t number = 1
     ){
         size_t ret = sizeof(T) * number;
-        try
-        {
+        try {
             filestream.write(
                     reinterpret_cast<const char *>(dword),
                     sizeof(T) * number
             );
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throwErrorException(std::string("Write failed: ") + e.what());
         }
         nrWrittenBytes_ += ret;

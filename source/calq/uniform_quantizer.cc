@@ -24,8 +24,7 @@ UniformQuantizer::UniformQuantizer(const int& valueMin,
                                    const int& nrSteps
 )
         : Quantizer(){
-    if ((valueMin > valueMax) || (nrSteps <= 1))
-    {
+    if ((valueMin > valueMax) || (nrSteps <= 1)) {
         throwErrorException("Error in quantizer initialization");
     }
 
@@ -44,8 +43,7 @@ UniformQuantizer::UniformQuantizer(const int& valueMin,
             valueMin +
             static_cast<int>(round(static_cast<double>(stepSize) / 2.0))
     );
-    for (int i = 0; i < (nrSteps - 1); i++)
-    {
+    for (int i = 0; i < (nrSteps - 1); i++) {
         newBorder += stepSize;
         borders.push(newBorder);
         reconstructionValues.push(
@@ -60,10 +58,8 @@ UniformQuantizer::UniformQuantizer(const int& valueMin,
     int currentIndex = 0;
     int currentReconstructionValue = reconstructionValues.front();
     int currentBorder = borders.front();
-    for (int value = valueMin; value <= valueMax; ++value)
-    {
-        if (value > currentBorder)
-        {
+    for (int value = valueMin; value <= valueMax; ++value) {
+        if (value > currentBorder) {
             currentIndex++;
             reconstructionValues.pop();
             borders.pop();

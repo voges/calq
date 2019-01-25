@@ -36,19 +36,19 @@ void SAMPileup::clear(){
 // -----------------------------------------------------------------------------
 
 void SAMPileup::print() const{
-    printf("%6d: %s %s\n", pos, seq.c_str(), qual.c_str());
+    printf("%6u: %s %s\n", pos, seq.c_str(), qual.c_str());
 }
 
 // -----------------------------------------------------------------------------
 
 void SAMPileup::printQual() const{
-    printf("%6d: %s\n", pos, qual.c_str());
+    printf("%6u: %s\n", pos, qual.c_str());
 }
 
 // -----------------------------------------------------------------------------
 
 void SAMPileup::printSeq() const{
-    printf("%6d: %s\n", pos, seq.c_str());
+    printf("%6u: %s\n", pos, seq.c_str());
 }
 
 // -----------------------------------------------------------------------------

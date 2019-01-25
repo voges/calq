@@ -21,62 +21,47 @@ static void parseLine(char *fields[SAMRecord::NUM_FIELDS],
     char *pc = c;
     int f = 0;
 
-    while (true)
-    {
-        if (*c == '\t' || *c == '\0')
-        {
+    while (true) {
+        if (*c == '\t' || *c == '\0') {
             *c = '\0';
-            if (f == 0)
-            {
+            if (f == 0) {
                 fields[f] = pc;
             }
-            if (f == 1)
-            {
+            if (f == 1) {
                 fields[f] = pc;
             }
-            if (f == 2)
-            {
+            if (f == 2) {
                 fields[f] = pc;
             }
-            if (f == 3)
-            {
+            if (f == 3) {
                 fields[f] = pc;
             }
-            if (f == 4)
-            {
+            if (f == 4) {
                 fields[f] = pc;
             }
-            if (f == 5)
-            {
+            if (f == 5) {
                 fields[f] = pc;
             }
-            if (f == 6)
-            {
+            if (f == 6) {
                 fields[f] = pc;
             }
-            if (f == 7)
-            {
+            if (f == 7) {
                 fields[f] = pc;
             }
-            if (f == 8)
-            {
+            if (f == 8) {
                 fields[f] = pc;
             }
-            if (f == 9)
-            {
+            if (f == 9) {
                 fields[f] = pc;
             }
-            if (f == 10)
-            {
+            if (f == 10) {
                 fields[f] = pc;
             }
-            if (f == 11)
-            {
+            if (f == 11) {
                 fields[f] = pc;
             }
             f++;
-            if (f == 12)
-            {
+            if (f == 12) {
                 break;
             }
             pc = c + 1;
@@ -100,57 +85,44 @@ SAMFile::SAMFile(const std::string& path,
         nrMappedRecordsRead_(0),
         nrUnmappedRecordsRead_(0),
         startTime_(std::chrono::steady_clock::now()){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
-    if (mode != Mode::MODE_READ)
-    {
+    if (mode != Mode::MODE_READ) {
         throwErrorException("Currently only MODE_READ supported");
     }
 
-    try
-    {
+    try {
         // 1 million chars should be enough
         line_ = make_unique<char[]>(LINE_SIZE);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         throwErrorException(std::string("New failed: ") + e.what());
     }
 
     // Read SAM header
     size_t fpos = 0;
-    for (;;)
-    {
+    for (;;) {
         fpos = tell();
-        if (readLine(line_.get(), LINE_SIZE))
-        {
+        if (readLine(line_.get(), LINE_SIZE)) {
             // Trim line
             size_t l = strlen(line_.get()) - 1;
-            while (l && (line_[l] == '\r' || line_[l] == '\n'))
-            {
+            while (l && (line_[l] == '\r' || line_[l] == '\n')) {
                 line_[l--] = '\0';
             }
 
-            if (line_[0] == '@')
-            {
+            if (line_[0] == '@') {
                 header += line_.get();
                 header += "\n";
-            }
-            else
-            {
+            } else {
                 break;
             }
-        }
-        else
-        {
+        } else {
             throwErrorException("Could not read SAM header");
         }
     }
     seek(fpos);  // rewind to the begin of the alignment section
-    if (header.empty())
-    {
+    if (header.empty()) {
         CALQ_LOG("No SAM header found");
     }
 }
@@ -186,8 +158,7 @@ size_t SAMFile::nrRecordsRead() const{
 // -----------------------------------------------------------------------------
 
 size_t SAMFile::readBlock(const size_t& blockSize){
-    if (blockSize < 1)
-    {
+    if (blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
 
@@ -196,15 +167,12 @@ size_t SAMFile::readBlock(const size_t& blockSize){
     std::string rnamePrev;
     uint32_t posPrev = 0;
 
-    for (size_t i = 0; i < blockSize; i++)
-    {
+    for (size_t i = 0; i < blockSize; i++) {
         size_t fpos = tell();
-        if (readLine(line_.get(), LINE_SIZE))
-        {
+        if (readLine(line_.get(), LINE_SIZE)) {
             // Trim line
             size_t l = strlen(line_.get()) - 1;
-            while (l && (line_[l] == '\r' || line_[l] == '\n'))
-            {
+            while (l && (line_[l] == '\r' || line_[l] == '\n')) {
                 line_[l--] = '\0';
             }
 
@@ -213,38 +181,28 @@ size_t SAMFile::readBlock(const size_t& blockSize){
             parseLine(fields, line_.get());
             SAMRecord samRecord(fields);
 
-            if (samRecord.isMapped())
-            {
-                if (rnamePrev.empty())
-                {
+            if (samRecord.isMapped()) {
+                if (rnamePrev.empty()) {
                     // This is the first mapped record in this block; just store
                     // its RNAME and POS and add it to the current block
                     rnamePrev = samRecord.rname;
                     posPrev = samRecord.pos;
                     currentBlock.records.push_back(samRecord);
                     currentBlock.nrMappedRecords_++;
-                }
-                else
-                {
+                } else {
                     // We already have a mapped record in this block
-                    if (rnamePrev == samRecord.rname)
-                    {
+                    if (rnamePrev == samRecord.rname) {
                         // RNAME didn't change, check POS
-                        if (samRecord.pos >= posPrev)
-                        {
+                        if (samRecord.pos >= posPrev) {
                             // Everything fits, just update posPrev and push
                             // the samRecord to the current block
                             posPrev = samRecord.pos;
                             currentBlock.records.push_back(samRecord);
                             currentBlock.nrMappedRecords_++;
-                        }
-                        else
-                        {
+                        } else {
                             throwErrorException("SAM file is not sorted");
                         }
-                    }
-                    else
-                    {
+                    } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
                         CALQ_LOG("RNAME changed - read only %zu record(s) "
@@ -254,15 +212,11 @@ size_t SAMFile::readBlock(const size_t& blockSize){
                         break;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 currentBlock.records.push_back(samRecord);
                 currentBlock.nrUnmappedRecords_++;
             }
-        }
-        else
-        {
+        } else {
             CALQ_LOG("Truncated block - read only %zu record(s) "
                      "(%zu requested) - reached EOF",
                      currentBlock.nrRecords(),
@@ -271,8 +225,7 @@ size_t SAMFile::readBlock(const size_t& blockSize){
         }
     }
 
-    if (currentBlock.nrRecords() > 0)
-    {
+    if (currentBlock.nrRecords() > 0) {
         nrBlocksRead_++;
         nrMappedRecordsRead_ += currentBlock.nrMappedRecords();
         nrUnmappedRecordsRead_ += currentBlock.nrUnmappedRecords();

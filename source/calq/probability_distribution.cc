@@ -30,10 +30,7 @@ void ProbabilityDistribution::addToPdf(size_t qualScore,
 // -----------------------------------------------------------------------------
 
 void ProbabilityDistribution::resetPdf(){
-    for (size_t& i : pdf)
-    {
-        i = 0;
-    }
+    std::fill(pdf.begin(), pdf.end(), 0);
 }
 
 // -----------------------------------------------------------------------------

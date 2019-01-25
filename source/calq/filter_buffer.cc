@@ -61,8 +61,7 @@ void FilterBuffer::push(double activityScore){
 // Calculate filter score at offset position
 double FilterBuffer::filter() const{
     double result = 0.0;
-    for (size_t i = 0; i < kernel.size(); ++i)
-    {
+    for (size_t i = 0; i < kernel.size(); ++i) {
         result += kernel[i] * buffer[i];
         // std::cout << kernel[i] << " " << buffer[i] << std::endl;
     }
@@ -80,14 +79,12 @@ FilterBuffer::FilterBuffer(const std::function<
         kernelSize,
         0.0
 ){
-    if (!(kernelSize % 2))
-    {
+    if (!(kernelSize % 2)) {
         throwErrorException("Kernel size must be an odd number");
     }
     kernel.resize(kernelSize, 0.0);
 
-    for (size_t i = 0; i < kernel.size(); ++i)
-    {
+    for (size_t i = 0; i < kernel.size(); ++i) {
         kernel[i] = kernelBuilder(i, kernelSize);
     }
 }
