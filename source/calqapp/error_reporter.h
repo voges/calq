@@ -12,15 +12,16 @@
 
 #include "calq/exceptions.h"
 
+
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
 inline void throwErrorException(const std::string& msg){
     std::cout.flush();
-    throw ErrorException(msg);
+    throw calq::ErrorException(msg);
 }
 
 // -----------------------------------------------------------------------------
@@ -73,9 +74,9 @@ class ErrorExceptionReporter
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException calq::ErrorExceptionReporter(__FILE__, \
-                                                         __FUNCTION__, \
-                                                         __LINE__ \
+#define throwErrorException calqapp::ErrorExceptionReporter(__FILE__, \
+                                                            __FUNCTION__, \
+                                                            __LINE__ \
 )
 
 // -----------------------------------------------------------------------------

@@ -23,12 +23,20 @@ struct DecodingBlock;
 
 // -----------------------------------------------------------------------------
 
+struct DecodingRead
+{
+    uint32_t posMin;
+    std::string cigar;
+};
+
+// -----------------------------------------------------------------------------
+
 class QualDecoder
 {
  public:
     QualDecoder(const DecodingBlock& in,
-                size_t positionOffset,
-                size_t qualityOffset,
+                uint32_t positionOffset,
+                uint8_t qualityOffset,
                 EncodingBlock *out
     );
     ~QualDecoder();

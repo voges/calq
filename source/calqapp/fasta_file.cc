@@ -11,7 +11,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ FASTAFile::FASTAFile(const std::string& path,
     // should be enough
     try
     {
-        line_ = make_unique<char[]>(LINE_SIZE);
+        line_ = std::unique_ptr<char[]>(new char[LINE_SIZE]);
     }
     catch (std::exception& e)
     {

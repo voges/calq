@@ -2,17 +2,16 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/calq_encoder.h"
-#include "calq/calq_decoder.h"
-#include "calq/structs.h"
-#include "calq/log.h"
+#include "calq/calq_coder.h"
+#include "calq/exceptions.h"
 
 // -----------------------------------------------------------------------------
 
 #include "calqapp/cq_file.h"
 #include "calqapp/fasta_file.h"
-#include "calqapp/SAMFileHandler.h"
+#include "calqapp/logging.h"
 #include "calqapp/program_options.h"
+#include "calqapp/SAMFileHandler.h"
 
 // -----------------------------------------------------------------------------
 
@@ -22,9 +21,9 @@
 
 size_t writeBlock(const calq::EncodingOptions& opts,
                   const calq::DecodingBlock& block,
-                  const calq::EncodingSideInformation& side,
+                  const calq::SideInformation& side,
                   const std::string& unmappedQualityValues_,
-                  calq::CQFile *cqFile
+                  calqapp::CQFile *cqFile
 ){
 
     size_t fileSize = 0;
@@ -126,9 +125,9 @@ size_t writeBlock(const calq::EncodingOptions& opts,
 
 // -----------------------------------------------------------------------------
 
-size_t readBlock(calq::CQFile *cqFile,
+size_t readBlock(calqapp::CQFile *cqFile,
                  calq::DecodingBlock *out,
-                 calq::DecodingSideInformation *side,
+                 calq::SideInformation *side,
                  std::string *unmapped
 ){
     out->codeBooks.clear();
@@ -208,61 +207,29 @@ int main(int argc,
         calqapp::ProgramOptions ProgramOptions(argc, argv);
         ProgramOptions.validate();
 
-        // TO-Do: Fill structs below with information from SAMFileHandler
-
         if (!ProgramOptions.decompress)
         {
-            calq::SAMFileHandler sH(ProgramOptions.inputFilePath);
+            calqapp::SAMFileHandler sH(ProgramOptions.inputFilePath, ProgramOptions.referenceFilePath);
 
-            std::unique_ptr<calq::FASTAFile> fastaFile;
-
-            if (ProgramOptions.options.version
-                == calq::EncodingOptions::Version::V2)
-            {
-                fastaFile = std::unique_ptr<calq::FASTAFile>(
-                        new calq::FASTAFile(ProgramOptions.referenceFilePath)
-                );
-            }
-
-            calq::CQFile file(
+            calqapp::CQFile file(
                     ProgramOptions.outputFilePath,
-                    calq::File::Mode::MODE_WRITE
+                    calqapp::File::Mode::MODE_WRITE
             );
             file.writeHeader(ProgramOptions.blockSize);
 
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
             {
+                calq::SideInformation encSide;
+                sH.getSideInformation(&encSide);
 
-                // Container to be filled by lib
-                std::string reference;
-                std::string rname;
-                if (ProgramOptions.options.version
-                    == calq::EncodingOptions::Version::V2)
-                {
-                    sH.getRname(&rname);
-                    reference = fastaFile->getReferencesInRange(
-                            rname,
-                            sH.getRefStart(),
-                            sH.getRefEnd()
-                    );
-                    std::transform(
-                            reference.begin(),
-                            reference.end(),
-                            reference.begin(),
-                            ::toupper
-                    );
-                }
-                std::vector<std::string> unmappedQualityScores;
-                sH.getUnmappedQualityScores(&unmappedQualityScores);
+                calqapp::UnmappedInformation unmappedInfo;
+                sH.getUnmappedBlock(&unmappedInfo);
+
                 calq::EncodingBlock encBlock;
-                sH.getMappedQualityScores(&encBlock.qvalues);
+                sH.getMappedBlock(&encBlock);
+
                 calq::DecodingBlock decBlock;
 
-                calq::EncodingSideInformation encSide;
-                sH.getPositions(&encSide.positions);
-                sH.getSequences(&encSide.sequences);
-                sH.getCigars(&encSide.cigars);
-                encSide.reference.swap(reference);
 
                 calq::encode(
                         ProgramOptions.options,
@@ -273,7 +240,7 @@ int main(int argc,
 
                 // Build single string out of unmapped q-values
                 std::string unmappedString;
-                for (const auto& s : unmappedQualityScores)
+                for (const auto& s : unmappedInfo.unmappedQualityScores)
                 {
                     unmappedString += s;
                 }
@@ -294,55 +261,56 @@ int main(int argc,
         }
         else
         {
-            calq::DecodingBlock input;
-            calq::EncodingBlock output;
-            calq::DecodingSideInformation side;
-            std::string unmappedValues;
-
-            calq::CQFile file(
+            calqapp::CQFile file(
                     ProgramOptions.inputFilePath,
-                    calq::File::Mode::MODE_READ
+                    calqapp::File::Mode::MODE_READ
             );
 
-            calq::File qualFile(
+            calqapp::File qualFile(
                     ProgramOptions.outputFilePath,
-                    calq::File::Mode::MODE_WRITE
+                    calqapp::File::Mode::MODE_WRITE
             );
 
             file.readHeader(&ProgramOptions.blockSize);
 
-            calq::SAMFileHandler sH(ProgramOptions.sideInformationFilePath);
+            calqapp::SAMFileHandler sH(
+                    ProgramOptions.sideInformationFilePath,
+                    ProgramOptions.referenceFilePath
+            );
 
             while (sH.readBlock(ProgramOptions.blockSize) != 0)
             {
                 //file side
+                calq::DecodingBlock input;
+                calq::EncodingBlock output;
+                calq::SideInformation side;
+                calqapp::UnmappedInformation unmappedInfo;
 
-                sH.getPositions(&side.positions);
-                sH.getCigars(&side.cigars);
-                side.posOffset = side.positions[0];
+                sH.getSideInformation(&side);
+                sH.getUnmappedBlock(&unmappedInfo);
+
                 side.qualOffset = ProgramOptions.options.qualityValueOffset;
                 input.quantizerIndices.clear();
 
+                std::string unmappedValues;
+                calq::DecodingOptions opts;
                 readBlock(&file, &input, &side, &unmappedValues);
-                calq::decode(side, input, &output);
+                calq::decode(opts, side, input, &output);
 
-                std::vector<bool> mappedFlags;
-                sH.getMappedFlags(&mappedFlags);
-
-                std::vector<std::string> unmappedOriginal;
-                sH.getUnmappedQualityScores(&unmappedOriginal);
 
                 auto mappedIt = output.qvalues.begin();
                 auto unmappedPos = 0;
-                auto unmappedSideIt = unmappedOriginal.begin();
-                for (const auto& b : mappedFlags)
+                auto unmappedSideIt = unmappedInfo.unmappedQualityScores.begin();
+                for (const auto& b : unmappedInfo.mappedFlags)
                 {
                     if (b)
                     {
                         qualFile.write(mappedIt->c_str(), mappedIt->length());
                         qualFile.writeByte('\n');
                         ++mappedIt;
-                    } else {
+                    }
+                    else
+                    {
                         std::string read = unmappedValues.substr(unmappedPos, unmappedSideIt->length());
                         qualFile.write(read.c_str(), read.length());
                         qualFile.writeByte('\n');

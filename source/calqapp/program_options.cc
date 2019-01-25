@@ -2,8 +2,9 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/error_exception_reporter.h"
-#include "calq/log.h"
+#include "calqapp/error_reporter.h"
+#include "calqapp/helpers.h"
+#include "calqapp/logging.h"
 
 // -----------------------------------------------------------------------------
 
@@ -44,12 +45,12 @@ ProgramOptions::~ProgramOptions() = default;
 void ProgramOptions::validate(void){
     if (versionStr == "v1")
     {
-        options.version = calq::EncodingOptions::Version::V1;
+        options.version = calq::Version::V1;
         CALQ_LOG("Using CALQ version 1");
     }
     else if (versionStr == "v2")
     {
-        options.version = calq::EncodingOptions::Version::V2;
+        options.version = calq::Version::V2;
         CALQ_LOG("Using CALQ version 2");
     }
     else
@@ -90,20 +91,20 @@ void ProgramOptions::validate(void){
     }
     if (!decompress)
     {
-        if (calq::fileNameExtension(inputFilePath) != std::string("sam"))
+        if (calqapp::fileNameExtension(inputFilePath) != std::string("sam"))
         {
             throwErrorException("Input file name extension must be 'sam'");
         }
     }
     else
     {
-        if (calq::fileNameExtension(inputFilePath) != std::string("cq"))
+        if (calqapp::fileNameExtension(inputFilePath) != std::string("cq"))
         {
             CALQ_LOG("Warning: Input file name extension is not 'cq'");
 //             throwErrorException("Input file name extension must be 'cq'");
         }
     }
-    if (!calq::fileExists(inputFilePath))
+    if (!calqapp::fileExists(inputFilePath))
     {
         throwErrorException("Cannot access input file");
     }
@@ -130,7 +131,7 @@ void ProgramOptions::validate(void){
         }
     }
     CALQ_LOG("Output file name: %s", outputFilePath.c_str());
-    if (calq::fileExists(outputFilePath))
+    if (calqapp::fileExists(outputFilePath))
     {
         if (!force)
         {
@@ -203,11 +204,11 @@ void ProgramOptions::validate(void){
         CALQ_LOG("Filter type: %s", filterTypeStr.c_str());
         if (filterTypeStr == "Gauss")
         {
-            options.filterType = calq::EncodingOptions::FilterType::GAUSS;
+            options.filterType = calq::FilterType::GAUSS;
         }
         else if (filterTypeStr == "Rectangle")
         {
-            options.filterType = calq::EncodingOptions::FilterType::RECTANGLE;
+            options.filterType = calq::FilterType::RECTANGLE;
         }
         else
         {
@@ -222,12 +223,12 @@ void ProgramOptions::validate(void){
         if (quantizerTypeStr == "Uniform")
         {
             options.quantizerType =
-                    calq::EncodingOptions::QuantizerType::UNIFORM;
+                    calq::QuantizerType::UNIFORM;
         }
         else if (quantizerTypeStr == "Lloyd")
         {
             options.quantizerType =
-                    calq::EncodingOptions::QuantizerType::LLOYD_MAX;
+                    calq::QuantizerType::LLOYD_MAX;
         }
         else
         {
@@ -311,13 +312,13 @@ void ProgramOptions::validate(void){
                 {
                     throwErrorException("Reference file name not provided");
                 }
-                if (!calq::fileExists(referenceFilePath))
+                if (!calqapp::fileExists(referenceFilePath))
                 {
                     throwErrorException("Cannot access reference file");
                 }
-                if (calq::fileNameExtension(referenceFilePath)
+                if (calqapp::fileNameExtension(referenceFilePath)
                     != std::string("fa")
-                    && calq::fileNameExtension(referenceFilePath)
+                    && calqapp::fileNameExtension(referenceFilePath)
                        != std::string("fasta"))
                 {
                     throwErrorException(
@@ -349,7 +350,7 @@ void ProgramOptions::validate(void){
         {
             throwErrorException("No side information file name provided");
         }
-        if (calq::fileNameExtension(sideInformationFilePath)
+        if (calqapp::fileNameExtension(sideInformationFilePath)
             != std::string("sam"))
         {
             throwErrorException(
@@ -357,7 +358,7 @@ void ProgramOptions::validate(void){
                     "extension must be 'sam'"
             );
         }
-        if (!calq::fileExists(sideInformationFilePath))
+        if (!calqapp::fileExists(sideInformationFilePath))
         {
             throwErrorException("Cannot access side information file");
         }

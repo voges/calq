@@ -3,14 +3,18 @@
 // -----------------------------------------------------------------------------
 
 #include <cmath>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <limits>
-#include <algorithm>
 
 // -----------------------------------------------------------------------------
 
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <sstream>
+
+// -----------------------------------------------------------------------------
+
+#include "calq/calq_coder.h"
 #include "calq/error_exception_reporter.h"
 
 // -----------------------------------------------------------------------------
@@ -29,7 +33,7 @@ Haplotyper::Haplotyper(size_t sigma,
                        size_t gaussRadius,
                        bool debug,
                        bool squashed,
-                       EncodingOptions::FilterType filterType
+                       FilterType filterType
 )
         : spreader(
         maxHQSoftclip_propagation,
@@ -45,7 +49,7 @@ Haplotyper::Haplotyper(size_t sigma,
         polyploidy(ploidy),
         DEBUG(debug),
         squashedActivity(squashed){
-    if (filterType == EncodingOptions::FilterType::GAUSS)
+    if (filterType == FilterType::GAUSS)
     {
         GaussKernel kernel(sigma);
         double THRESHOLD = 0.0000001;
@@ -59,7 +63,7 @@ Haplotyper::Haplotyper(size_t sigma,
         );
         localDistortion = kernel.calcValue((size - 1) / 2, size);
     }
-    else if (filterType == EncodingOptions::FilterType::RECTANGLE)
+    else if (filterType == FilterType::RECTANGLE)
     {
         RectangleKernel kernel(sigma);
         size_t size = kernel.calcMinSize(gaussRadius * 2 + 1);
@@ -250,16 +254,24 @@ size_t Haplotyper::push(const std::string& seqPile,
           << std::setfill('0') << altProb;
 
         std::string out = debug.push(s.str());
+
+        s.clear();
         if (out != "\n")
         {
-            std::cerr << out << " " << std::fixed << std::setw(6)
-                      << std::setprecision(4) << std::setfill('0')
-                      << activity << " " << quant << std::endl;
+            s << out << " " << std::fixed << std::setw(6)
+              << std::setprecision(4) << std::setfill('0')
+              << activity << " " << quant << std::endl;
         }
 
         if (hq_softclips > 0)
         {
-            std::cerr << hq_softclips << " detected!" << std::endl;
+            s << hq_softclips << " softclips detected!" << std::endl;
+        }
+
+        std::string line;
+        while(std::getline(s, line))
+        {
+            getLogging().errorOut(line);
         }
     }
 

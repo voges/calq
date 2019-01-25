@@ -9,14 +9,33 @@
 #include <string>
 #include <vector>
 
-#include "calq/sam_pileup_deque.h"
+// -----------------------------------------------------------------------------
+
 #include "calq/genotyper.h"
-#include "calq/quantizer.h"
 #include "calq/haplotyper.h"
+#include "calq/quantizer.h"
+#include "calq/sam_pileup_deque.h"
 
 // -----------------------------------------------------------------------------
 
 namespace calq {
+
+// -----------------------------------------------------------------------------
+
+struct EncodingOptions;
+struct DecodingBlock;
+enum struct Version;
+// -----------------------------------------------------------------------------
+
+struct EncodingRead
+{
+    uint32_t posMin;
+    uint32_t posMax;
+    std::string qvalues;
+    std::string cigar;
+    std::string sequence;
+    std::string reference;
+};
 
 // -----------------------------------------------------------------------------
 
@@ -42,7 +61,7 @@ class QualEncoder
     int NR_QUANTIZERS;
 
     // Quality value offset for this block
-    int qualityValueOffset_;
+    uint8_t qualityValueOffset_;
 
     // 0-based position offset of this block
     uint32_t posOffset_;
@@ -67,7 +86,7 @@ class QualEncoder
 
     bool debugOut;
 
-    EncodingOptions::Version version_;
+    Version version_;
 };
 
 // -----------------------------------------------------------------------------

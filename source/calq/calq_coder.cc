@@ -1,18 +1,16 @@
-#include "calq/calq_encoder.h"
+#include "calq/calq_coder.h"
 
 // -----------------------------------------------------------------------------
 
-#include <chrono>
+#include <map>
 
 // -----------------------------------------------------------------------------
 
 #include "calq/error_exception_reporter.h"
-#include "calq/log.h"
-#include "calq/helpers.h"
-#include "calq/qual_encoder.h"
-#include "calq/probability_distribution.h"
-#include "calq/uniform_min_max_quantizer.h"
 #include "calq/lloyd_max_quantizer.h"
+#include "calq/qual_decoder.h"
+#include "calq/qual_encoder.h"
+#include "calq/uniform_min_max_quantizer.h"
 
 // -----------------------------------------------------------------------------
 
@@ -20,7 +18,7 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-uint32_t computeLength(const std::string& cigar){
+static uint32_t computeLength(const std::string& cigar){
     // Compute 0-based first position and 0-based last position this record
     // is mapped to on the reference used for alignment
     uint32_t posMax = 0;
@@ -64,7 +62,7 @@ uint32_t computeLength(const std::string& cigar){
 // -----------------------------------------------------------------------------
 
 void encode(const EncodingOptions& opt,
-            const EncodingSideInformation& sideInformation,
+            const SideInformation& sideInformation,
             const EncodingBlock& input,
             DecodingBlock *output
 ){
@@ -94,7 +92,7 @@ void encode(const EncodingOptions& opt,
     for (auto i = static_cast<int>(opt.quantizationMin);
          i <= static_cast<int>(opt.quantizationMax); ++i)
     {
-        if (opt.quantizerType == EncodingOptions::QuantizerType::UNIFORM)
+        if (opt.quantizerType == QuantizerType::UNIFORM)
         {
             UniformMinMaxQuantizer quantizer(
                     static_cast<const int&>(opt.qualityValueMin),
@@ -106,7 +104,7 @@ void encode(const EncodingOptions& opt,
                             quantizer
                     ));
         }
-        else if (opt.quantizerType == EncodingOptions::QuantizerType::LLOYD_MAX)
+        else if (opt.quantizerType == QuantizerType::LLOYD_MAX)
         {
             LloydMaxQuantizer quantizer(static_cast<size_t>(i));
             quantizer.build(pdf);
@@ -126,9 +124,9 @@ void encode(const EncodingOptions& opt,
     QualEncoder qualEncoder(opt, quantizers, output);
     for (size_t i = 0; i < sideInformation.positions.size(); ++i)
     {
-        std::string ref = "";
-        size_t len = computeLength(sideInformation.cigars[i]);
-        if (opt.version == EncodingOptions::Version::V2)
+        std::string ref;
+        uint32_t len = computeLength(sideInformation.cigars[i]);
+        if (opt.version == Version::V2)
         {
             ref = sideInformation.reference.substr(
                     sideInformation.positions[i]
@@ -147,6 +145,32 @@ void encode(const EncodingOptions& opt,
 
     qualEncoder.finishBlock();
 
+}
+
+// -----------------------------------------------------------------------------
+
+void decode(const DecodingOptions&,
+            const SideInformation& sideInformation,
+            const DecodingBlock& input,
+            EncodingBlock *output
+){
+
+    // Decode the quality values
+    QualDecoder qualDecoder(
+            input,
+            sideInformation.positions[0],
+            sideInformation.qualOffset,
+            output
+    );
+    output->qvalues.clear();
+    for (size_t i = 0; i < sideInformation.positions.size(); ++i)
+    {
+        DecodingRead r = {
+                sideInformation.positions[i],
+                sideInformation.cigars[i]
+        };
+        qualDecoder.decodeMappedRecordFromBlock(r);
+    }
 }
 
 // -----------------------------------------------------------------------------

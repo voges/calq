@@ -3,57 +3,67 @@
 
 // -----------------------------------------------------------------------------
 
+#include <functional>
+#include <iostream>
 #include <string>
 
 // -----------------------------------------------------------------------------
 
-#include "calq/helpers.h"
+namespace calq {
+
+/**
+ * Output streams for logging
+ */
+struct LogConfiguration
+{
+    /**
+     * Output to stdout
+     */
+    std::function<void(const std::string&)> standardOut;
+
+    /**
+     * Output to stderr
+     */
+    std::function<void(const std::string&)> errorOut;
+};
+
+/**
+ * Redirect logging streams
+ * @param c New configuration
+ */
+void setLogging(const LogConfiguration& c);
+
+/**
+ * @return Current logging configuration
+ */
+LogConfiguration getLogging();
 
 // -----------------------------------------------------------------------------
 
-// C-style debug macro
-// #define DBG
-#ifdef DBG
-#define CALQ_DEBUG(c, ...) \
-        do { \
-            fflush(stderr); \
-            fprintf(stderr, \
-                    "DEBUG  %s %s:%s:%d: " c"\n", \
-                    calq::currentDateAndTime().c_str(), \
-                    __FILE__, \
-                    __FUNCTION__, \
-                    __LINE__, \
-                    ##__VA_ARGS__); \
-        } while (false)
-#else
-    #define CALQ_DEBUG(c, ...) do { } while (false)
-#endif
+/**
+ * Contains some handy default configurations
+ */
+namespace loggingPresets {
 
 // -----------------------------------------------------------------------------
 
-// C-style log macro
-#define CALQ_LOG(c, ...) \
-    do {\
-        fflush(stdout); \
-        fprintf(stdout, \
-                "LOG  %s %s: " c"\n", \
-                calq::currentDateAndTime().c_str(), \
-                calq::removeFileNameExtension( \
-                calq::fileBaseName(std::string(__FILE__))).c_str(), \
-                ##__VA_ARGS__); \
-    } while (false)
+/**
+ * @return Configuration not logging at all
+ */
+LogConfiguration getSilent();
+
+/**
+ * @return Using std::cout and std::cerr
+ */
+LogConfiguration getStandard();
 
 // -----------------------------------------------------------------------------
 
-// C-style error macro
-#define CALQ_ERROR(c, ...) \
-    do {\
-        fflush(stderr); \
-        fprintf(stderr, \
-                "ERROR  %s " c"\n", \
-                calq::currentDateAndTime().c_str(), \
-                ##__VA_ARGS__); \
-    } while (false)
+}  // namespace loggingPresets
+
+// -----------------------------------------------------------------------------
+
+}  // namespace calq
 
 // -----------------------------------------------------------------------------
 

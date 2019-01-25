@@ -17,7 +17,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ size_t CQFile::readQualBlock(std::string *block){
         {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
-            auto tmp = make_unique<unsigned char[]>(tmpSize);
+            auto tmp = std::unique_ptr<unsigned char[]>(new unsigned char[tmpSize]);
             ret += read(tmp.get(), tmpSize);
             *block += std::string((const char *) tmp.get(), tmpSize);
 //             CALQ_LOG("Read uncompressed sub-block (%u byte(s))", tmpSize);
@@ -150,7 +150,7 @@ size_t CQFile::readQualBlock(std::string *block){
         {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
-            auto tmp = make_unique<unsigned char[]>(tmpSize);
+            auto tmp = std::unique_ptr<unsigned char[]>(new unsigned char[tmpSize]);
             ret += read(tmp.get(), tmpSize);
 //             CALQ_LOG("Read compressed sub-block (%u byte(s))", tmpSize);
             unsigned int uncompressedSize = 0;
