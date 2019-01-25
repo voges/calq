@@ -131,7 +131,14 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
             ::toupper
     );
 
-    side.posOffset = side.positions[0];
+    if (side.positions.empty())
+    {
+        side.posOffset = 0;
+    }
+    else
+    {
+        side.posOffset = side.positions[0];
+    }
 
     return returnCode;
 }
