@@ -43,6 +43,7 @@ class LloydMaxQuantizer : public Quantizer
 
     // Calculates quantization borders using pdf
     void calcBorders(const ProbabilityDistribution& pdf);
+
  public:
     explicit LloydMaxQuantizer(size_t steps);
 

@@ -189,10 +189,13 @@ int main(int argc,
         // calq::setLogging(calq::loggingPresets::getSilent());
         // Compress or decompress
 
-        calqapp::ProgramOptions ProgramOptions(argc, argv);
-        ProgramOptions.validate();
+        calqapp::ProgramOptions programOptions(argc, argv);
+        if(programOptions.help) {
+            return EXIT_SUCCESS;
+        }
+        programOptions.validate();
 
-        if (!ProgramOptions.decompress) {
+        if (!programOptions.decompress) {
             auto startTime = std::chrono::steady_clock::now();
 
             size_t compressedMappedQualSize = 0;
@@ -200,15 +203,15 @@ int main(int argc,
             size_t uncompressedMappedQualSize = 0;
             size_t uncompressedUnmappedQualSize = 0;
 
-            calqapp::SAMFileHandler sH(ProgramOptions.inputFilePath, ProgramOptions.referenceFilePath);
+            calqapp::SAMFileHandler sH(programOptions.inputFilePath, programOptions.referenceFilePath);
 
             calqapp::CQFile file(
-                    ProgramOptions.outputFilePath,
+                    programOptions.outputFilePath,
                     calqapp::File::Mode::MODE_WRITE
             );
-            file.writeHeader(ProgramOptions.blockSize);
+            file.writeHeader(programOptions.blockSize);
 
-            while (sH.readBlock(ProgramOptions.blockSize) != 0) {
+            while (sH.readBlock(programOptions.blockSize) != 0) {
                 calq::SideInformation encSide;
                 sH.getSideInformation(&encSide);
 
@@ -222,7 +225,7 @@ int main(int argc,
 
 
                 calq::encode(
-                        ProgramOptions.options,
+                        programOptions.options,
                         encSide,
                         encBlock,
                         &decBlock
@@ -237,11 +240,11 @@ int main(int argc,
                 size_t mappedSize;
                 size_t unmappedSize;
                 writeBlock(
-                        ProgramOptions.options,
+                        programOptions.options,
                         decBlock,
                         encSide,
                         unmappedString,
-                        ProgramOptions.debugStreams,
+                        programOptions.debugStreams,
                         &file,
                         &mappedSize,
                         &unmappedSize
@@ -315,23 +318,23 @@ int main(int argc,
             auto startTime = std::chrono::steady_clock::now();
 
             calqapp::CQFile file(
-                    ProgramOptions.inputFilePath,
+                    programOptions.inputFilePath,
                     calqapp::File::Mode::MODE_READ
             );
 
             calqapp::File qualFile(
-                    ProgramOptions.outputFilePath,
+                    programOptions.outputFilePath,
                     calqapp::File::Mode::MODE_WRITE
             );
 
-            file.readHeader(&ProgramOptions.blockSize);
+            file.readHeader(&programOptions.blockSize);
 
             calqapp::SAMFileHandler sH(
-                    ProgramOptions.sideInformationFilePath,
-                    ProgramOptions.referenceFilePath
+                    programOptions.sideInformationFilePath,
+                    programOptions.referenceFilePath
             );
 
-            while (sH.readBlock(ProgramOptions.blockSize) != 0) {
+            while (sH.readBlock(programOptions.blockSize) != 0) {
                 //file side
                 calq::DecodingBlock input;
                 calq::EncodingBlock output;
@@ -341,7 +344,7 @@ int main(int argc,
                 sH.getSideInformation(&side);
                 sH.getUnmappedBlock(&unmappedInfo);
 
-                side.qualOffset = ProgramOptions.options.qualityValueOffset;
+                side.qualOffset = programOptions.options.qualityValueOffset;
                 input.quantizerIndices.clear();
 
                 std::string unmappedValues;
@@ -351,7 +354,7 @@ int main(int argc,
 
 
                 auto mappedIt = output.qvalues.begin();
-                auto unmappedPos = 0;
+                auto unmappedPos = 0u;
                 auto unmappedSideIt = unmappedInfo.unmappedQualityScores.begin();
                 for (const auto& b : unmappedInfo.mappedFlags) {
                     if (b) {

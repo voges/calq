@@ -33,6 +33,7 @@ class ProgramOptions
     bool force;
     bool debugStreams;
     bool test;
+    bool help;
     std::string inputFilePath;
     std::string outputFilePath;
     size_t blockSize;
@@ -55,6 +56,12 @@ class ProgramOptions
             int argc,
             char *argv[]
     );
+
+    void validateV1();
+    void validateV2();
+    void validateCompress();
+    void validateDecompress();
+    void validateCommon();
 };
 
 // -----------------------------------------------------------------------------

@@ -25,7 +25,9 @@ SAMFileHandler::SAMFileHandler(const std::string& inputFileName,
         rname(){
     samFile_ = std::unique_ptr<SAMFile>(new SAMFile(inputFileName));
     if (!referenceFileName.empty()) {
-        fastaFile = std::unique_ptr<FASTAFile>(new FASTAFile(referenceFileName));
+        fastaFile = std::unique_ptr<FASTAFile>(
+                new FASTAFile(referenceFileName)
+        );
     }
 }
 

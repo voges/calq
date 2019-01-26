@@ -63,7 +63,7 @@ size_t CQFile::readHeader(size_t *blockSize){
         throwErrorException("magic does not match");
     }
 
-    ret += readUint64(reinterpret_cast<uint64_t *>(blockSize));
+    ret += readUint64(blockSize);
 //     CALQ_LOG("Block size: %zu", *blockSize);
 
     nrReadFileFormatBytes_ += ret;
