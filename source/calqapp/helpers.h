@@ -1,33 +1,30 @@
-#ifndef CALQ_UNIFORM_QUANTIZER_H_
-#define CALQ_UNIFORM_QUANTIZER_H_
+#ifndef CALQAPP_HELPERS_H_
+#define CALQAPP_HELPERS_H_
 
 // -----------------------------------------------------------------------------
 
-#include "calq/quantizer.h"
+#include <functional>
+#include <memory>
+#include <string>
+#include <utility>
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
-class UniformQuantizer : public Quantizer
-{
- public:
-    UniformQuantizer(const int& valueMin,
-                     const int& valueMax,
-                     const int& nrSteps
-    );
-    ~UniformQuantizer() override;
-};
+std::string currentDateAndTime();
+bool fileExists(const std::string& path);
+std::string fileBaseName(const std::string& path);
+std::string fileNameExtension(const std::string& path);
+std::string removeFileNameExtension(const std::string& path);
+
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
-
-// -----------------------------------------------------------------------------
-
-#endif  // CALQ_UNIFORM_QUANTIZER_H_
+#endif  // CALQAPP_HELPERS_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

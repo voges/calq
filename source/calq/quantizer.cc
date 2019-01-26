@@ -2,7 +2,13 @@
 
 // -----------------------------------------------------------------------------
 
+#include <sstream>
+#include <string>
+
+// -----------------------------------------------------------------------------
+
 #include "calq/error_exception_reporter.h"
+#include "calq/log.h"
 
 // -----------------------------------------------------------------------------
 
@@ -29,8 +35,7 @@ Quantizer::~Quantizer() = default;
 // -----------------------------------------------------------------------------
 
 int Quantizer::valueToIndex(const int& value) const{
-    if (lut_.find(value) == lut_.end())
-    {
+    if (lut_.find(value) == lut_.end()) {
         throwErrorException("Value out of range");
     }
     return lut_.at(value).first;
@@ -39,8 +44,7 @@ int Quantizer::valueToIndex(const int& value) const{
 // -----------------------------------------------------------------------------
 
 int Quantizer::indexToReconstructionValue(const int& index) const{
-    if (inverseLut_.find(index) == inverseLut_.end())
-    {
+    if (inverseLut_.find(index) == inverseLut_.end()) {
         throwErrorException("Index not found");
     }
     return inverseLut_.at(index);
@@ -49,8 +53,7 @@ int Quantizer::indexToReconstructionValue(const int& index) const{
 // -----------------------------------------------------------------------------
 
 int Quantizer::valueToReconstructionValue(const int& value) const{
-    if (lut_.find(value) == lut_.end())
-    {
+    if (lut_.find(value) == lut_.end()) {
         throwErrorException("Value out of range");
     }
 
@@ -66,19 +69,23 @@ const std::map<int, int>& Quantizer::inverseLut() const{
 // -----------------------------------------------------------------------------
 
 void Quantizer::print() const{
-    std::cout << "LUT:" << std::endl;
-    for (auto const& lutElem : lut_)
-    {
-        std::cout << "  " << lutElem.first << ": ";
-        std::cout << lutElem.second.first << ",";
-        std::cout << lutElem.second.second << std::endl;
+    std::stringstream stream;
+    stream << "LUT:" << std::endl;
+    for (auto const& lutElem : lut_) {
+        stream << "  " << lutElem.first << ": ";
+        stream << lutElem.second.first << ",";
+        stream << lutElem.second.second << std::endl;
     }
 
-    std::cout << "Inverse LUT:" << std::endl;
-    for (auto const& inverseLutElem : inverseLut_)
-    {
-        std::cout << "  " << inverseLutElem.first << ": ";
-        std::cout << inverseLutElem.second << std::endl;
+    stream << "Inverse LUT:" << std::endl;
+    for (auto const& inverseLutElem : inverseLut_) {
+        stream << "  " << inverseLutElem.first << ": ";
+        stream << inverseLutElem.second << std::endl;
+    }
+
+    std::string line;
+    while (std::getline(stream, line)) {
+        getLogging().standardOut(line);
     }
 }
 

@@ -1,5 +1,5 @@
-#ifndef CALQ_FILE_H_
-#define CALQ_FILE_H_
+#ifndef CALQAPP_FILE_H_
+#define CALQAPP_FILE_H_
 
 // -----------------------------------------------------------------------------
 
@@ -8,18 +8,17 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/error_exception_reporter.h"
+#include "calqapp/error_reporter.h"
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
 class File
 {
  public:
-
     // -------------------------------------------------------------------------
 
     enum class Mode
@@ -64,12 +63,12 @@ class File
                      size_t number = 1
     ){
         size_t ret = sizeof(T) * number;
-        try
-        {
-            filestream.read(reinterpret_cast<char *>(dword), sizeof(T) * number);
+        try {
+            filestream.read(
+                    reinterpret_cast<char *>(dword), sizeof(T) * number
+            );
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throwErrorException(std::string("Read failed: ") + e.what());
         }
         nrReadBytes_ += ret;
@@ -83,15 +82,13 @@ class File
                       size_t number = 1
     ){
         size_t ret = sizeof(T) * number;
-        try
-        {
+        try {
             filestream.write(
                     reinterpret_cast<const char *>(dword),
                     sizeof(T) * number
             );
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throwErrorException(std::string("Write failed: ") + e.what());
         }
         nrWrittenBytes_ += ret;
@@ -129,11 +126,11 @@ class File
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_FILE_H_
+#endif  // CALQAPP_FILE_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

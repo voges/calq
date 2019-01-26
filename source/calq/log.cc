@@ -1,55 +1,61 @@
-#include "calq/sam_pileup.h"
+#include "calq/log.h"
 
-// -----------------------------------------------------------------------------
+#include <memory>
 
 namespace calq {
 
 // -----------------------------------------------------------------------------
 
-SAMPileup::SAMPileup()
-        : pos(0),
-        qual(""),
-        seq(""),
-        ref('N'),
-        hq_softcounter(0){
+static std::unique_ptr<LogConfiguration> currentConfig;
+
+// -----------------------------------------------------------------------------
+
+void setLogging(const LogConfiguration& c){
+    currentConfig = std::unique_ptr<LogConfiguration>(new LogConfiguration(c));
 }
 
 // -----------------------------------------------------------------------------
 
-SAMPileup::~SAMPileup() = default;
-
-// -----------------------------------------------------------------------------
-
-bool SAMPileup::empty() const{
-    return seq.empty();
+LogConfiguration getLogging(){
+    if (!currentConfig) {
+        setLogging(loggingPresets::getStandard());
+    }
+    return *currentConfig;
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::clear(){
-    pos = 0;
-    qual = "";
-    seq = "";
-    ref = 'N';
+namespace loggingPresets {
+
+// -----------------------------------------------------------------------------
+
+LogConfiguration getSilent(){
+    return {[](const std::string&)
+            {
+            },
+            [](const std::string&)
+            {
+            }
+    };
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::print() const{
-    printf("%6u: %s %s\n", pos, seq.c_str(), qual.c_str());
+LogConfiguration getStandard(){
+    return {[](const std::string& msg)
+            {
+                std::cout << msg << std::endl;
+            },
+            [](const std::string& msg)
+            {
+                std::cerr << msg << std::endl;
+            }
+    };
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::printQual() const{
-    printf("%6u: %s\n", pos, qual.c_str());
-}
-
-// -----------------------------------------------------------------------------
-
-void SAMPileup::printSeq() const{
-    printf("%6u: %s\n", pos, seq.c_str());
-}
+}  // namespace loggingPresets
 
 // -----------------------------------------------------------------------------
 

@@ -11,7 +11,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
@@ -23,23 +23,19 @@ FASTAFile::FASTAFile(const std::string& path,
         mode
 ),
         line_(nullptr){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
-    if (mode != FASTAFile::Mode::MODE_READ)
-    {
+    if (mode != FASTAFile::Mode::MODE_READ) {
         throwErrorException("Currently only MODE_READ supported");
     }
 
     // Usually, lines in a FASTA file should be limited to 80 chars, so 4 KB
     // should be enough
-    try
-    {
-        line_ = make_unique<char[]>(LINE_SIZE);
+    try {
+        line_ = std::unique_ptr<char[]>(new char[LINE_SIZE]);
     }
-    catch (std::exception& e)
-    {
+    catch (std::exception& e) {
         throwErrorException(std::string("New failed: ") + e.what());
     }
 
@@ -57,29 +53,23 @@ void FASTAFile::parse(){
     std::string currentHeader;
     std::string currentSequence;
 
-    while (readLine(line_.get(), LINE_SIZE))
-    {
+    while (readLine(line_.get(), LINE_SIZE)) {
         // Trim line
         size_t l = strlen(line_.get()) - 1;
-        while (l && (line_[l] == '\r' || line_[l] == '\n'))
-        {
+        while (l && (line_[l] == '\r' || line_[l] == '\n')) {
             line_[l--] = '\0';
         }
 
-        if (line_[0] == '>')
-        {
-            if (!currentSequence.empty())
-            {
+        if (line_[0] == '>') {
+            if (!currentSequence.empty()) {
                 // We have a sequence, check if we have a header
-                if (currentHeader.empty())
-                {
+                if (currentHeader.empty()) {
                     throwErrorException("Found sequence but no header");
                 }
 
                 // We have a header, check if it is already present in our
                 // references map
-                if (references.find(currentHeader) != references.end())
-                {
+                if (references.find(currentHeader) != references.end()) {
                     throwErrorException("Found the same header twice");
                 }
 
@@ -103,9 +93,7 @@ void FASTAFile::parse(){
 
             // Reset sequence
             currentSequence = "";
-        }
-        else
-        {
+        } else {
             currentSequence += line_.get();
         }
     }
@@ -129,7 +117,7 @@ std::string FASTAFile::getReferencesInRange(const std::string& header,
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

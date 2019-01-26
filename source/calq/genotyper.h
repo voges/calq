@@ -18,7 +18,8 @@ class Genotyper
  public:
     Genotyper(const int& polyploidy,
               const int& qualOffset,
-              const int& nrQuantizers
+              const int& nrQuantizers,
+              bool debug
     );
     ~Genotyper();
 
@@ -55,6 +56,7 @@ class Genotyper
     const int nrQuantizers_;
     const int polyploidy_;
     const int qualOffset_;
+    const bool DEBUG;
 };
 
 // -----------------------------------------------------------------------------

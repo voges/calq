@@ -28,7 +28,6 @@ class Quantizer
     void print() const;
 
  protected:
-
     // value->(index,reconstructionValue)
     std::map<int, std::pair<int, int>> lut_;
     std::map<int, int> inverseLut_;  // index->reconstructionValue

@@ -8,7 +8,7 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/structs.h"
+#include "calq/calq_coder.h"
 
 // -----------------------------------------------------------------------------
 
@@ -31,8 +31,9 @@ class ProgramOptions
     calq::EncodingOptions options;
 
     bool force;
-    bool verbose;
+    bool debugStreams;
     bool test;
+    bool help;
     std::string inputFilePath;
     std::string outputFilePath;
     size_t blockSize;
@@ -44,11 +45,23 @@ class ProgramOptions
     bool decompress;
     std::string sideInformationFilePath;
 
+
+    size_t quantizationMin;
+    size_t quantizationMax;
+    size_t polyploidy;
+    size_t hqSoftClipThreshold;
+
  private:
     void processCommandLine(
             int argc,
             char *argv[]
     );
+
+    void validateV1();
+    void validateV2();
+    void validateCompress();
+    void validateDecompress();
+    void validateCommon();
 };
 
 // -----------------------------------------------------------------------------

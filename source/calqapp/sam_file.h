@@ -1,11 +1,11 @@
-#ifndef CALQ_SAM_FILE_H_
-#define CALQ_SAM_FILE_H_
+#ifndef CALQAPP_SAM_FILE_H_
+#define CALQAPP_SAM_FILE_H_
 
 // -----------------------------------------------------------------------------
 
 #include <chrono>
-#include <string>
 #include <memory>
+#include <string>
 
 // -----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ class SAMFile : public File
     std::string header;
 
  private:
-    static const size_t LINE_SIZE = sizeof(char) * (1 * 1000000); // 1 MB
+    static const size_t LINE_SIZE = sizeof(char) * (1 * 1000000);  // 1 MB
 
     std::unique_ptr<char[]> line_;
     size_t nrBlocksRead_;
@@ -48,11 +48,11 @@ class SAMFile : public File
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_SAM_FILE_H_
+#endif  // CALQAPP_SAM_FILE_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

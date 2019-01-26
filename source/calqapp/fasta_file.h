@@ -1,5 +1,5 @@
-#ifndef CALQ_FASTA_FILE_H_
-#define CALQ_FASTA_FILE_H_
+#ifndef CALQAPP_FASTA_FILE_H_
+#define CALQAPP_FASTA_FILE_H_
 
 // -----------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ class FASTAFile : public File
     );
 
  private:
-    static const size_t LINE_SIZE = sizeof(char) * (4 * 1000); // 4 KB
+    static const size_t LINE_SIZE = sizeof(char) * (4 * 1000);  // 4 KB
 
     void parse();
 
@@ -42,11 +42,11 @@ class FASTAFile : public File
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_FASTA_FILE_H_
+#endif  // CALQAPP_FASTA_FILE_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
