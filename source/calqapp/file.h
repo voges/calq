@@ -1,5 +1,5 @@
-#ifndef CALQ_FILE_H_
-#define CALQ_FILE_H_
+#ifndef CALQAPP_FILE_H_
+#define CALQAPP_FILE_H_
 
 // -----------------------------------------------------------------------------
 
@@ -19,7 +19,6 @@ namespace calqapp {
 class File
 {
  public:
-
     // -------------------------------------------------------------------------
 
     enum class Mode
@@ -65,7 +64,9 @@ class File
     ){
         size_t ret = sizeof(T) * number;
         try {
-            filestream.read(reinterpret_cast<char *>(dword), sizeof(T) * number);
+            filestream.read(
+                    reinterpret_cast<char *>(dword), sizeof(T) * number
+            );
         }
         catch (std::exception& e) {
             throwErrorException(std::string("Read failed: ") + e.what());
@@ -125,11 +126,11 @@ class File
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_FILE_H_
+#endif  // CALQAPP_FILE_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

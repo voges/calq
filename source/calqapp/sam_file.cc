@@ -94,7 +94,7 @@ SAMFile::SAMFile(const std::string& path,
 
     try {
         // 1 million chars should be enough
-        line_ = make_unique<char[]>(LINE_SIZE);
+        line_ = std::unique_ptr<char[]>(new char[LINE_SIZE]);
     }
     catch (std::exception& e) {
         throwErrorException(std::string("New failed: ") + e.what());
@@ -250,7 +250,7 @@ size_t SAMFile::readBlock(const size_t& blockSize){
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

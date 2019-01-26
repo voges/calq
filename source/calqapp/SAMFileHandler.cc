@@ -162,13 +162,19 @@ size_t SAMFileHandler::nrBlocksRead() const{
     return this->samFile_->nrBlocksRead();
 }
 
+// -----------------------------------------------------------------------------
+
 size_t SAMFileHandler::nrMappedRecordsRead() const{
     return this->samFile_->nrMappedRecordsRead();
 }
 
+// -----------------------------------------------------------------------------
+
 size_t SAMFileHandler::nrUnmappedRecordsRead() const{
     return this->samFile_->nrUnmappedRecordsRead();
 }
+
+// -----------------------------------------------------------------------------
 
 size_t SAMFileHandler::nrRecordsRead() const{
     return this->samFile_->nrRecordsRead();
@@ -176,7 +182,7 @@ size_t SAMFileHandler::nrRecordsRead() const{
 
 // -----------------------------------------------------------------------------
 
-} // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

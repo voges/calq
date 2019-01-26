@@ -1,5 +1,5 @@
-#ifndef CALQ_ERROR_EXCEPTION_REPORTER_H_
-#define CALQ_ERROR_EXCEPTION_REPORTER_H_
+#ifndef CALQAPP_ERROR_REPORTER_H_
+#define CALQAPP_ERROR_REPORTER_H_
 
 // -----------------------------------------------------------------------------
 
@@ -28,7 +28,6 @@ inline void throwErrorException(const std::string& msg){
 
 class ErrorExceptionReporter
 {
-
     // -------------------------------------------------------------------------
 
  public:
@@ -66,7 +65,7 @@ class ErrorExceptionReporter
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
@@ -81,7 +80,7 @@ class ErrorExceptionReporter
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_ERROR_EXCEPTION_REPORTER_H_
+#endif  // CALQAPP_ERROR_REPORTER_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

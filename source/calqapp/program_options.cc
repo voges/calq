@@ -279,13 +279,11 @@ void ProgramOptions::validateCommon(){
             CALQ_LOG("Force switch set - overwriting output file(s)");
         }
     }
-
 }
 
 // -----------------------------------------------------------------------------
 
 void ProgramOptions::validate(){
-
     validateCommon();
 
     if (decompress) {
@@ -457,12 +455,12 @@ void ProgramOptions::processCommandLine(
 
     // First thing to do is to print the help
     if (optionsMap.count("help") || optionsMap.count("h")) {
-        std::cout << "Usage calq V1:\n $ ./calcapp -i [input_file] "
+        std::cout << "Usage calq V1:\n $ ./calqapp -i [input_file] "
                      "-o [output_file] [optional parameters]\n\n"
-                     "Usage calq V2:\n $ ./calcapp -i [input_file] "
+                     "Usage calq V2:\n $ ./calqapp -i [input_file] "
                      "-o [output_file] -r [reference file] "
                      "--calq_version v2 [optional parameters]\n\n"
-                     "Usage calq Decoder:\n $ ./calcapp -i [input_file] "
+                     "Usage calq Decoder:\n $ ./calqapp -i [input_file] "
                      "-o [output_file] -s [sam side file] "
                      "-d [optional parameters]\n" << std::endl;
         std::cout << options;

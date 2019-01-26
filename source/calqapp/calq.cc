@@ -1,4 +1,5 @@
 #include <chrono>
+#include <numeric>
 
 // -----------------------------------------------------------------------------
 
@@ -19,165 +20,242 @@
 
 // -----------------------------------------------------------------------------
 
-size_t writeBlock(const calq::EncodingOptions& opts,
-                  const calq::DecodingBlock& block,
-                  const calq::SideInformation& side,
-                  const std::string& unmappedQualityValues_,
-                  bool STREAMOUT,
-                  calqapp::CQFile *cqFile,
-                  size_t *compressedSizeMapped,
-                  size_t *compressedSizeUnmapped
-){
+static int encode(const calqapp::ProgramOptions& programOptions){
+    auto startTime = std::chrono::steady_clock::now();
 
-    *compressedSizeMapped = 0;
-    *compressedSizeUnmapped = 0;
-    // Write block parameters
-    *compressedSizeMapped += cqFile->writeUint32(side.positions[0] - 1);
-    *compressedSizeMapped += cqFile->writeUint32((uint32_t) opts.qualityValueOffset);
+    size_t compressedMappedQualSize = 0;
+    size_t compressedUnmappedQualSize = 0;
+    size_t uncompressedMappedQualSize = 0;
+    size_t uncompressedUnmappedQualSize = 0;
 
-    // Write inverse quantization LUTs
-    *compressedSizeMapped += cqFile->writeQuantizers(block.codeBooks);
+    calqapp::SAMFileHandler sH(
+            programOptions.inputFilePath,
+            programOptions.referenceFilePath
+    );
 
-    // Write unmapped quality values
-    auto *uqv = (unsigned char *) unmappedQualityValues_.c_str();
-    size_t uqvSize = unmappedQualityValues_.length();
-    if (uqvSize > 0) {
-        *compressedSizeUnmapped += cqFile->writeUint8(0x01);
+    calqapp::CQFile file(
+            programOptions.outputFilePath,
+            calqapp::File::Mode::MODE_WRITE
+    );
+    file.writeHeader(programOptions.blockSize);
 
-        if (STREAMOUT) {
-            std::cerr << "unmapped qvalues:" << std::endl;
+    while (sH.readBlock(programOptions.blockSize) != 0) {
+        calq::SideInformation encSide;
+        sH.getSideInformation(&encSide);
 
-            std::cerr << unmappedQualityValues_;
+        calqapp::UnmappedInformation unmappedInfo;
+        sH.getUnmappedBlock(&unmappedInfo);
 
-            std::cerr << std::endl;
-        }
+        calq::EncodingBlock encBlock;
+        sH.getMappedBlock(&encBlock);
 
-        *compressedSizeUnmapped += cqFile->writeQualBlock(uqv, uqvSize);
-    } else {
-        *compressedSizeUnmapped += cqFile->writeUint8(0x00);
+        calq::DecodingBlock decBlock;
+
+
+        calq::encode(
+                programOptions.options,
+                encSide,
+                encBlock,
+                &decBlock
+        );
+
+        // Build single string out of unmapped q-values
+        std::string unmappedString;
+        unmappedString = std::accumulate(
+                unmappedInfo.unmappedQualityScores.begin(),
+                unmappedInfo.unmappedQualityScores.end(),
+                unmappedString
+        );
+
+        size_t mappedSize;
+        size_t unmappedSize;
+        file.writeBlock(
+                programOptions.options,
+                decBlock,
+                encSide,
+                unmappedString,
+                programOptions.debugStreams,
+                &mappedSize,
+                &unmappedSize
+        );
+
+        compressedMappedQualSize += mappedSize;
+        compressedUnmappedQualSize += unmappedSize;
+
+        uncompressedMappedQualSize = std::accumulate(
+                encBlock.qvalues.begin(),
+                encBlock.qvalues.end(),
+                uncompressedMappedQualSize,
+                [](const size_t& a, const std::string& b)->size_t{
+                    return a + b.size();
+                }
+        );
+        uncompressedUnmappedQualSize += unmappedString.length();
     }
 
-    // Write mapped quantizer indices
-    std::string mqiString;
+    file.close();
 
-    for (auto const& mappedQuantizerIndex : block.quantizerIndices) {
-        mqiString += std::to_string(mappedQuantizerIndex);
-    }
+    auto stopTime = std::chrono::steady_clock::now();
+    auto diffTime = stopTime - startTime;
+    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+            diffTime
+    ).count();
+    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(
+            diffTime
+    ).count();
+    auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(
+            diffTime
+    ).count();
+    auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(
+            diffTime
+    ).count();
 
-    if (STREAMOUT) {
-        std::cerr << "quantizer indices:" << std::endl;
+    CALQ_LOG("COMPRESSION STATISTICS");
+    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h",
+             (int) diffTimeMs,
+             (int) diffTimeS,
+             (int) diffTimeM,
+             (int) diffTimeH);
+    const unsigned MB = 1 * 1000 * 1000;
+    CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s",
+             ((static_cast<double>(uncompressedMappedQualSize
+                                   + uncompressedUnmappedQualSize) /
+               static_cast<double>(MB))) / (static_cast<double>(diffTimeS)));
+    CALQ_LOG("  Wrote %zu block(s)", sH.nrBlocksRead());
+    CALQ_LOG("  Record(s):  %12zu", sH.nrRecordsRead());
+    CALQ_LOG("    Mapped:   %12zu", sH.nrMappedRecordsRead());
+    CALQ_LOG("    Unmapped: %12zu", sH.nrUnmappedRecordsRead());
+    CALQ_LOG("  Uncompressed size: %12zu",
+             uncompressedMappedQualSize + uncompressedUnmappedQualSize);
+    CALQ_LOG("    Mapped:          %12zu", uncompressedMappedQualSize);
+    CALQ_LOG("    Unmapped:        %12zu", uncompressedUnmappedQualSize);
+    CALQ_LOG("  Compressed size: %12zu", file.nrWrittenBytes());
+    CALQ_LOG("    File format:   %12zu", file.nrWrittenFileFormatBytes());
+    CALQ_LOG("    Mapped:        %12zu", compressedMappedQualSize);
+    CALQ_LOG("    Unmapped:      %12zu", compressedUnmappedQualSize);
+    CALQ_LOG("  Compression ratio: %4.2f%%",
+             (double) file.nrWrittenBytes() *
+             100 /
+             (double) (uncompressedMappedQualSize
+                       + uncompressedUnmappedQualSize));
+    CALQ_LOG("    Mapped:          %4.2f%%",
+             (double) compressedMappedQualSize * 100
+             / (double) (uncompressedMappedQualSize));
+    CALQ_LOG("    Unmapped:        %4.2f%%",
+             (double) compressedUnmappedQualSize * 100
+             / (double) (uncompressedUnmappedQualSize));
+    CALQ_LOG("  Compression factor: %4.2f",
+             (double) (uncompressedMappedQualSize
+                       + uncompressedUnmappedQualSize) /
+             (double) file.nrWrittenBytes());
+    CALQ_LOG("    Mapped:           %4.2f",
+             (double) (uncompressedMappedQualSize)
+             / (double) compressedMappedQualSize);
+    CALQ_LOG("    Unmapped:         %4.2f",
+             (double) (uncompressedUnmappedQualSize)
+             / (double) compressedUnmappedQualSize);
+    CALQ_LOG("  Bits per quality value: %2.4f",
+             (static_cast<double>(file.nrWrittenBytes()) * 8) /
+             static_cast<double>(uncompressedMappedQualSize
+                                 + uncompressedUnmappedQualSize));
+    CALQ_LOG("    Mapped:               %2.4f",
+             (static_cast<double>(compressedMappedQualSize) * 8) /
+             static_cast<double>(uncompressedMappedQualSize));
+    CALQ_LOG("    Unmapped:             %2.4f",
+             (static_cast<double>(compressedUnmappedQualSize) * 8) /
+             static_cast<double>(uncompressedUnmappedQualSize));
 
-        std::cerr << mqiString;
-
-        std::cerr << std::endl;
-    }
-
-    auto *mqi = (unsigned char *) mqiString.c_str();
-    size_t mqiSize = mqiString.length();
-    if (mqiSize > 0) {
-        *compressedSizeMapped += cqFile->writeUint8(0x01);
-        *compressedSizeMapped += cqFile->writeQualBlock(mqi, mqiSize);
-    } else {
-        *compressedSizeMapped += cqFile->writeUint8(0x00);
-    }
-
-    // Write mapped quality value indices
-    for (int i = 0; i < opts.quantizationMax - opts.quantizationMin + 1; ++i) {
-        std::vector<uint8_t> mqviStream = block.stepindices[i];
-        std::string mqviString;
-
-
-        for (auto const& mqviInt : mqviStream) {
-            mqviString += std::to_string(mqviInt);
-        }
-        auto *mqvi = (unsigned char *) mqviString.c_str();
-        size_t mqviSize = mqviString.length();
-
-        if (STREAMOUT) {
-            std::cerr << "Step indices" << i << ":" << std::endl;
-
-
-            std::cerr << mqviString;
-
-            std::cerr << std::endl;
-        }
-        if (mqviSize > 0) {
-            *compressedSizeMapped += cqFile->writeUint8(0x01);
-            *compressedSizeMapped += cqFile->writeQualBlock(mqvi, mqviSize);
-        } else {
-            *compressedSizeMapped += cqFile->writeUint8(0x00);
-        }
-    }
-
-    return *compressedSizeUnmapped + *compressedSizeMapped;
+    return EXIT_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
 
-size_t readBlock(calqapp::CQFile *cqFile,
-                 calq::DecodingBlock *out,
-                 calq::SideInformation *side,
-                 std::string *unmapped
-){
-    out->codeBooks.clear();
-    out->stepindices.clear();
-    out->quantizerIndices.clear();
+static int decode(const calqapp::ProgramOptions& po){
+    calqapp::ProgramOptions programOptions = po;
 
-    unmapped->clear();
+    auto startTime = std::chrono::steady_clock::now();
 
-    size_t ret = 0;
+    calqapp::CQFile file(
+            programOptions.inputFilePath,
+            calqapp::File::Mode::MODE_READ
+    );
 
-    std::string buffer;
+    calqapp::File qualFile(
+            programOptions.outputFilePath,
+            calqapp::File::Mode::MODE_WRITE
+    );
 
-    // Read block parameters
-    ret += cqFile->readUint32(&side->posOffset);
-    ret += cqFile->readUint32(reinterpret_cast<uint32_t *>(&side->qualOffset));
+    file.readHeader(&programOptions.blockSize);
 
-    // Read inverse quantization LUTs
-    cqFile->readQuantizers(&out->codeBooks);
-    /*    
-    for (size_t i = 0; i < quantizers_.size(); ++i)
-    {
-        out->codeBooks.emplace_back();
-        for (size_t j = 0; j < quantizers_[i].inverseLut().size(); ++j)
-        {
-            out->codeBooks[i].push_back(quantizers_[i].inverseLut().at(j));
+    calqapp::SAMFileHandler sH(
+            programOptions.sideInformationFilePath,
+            programOptions.referenceFilePath
+    );
+
+    while (sH.readBlock(programOptions.blockSize) != 0) {
+        calq::DecodingBlock input;
+        calq::EncodingBlock output;
+        calq::SideInformation side;
+        calqapp::UnmappedInformation unmappedInfo;
+
+        sH.getSideInformation(&side);
+        sH.getUnmappedBlock(&unmappedInfo);
+
+        side.qualOffset = programOptions.options.qualityValueOffset;
+        input.quantizerIndices.clear();
+
+        std::string unmappedValues;
+        calq::DecodingOptions opts;
+        file.readBlock(&input, &side, &unmappedValues);
+        calq::decode(opts, side, input, &output);
+
+
+        auto mappedIt = output.qvalues.begin();
+        auto unmappedPos = 0u;
+        auto unmappedSideIt = unmappedInfo.unmappedQualityScores.begin();
+        for (const auto& b : unmappedInfo.mappedFlags) {
+            if (b) {
+                qualFile.write(mappedIt->c_str(), mappedIt->length());
+                qualFile.writeByte('\n');
+                ++mappedIt;
+            } else {
+                std::string read = unmappedValues.substr(
+                        unmappedPos,
+                        unmappedSideIt->length()
+                );
+                qualFile.write(read.c_str(), read.length());
+                qualFile.writeByte('\n');
+
+                unmappedPos += read.length();
+                ++unmappedSideIt;
+            }
         }
     }
-    */
 
-    // Read unmapped quality values
-    uint8_t uqvFlags = 0;
-    ret += cqFile->readUint8(&uqvFlags);
-    if (uqvFlags & 0x01) { //NOLINT
-        ret += cqFile->readQualBlock(unmapped);
-    }
+    auto stopTime = std::chrono::steady_clock::now();
+    auto diffTime = stopTime - startTime;
+    auto diffTimeMs =
+            std::chrono::duration_cast<std::chrono::milliseconds>(diffTime)
+                    .count();
+    auto diffTimeS =
+            std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
+    auto diffTimeM =
+            std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
+    auto diffTimeH =
+            std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
-    // Read mapped quantizer indices
-    uint8_t mqiFlags = 0;
-    ret += cqFile->readUint8(&mqiFlags);
-    if (mqiFlags & 0x1) { //NOLINT
-        ret += cqFile->readQualBlock(&buffer);
-        std::copy(buffer.begin(), buffer.end(), std::back_inserter(out->quantizerIndices));
-        buffer.clear();
-    }
+    CALQ_LOG("DECOMPRESSION STATISTICS");
+    CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h",
+             (int) diffTimeMs, (int) diffTimeS, (int) diffTimeM, (int) diffTimeH
+    );
+    const unsigned MB = 1 * 1000 * 1000;
+    CALQ_LOG("  Speed (compressed size/time): %.2f MB/s",
+             ((static_cast<double>(file.nrReadBytes()) /
+               static_cast<double>(MB))) /
+             (static_cast<double>(diffTimeS)));
+    CALQ_LOG("  Decoded %zu block(s)", sH.nrBlocksRead());
 
-    // Read mapped quality value indices
-    for (int i = 0; i < static_cast<int>(out->codeBooks.size()); ++i) {
-        out->stepindices.emplace_back();
-        uint8_t mqviFlags = 0;
-        ret += cqFile->readUint8(&mqviFlags);
-        if (mqviFlags & 0x1) { //NOLINT
-            ret += cqFile->readQualBlock(&buffer);
-            std::copy(
-                    buffer.begin(),
-                    buffer.end(),
-                    std::back_inserter(out->stepindices[i]));
-            buffer.clear();
-        }
-    }
-
-    return ret;
+    return EXIT_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
@@ -186,208 +264,16 @@ int main(int argc,
          char *argv[]
 ){
     try {
-        // calq::setLogging(calq::loggingPresets::getSilent());
-        // Compress or decompress
-
         calqapp::ProgramOptions programOptions(argc, argv);
-        if(programOptions.help) {
+        if (programOptions.help) {
             return EXIT_SUCCESS;
         }
         programOptions.validate();
 
         if (!programOptions.decompress) {
-            auto startTime = std::chrono::steady_clock::now();
-
-            size_t compressedMappedQualSize = 0;
-            size_t compressedUnmappedQualSize = 0;
-            size_t uncompressedMappedQualSize = 0;
-            size_t uncompressedUnmappedQualSize = 0;
-
-            calqapp::SAMFileHandler sH(programOptions.inputFilePath, programOptions.referenceFilePath);
-
-            calqapp::CQFile file(
-                    programOptions.outputFilePath,
-                    calqapp::File::Mode::MODE_WRITE
-            );
-            file.writeHeader(programOptions.blockSize);
-
-            while (sH.readBlock(programOptions.blockSize) != 0) {
-                calq::SideInformation encSide;
-                sH.getSideInformation(&encSide);
-
-                calqapp::UnmappedInformation unmappedInfo;
-                sH.getUnmappedBlock(&unmappedInfo);
-
-                calq::EncodingBlock encBlock;
-                sH.getMappedBlock(&encBlock);
-
-                calq::DecodingBlock decBlock;
-
-
-                calq::encode(
-                        programOptions.options,
-                        encSide,
-                        encBlock,
-                        &decBlock
-                );
-
-                // Build single string out of unmapped q-values
-                std::string unmappedString;
-                for (const auto& s : unmappedInfo.unmappedQualityScores) {
-                    unmappedString += s;
-                }
-
-                size_t mappedSize;
-                size_t unmappedSize;
-                writeBlock(
-                        programOptions.options,
-                        decBlock,
-                        encSide,
-                        unmappedString,
-                        programOptions.debugStreams,
-                        &file,
-                        &mappedSize,
-                        &unmappedSize
-                );
-
-
-                compressedMappedQualSize += mappedSize;//qualEncoder.compressedMappedQualSize();
-                compressedUnmappedQualSize += unmappedSize;//qualEncoder.compressedUnmappedQualSize();
-                for (const auto& q : encBlock.qvalues) {
-                    uncompressedMappedQualSize += q.size();
-                }
-                uncompressedUnmappedQualSize += unmappedString.length();
-
-            }
-
-            file.close();
-
-            auto stopTime = std::chrono::steady_clock::now();
-            auto diffTime = stopTime - startTime;
-            auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
-            auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-            auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
-            auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
-
-            CALQ_LOG("COMPRESSION STATISTICS");
-            CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h",
-                     (int) diffTimeMs,
-                     (int) diffTimeS,
-                     (int) diffTimeM,
-                     (int) diffTimeH);
-            const unsigned MB = 1 * 1000 * 1000;
-            CALQ_LOG("  Speed (uncompressed size/time): %.2f MB/s",
-                     ((static_cast<double>(uncompressedMappedQualSize + uncompressedUnmappedQualSize) /
-                       static_cast<double>(MB))) / (static_cast<double>(diffTimeS)));
-            CALQ_LOG("  Wrote %zu block(s)", sH.nrBlocksRead());
-            CALQ_LOG("  Record(s):  %12zu", sH.nrRecordsRead());
-            CALQ_LOG("    Mapped:   %12zu", sH.nrMappedRecordsRead());
-            CALQ_LOG("    Unmapped: %12zu", sH.nrUnmappedRecordsRead());
-            CALQ_LOG("  Uncompressed size: %12zu", uncompressedMappedQualSize + uncompressedUnmappedQualSize);
-            CALQ_LOG("    Mapped:          %12zu", uncompressedMappedQualSize);
-            CALQ_LOG("    Unmapped:        %12zu", uncompressedUnmappedQualSize);
-            CALQ_LOG("  Compressed size: %12zu", file.nrWrittenBytes());
-            CALQ_LOG("    File format:   %12zu", file.nrWrittenFileFormatBytes());
-            CALQ_LOG("    Mapped:        %12zu", compressedMappedQualSize);
-            CALQ_LOG("    Unmapped:      %12zu", compressedUnmappedQualSize);
-            CALQ_LOG("  Compression ratio: %4.2f%%",
-                     (double) file.nrWrittenBytes() *
-                     100 /
-                     (double) (uncompressedMappedQualSize + uncompressedUnmappedQualSize));
-            CALQ_LOG("    Mapped:          %4.2f%%",
-                     (double) compressedMappedQualSize * 100 / (double) (uncompressedMappedQualSize));
-            CALQ_LOG("    Unmapped:        %4.2f%%",
-                     (double) compressedUnmappedQualSize * 100 / (double) (uncompressedUnmappedQualSize));
-            CALQ_LOG("  Compression factor: %4.2f",
-                     (double) (uncompressedMappedQualSize + uncompressedUnmappedQualSize) /
-                     (double) file.nrWrittenBytes());
-            CALQ_LOG("    Mapped:           %4.2f",
-                     (double) (uncompressedMappedQualSize) / (double) compressedMappedQualSize);
-            CALQ_LOG("    Unmapped:         %4.2f",
-                     (double) (uncompressedUnmappedQualSize) / (double) compressedUnmappedQualSize);
-            CALQ_LOG("  Bits per quality value: %2.4f",
-                     (static_cast<double>(file.nrWrittenBytes()) * 8) /
-                     static_cast<double>(uncompressedMappedQualSize + uncompressedUnmappedQualSize));
-            CALQ_LOG("    Mapped:               %2.4f",
-                     (static_cast<double>(compressedMappedQualSize) * 8) /
-                     static_cast<double>(uncompressedMappedQualSize));
-            CALQ_LOG("    Unmapped:             %2.4f",
-                     (static_cast<double>(compressedUnmappedQualSize) * 8) /
-                     static_cast<double>(uncompressedUnmappedQualSize));
+            return encode(programOptions);
         } else {
-            auto startTime = std::chrono::steady_clock::now();
-
-            calqapp::CQFile file(
-                    programOptions.inputFilePath,
-                    calqapp::File::Mode::MODE_READ
-            );
-
-            calqapp::File qualFile(
-                    programOptions.outputFilePath,
-                    calqapp::File::Mode::MODE_WRITE
-            );
-
-            file.readHeader(&programOptions.blockSize);
-
-            calqapp::SAMFileHandler sH(
-                    programOptions.sideInformationFilePath,
-                    programOptions.referenceFilePath
-            );
-
-            while (sH.readBlock(programOptions.blockSize) != 0) {
-                //file side
-                calq::DecodingBlock input;
-                calq::EncodingBlock output;
-                calq::SideInformation side;
-                calqapp::UnmappedInformation unmappedInfo;
-
-                sH.getSideInformation(&side);
-                sH.getUnmappedBlock(&unmappedInfo);
-
-                side.qualOffset = programOptions.options.qualityValueOffset;
-                input.quantizerIndices.clear();
-
-                std::string unmappedValues;
-                calq::DecodingOptions opts;
-                readBlock(&file, &input, &side, &unmappedValues);
-                calq::decode(opts, side, input, &output);
-
-
-                auto mappedIt = output.qvalues.begin();
-                auto unmappedPos = 0u;
-                auto unmappedSideIt = unmappedInfo.unmappedQualityScores.begin();
-                for (const auto& b : unmappedInfo.mappedFlags) {
-                    if (b) {
-                        qualFile.write(mappedIt->c_str(), mappedIt->length());
-                        qualFile.writeByte('\n');
-                        ++mappedIt;
-                    } else {
-                        std::string read = unmappedValues.substr(unmappedPos, unmappedSideIt->length());
-                        qualFile.write(read.c_str(), read.length());
-                        qualFile.writeByte('\n');
-
-                        unmappedPos += read.length();
-                        ++unmappedSideIt;
-                    }
-                }
-            }
-
-            auto stopTime = std::chrono::steady_clock::now();
-            auto diffTime = stopTime - startTime;
-            auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
-            auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-            auto diffTimeM = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
-            auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
-
-            CALQ_LOG("DECOMPRESSION STATISTICS");
-            CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h",
-                     (int) diffTimeMs, (int) diffTimeS, (int) diffTimeM, (int) diffTimeH
-            );
-            const unsigned MB = 1 * 1000 * 1000;
-            CALQ_LOG("  Speed (compressed size/time): %.2f MB/s",
-                     ((static_cast<double>(file.nrReadBytes()) / static_cast<double>(MB))) /
-                     (static_cast<double>(diffTimeS)));
-            CALQ_LOG("  Decoded %zu block(s)", sH.nrBlocksRead());
+            return decode(programOptions);
         }
     }
     catch (const calq::ErrorException& errorException) {
@@ -402,8 +288,6 @@ int main(int argc,
         CALQ_ERROR("Unknown error occurred");
         return EXIT_FAILURE;
     }
-
-    return EXIT_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
