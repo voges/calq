@@ -13,6 +13,37 @@ set(CMAKE_CXX_STANDARD 11)
 # This is calq
 project("calq")
 
+#==============================================================================
+# gabac
+#==============================================================================
+
+configure_file(CMakeLists_gabac.txt.in gabac-download/CMakeLists.txt)
+set(BUILD_GABACIFY OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result2
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
+)
+if(result)
+    message(FATAL_ERROR "CMake step for gabac failed: ${result2}")
+endif()
+execute_process(
+    COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result2
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
+)
+if(result2)
+    message(FATAL_ERROR "Build step for gabac failed: ${result2}")
+endif()
+
+# Add gabac directly to our build. This defines the gtest and gtest_main
+# targets.
+add_subdirectory(
+    ${CMAKE_CURRENT_BINARY_DIR}/gabac-src
+    ${CMAKE_CURRENT_BINARY_DIR}/gabac-build
+    EXCLUDE_FROM_ALL
+)
 
 #==============================================================================
 # Compiler
@@ -99,42 +130,7 @@ if(CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-#==============================================================================
-# gabac
-#==============================================================================
 
-configure_file(CMakeLists_gabac.txt.in gabac-download/CmakeLists.txt)
-execute_process(
-    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result2
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
-)
-if(result)
-    message(FATAL_ERROR "CMake step for gabac failed: ${result2}")
-endif()
-execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result2
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
-)
-if(result2)
-    message(FATAL_ERROR "Build step for gabac failed: ${result2}")
-endif()
-
-# Add gabac directly to our build. This defines the gtest and gtest_main
-# targets.
-add_subdirectory(
-    ${CMAKE_CURRENT_BINARY_DIR}/gabac-src
-    ${CMAKE_CURRENT_BINARY_DIR}/gabac-build
-    EXCLUDE_FROM_ALL
-)
-
-# The gtest/gtest_main targets carry header search path dependencies
-# automatically when using CMake 2.8.11 or later. Otherwise we have to add
-# them here ourselves.
-if(CMAKE_VERSION VERSION_LESS 2.8.11)
-    include_directories("${gabac}/include")
-endif()
 
 #==============================================================================
 # calq
@@ -194,7 +190,7 @@ target_include_directories(${calqapp} PRIVATE ${calq_include_dir})
 target_include_directories(${calqapp} PRIVATE ${Boost_INCLUDE_DIR})
 target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
 
-target_link_libraries(${calqapp} ${calq})
+target_link_libraries(${calqapp} ${calq} gabac)
 target_link_libraries(${calqapp} ${Boost_LIBRARIES})
 
 #==============================================================================
