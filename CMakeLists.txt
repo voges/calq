@@ -37,13 +37,15 @@ if(result2)
     message(FATAL_ERROR "Build step for gabac failed: ${result2}")
 endif()
 
-# Add gabac directly to our build. This defines the gtest and gtest_main
-# targets.
+# Add gabac directly to our build. This defines the gabac targets. 
 add_subdirectory(
     ${CMAKE_CURRENT_BINARY_DIR}/gabac-src
     ${CMAKE_CURRENT_BINARY_DIR}/gabac-build
     EXCLUDE_FROM_ALL
 )
+
+# Set up include directory
+set(gabac_include_dir ${CMAKE_CURRENT_BINARY_DIR}/gabac-src/source)
 
 #==============================================================================
 # Compiler
@@ -188,6 +190,8 @@ add_executable(${calqapp} EXCLUDE_FROM_ALL ${calqapp_source_files} ${calqapp_hea
 target_include_directories(${calqapp} PRIVATE ${calqapp_include_dir})
 target_include_directories(${calqapp} PRIVATE ${calq_include_dir})
 target_include_directories(${calqapp} PRIVATE ${Boost_INCLUDE_DIR})
+message("Gabac Include dir: ${gabac_include_dir}")
+target_include_directories(${calqapp} PRIVATE ${gabac_include_dir})
 target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
 
 target_link_libraries(${calqapp} ${calq} gabac)

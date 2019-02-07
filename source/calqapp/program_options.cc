@@ -279,6 +279,7 @@ void ProgramOptions::validateCommon(){
             CALQ_LOG("Force switch set - overwriting output file(s)");
         }
     }
+
 }
 
 // -----------------------------------------------------------------------------

@@ -13,6 +13,11 @@
 
 // -----------------------------------------------------------------------------
 
+#include "gabac/gabac.h"
+#include "gabac/configuration.h"
+
+// -----------------------------------------------------------------------------
+
 namespace calq {
 struct EncodingOptions;
 struct DecodingBlock;
@@ -67,7 +72,8 @@ class CQFile : public File
 
     size_t writeQuantizers(const std::vector<std::vector<uint8_t>>& quantizers);
     size_t writeQualBlock(unsigned char *block,
-                          const size_t& blockSize
+                          const size_t& blockSize,
+                          const gabac::Configuration& configuration
     );
 };
 

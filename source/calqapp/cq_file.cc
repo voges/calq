@@ -210,7 +210,8 @@ CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>>& quantizers){
 // -----------------------------------------------------------------------------
 
 size_t CQFile::writeQualBlock(unsigned char *block,
-                              const size_t& blockSize
+                              const size_t& blockSize,
+                              const gabac::Configuration& configuration
 ){
     if (block == nullptr) {
         throwErrorException("block is nullptr");
@@ -220,6 +221,8 @@ size_t CQFile::writeQualBlock(unsigned char *block,
     }
 
 //     CALQ_LOG("Writing block");
+
+
 
     size_t ret = 0;
 
@@ -231,7 +234,8 @@ size_t CQFile::writeQualBlock(unsigned char *block,
     ret = writeUint64((uint64_t) nrBlocks);
 
     size_t encodedBytes = 0;
-    while (encodedBytes < blockSize) {
+    gabac::
+    while (encodedBytes < blockSize) { /*
         unsigned int bytesToEncode = 0;
         if ((blockSize - encodedBytes) > (1 * MB)) {
             bytesToEncode = (1 * MB);
@@ -246,6 +250,8 @@ size_t CQFile::writeQualBlock(unsigned char *block,
                 &compressedSize
         );
 
+        // gabac::encode(configuration, l, &symbols, &buffer);
+
         if (compressedSize >= bytesToEncode) {
             ret += writeUint8(0);
             ret += writeUint32(bytesToEncode);
@@ -258,6 +264,39 @@ size_t CQFile::writeQualBlock(unsigned char *block,
 
         encodedBytes += bytesToEncode;
         free(compressed);
+        */
+
+        unsigned int bytesToEncode = 0;
+        if ((blockSize - encodedBytes) > (1 * MB)) {
+            bytesToEncode = (1 * MB);
+        } else {
+            bytesToEncode = static_cast<unsigned int>(blockSize - encodedBytes);
+        }
+
+        unsigned int compressedSize = 0;
+        std::vector<unsigned char> compressed;
+        std::vector<uint64_t> toCompress;
+
+        // TO-DO: Check if this can be done better with a std::copy
+        for(int i = encodedBytes; i < encodedBytes+bytesToEncode; i++) {
+            toCompress.push_back(block[i]);
+        }
+        // TO-DO:   Gabac::encode needs gabacify log l - calq doesnt build gabacify
+        //          probably need to finetune gabac::encode implementation
+        gabac::encode(configuration, l, toCompress, compressed);
+        compressedSize = compressed.size() * sizeof(unsigned char);
+        vector<unsigned char>::pointer p = &compressed[0];
+        unsigned char* bytes = p;
+        
+        // TO-DO:   Can it still happen that compressedSize > bytesToEncode?
+        ret += writeUint8(1);
+        ret += writeUint(compressedSize);
+        ret += writeUint(bytes, compressedSize);
+
+        encodedBytes += bytesToEncode;
+
+        compressed.clear();
+        toCompress.clear();
     }
 
     return ret;
@@ -298,7 +337,18 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
             std::cerr << std::endl;
         }
 
-        *compressedSizeUnmapped += this->writeQualBlock(uqv, uqvSize);
+        // Compute Gabac Config Here
+        // std::string jsonInput();
+        // jsonInput = 
+        gabac::Configuration configuration;
+        // for now simple config:
+        configuration.transformedSequenceConfigurations[0].lutTransformationEnabled = 0;
+        configuration.transformedSequenceConfigurations[0].diffCodingEnabled = 0;
+        configuration.transformedSequenceConfigurations[0].binarizationId = static_cast<gabac::BinarizationId>(0);
+        configuration.transformedSequenceConfigurations[0].binarizationParameters.push_back(8);
+        configuration.transformedSequenceConfigurations[0].contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
+
+        *compressedSizeUnmapped += this->writeQualBlock(uqv, uqvSize, configuration);
     } else {
         *compressedSizeUnmapped += this->writeUint8(0x00);
     }
@@ -322,7 +372,16 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
         *compressedSizeMapped += this->writeUint8(0x01);
-        *compressedSizeMapped += this->writeQualBlock(mqi, mqiSize);
+
+         gabac::Configuration configuration;
+        // for now simple config:
+        configuration.transformedSequenceConfigurations[0].lutTransformationEnabled = 0;
+        configuration.transformedSequenceConfigurations[0].diffCodingEnabled = 0;
+        configuration.transformedSequenceConfigurations[0].binarizationId = static_cast<gabac::BinarizationId>(0);
+        configuration.transformedSequenceConfigurations[0].binarizationParameters.push_back(8);
+        configuration.transformedSequenceConfigurations[0].contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
+
+        *compressedSizeMapped += this->writeQualBlock(mqi, mqiSize, configuration);
     } else {
         *compressedSizeMapped += this->writeUint8(0x00);
     }
@@ -349,7 +408,16 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
         }
         if (mqviSize > 0) {
             *compressedSizeMapped += this->writeUint8(0x01);
-            *compressedSizeMapped += this->writeQualBlock(mqvi, mqviSize);
+
+            gabac::Configuration configuration;
+            // for now simple config:
+        configuration.transformedSequenceConfigurations[0].lutTransformationEnabled = 0;
+        configuration.transformedSequenceConfigurations[0].diffCodingEnabled = 0;
+        configuration.transformedSequenceConfigurations[0].binarizationId = static_cast<gabac::BinarizationId>(0);
+        configuration.transformedSequenceConfigurations[0].binarizationParameters.push_back(8);
+        configuration.transformedSequenceConfigurations[0].contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
+
+            *compressedSizeMapped += this->writeQualBlock(mqvi, mqviSize, configuration);
         } else {
             *compressedSizeMapped += this->writeUint8(0x00);
         }
