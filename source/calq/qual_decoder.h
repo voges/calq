@@ -23,10 +23,20 @@ struct DecodingBlock;
 
 // -----------------------------------------------------------------------------
 
+struct DecodingRead
+{
+    uint32_t posMin;
+    std::string cigar;
+};
+
+// -----------------------------------------------------------------------------
+
 class QualDecoder
 {
  public:
     QualDecoder(const DecodingBlock& in,
+                uint32_t positionOffset,
+                uint8_t qualityOffset,
                 EncodingBlock *out
     );
     ~QualDecoder();
@@ -40,7 +50,7 @@ class QualDecoder
     size_t uqvIdx_;
     std::vector<size_t> qviIdx_;
 
-    std::map<int, Quantizer> quantizers_;
+    std::vector<Quantizer> quantizers_;
 
     EncodingBlock *out;
     const DecodingBlock& in;

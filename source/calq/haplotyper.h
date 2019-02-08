@@ -1,8 +1,11 @@
 #ifndef CALQ_HAPLOTYPER_H_
 #define CALQ_HAPLOTYPER_H_
 
-#include <functional>
 #include <cmath>
+
+// -----------------------------------------------------------------------------
+
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
@@ -12,11 +15,16 @@
 #include "calq/filter_buffer.h"
 #include "calq/genotyper.h"
 #include "calq/softclip_spreader.h"
-#include "calq_encoder.h"
 
 // -----------------------------------------------------------------------------
 
 namespace calq {
+
+// -----------------------------------------------------------------------------
+
+enum struct FilterType;
+
+// -----------------------------------------------------------------------------
 
 class Haplotyper
 {
@@ -45,10 +53,10 @@ class Haplotyper
                size_t nrQuantizers,
                size_t maxHQSoftclip_propagation,
                size_t minHQSoftclip_streak,
-               size_t gaussRadius,
+               size_t filterCutOff,
                bool debug,
                bool squashed,
-               EncodingOptions::FilterType filterType
+               FilterType filterType
     );
 
     // Returns offset between activity scores' position and front

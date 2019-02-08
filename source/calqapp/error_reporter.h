@@ -1,5 +1,5 @@
-#ifndef CALQ_ERROR_EXCEPTION_REPORTER_H_
-#define CALQ_ERROR_EXCEPTION_REPORTER_H_
+#ifndef CALQAPP_ERROR_REPORTER_H_
+#define CALQAPP_ERROR_REPORTER_H_
 
 // -----------------------------------------------------------------------------
 
@@ -12,21 +12,24 @@
 
 #include "calq/exceptions.h"
 
+
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
 inline void throwErrorException(const std::string& msg){
     std::cout.flush();
-    throw ErrorException(msg);
+    throw calq::ErrorException(msg);
 }
 
 // -----------------------------------------------------------------------------
 
 class ErrorExceptionReporter
 {
+    // -------------------------------------------------------------------------
+
  public:
     ErrorExceptionReporter(std::string file,
                            std::string function,
@@ -62,7 +65,7 @@ class ErrorExceptionReporter
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 
@@ -70,14 +73,14 @@ class ErrorExceptionReporter
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException calq::ErrorExceptionReporter(__FILE__, \
-                                                         __FUNCTION__, \
-                                                         __LINE__ \
+#define throwErrorException calqapp::ErrorExceptionReporter(__FILE__, \
+                                                            __FUNCTION__, \
+                                                            __LINE__ \
 )
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQ_ERROR_EXCEPTION_REPORTER_H_
+#endif  // CALQAPP_ERROR_REPORTER_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

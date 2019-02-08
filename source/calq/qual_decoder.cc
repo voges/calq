@@ -2,8 +2,9 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/structs.h"
+#include "calq/calq_coder.h"
 #include "calq/error_exception_reporter.h"
+#include "calq/qual_encoder.h"
 
 // -----------------------------------------------------------------------------
 
@@ -12,16 +13,25 @@ namespace calq {
 // -----------------------------------------------------------------------------
 
 QualDecoder::QualDecoder(const DecodingBlock& b,
+                         uint32_t positionOffset,
+                         uint8_t qualityOffset,
                          EncodingBlock *o
 )
-        : posOffset_(0),
-        qualityValueOffset_(0),
+        : posOffset_(positionOffset),
+        qualityValueOffset_(qualityOffset),
         uqvIdx_(0),
         qviIdx_(b.stepindices.size(), 0),
-        quantizers_(b.quantizers),
+        quantizers_(0),
         out(o),
         in(b){
     out->qvalues.clear();
+    for (const auto& q : b.codeBooks) {
+        std::map<int, int> steps;
+        for (unsigned int i = 0; i < q.size(); ++i) {
+            steps[i] = q[i];
+        }
+        quantizers_.emplace_back(steps);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -38,40 +48,37 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord){
     size_t opLen = 0;
     size_t qvciPos = samRecord.posMin - posOffset_;
 
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++)
-    {
-        if (isdigit(samRecord.cigar[cigarIdx]))
-        {
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(samRecord.cigar[cigarIdx])) {
             opLen = opLen * 10 + (size_t) samRecord.cigar[cigarIdx]
                     - (size_t) '0';
             continue;
         }
 
-        switch (samRecord.cigar[cigarIdx])
-        {
+        switch (samRecord.cigar[cigarIdx]) {
             case 'M':
             case '=':
             case 'X':
                 // Decode opLen quality value indices with computed
                 // quantizer indices
-                for (size_t i = 0; i < opLen; i++)
-                {   
-                    int quantizerIndex = in.quantizerIndices[qvciPos++] - '0';
-                    std::cout << "quantizer index: " << quantizerIndex << std::endl;
+                for (size_t i = 0; i < opLen; i++) {
+                    uint8_t quantizerIndex =
+                            in.quantizerIndices[qvciPos++] - '0';
 
-                    for (auto i = in.quantizerIndices.begin(); i != in.quantizerIndices.end(); ++i)
-                            std::cout << *i << ' ';
-                    std::cout << std::endl;
 
-                    int qualityValueIndex =
+                    uint8_t qualityValueIndex =
                             in.stepindices.at(
                                     static_cast<size_t>(quantizerIndex)
                             )[qviIdx_[quantizerIndex]++] - '0';
 
-                    std::cout << "qualityValueIndex: " << qualityValueIndex << std::endl;
 
-                    int q = quantizers_.at(quantizerIndex)
-                            .indexToReconstructionValue(qualityValueIndex);
+                    uint8_t q =
+                            uint8_t(
+                                    quantizers_.at(quantizerIndex)
+                                            .indexToReconstructionValue(
+                                                    qualityValueIndex
+                                            )
+                            );
 
                     qual += static_cast<char>(q + qualityValueOffset_);
                 }
@@ -79,16 +86,11 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord){
             case 'I':
             case 'S':
                 // Decode opLen quality values with max quantizer index
-                for (size_t i = 0; i < opLen; i++)
-                {
+                for (size_t i = 0; i < opLen; i++) {
                     int qualityValueIndex =
                             in.stepindices.at(quantizers_.size() - 1)
                             [qviIdx_[quantizers_.size() - 1]++] - '0';
-                    int q = quantizers_.at(
-                                    static_cast<const int&>(
-                                            quantizers_.size() - 1
-                                    )
-                            )
+                    int q = quantizers_.at(quantizers_.size() - 1)
                             .indexToReconstructionValue(qualityValueIndex);
                     qual += static_cast<char>(q + qualityValueOffset_);
                 }

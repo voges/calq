@@ -13,6 +13,39 @@ set(CMAKE_CXX_STANDARD 11)
 # This is calq
 project("calq")
 
+#==============================================================================
+# gabac
+#==============================================================================
+
+configure_file(CMakeLists_gabac.txt.in gabac-download/CMakeLists.txt)
+set(BUILD_GABACIFY OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result2
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
+)
+if(result)
+    message(FATAL_ERROR "CMake step for gabac failed: ${result2}")
+endif()
+execute_process(
+    COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result2
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
+)
+if(result2)
+    message(FATAL_ERROR "Build step for gabac failed: ${result2}")
+endif()
+
+# Add gabac directly to our build. This defines the gabac targets. 
+add_subdirectory(
+    ${CMAKE_CURRENT_BINARY_DIR}/gabac-src
+    ${CMAKE_CURRENT_BINARY_DIR}/gabac-build
+    EXCLUDE_FROM_ALL
+)
+
+# Set up include directory
+set(gabac_include_dir ${CMAKE_CURRENT_BINARY_DIR}/gabac-src/source)
 
 #==============================================================================
 # Compiler
@@ -63,7 +96,7 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 #==============================================================================
 
 # Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+configure_file(CMakeLists_googletest.txt.in googletest-download/CMakeLists.txt)
 execute_process(
     COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -98,6 +131,7 @@ add_subdirectory(
 if(CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
+
 
 
 #==============================================================================
@@ -156,9 +190,11 @@ add_executable(${calqapp} EXCLUDE_FROM_ALL ${calqapp_source_files} ${calqapp_hea
 target_include_directories(${calqapp} PRIVATE ${calqapp_include_dir})
 target_include_directories(${calqapp} PRIVATE ${calq_include_dir})
 target_include_directories(${calqapp} PRIVATE ${Boost_INCLUDE_DIR})
+message("Gabac Include dir: ${gabac_include_dir}")
+target_include_directories(${calqapp} PRIVATE ${gabac_include_dir})
 target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
 
-target_link_libraries(${calqapp} ${calq})
+target_link_libraries(${calqapp} ${calq} gabac)
 target_link_libraries(${calqapp} ${Boost_LIBRARIES})
 
 #==============================================================================

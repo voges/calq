@@ -2,8 +2,8 @@
 
 // -----------------------------------------------------------------------------
 
-#include <utility>
 #include <algorithm>
+#include <utility>
 
 // -----------------------------------------------------------------------------
 
@@ -15,12 +15,9 @@ void LloydMaxQuantizer::fillLUT(const ProbabilityDistribution& pdf){
     size_t index = 0;
     size_t pos = pdf.getRangeMin();
 
-    while (index < borders.size())
-    {
-        while (pos <= pdf.getRangeMax())
-        {
-            if (pos >= borders[index])
-            {
+    while (index < borders.size()) {
+        while (pos <= pdf.getRangeMax()) {
+            if (pos >= borders[index]) {
                 break;
             }
             this->lut_[pos] = std::pair<int, int>(
@@ -31,8 +28,7 @@ void LloydMaxQuantizer::fillLUT(const ProbabilityDistribution& pdf){
         index += 1;
     }
 
-    for (index = 0; index < borders.size(); ++index)
-    {
+    for (index = 0; index < borders.size(); ++index) {
         inverseLut_[index] = static_cast<int>(std::round(values[index]));
     }
 }
@@ -48,15 +44,13 @@ double LloydMaxQuantizer::calcCentroid(size_t left,
 
     const double THRESHOLD = 0.01;  // Avoid division by zero
 
-    if (right == pdf.getRangeMax() + 1)
-    {
+    if (right == pdf.getRangeMax() + 1) {
         sum += pdf[pdf.size() - 1];
         weightSum += (right) * pdf[pdf.size() - 1];
         right -= 1;
     }
 
-    for (size_t i = left; i <= right; ++i)
-    {
+    for (size_t i = left; i <= right; ++i) {
         sum += pdf[i - pdf.getRangeMin()];
         weightSum += i * pdf[i - pdf.getRangeMin()];
     }
@@ -71,8 +65,7 @@ double LloydMaxQuantizer::calcCentroid(size_t left,
 void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf){
     // Step 1: Init
     double stepSize = pdf.size() / static_cast<double>(steps);
-    for (size_t i = 0; i < steps; ++i)
-    {
+    for (size_t i = 0; i < steps; ++i) {
         borders[i] = pdf.getRangeMin() + (i + 1) * stepSize;
         values[i] = pdf.getRangeMin() + i * stepSize + stepSize / 2.0;
     }
@@ -80,8 +73,7 @@ void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf){
     double change = 0.0;
 
     // Step 2: Lloyd's II. algorithm
-    for (int k = 0; k < static_cast<int>(borders.size()); ++k)
-    {
+    for (int k = 0; k < static_cast<int>(borders.size()); ++k) {
         double left = (k == 0) ? pdf.getRangeMin() : borders[k - 1];
         double right = borders[k];
 
@@ -94,11 +86,9 @@ void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf){
         change = std::max(change, std::abs(values[k] - centroid));
         values[k] = centroid;
 
-        if (k == static_cast<int>(borders.size() - 1))
-        {
+        if (k == static_cast<int>(borders.size() - 1)) {
             constexpr double EPSILON = 0.05;
-            if (change < EPSILON)
-            {
+            if (change < EPSILON) {
                 break;
             }
             k = -1;

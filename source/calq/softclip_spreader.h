@@ -7,8 +7,8 @@
 
 // -----------------------------------------------------------------------------
 
-#include <vector>
 #include <utility>
+#include <vector>
 
 // -----------------------------------------------------------------------------
 
@@ -43,8 +43,8 @@ class SoftclipSpreader
     double squash(double activity,
                   double antiActivity
     ) const;
- public:
 
+ public:
     // Push an activity score and average number of softclips at that position
     // into buffer. Returns the oldest activity score which can't be influenced
     // by new clips anymore.

@@ -11,9 +11,9 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/quantizer.h"
-#include "calq/probability_distribution.h"
 #include "calq/exceptions.h"
+#include "calq/probability_distribution.h"
+#include "calq/quantizer.h"
 
 // -----------------------------------------------------------------------------
 
@@ -43,6 +43,7 @@ class LloydMaxQuantizer : public Quantizer
 
     // Calculates quantization borders using pdf
     void calcBorders(const ProbabilityDistribution& pdf);
+
  public:
     explicit LloydMaxQuantizer(size_t steps);
 

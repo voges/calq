@@ -2,8 +2,8 @@
 
 // -----------------------------------------------------------------------------
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 // -----------------------------------------------------------------------------
 
@@ -23,8 +23,7 @@ double SoftclipSpreader::push(double score,
                               size_t softclips
 ){
     // Trigger spreading
-    if (softclips >= MIN_HQ_SOFTCLIPS)
-    {
+    if (softclips >= MIN_HQ_SOFTCLIPS) {
         // Radius
         auto clipped = static_cast<int>(std::min(softclips, MAX_PROPAGATION));
 
@@ -33,8 +32,7 @@ double SoftclipSpreader::push(double score,
 
         // Change past positions
         for (auto i = static_cast<int>(buffer.size() - clipped);
-             i < static_cast<int>(buffer.size()); ++i)
-        {
+             i < static_cast<int>(buffer.size()); ++i) {
             buffer[i] += score;
         }
     }
@@ -42,16 +40,12 @@ double SoftclipSpreader::push(double score,
     double ownscore = score;
 
     // Apply all changes to current position in memory from other softclips
-    for (auto it = forwardSpread.begin(); it != forwardSpread.end();)
-    {
+    for (auto it = forwardSpread.begin(); it != forwardSpread.end();) {
         ownscore += (*it).second;
         --(*it).first;
-        if ((*it).first == 0)
-        {
+        if ((*it).first == 0) {
             it = forwardSpread.erase(it);
-        }
-        else
-        {
+        } else {
             ++it;
         }
     }

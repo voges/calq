@@ -1,4 +1,4 @@
-#include "calq/helpers.h"
+#include "calqapp/helpers.h"
 
 // -----------------------------------------------------------------------------
 
@@ -6,11 +6,11 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/error_exception_reporter.h"
+#include "calqapp/error_reporter.h"
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
@@ -19,8 +19,7 @@ std::string currentDateAndTime(){
     char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
 
     time_t currentTime = time(nullptr);
-    if (currentTime == ((time_t) -1))
-    {
+    if (currentTime == ((time_t) -1)) {
         throwErrorException("time failed");
     }
     struct tm timeinfo{0,
@@ -42,8 +41,7 @@ std::string currentDateAndTime(){
     }
 #else
     struct tm *ret = gmtime_r(&currentTime, &timeinfo);
-    if (ret == nullptr)
-    {
+    if (ret == nullptr) {
         throwErrorException("gmtime_r failed");
     }
 #endif
@@ -53,8 +51,7 @@ std::string currentDateAndTime(){
             sizeof(timeString),
             "%Y-%m-%dT%H:%M:%SZ",
             &timeinfo
-    ) == 0)
-    {
+    ) == 0) {
         throwErrorException("strftime failed");
     }
 
@@ -65,8 +62,7 @@ std::string currentDateAndTime(){
 // -----------------------------------------------------------------------------
 
 bool fileExists(const std::string& path){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
     std::ifstream ifs(path.c_str());
@@ -76,8 +72,7 @@ bool fileExists(const std::string& path){
 // -----------------------------------------------------------------------------
 
 std::string fileBaseName(const std::string& path){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
     std::string const& delims = "/\\";
@@ -87,12 +82,10 @@ std::string fileBaseName(const std::string& path){
 // -----------------------------------------------------------------------------
 
 std::string fileNameExtension(const std::string& path){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
-    if (path.find_last_of('.') != std::string::npos)
-    {
+    if (path.find_last_of('.') != std::string::npos) {
         return path.substr(path.find_last_of('.') + 1);
     }
     return "";
@@ -101,8 +94,7 @@ std::string fileNameExtension(const std::string& path){
 // -----------------------------------------------------------------------------
 
 std::string removeFileNameExtension(const std::string& path){
-    if (path.empty())
-    {
+    if (path.empty()) {
         throwErrorException("path is empty");
     }
     std::string::size_type const p(path.find_last_of('.'));
@@ -111,7 +103,7 @@ std::string removeFileNameExtension(const std::string& path){
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

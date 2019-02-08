@@ -1,27 +1,34 @@
+#include <algorithm>
 #include "calqapp/SAMFileHandler.h"
 
 // -----------------------------------------------------------------------------
 
+#include "calqapp/fasta_file.h"
 #include "calqapp/sam_file.h"
 
 // -----------------------------------------------------------------------------
 
-namespace calq {
+namespace calqapp {
 
 // -----------------------------------------------------------------------------
 
-SAMFileHandler::SAMFileHandler(const std::string& inputFileName)
+SAMFileHandler::SAMFileHandler(const std::string& inputFileName,
+                               const std::string& referenceFileName
+)
         : samFile_(nullptr),
-        positions(),
-        sequences(),
-        cigars(),
-        mappedQualityScores(),
-        unmappedQualityScores(),
+        fastaFile(nullptr),
+        side(),
+        encBlock(),
+        unmapped(),
         refStart(),
         refEnd(),
-        rname()
-{
-    samFile_ = calq::make_unique<SAMFile>(inputFileName);
+        rname(){
+    samFile_ = std::unique_ptr<SAMFile>(new SAMFile(inputFileName));
+    if (!referenceFileName.empty()) {
+        fastaFile = std::unique_ptr<FASTAFile>(
+                new FASTAFile(referenceFileName)
+        );
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -39,15 +46,12 @@ uint32_t computeRefLength(const std::string& cigar){
     size_t cigarLen = cigar.length();
     uint32_t opLen = 0;  // length of current CIGAR operation
 
-    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++)
-    {
-        if (isdigit(cigar[cigarIdx]))
-        {
+    for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
+        if (isdigit(cigar[cigarIdx])) {
             opLen = opLen * 10 + (uint32_t) cigar[cigarIdx] - (uint32_t) '0';
             continue;
         }
-        switch (cigar[cigarIdx])
-        {
+        switch (cigar[cigarIdx]) {
             case 'M':
             case '=':
             case 'X':
@@ -74,91 +78,111 @@ uint32_t computeRefLength(const std::string& cigar){
 // -----------------------------------------------------------------------------
 
 size_t SAMFileHandler::readBlock(const size_t& blockSize){
+    this->unmapped.mappedFlags.clear();
+    this->unmapped.unmappedQualityScores.clear();
+    this->encBlock.qvalues.clear();
+    side.positions.clear();
+    side.cigars.clear();
+    side.sequences.clear();
+
     size_t returnCode = samFile_->readBlock(blockSize);
     refEnd = 0;
     rname = samFile_->currentBlock.records[0].rname;
-    for (auto const& samRecord : samFile_->currentBlock.records)
-    {
-        if (samRecord.isMapped())
-        {
-            if (positions.empty())
-            {
+    for (auto const& samRecord : samFile_->currentBlock.records) {
+        unmapped.mappedFlags.push_back(samRecord.isMapped());
+        if (samRecord.isMapped()) {
+            if (side.positions.empty()) {
                 refStart = samRecord.pos;
             }
-            positions.push_back(samRecord.pos);
-            sequences.push_back(samRecord.seq);
-            cigars.push_back(samRecord.cigar);
-            mappedQualityScores.push_back(samRecord.qual);
-            if ((samRecord.pos + computeRefLength(samRecord.cigar)) > refEnd)
-            {
-                refEnd = samRecord.pos + computeRefLength(samRecord.cigar);
+            side.positions.push_back(samRecord.pos);
+            side.sequences.push_back(samRecord.seq);
+            side.cigars.push_back(samRecord.cigar);
+            encBlock.qvalues.push_back(samRecord.qual);
+            auto endTmp = samRecord.pos + computeRefLength(samRecord.cigar);
+            if (endTmp > refEnd) {
+                refEnd = endTmp;
             }
-        }
-        else
-        {
-            unmappedQualityScores += samRecord.qual;
+        } else {
+            unmapped.unmappedQualityScores.push_back(samRecord.qual);
         }
     }
+
+    if (!fastaFile) {
+        return returnCode;
+    }
+
+    side.reference = fastaFile->getReferencesInRange(
+            rname,
+            refStart,
+            refEnd
+    );
+    std::transform(
+            side.reference.begin(),
+            side.reference.end(),
+            side.reference.begin(),
+            ::toupper
+    );
+
+    if (side.positions.empty()) {
+        side.posOffset = 0;
+    } else {
+        side.posOffset = side.positions[0];
+    }
+
     return returnCode;
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getPositions(std::vector<uint64_t> *var){
-    var->clear();
-    var->swap(this->positions);
+void SAMFileHandler::getMappedBlock(calq::EncodingBlock *var){
+    var->qvalues.swap(encBlock.qvalues);
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getSequences(std::vector<std::string> *var){
-    var->clear();
-    var->swap(this->sequences);
+void SAMFileHandler::getUnmappedBlock(UnmappedInformation *var){
+    var->mappedFlags.swap(unmapped.mappedFlags);
+    var->unmappedQualityScores.swap(unmapped.unmappedQualityScores);
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getCigars(std::vector<std::string> *var){
-    var->clear();
-    var->swap(this->cigars);
+void SAMFileHandler::getSideInformation(calq::SideInformation *var){
+    side.cigars.swap(var->cigars);
+    side.sequences.swap(var->sequences);
+    side.positions.swap(var->positions);
+    side.reference.swap(var->reference);
+    var->posOffset = side.posOffset;
+    var->qualOffset = side.qualOffset;
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getMappedQualityScores(std::vector<std::string> *var){
-    var->clear();
-    var->swap(this->mappedQualityScores);
+size_t SAMFileHandler::nrBlocksRead() const{
+    return this->samFile_->nrBlocksRead();
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getUnmappedQualityScores(std::string *var){
-    var->clear();
-    var->swap(this->unmappedQualityScores);
+size_t SAMFileHandler::nrMappedRecordsRead() const{
+    return this->samFile_->nrMappedRecordsRead();
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::getRefStart(){
-    return this->refStart;
+size_t SAMFileHandler::nrUnmappedRecordsRead() const{
+    return this->samFile_->nrUnmappedRecordsRead();
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::getRefEnd(){
-    return this->refEnd;
+size_t SAMFileHandler::nrRecordsRead() const{
+    return this->samFile_->nrRecordsRead();
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getRname(std::string *var){
-    var->clear();
-    var->swap(this->rname);
-}
-
-// -----------------------------------------------------------------------------
-
-} // namespace calq
+}  // namespace calqapp
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
