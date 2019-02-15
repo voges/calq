@@ -113,7 +113,8 @@ size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>>
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::readQualBlock(std::string *block){
+size_t CQFile::readQualBlock(std::string *block,
+                             const gabac::Configuration& configuration){
     if (block == nullptr) {
         throwErrorException("block is nullptr");
     } else if (!block->empty()) {
@@ -121,7 +122,7 @@ size_t CQFile::readQualBlock(std::string *block){
     }
 
 //     CALQ_LOG("Reading block");
-
+    /*
     size_t ret = 0;
 
     uint64_t nrBlocks = 0;
@@ -159,6 +160,22 @@ size_t CQFile::readQualBlock(std::string *block){
             throwErrorException("Bitstream error");
         }
     }
+    */
+    size_t ret = 0;
+
+    uint32_t tmpSize = 0;
+    ret += readUint32(&tmpSize);
+    auto tmp = std::unique_ptr<unsigned char[]>(new unsigned char[tmpSize]);
+    ret += read(tmp.get(), tmpSize);
+    std::vector<unsigned char> byteStream(tmp.get(), tmp.get() + tmpSize);
+
+    std::vector<uint64_t> sequence;
+    
+    gabac::LogInfo l{&std::cout, gabac::LogInfo::LogLevel::INFO};
+
+    gabac::decode(&byteStream, configuration, l, &sequence);
+
+    *block = std::string(sequence.begin(), sequence.end());
 
     return ret;
 }
@@ -291,7 +308,6 @@ if (block == nullptr) {
     gabac::encode(configuration, l, &toCompress, &compressed);
     compressedSize = compressed.size() * sizeof(unsigned char);
     
-    ret += writeUint8(1);
     ret += writeUint32(compressedSize);
     ret += write(reinterpret_cast<unsigned char*>(compressed.data()), compressedSize);
 
@@ -438,6 +454,18 @@ size_t CQFile::readBlock(calq::DecodingBlock *out,
                          calq::SideInformation *side,
                          std::string *unmapped
 ){
+    gabac::Configuration configuration;
+    // for now simple config:
+    gabac::TransformedSequenceConfiguration tsc;
+    tsc.lutTransformationEnabled = 0;
+    tsc.diffCodingEnabled = 0;
+    tsc.binarizationId = static_cast<gabac::BinarizationId>(0);
+    tsc.binarizationParameters.push_back(8);
+    tsc.contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
+            
+    configuration.transformedSequenceConfigurations.push_back(tsc);
+
+
     out->codeBooks.clear();
     out->stepindices.clear();
     out->quantizerIndices.clear();
@@ -459,14 +487,14 @@ size_t CQFile::readBlock(calq::DecodingBlock *out,
     uint8_t uqvFlags = 0;
     ret += this->readUint8(&uqvFlags);
     if (uqvFlags & 0x01) { //NOLINT
-        ret += this->readQualBlock(unmapped);
+        ret += this->readQualBlock(unmapped, configuration);
     }
 
     // Read mapped quantizer indices
     uint8_t mqiFlags = 0;
     ret += this->readUint8(&mqiFlags);
     if (mqiFlags & 0x1) { //NOLINT
-        ret += this->readQualBlock(&buffer);
+        ret += this->readQualBlock(&buffer, configuration);
         std::copy(
                 buffer.begin(),
                 buffer.end(),
@@ -481,7 +509,7 @@ size_t CQFile::readBlock(calq::DecodingBlock *out,
         uint8_t mqviFlags = 0;
         ret += this->readUint8(&mqviFlags);
         if (mqviFlags & 0x1) { //NOLINT
-            ret += this->readQualBlock(&buffer);
+            ret += this->readQualBlock(&buffer, configuration);
             std::copy(
                     buffer.begin(),
                     buffer.end(),

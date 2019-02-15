@@ -68,7 +68,9 @@ class CQFile : public File
     size_t nrReadFileFormatBytes() const;
 
     size_t readQuantizers(std::vector<std::vector<uint8_t>> *quantizers);
-    size_t readQualBlock(std::string *block);
+    size_t readQualBlock(std::string *block,
+                         const gabac::Configuration& configuration
+    );
 
     size_t writeQuantizers(const std::vector<std::vector<uint8_t>>& quantizers);
     size_t writeQualBlock(unsigned char *block,
