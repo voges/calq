@@ -39,3 +39,4 @@ script:
   - make tests
   - ./tests
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then shellcheck ../scripts/*.sh; fi
+  - ../ci/test_calqapp_v1.sh
