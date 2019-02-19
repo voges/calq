@@ -2,50 +2,17 @@
 # Generic
 #==============================================================================
 
-# We require at least CMake 3.1
-cmake_minimum_required(VERSION 3.1)
-message(STATUS "CMake generator: ${CMAKE_GENERATOR}")
+# we require at least CMake 3.1
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 
 # C and C++ code shall be compliant to C(++)11
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-# This is calq
-project("calq")
-
-#==============================================================================
-# gabac
-#==============================================================================
-
-configure_file(CMakeLists_gabac.txt.in gabac-download/CMakeLists.txt)
-set(BUILD_GABACIFY OFF CACHE BOOL "" FORCE)
-set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
-execute_process(
-    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result2
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
-)
-if(result)
-    message(FATAL_ERROR "CMake step for gabac failed: ${result2}")
-endif()
-execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result2
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gabac-download
-)
-if(result2)
-    message(FATAL_ERROR "Build step for gabac failed: ${result2}")
-endif()
-
-# Add gabac directly to our build. This defines the gabac targets. 
-add_subdirectory(
-    ${CMAKE_CURRENT_BINARY_DIR}/gabac-src
-    ${CMAKE_CURRENT_BINARY_DIR}/gabac-build
-    EXCLUDE_FROM_ALL
-)
-
-# Set up include directory
-set(gabac_include_dir ${CMAKE_CURRENT_BINARY_DIR}/gabac-src/source)
+# Initializing our build options
+option(CALQ_BUILD_LIB "Builds the calq library" ON)
+option(CALQ_BUILD_APP "Builds the calq library and application" ON)
+option(CALQ_BUILD_TESTS "Builds the googletests for calq" ON)
 
 #==============================================================================
 # Compiler
@@ -85,139 +52,20 @@ message(STATUS "Additional C++ compiler flags for build type 'RelWithDebInfo': $
 message(STATUS "Additional C++ compiler flags for build type 'MinSizeRel': ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 message(STATUS "Selected build type: ${CMAKE_BUILD_TYPE}")
 
-#==============================================================================
-# Boost
-#==============================================================================
+# Set output dirs
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
-
-#==============================================================================
-# Google Test
-#==============================================================================
-
-# Download and unpack googletest at configure time
-configure_file(CMakeLists_googletest.txt.in googletest-download/CMakeLists.txt)
-execute_process(
-    COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
-)
-if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
-)
-if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+# Set build dirs
+if(CALQ_BUILD_LIB OR CALQ_BUILD_APP)
+	add_subdirectory(source/calq)
 endif()
 
-# Prevent overriding the parent project's compiler/linker settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-# Add googletest directly to our build. This defines the gtest and gtest_main
-# targets.
-add_subdirectory(
-    ${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-    ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-    EXCLUDE_FROM_ALL
-)
-
-# The gtest/gtest_main targets carry header search path dependencies
-# automatically when using CMake 2.8.11 or later. Otherwise we have to add
-# them here ourselves.
-if(CMAKE_VERSION VERSION_LESS 2.8.11)
-    include_directories("${gtest_SOURCE_DIR}/include")
+if(CALQ_BUILD_APP)
+	add_subdirectory(source/calqapp)
 endif()
 
-
-
-#==============================================================================
-# calq
-#==============================================================================
-
-# Set the paths
-set(calq "calq")
-set(calq_source_dir ${CMAKE_SOURCE_DIR}/source/calq)
-set(calq_header_dir ${CMAKE_SOURCE_DIR}/source/calq)
-set(calq_include_dir ${CMAKE_SOURCE_DIR}/source)
-
-# Get all source and header files
-file(GLOB_RECURSE calq_cc_source_files ${calq_source_dir}/*.cc)
-file(GLOB_RECURSE calq_header_files ${calq_header_dir}/*.h)
-
-# Group the source and header files
-source_group("CALQ Source Files" FILES ${calq_cc_source_files})
-source_group("CALQ Header Files" FILES ${calq_header_files})
-
-
-set(CALQ_BUILD_SHARED_LIB OFF CACHE BOOL "Build shared CALQ library.")
-if (${CALQ_BUILD_SHARED_LIB})
-    message(STATUS "Configured build of CALQ as *shared* library")
-    add_library(${calq} SHARED ${calq_cc_source_files} ${calq_header_files})
-    set_target_properties(${calq} PROPERTIES LINKER_LANGUAGE CXX)
-    set_target_properties(${calq} PROPERTIES POSITION_INDEPENDENT_CODE 1)
-else ()
-    message(STATUS "Configured build of calq as *static* library")
-    add_library(${calq} STATIC ${calq_cc_source_files} ${calq_header_files})
-    set_target_properties(${calq} PROPERTIES LINKER_LANGUAGE CXX)
-endif ()
-
-target_include_directories(${calq} PRIVATE ${calq_include_dir})
-target_include_directories(${calq} PRIVATE ${CMAKE_BINARY_DIR})
-
-#==============================================================================
-# calq exe
-#==============================================================================
-
-set(calqapp "calqapp")
-set(calqapp_source_dir ${CMAKE_SOURCE_DIR}/source/calqapp)
-set(calqapp_header_dir ${CMAKE_SOURCE_DIR}/source/calqapp)
-set(calqapp_include_dir ${CMAKE_SOURCE_DIR}/source)
-
-# List all source files (alphabetically)
-file(GLOB_RECURSE calqapp_source_files ${calqapp_source_dir}/*.cc ${calqapp_source_dir}/*.c)
-file(GLOB_RECURSE calqapp_header_files ${calqapp_header_dir}/*.h)
-
-
-source_group("Source files" FILES ${calqapp_source_files})
-source_group("Header files" FILES ${calqapp_header_files})
-
-add_executable(${calqapp} EXCLUDE_FROM_ALL ${calqapp_source_files} ${calqapp_header_files})
-
-target_include_directories(${calqapp} PRIVATE ${calqapp_include_dir})
-target_include_directories(${calqapp} PRIVATE ${calq_include_dir})
-target_include_directories(${calqapp} PRIVATE ${Boost_INCLUDE_DIR})
-message("Gabac Include dir: ${gabac_include_dir}")
-target_include_directories(${calqapp} PRIVATE ${gabac_include_dir})
-target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
-
-target_link_libraries(${calqapp} ${calq} gabac)
-target_link_libraries(${calqapp} ${Boost_LIBRARIES})
-
-#==============================================================================
-# tests
-#==============================================================================
-
-# Set the paths
-set(tests "tests")
-set(tests_source_dir ${CMAKE_SOURCE_DIR}/tests)
-set(tests_header_dir ${CMAKE_SOURCE_DIR}/tests)
-set(tests_include_dir ${CMAKE_SOURCE_DIR})
-
-# List all source files (alphabetically)
-set(tests_source_files ${tests_source_files} ${tests_source_dir}/example_test.cpp)
-set(tests_source_files ${tests_source_files} ${tests_source_dir}/main.cpp)
-
-# List all header files (alphabetically)
-# set(tests_header_files ${tests_header_files} ${tests_header_dir}/whatever.h)
-
-# Group the source and header files
-source_group("Tests Source Files" FILES ${tests_source_files})
-# source_group("Tests Header Files" FILES ${tests_header_files})
-
-# Set up the target
-add_executable(${tests} EXCLUDE_FROM_ALL ${tests_source_files})
-target_link_libraries(${tests} gtest_main)
+if(CALQ_BUILD_TESTS AND CALQ_BUILD_APP)
+	add_subdirectory(tests/)
+endif()
