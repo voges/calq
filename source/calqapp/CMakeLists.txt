@@ -25,7 +25,7 @@ if(result2)
     message(FATAL_ERROR "Build step for gabac failed: ${result2}")
 endif()
 
-# Add gabac directly to our build. This defines the gabac targets. 
+# Add gabac directly to our build. This defines the gabac targets.
 add_subdirectory(
     ${CMAKE_CURRENT_BINARY_DIR}/gabac-src
     ${CMAKE_CURRENT_BINARY_DIR}/gabac-build
@@ -55,6 +55,7 @@ set(calqapp_include_dir ${PARENT_DIR})
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/calq.cc)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/cq_file.cc)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/fasta_file.cc)
+set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/file.cc)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/helpers.cc)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/program_options.cc)
 set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/sam_block.cc)
@@ -65,6 +66,7 @@ set(calqapp_source_files ${calqapp_source_files} ${calqapp_source_dir}/SAMFileHa
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/cq_file.h)
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/error_reporter.h)
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/fasta_file.h)
+set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/file.h)
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/helpers.h)
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/logging.h)
 set(calqapp_header_files ${calqapp_header_files} ${calqapp_header_dir}/program_options.h)
@@ -86,5 +88,6 @@ message("Gabac Include dir: ${gabac_include_dir}")
 target_include_directories(${calqapp} PRIVATE ${gabac_include_dir})
 target_include_directories(${calqapp} PRIVATE ${CMAKE_BINARY_DIR})
 
-target_link_libraries(${calqapp} ${calq} gabac)
+target_link_libraries(${calqapp} gabac)
+target_link_libraries(${calqapp} calq)
 target_link_libraries(${calqapp} ${Boost_LIBRARIES})

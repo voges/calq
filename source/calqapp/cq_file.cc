@@ -15,10 +15,6 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calqapp/range/range.h"
-
-// -----------------------------------------------------------------------------
-
 namespace calqapp {
 
 // -----------------------------------------------------------------------------
@@ -67,7 +63,9 @@ size_t CQFile::readHeader(size_t *blockSize){
         throwErrorException("magic does not match");
     }
 
-    ret += readUint64(blockSize);
+    uint64_t tmp = 0x0000000000000000;
+    ret += readUint64(&tmp);
+    *blockSize = static_cast<size_t>(tmp);
 //     CALQ_LOG("Block size: %zu", *blockSize);
 
     nrReadFileFormatBytes_ += ret;
@@ -170,7 +168,7 @@ size_t CQFile::readQualBlock(std::string *block,
     std::vector<unsigned char> byteStream(tmp.get(), tmp.get() + tmpSize);
 
     std::vector<uint64_t> sequence;
-    
+
     gabac::LogInfo l{&std::cout, gabac::LogInfo::LogLevel::INFO};
 
     gabac::decode(&byteStream, configuration, l, &sequence);
@@ -302,12 +300,12 @@ if (block == nullptr) {
     for(size_t i = 0; i < blockSize; i++) {
         toCompress.push_back(block[i]);
     }
-        
+
     gabac::LogInfo l{&std::cout, gabac::LogInfo::LogLevel::INFO};
 
     gabac::encode(configuration, l, &toCompress, &compressed);
     compressedSize = compressed.size() * sizeof(unsigned char);
-    
+
     ret += writeUint32(compressedSize);
     ret += write(reinterpret_cast<unsigned char*>(compressed.data()), compressedSize);
 
@@ -315,7 +313,7 @@ if (block == nullptr) {
     toCompress.clear();
 
     return ret;
-    
+
 }
 
 // -----------------------------------------------------------------------------
@@ -352,7 +350,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
 
             std::cerr << std::endl;
         }
-        
+
         gabac::Configuration configuration;
         // for now simple config:
         gabac::TransformedSequenceConfiguration tsc;
@@ -361,9 +359,9 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
         tsc.binarizationId = static_cast<gabac::BinarizationId>(0);
         tsc.binarizationParameters.push_back(8);
         tsc.contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
-        
+
         configuration.transformedSequenceConfigurations.push_back(tsc);
-        
+
         *compressedSizeUnmapped += this->writeQualBlock(uqv, uqvSize, configuration);
     } else {
         *compressedSizeUnmapped += this->writeUint8(0x00);
@@ -397,7 +395,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
         tsc.binarizationId = static_cast<gabac::BinarizationId>(0);
         tsc.binarizationParameters.push_back(8);
         tsc.contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
-        
+
         configuration.transformedSequenceConfigurations.push_back(tsc);
 
         *compressedSizeMapped += this->writeQualBlock(mqi, mqiSize, configuration);
@@ -436,7 +434,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions& opts,
             tsc.binarizationId = static_cast<gabac::BinarizationId>(0);
             tsc.binarizationParameters.push_back(8);
             tsc.contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
-            
+
             configuration.transformedSequenceConfigurations.push_back(tsc);
 
             *compressedSizeMapped += this->writeQualBlock(mqvi, mqviSize, configuration);
@@ -462,7 +460,7 @@ size_t CQFile::readBlock(calq::DecodingBlock *out,
     tsc.binarizationId = static_cast<gabac::BinarizationId>(0);
     tsc.binarizationParameters.push_back(8);
     tsc.contextSelectionId = static_cast<gabac::ContextSelectionId>(0);
-            
+
     configuration.transformedSequenceConfigurations.push_back(tsc);
 
 
