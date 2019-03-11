@@ -4,6 +4,8 @@
 // -----------------------------------------------------------------------------
 
 #include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 // -----------------------------------------------------------------------------
 
@@ -19,6 +21,74 @@
 #include "calqapp/SAMFileHandler.h"
 
 // -----------------------------------------------------------------------------
+
+#include "gabac/configuration.h"
+
+// -----------------------------------------------------------------------------
+
+void json2config(const std::string& json, gabac::EncodingConfiguration *enc) {
+    try
+    {
+        // Read the stringstream JSON data to a property tree
+        std::stringstream tmp(json);
+        boost::property_tree::ptree propertyTree;
+        boost::property_tree::read_json(tmp, propertyTree);
+
+        // Convert the property tree contents to our internal structure
+        enc->wordSize
+                = propertyTree.get<unsigned int>("word_size");
+        enc->sequenceTransformationId
+                =
+                static_cast<gabac::SequenceTransformationId>(propertyTree.get<unsigned int>("sequence_transformation_id"));
+        enc->sequenceTransformationParameter
+                = propertyTree.get<unsigned int>("sequence_transformation_parameter");
+        for (const auto& child : propertyTree.get_child("transformed_sequences")) {
+            // Declare a transformed sequence configuration
+            gabac::TransformedSequenceConfiguration transformedSequenceConfiguration;
+
+            // Fill the transformed sequence configuration
+            transformedSequenceConfiguration.lutTransformationEnabled
+                    = static_cast<bool>(child.second.get<unsigned int>("lut_transformation_enabled"));
+            transformedSequenceConfiguration.lutBits = enc->wordSize*8;
+            transformedSequenceConfiguration.lutOrder = 0;
+            if (transformedSequenceConfiguration.lutTransformationEnabled) {
+                if(child.second.count("lut_transformation_bits") > 0) {
+                    transformedSequenceConfiguration.lutBits
+                            = child.second.get<unsigned int>("lut_transformation_bits");
+                }
+                if(child.second.count("lut_transformation_order") > 0) {
+                    transformedSequenceConfiguration.lutOrder
+                            = child.second.get<unsigned int>("lut_transformation_order");
+                }
+            } else {
+                transformedSequenceConfiguration.lutBits = 0;
+                transformedSequenceConfiguration.lutOrder = 0;
+            }
+            transformedSequenceConfiguration.diffCodingEnabled
+                    = child.second.get<bool>("diff_coding_enabled");
+            transformedSequenceConfiguration.binarizationId
+                    = static_cast<gabac::BinarizationId>(child.second.get<unsigned int>("binarization_id"));
+            for (const auto& grandchild : child.second.get_child("binarization_parameters"))
+            {
+                transformedSequenceConfiguration.binarizationParameters
+                        .push_back(grandchild.second.get_value<unsigned int>());
+            }
+            transformedSequenceConfiguration.contextSelectionId
+                    = static_cast<gabac::ContextSelectionId>(child.second.get<unsigned int>("context_selection_id"));
+
+            // Append the filled transformed sequence configuration to our
+            // list of transformed sequence configurations
+            enc->transformedSequenceConfigurations.push_back(transformedSequenceConfiguration);
+        }
+    }
+    catch (const boost::property_tree::ptree_error& e)
+    {
+        throwErrorException("Boost ptree failed.");  
+    }
+} 
+
+// -----------------------------------------------------------------------------
+
 
 static int encode(const calqapp::ProgramOptions& programOptions){
     auto startTime = std::chrono::steady_clock::now();
@@ -38,6 +108,16 @@ static int encode(const calqapp::ProgramOptions& programOptions){
             calqapp::File::Mode::MODE_WRITE
     );
     file.writeHeader(programOptions.blockSize);
+        
+    gabac::EncodingConfiguration config;
+    calqapp::File configurationFile(
+            "config.json",
+            calqapp::File::Mode::MODE_READ
+            );
+    std::string jsonInput("\0", configurationFile.size());
+    configurationFile.read(&jsonInput[0], jsonInput.size());
+    json2config(jsonInput, &config);
+
 
     while (sH.readBlock(programOptions.blockSize) != 0) {
         calq::SideInformation encSide;
@@ -69,8 +149,10 @@ static int encode(const calqapp::ProgramOptions& programOptions){
 
         size_t mappedSize;
         size_t unmappedSize;
+
         file.writeBlock(
                 programOptions.options,
+                config,
                 decBlock,
                 encSide,
                 unmappedString,
@@ -192,6 +274,15 @@ static int decode(const calqapp::ProgramOptions& po){
             programOptions.referenceFilePath
     );
 
+    gabac::EncodingConfiguration configuration;
+    calqapp::File configurationFile(
+            "config.json",
+            calqapp::File::Mode::MODE_READ
+            );
+    std::string jsonInput("\0", configurationFile.size());
+    configurationFile.read(&jsonInput[0], jsonInput.size());
+    json2config(jsonInput, &configuration);
+
     while (sH.readBlock(programOptions.blockSize) != 0) {
         calq::DecodingBlock input;
         calq::EncodingBlock output;
@@ -206,7 +297,7 @@ static int decode(const calqapp::ProgramOptions& po){
 
         std::string unmappedValues;
         calq::DecodingOptions opts;
-        file.readBlock(&input, &side, &unmappedValues);
+        file.readBlock(&input, &side, &unmappedValues, configuration);
         calq::decode(opts, side, input, &output);
 
 

@@ -19,9 +19,9 @@
 // -----------------------------------------------------------------------------
 
 namespace calq {
-struct EncodingOptions;
-struct DecodingBlock;
-struct SideInformation;
+  struct EncodingOptions;
+  struct DecodingBlock;
+  struct SideInformation;
 }
 
 // -----------------------------------------------------------------------------
@@ -40,10 +40,12 @@ class CQFile : public File
 
     size_t readBlock(calq::DecodingBlock *out,
                      calq::SideInformation *side,
-                     std::string *unmapped
+                     std::string *unmapped,
+                     const gabac::EncodingConfiguration& configuration
     );
 
     size_t writeBlock(const calq::EncodingOptions& opts,
+                      const gabac::EncodingConfiguration& configuration,
                       const calq::DecodingBlock& block,
                       const calq::SideInformation& side,
                       const std::string& unmappedQualityValues_,
@@ -69,13 +71,13 @@ class CQFile : public File
 
     size_t readQuantizers(std::vector<std::vector<uint8_t>> *quantizers);
     size_t readQualBlock(std::string *block,
-                         const gabac::Configuration& configuration
+                        const gabac::EncodingConfiguration& configuration
     );
 
     size_t writeQuantizers(const std::vector<std::vector<uint8_t>>& quantizers);
     size_t writeQualBlock(unsigned char *block,
-                          const size_t& blockSize,
-                          const gabac::Configuration& configuration
+                        const size_t& blockSize,
+                        const gabac::EncodingConfiguration& configuration
     );
 };
 
