@@ -13,3 +13,6 @@ cmake-build-debug/
 
 # External tools directory
 external_tools/
+
+# CLion project directory
+.idea/
