@@ -1,37 +1,41 @@
 #include "calq/cq_file.h"
 
-#include <cstring>
-#include <cmath>
+#include <math.h>
+#include <string.h>
+
 #include <utility>
-#include <memory>
+#include <string>
 
-#include "calq/error_exception_reporter.h"
 #include "calq/constants.h"
-
+#include "calq/exceptions.h"
+#include "calq/log.h"
 #include "calq/range/range.h"
+
+#define MAGIC "CQ"
+#define MAGIC_LEN 3
 
 namespace calq {
 
 CQFile::CQFile(const std::string &path, const Mode &mode)
-        : File(path, mode),
-          nrReadFileFormatBytes_(0),
-          nrWrittenFileFormatBytes_(0) {
-    if (path.empty()) {
+    : File(path, mode),
+      nrReadFileFormatBytes_(0),
+      nrWrittenFileFormatBytes_(0) {
+    if (path.empty() == true) {
         throwErrorException("path is empty");
     }
 }
 
-CQFile::~CQFile() = default;
+CQFile::~CQFile(void) {}
 
-size_t CQFile::nrReadFileFormatBytes() const {
+size_t CQFile::nrReadFileFormatBytes(void) const {
     return nrReadFileFormatBytes_;
 }
 
-size_t CQFile::nrWrittenFileFormatBytes() const {
+size_t CQFile::nrWrittenFileFormatBytes(void) const {
     return nrWrittenFileFormatBytes_;
 }
 
-size_t CQFile::readHeader(size_t* blockSize) {
+size_t CQFile::readHeader(size_t *blockSize) {
     if (blockSize == nullptr) {
         throwErrorException("Received nullptr as argument");
     }
@@ -46,7 +50,7 @@ size_t CQFile::readHeader(size_t* blockSize) {
         throwErrorException("magic does not match");
     }
 
-    ret += readUint64(reinterpret_cast<uint64_t*>(blockSize));
+    ret += readUint64(reinterpret_cast<uint64_t *>(blockSize));
 //     CALQ_LOG("Block size: %zu", *blockSize);
 
     nrReadFileFormatBytes_ += ret;
@@ -54,8 +58,8 @@ size_t CQFile::readHeader(size_t* blockSize) {
     return ret;
 }
 
-size_t CQFile::readQuantizers(std::map<int, Quantizer>* quantizers) {
-    if (!quantizers->empty()) {
+size_t CQFile::readQuantizers(std::map<int, Quantizer> *quantizers) {
+    if (quantizers->empty() == false) {
         throwErrorException("quantizers is not empty");
     }
 
@@ -82,16 +86,17 @@ size_t CQFile::readQuantizers(std::map<int, Quantizer>* quantizers) {
         }
 
         Quantizer quantizer(inverseLut);
-        quantizers->insert(std::pair<int, Quantizer>(static_cast<int>(quantizerIdx), quantizer));
+        quantizers->insert(std::pair<int, Quantizer>(quantizerIdx, quantizer));
     }
 
     return ret;
 }
 
-size_t CQFile::readQualBlock(std::string* block) {
-    if (block == nullptr) {
-        throwErrorException("block is nullptr");
-    } else if (!block->empty()) {
+size_t CQFile::readQualBlock(std::string *block) {
+    if (block == NULL) {
+        throwErrorException("block is NULL");
+    }
+    if (block->empty() == false) {
         throwErrorException("block is not empty");
     }
 
@@ -109,19 +114,21 @@ size_t CQFile::readQualBlock(std::string* block) {
         if (compressed == 0) {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
-            auto tmp = make_unique<unsigned char[]> (tmpSize);
-            ret += read(tmp.get(), tmpSize);
-            *block += std::string((const char*) tmp.get(), tmpSize);
+            unsigned char *tmp = (unsigned char *)malloc(tmpSize);
+            ret += read(tmp, tmpSize);
+            *block += std::string((const char *)tmp, tmpSize);
+            free(tmp);
 //             CALQ_LOG("Read uncompressed sub-block (%u byte(s))", tmpSize);
         } else if (compressed == 1) {
             uint32_t tmpSize = 0;
             ret += readUint32(&tmpSize);
-            auto tmp = make_unique<unsigned char[]> (tmpSize);
-            ret += read(tmp.get(), tmpSize);
+            unsigned char *tmp = (unsigned char *)malloc(tmpSize);
+            ret += read(tmp, tmpSize);
 //             CALQ_LOG("Read compressed sub-block (%u byte(s))", tmpSize);
             unsigned int uncompressedSize = 0;
-            unsigned char* uncompressed = range_decompress_o1(tmp.get(), &uncompressedSize);
-            *block += std::string((const char*) uncompressed, uncompressedSize);
+            unsigned char *uncompressed = range_decompress_o1(tmp, &uncompressedSize);
+            free(tmp);
+            *block += std::string((const char *)uncompressed, uncompressedSize);
             free(uncompressed);
 //             CALQ_LOG("Uncompressed size was: %u", uncompressedSize);
         } else {
@@ -141,8 +148,8 @@ size_t CQFile::writeHeader(const size_t &blockSize) {
 
     size_t ret = 0;
 
-    ret += write(reinterpret_cast<const void*>(MAGIC), MAGIC_LEN);
-    ret += writeUint64((uint64_t) blockSize);
+    ret += write((char *)MAGIC, MAGIC_LEN);
+    ret += writeUint64((uint64_t)blockSize);
 
     nrWrittenFileFormatBytes_ += ret;
 
@@ -150,7 +157,7 @@ size_t CQFile::writeHeader(const size_t &blockSize) {
 }
 
 size_t CQFile::writeQuantizers(const std::map<int, Quantizer> &quantizers) {
-    if (quantizers.empty()) {
+    if (quantizers.empty() == true) {
         throwErrorException("lut is empty");
     }
 
@@ -162,20 +169,20 @@ size_t CQFile::writeQuantizers(const std::map<int, Quantizer> &quantizers) {
     ret += writeUint64(nrQuantizers);
 
     for (auto const &quantizer : quantizers) {
-        ret += writeUint64((const uint64_t &) quantizer.first);
+        ret += writeUint64(quantizer.first);
         ret += writeUint64(quantizer.second.inverseLut().size());
         for (auto const &inverseLutEntry : quantizer.second.inverseLut()) {
-            ret += writeUint8((const uint8_t &) inverseLutEntry.first);
-            ret += writeUint8(static_cast<const uint8_t &>(inverseLutEntry.second));
+            ret += writeUint8(inverseLutEntry.first);
+            ret += writeUint8(inverseLutEntry.second);
         }
     }
 
     return ret;
 }
 
-size_t CQFile::writeQualBlock(unsigned char* block, const size_t &blockSize) {
-    if (block == nullptr) {
-        throwErrorException("block is nullptr");
+size_t CQFile::writeQualBlock(unsigned char *block, const size_t &blockSize) {
+    if (block == NULL) {
+        throwErrorException("block is NULL");
     }
     if (blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
@@ -185,26 +192,26 @@ size_t CQFile::writeQualBlock(unsigned char* block, const size_t &blockSize) {
 
     size_t ret = 0;
 
-    auto nrBlocks = static_cast<size_t>(ceil(static_cast<double>(blockSize) / static_cast<double>(1 * MB)));
-    ret = writeUint64((uint64_t) nrBlocks);
+    size_t nrBlocks = static_cast<size_t>(ceil(static_cast<double>(blockSize) / static_cast<double>(MB)));
+    ret = writeUint64(static_cast<uint64_t>(nrBlocks));
 //     CALQ_LOG("Splitting block containing %zu byte(s) into %zu sub-block(s)", blockSize, nrBlocks);
 
     size_t encodedBytes = 0;
     while (encodedBytes < blockSize) {
         unsigned int bytesToEncode = 0;
-        if ((blockSize - encodedBytes) > (1 * MB)) {
-            bytesToEncode = (1 * MB);
+        if ((blockSize - encodedBytes) > (1*MB)) {
+            bytesToEncode = (1*MB);
         } else {
-            bytesToEncode = static_cast<unsigned int>(blockSize - encodedBytes);
+            bytesToEncode = blockSize - encodedBytes;
         }
 
         unsigned int compressedSize = 0;
-        unsigned char* compressed = range_compress_o1(block + encodedBytes, bytesToEncode, &compressedSize);
+        unsigned char *compressed = range_compress_o1(block+encodedBytes, (unsigned int)bytesToEncode, &compressedSize);
 
         if (compressedSize >= bytesToEncode) {
             ret += writeUint8(0);
             ret += writeUint32(bytesToEncode);
-            ret += write(block + encodedBytes, bytesToEncode);
+            ret += write(block+encodedBytes, bytesToEncode);
         } else {
             ret += writeUint8(1);
             ret += writeUint32(compressedSize);

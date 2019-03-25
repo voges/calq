@@ -8,17 +8,17 @@ namespace calq {
 
 class Quantizer {
  public:
-    Quantizer();
+    Quantizer(void);
     explicit Quantizer(const std::map<int, int> &inverseLut);
-    virtual ~Quantizer();
+    virtual ~Quantizer(void);
 
     int valueToIndex(const int &value) const;
     int indexToReconstructionValue(const int &index) const;
     int valueToReconstructionValue(const int &value) const;
 
-    const std::map<int, int> &inverseLut() const;
+    const std::map<int, int> & inverseLut(void) const;
 
-    void print() const;
+    void print(void) const;
 
  protected:
     std::map<int, std::pair<int, int>> lut_;  // value->(index,reconstructionValue)

@@ -11,23 +11,23 @@ class SAMPileupDeque {
     friend class SAMRecord;
 
  public:
-    SAMPileupDeque();
-    ~SAMPileupDeque();
+    SAMPileupDeque(void);
+    ~SAMPileupDeque(void);
 
-    const SAMPileup &back() const;
-    void clear();
-    bool empty() const;
-    const SAMPileup &front() const;
-    size_t length() const;
-    const SAMPileup &operator[](const size_t &n) const;
-    void pop_back();
-    void pop_front();
-    size_t size() const;
+    const SAMPileup & back(void) const;
+    void clear(void);
+    bool empty(void) const;
+    const SAMPileup & front(void) const;
+    size_t length(void) const;
+    const SAMPileup & operator[](const size_t &n) const;
+    void pop_back(void);
+    void pop_front(void);
+    size_t size(void) const;
 
-    void print() const;
+    void print(void) const;
 
-    uint32_t posMax() const;
-    uint32_t posMin() const;
+    uint32_t posMax(void) const;
+    uint32_t posMin(void) const;
 
     void setPosMax(const uint32_t &posMax);
     void setPosMin(const uint32_t &posMin);

@@ -1,16 +1,16 @@
 #include "calq/quantizer.h"
 
-#include "calq/error_exception_reporter.h"
+#include "calq/exceptions.h"
 
 namespace calq {
 
-Quantizer::Quantizer() : lut_(), inverseLut_() {
-}
+Quantizer::Quantizer(void) : lut_() , inverseLut_() {}
 
-Quantizer::Quantizer(const std::map<int, int> &inverseLut) : lut_(), inverseLut_(inverseLut) {
-}
+Quantizer::Quantizer(const std::map<int, int> &inverseLut)
+    : lut_(),
+      inverseLut_(inverseLut) {}
 
-Quantizer::~Quantizer() = default;
+Quantizer::~Quantizer(void) {}
 
 int Quantizer::valueToIndex(const int &value) const {
     if (lut_.find(value) == lut_.end()) {
@@ -34,11 +34,11 @@ int Quantizer::valueToReconstructionValue(const int &value) const {
     return lut_.at(value).second;
 }
 
-const std::map<int, int> &Quantizer::inverseLut() const {
+const std::map<int, int> & Quantizer::inverseLut(void) const {
     return inverseLut_;
 }
 
-void Quantizer::print() const {
+void Quantizer::print(void) const {
     std::cout << "LUT:" << std::endl;
     for (auto const &lutElem : lut_) {
         std::cout << "  " << lutElem.first << ": ";

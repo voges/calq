@@ -2,19 +2,15 @@
 
 namespace calq {
 
-Exception::Exception(const std::string &msg) : msg_(msg) {
-}
+Exception::Exception(const std::string &msg) : msg_(msg) {}
 
-Exception::Exception(const Exception &e) noexcept : msg_(e.msg_) {
-}
+Exception::~Exception(void) throw() {}
 
-Exception::~Exception() noexcept = default;
-
-std::string Exception::getMessage() const {
+std::string Exception::getMessage(void) const {
     return msg_;
 }
 
-const char* Exception::what() const noexcept {
+const char * Exception::what(void) const throw() {
     return msg_.c_str();
 }
 

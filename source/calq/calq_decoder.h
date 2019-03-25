@@ -1,29 +1,24 @@
 #ifndef CALQ_CALQ_DECODER_H_
 #define CALQ_CALQ_DECODER_H_
 
-#include <memory>
-
 #include "calq/options.h"
+#include "calq/cq_file.h"
+#include "calq/file.h"
+#include "calq/sam_file.h"
 
 namespace calq {
 
-class CQFile;
-
-class File;
-
-class SAMFile;
-
 class CalqDecoder {
  public:
-    explicit CalqDecoder(const Options &options);
-    ~CalqDecoder();
+    explicit CalqDecoder(const Options &pptions);
+    ~CalqDecoder(void);
 
-    void decode();
+    void decode(void);
 
  private:
-    std::unique_ptr<CQFile> cqFile_;
-    std::unique_ptr<File> qualFile_;
-    std::unique_ptr<SAMFile> sideInformationFile_;
+    CQFile cqFile_;
+    File qualFile_;
+    SAMFile sideInformationFile_;
 };
 
 }  // namespace calq

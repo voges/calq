@@ -12,8 +12,8 @@ namespace calq {
 
 class QualDecoder {
  public:
-    QualDecoder();
-    ~QualDecoder();
+    QualDecoder(void);
+    ~QualDecoder(void);
 
     void decodeMappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);
     void decodeUnmappedRecordFromBlock(const SAMRecord &samRecord, File *qualFile);

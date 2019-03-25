@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-#include <memory>
 
 #include "calq/constants.h"
 #include "calq/file.h"
@@ -12,17 +11,17 @@ namespace calq {
 
 class FASTAFile : public File {
  public:
-    explicit FASTAFile(const std::string &path, const Mode &mode = Mode::MODE_READ);
-    ~FASTAFile() override;
+    explicit FASTAFile(const std::string &path, const Mode &mode = MODE_READ);
+    ~FASTAFile(void);
 
     std::map<std::string, std::string> references;
 
  private:
     static const size_t LINE_SIZE = sizeof(char) * (4*KB);
 
-    void parse();
+    void parse(void);
 
-    std::unique_ptr<char[]> line_;
+    char *line_;
 };
 
 }  // namespace calq

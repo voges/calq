@@ -1,91 +1,79 @@
-#include <cstring>
-
 #include "calq/sam_file.h"
-#include "calq/error_exception_reporter.h"
+
+#include <string.h>
+
+#include <string>
+
+#include "calq/exceptions.h"
 #include "calq/log.h"
 
 namespace calq {
 
-static void parseLine(char* fields[SAMRecord::NUM_FIELDS], char* line) {
-    char* c = line;
-    char* pc = c;
+static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line) {
+    char *c = line;
+    char *pc = c;
     int f = 0;
 
     while (true) {
         if (*c == '\t' || *c == '\0') {
             *c = '\0';
-            if (f == 0)
-                fields[f] = pc;
-            if (f == 1)
-                fields[f] = pc;
-            if (f == 2)
-                fields[f] = pc;
-            if (f == 3)
-                fields[f] = pc;
-            if (f == 4)
-                fields[f] = pc;
-            if (f == 5)
-                fields[f] = pc;
-            if (f == 6)
-                fields[f] = pc;
-            if (f == 7)
-                fields[f] = pc;
-            if (f == 8)
-                fields[f] = pc;
-            if (f == 9)
-                fields[f] = pc;
-            if (f == 10)
-                fields[f] = pc;
-            if (f == 11)
-                fields[f] = pc;
+            if (f ==  0) fields[f] = pc;
+            if (f ==  1) fields[f] = pc;
+            if (f ==  2) fields[f] = pc;
+            if (f ==  3) fields[f] = pc;
+            if (f ==  4) fields[f] = pc;
+            if (f ==  5) fields[f] = pc;
+            if (f ==  6) fields[f] = pc;
+            if (f ==  7) fields[f] = pc;
+            if (f ==  8) fields[f] = pc;
+            if (f ==  9) fields[f] = pc;
+            if (f == 10) fields[f] = pc;
+            if (f == 11) fields[f] = pc;
             f++;
-            if (f == 12) {
-                break;
-            }
+            if (f == 12) { break; }
             pc = c + 1;
         }
         c++;
     }
 
-    // if (f == 11) { fields[f] = pc; }
+    if (f == 11) { fields[f] = pc; }
 }
 
 SAMFile::SAMFile(const std::string &path, const Mode &mode)
-        : File(path, mode),
-          currentBlock(),
-          header(""),
-          line_(nullptr),
-          nrBlocksRead_(0),
-          nrMappedRecordsRead_(0),
-          nrUnmappedRecordsRead_(0),
-          startTime_(std::chrono::steady_clock::now()) {
-    if (path.empty()) {
+    : File(path, mode),
+      currentBlock(),
+      header(""),
+      line_(NULL),
+      nrBlocksRead_(0),
+      nrMappedRecordsRead_(0),
+      nrUnmappedRecordsRead_(0),
+      startTime_(std::chrono::steady_clock::now()) {
+    if (path.empty() == true) {
         throwErrorException("path is empty");
     }
-    if (mode != Mode::MODE_READ) {
+    if (mode != MODE_READ) {
         throwErrorException("Currently only MODE_READ supported");
     }
 
-    try {
-        // 1 million chars should be enough
-        line_ = make_unique<char[]>(LINE_SIZE);
-    } catch (std::exception &e) {
-        throwErrorException(std::string("New failed: ") + e.what());
+    // 1 million chars should be enough
+    line_ = reinterpret_cast<char *>(malloc(LINE_SIZE));
+    if (line_ == NULL) {
+        throwErrorException("malloc failed");
     }
 
     // Read SAM header
-    size_t fpos = 0;
+    size_t fpos = tell();
     for (;;) {
         fpos = tell();
-        if (readLine(line_.get(), LINE_SIZE)) {
+        if (fgets(line_, LINE_SIZE, fp_) != NULL) {
             // Trim line
-            size_t l = strlen(line_.get()) - 1;
+            size_t l = strlen(line_) - 1;
             while (l && (line_[l] == '\r' || line_[l] == '\n')) {
                 line_[l--] = '\0';
             }
 
             if (line_[0] == '@') {
-                header += line_.get();
+                header += line_;
                 header += "\n";
             } else {
                 break;
@@ -95,14 +83,16 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
         }
     }
     seek(fpos);  // rewind to the begin of the alignment section
-    if (header.empty()) {
+    if (header.empty() == true) {
         CALQ_LOG("No SAM header found");
     }
 }
 
-SAMFile::~SAMFile() = default;
+SAMFile::~SAMFile(void) {
+    free(line_);
+}
 
-size_t SAMFile::nrBlocksRead() const {
+size_t SAMFile::nrBlocksRead(void) const {
     return nrBlocksRead_;
 }
 
@@ -125,25 +115,25 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
 
     currentBlock.reset();
 
-    std::string rnamePrev;
+    std::string rnamePrev("");
     uint32_t posPrev = 0;
 
     for (size_t i = 0; i < blockSize; i++) {
         size_t fpos = tell();
-        if (readLine(line_.get(), LINE_SIZE)) {
+        if (fgets(line_, LINE_SIZE, fp_) != NULL) {
             // Trim line
-            size_t l = strlen(line_.get()) - 1;
+            size_t l = strlen(line_) - 1;
             while (l && (line_[l] == '\r' || line_[l] == '\n')) {
                 line_[l--] = '\0';
             }
 
             // Parse line and construct samRecord
-            char* fields[SAMRecord::NUM_FIELDS];
-            parseLine(fields, line_.get());
+            char *fields[SAMRecord::NUM_FIELDS];
+            parseLine(fields, line_);
             SAMRecord samRecord(fields);
 
-            if (samRecord.isMapped()) {
-                if (rnamePrev.empty()) {
+            if (samRecord.isMapped() == true) {
+                if (rnamePrev.empty() == true) {
                     // This is the first mapped record in this block; just store
                     // its RNAME and POS and add it to the current block
                     rnamePrev = samRecord.rname;
@@ -166,7 +156,10 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        CALQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)", currentBlock.nrRecords(), blockSize);
+                        CALQ_LOG("RNAME changed - read only %zu record(s) (%zu requested)",
+                            currentBlock.nrRecords(),
+                            blockSize
+                        );
                         break;
                     }
                 }
@@ -175,7 +168,10 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
                 currentBlock.nrUnmappedRecords_++;
             }
         } else {
-            CALQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF", currentBlock.nrRecords(), blockSize);
+            CALQ_LOG("Truncated block - read only %zu record(s) (%zu requested) - reached EOF",
+                currentBlock.nrRecords(),
+                blockSize
+            );
             break;
         }
     }
@@ -188,14 +184,14 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
 
     auto elapsedTime = std::chrono::steady_clock::now() - startTime_;
     auto elapsedTimeS = std::chrono::duration_cast<std::chrono::seconds>(elapsedTime).count();
-    double elapsedTimeM = static_cast<double>(elapsedTimeS) / 60.0;
-    double processedPercentage = (static_cast<double>(tell()) / static_cast<double>(size())) * 100.0;
+    double elapsedTimeM = static_cast<double>(elapsedTimeS) / static_cast<double>(60);
+    double processedPercentage = (static_cast<double>(tell()) / static_cast<double>(size())) * 100;
     auto remainingPercentage = 100 - processedPercentage;
     CALQ_LOG("Processed: %.2f%% (elapsed: %.2f m), remaining: %.2f%% (~%.2f m)",
              processedPercentage,
              elapsedTimeM,
              remainingPercentage,
-             elapsedTimeM * (remainingPercentage / processedPercentage));
+             elapsedTimeM * (remainingPercentage/processedPercentage));
 
     return currentBlock.nrRecords();
 }

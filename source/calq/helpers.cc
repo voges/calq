@@ -1,20 +1,23 @@
 #include "calq/helpers.h"
 
+#include <time.h>
+
 #include <fstream>
 
-#include "calq/error_exception_reporter.h"
+#include "calq/exceptions.h"
+#include "calq/os.h"
 
 namespace calq {
 
-std::string currentDateAndTime() {
+std::string currentDateAndTime(void) {
     // ISO 8601 format: 2007-04-05T14:30:21Z
     char timeString[] = "yyyy-mm-ddTHH:MM:SSZ";
 
-    time_t currentTime = time(nullptr);
-    if (currentTime == ((time_t) -1)) {
+    time_t currentTime = time(NULL);
+    if (currentTime == ((time_t)-1)) {
         throwErrorException("time failed");
     }
-    struct tm timeinfo{0, 0, 0, 1, 0, 0, 0, 0, 0, 0, nullptr};
+    struct tm timeinfo;
 
 #ifdef OS_WINDOWS
     errno_t err = gmtime_s(&timeinfo, &currentTime);
@@ -22,8 +25,8 @@ std::string currentDateAndTime() {
         throwErrorException("gmtime_s failed");
     }
 #else
-    struct tm* ret = gmtime_r(&currentTime, &timeinfo);
-    if (ret == nullptr) {
+    struct tm *ret = gmtime_r(&currentTime, &timeinfo);
+    if (ret == NULL) {
         throwErrorException("gmtime_r failed");
     }
 #endif
@@ -38,7 +41,7 @@ std::string currentDateAndTime() {
 }
 
 bool fileExists(const std::string &path) {
-    if (path.empty()) {
+    if (path.empty() == true) {
         throwErrorException("path is empty");
     }
     std::ifstream ifs(path.c_str());
@@ -46,7 +49,7 @@ bool fileExists(const std::string &path) {
 }
 
 std::string fileBaseName(const std::string &path) {
-    if (path.empty()) {
+    if (path.empty() == true) {
         throwErrorException("path is empty");
     }
     std::string const &delims = "/\\";
@@ -54,17 +57,17 @@ std::string fileBaseName(const std::string &path) {
 }
 
 std::string fileNameExtension(const std::string &path) {
-    if (path.empty()) {
+    if (path.empty() == true) {
         throwErrorException("path is empty");
     }
-    if (path.find_last_of('.') != std::string::npos) {
-        return path.substr(path.find_last_of('.') + 1);
+    if (path.find_last_of(".") != std::string::npos) {
+        return path.substr(path.find_last_of(".")+1);
     }
     return "";
 }
 
 std::string removeFileNameExtension(const std::string &path) {
-    if (path.empty()) {
+    if (path.empty() == true) {
         throwErrorException("path is empty");
     }
     std::string::size_type const p(path.find_last_of('.'));

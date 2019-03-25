@@ -2,23 +2,26 @@
 
 namespace calq {
 
-SAMBlock::SAMBlock() : records(), nrMappedRecords_(0), nrUnmappedRecords_(0) {}
+SAMBlock::SAMBlock(void)
+    : records(),
+      nrMappedRecords_(0),
+      nrUnmappedRecords_(0) {}
 
-SAMBlock::~SAMBlock() = default;
+SAMBlock::~SAMBlock(void) {}
 
-size_t SAMBlock::nrMappedRecords() const {
+size_t SAMBlock::nrMappedRecords(void) const {
     return nrMappedRecords_;
 }
 
-size_t SAMBlock::nrUnmappedRecords() const {
+size_t SAMBlock::nrUnmappedRecords(void) const {
     return nrUnmappedRecords_;
 }
 
-size_t SAMBlock::nrRecords() const {
+size_t SAMBlock::nrRecords(void) const {
     return (nrMappedRecords_ + nrUnmappedRecords_);
 }
 
-void SAMBlock::reset() {
+void SAMBlock::reset(void) {
     records.clear();
     nrMappedRecords_ = 0;
     nrUnmappedRecords_ = 0;

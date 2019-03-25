@@ -12,10 +12,10 @@ namespace calq {
 class CQFile : public File {
  public:
     CQFile(const std::string &path, const Mode &mode);
-    ~CQFile() override;
+    ~CQFile(void);
 
-    size_t nrReadFileFormatBytes() const;
-    size_t nrWrittenFileFormatBytes() const;
+    size_t nrReadFileFormatBytes(void) const;
+    size_t nrWrittenFileFormatBytes(void) const;
 
     size_t readHeader(size_t *blockSize);
     size_t readQuantizers(std::map<int, Quantizer> *quantizers);
@@ -26,9 +26,6 @@ class CQFile : public File {
     size_t writeQualBlock(unsigned char *block, const size_t &blockSize);
 
  private:
-    static constexpr const char *MAGIC = "CQ";
-    const size_t MAGIC_LEN = 3;
-
     size_t nrReadFileFormatBytes_;
     size_t nrWrittenFileFormatBytes_;
 };

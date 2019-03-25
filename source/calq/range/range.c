@@ -1,9 +1,3 @@
-/** @file range.c
- *  @brief This file contains the implementation of the range codec.
- *  @author Jan Voges (voges)
- *  @bug No known bugs
- */
-
 /*
  * Copyright (c) 2014 Genome Research Ltd.
  * Author(s): James Bonfield, Wellcome Trust Sanger Institute
@@ -82,15 +76,6 @@ double rangecoder_recip[65536];
 /* uint32_t rangecoder_recip2b[65536][2]; */
 uint32_t rangecoder_recip3[1<<(32-TF_SHIFT)];
 
-#ifdef _MSC_VER
-inline uint32_t i_log2(const uint32_t x)
-{
-    uint32_t log2Val = 0;
-    uint32_t y = x;
-    while (y >>= 1) log2Val++;
-    return log2Val;
-}
-#else
 static inline uint32_t i_log2(const uint32_t x) {
     uint32_t y;
     asm( "\tbsr %1, %0\n"
@@ -102,7 +87,6 @@ static inline uint32_t i_log2(const uint32_t x) {
 
     return y;
 }
-#endif
 
 void rangecoder_init(void)
 {
