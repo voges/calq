@@ -19,11 +19,11 @@ Build the CALQ application:
     cmake ..
     make
 
-This generates an executable named ``calq`` in the ``build`` folder.
+This generates an executable named ``cip`` in the ``build`` folder.
 
 ## Usage examples
 
-A list of the available command line options can be obtained via ``calq --help`` or ``calq -h``.
+A list of the available command line options can be obtained via ``cip --help`` or ``cip -h``.
 
 ### Compression
 
@@ -45,15 +45,15 @@ Thus, the above command is equivalent to the following command.
 
 ### Decompression
 
-To perform the decompression of the file ``file.sam.cq``, the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The switch ``-d`` invokes the decoder.
+To perform the decompression of the file ``file.sam.cip``, the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The switch ``-d`` invokes the decoder.
 
-    calq -d -s file.sam file.sam.cq
+    calq -d -s file.sam file.sam.cip
 
-By default, the reconstructed quality values are written to the file ``file.sam.cq.qual``.
+By default, the reconstructed quality values are written to the file ``file.sam.cip.qual``.
 
 Thus, the above command is equivalent to the following command.
 
-    calq -d -s file.sam file.sam.cq -o file.sam.cq.qual
+    calq -d -s file.sam file.sam.cip -o file.sam.cip.qual
 
 Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py``. This and other supplementary scripts can be found at https://github.com/voges/htstools.
 
@@ -95,7 +95,7 @@ That means:
   * Example 2: 1.0.0-beta.1 ("beta version 1 of the planned major release 1")
   * Example 3: 1.0.0-rc.1 ("release candidate (rc) 1 of the planned major release 1")
   * Note: 1.0.0-alpha.1 < 1.0.0-beta.1 < 1.0.0-rc.1 by definition (see https://semver.org)
- 
+
 ## Who do I talk to?
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
