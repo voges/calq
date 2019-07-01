@@ -59,13 +59,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Set build dirs
 if(CALQ_BUILD_LIB OR CALQ_BUILD_APP)
-	add_subdirectory(source/calq)
+    add_subdirectory(source/calq)
 endif()
 
 if(CALQ_BUILD_APP)
-	add_subdirectory(source/calqapp)
-endif()
-
-if(CALQ_BUILD_TESTS AND CALQ_BUILD_APP)
-	add_subdirectory(tests/)
+    add_subdirectory(source/cip)
 endif()
