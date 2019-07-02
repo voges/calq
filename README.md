@@ -8,18 +8,16 @@ Coverage-adaptive lossy quality value compression
 
 ## Quick start on Linux
 
-Clone the CALQ repository with
+Clone the CALQ repository:
 
     git clone https://github.com/voges/calq.git
 
-Build the CALQ application:
+Build the CALQ executable using CMake:
 
     mkdir build
     cd build
     cmake ..
     make
-
-This generates an executable named ``cip`` in the ``build`` folder.
 
 ## Usage examples
 
@@ -31,39 +29,27 @@ The CALQ encoder accepts input files in the SAM format (https://github.com/samto
 
 The following command can be used to compress the quality values from the SAM file ``file.sam``.
 
-    calq file.sam
+    cip file.sam
 
-By default, the compressed quality values are written to the file ``file.sam.cq``. Furthermore, the CALQ encoder uses the following parameters by default:
-
-* ``-b 10000`` | ``--blockSize 10000`` (block size in number of SAM records, i.e., alignments),
-* ``-p 2`` | ``--polyploidy 2`` (sequence reads from a diploid organism are assumed),
-* ``-q Illumina-1.8+`` | ``--qualityValueType Illumina-1.8+`` (quality values in the Illumina 1.8+ format (Phred+33, i.e., [0, 41] + 33) are assumed).
-
-Thus, the above command is equivalent to the following command.
-
-    calq -q Illumina 1.8+ -p 2 -b 10000 file.sam -o file.sam.cq
+The compressed quality values are written to the file ``file.sam.cip``.
 
 ### Decompression
 
 To perform the decompression of the file ``file.sam.cip``, the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The switch ``-d`` invokes the decoder.
 
-    calq -d -s file.sam file.sam.cip
+    cip -d -s file.sam file.sam.cip
 
-By default, the reconstructed quality values are written to the file ``file.sam.cip.qual``.
-
-Thus, the above command is equivalent to the following command.
-
-    calq -d -s file.sam file.sam.cip -o file.sam.cip.qual
+The reconstructed quality values are written to the file ``file.sam.cip.qual``.
 
 Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py``. This and other supplementary scripts can be found at https://github.com/voges/htstools.
 
 ## Continuous integration
 
-Commits to this repository are continuously tested on **Travis CI** (https://travis-ci.org/voges/calq). Take a look at ``.travis.yml`` to see what is being done on Travis' (virtual) machines.
+Commits to this repository are continuously tested on **Travis CI** (https://travis-ci.org/voges/calq). Take a look at the file ``.travis.yml`` to see what is being done on Travis' (virtual) machines.
 
 ## Build system
 
-We use **CMake** (https://cmake.org/) as build system and we provide a ``CMakeLists.txt`` to build CALQ.
+We use **CMake** (https://cmake.org) as build system.
 
 ## Version control system
 
@@ -86,10 +72,10 @@ We use the Semantic Versioning 2.0.0 (https://semver.org).
 That means:
 
 * The **release** version number format is: MAJOR.MINOR.PATCH
-* Increment the
-  * MAJOR version when you make incompatible API changes,
-  * MINOR version when you add functionality in a backwards-compatible manner, and
-  * PATCH version when you make backwards-compatible bug fixes.
+* We increment the
+  * MAJOR version when making incompatible API changes,
+  * MINOR version when adding functionality in a backwards-compatible manner, and
+  * PATCH version when making backwards-compatible bug fixes.
 * **Pre-release** versions are denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version.
   * Example 1: 1.0.0-alpha.1 ("alpha version 1 of the planned major release 1")
   * Example 2: 1.0.0-beta.1 ("beta version 1 of the planned major release 1")
