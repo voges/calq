@@ -1,4 +1,4 @@
-# Linux Dolphin directory attributes files
+# Dolphin directory attributes files
 .directory
 
 # macOS Finder directory attributes files
@@ -6,7 +6,9 @@
 
 # CMake build directories
 build/
+cmake-build/
 cmake-build-debug/
+cmake-build-release/
 
 # CLion project directory
 .idea/
