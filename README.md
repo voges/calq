@@ -19,6 +19,8 @@ Build the CALQ executable using CMake:
     cmake ..
     make
 
+This will generate the CALQ application (named ``cip``) at ``cmake-build/bin/cip``.
+
 ## Usage examples
 
 A list of the available command line options can be obtained via ``cip --help`` or ``cip -h``.
