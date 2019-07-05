@@ -32,4 +32,4 @@ before_install:
 before_script:
 
 script:
-  - ./ci/cmake-build.sh
+  - ./ci/build.sh

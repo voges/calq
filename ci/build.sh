@@ -26,12 +26,12 @@ run() {
 run git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
-readonly cmake_build_dir="${git_root_dir}/cmake-build"
-if [[ ! -d "${cmake_build_dir}" ]]; then
-    info "Creating directory for CMake build: ${cmake_build_dir}"
-    run mkdir -p "${cmake_build_dir}"
+readonly build_dir="${git_root_dir}/build"
+if [[ ! -d "${build_dir}" ]]; then
+    info "Creating directory for CMake build: ${build_dir}"
+    run mkdir -p "${build_dir}"
 fi
 
-run cd "${cmake_build_dir}"
+run cd "${build_dir}"
 run cmake ..
 run make
