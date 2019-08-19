@@ -1,0 +1,3 @@
+- [ ] Remove/Replace Boost
+- [ ] Clean up todo folder
+- [ ] Make GABAC work again and add rANS
