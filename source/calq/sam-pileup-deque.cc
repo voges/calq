@@ -1,9 +1,9 @@
-#include "calq/sam_pileup_deque.h"
+#include "sam-pileup-deque.h"
 
 // -----------------------------------------------------------------------------
 
-#include "calq/error_exception_reporter.h"
-#include "calq/qual_encoder.h"
+#include "error-exception-reporter.h"
+#include "qual-encoder.h"
 
 // -----------------------------------------------------------------------------
 

@@ -1,10 +1,10 @@
-#include "calq/qual_decoder.h"
+#include "calq/qual-decoder.h"
 
 // -----------------------------------------------------------------------------
 
-#include "calq/calq_coder.h"
-#include "calq/error_exception_reporter.h"
-#include "calq/qual_encoder.h"
+#include "calq/calq-codec.h"
+#include "calq/error-exception-reporter.h"
+#include "calq/qual-encoder.h"
 
 // -----------------------------------------------------------------------------
 

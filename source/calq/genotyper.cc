@@ -13,8 +13,8 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calq/error_exception_reporter.h"
-#include "calq/log.h"
+#include "error-exception-reporter.h"
+#include "log.h"
 
 // -----------------------------------------------------------------------------
 

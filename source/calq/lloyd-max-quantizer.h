@@ -12,7 +12,7 @@
 // -----------------------------------------------------------------------------
 
 #include "calq/exceptions.h"
-#include "calq/probability_distribution.h"
+#include "calq/probability-distribution.h"
 #include "calq/quantizer.h"
 
 // -----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-#include "calq/lloyd_max_quantizer.h"
+#include "calq/lloyd-max-quantizer.h"
 
 // -----------------------------------------------------------------------------
 

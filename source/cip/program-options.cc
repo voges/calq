@@ -1,10 +1,10 @@
-#include "calqapp/program_options.h"
+#include "program-options.h"
 
 // -----------------------------------------------------------------------------
 
-#include "calqapp/error_reporter.h"
-#include "calqapp/helpers.h"
-#include "calqapp/logging.h"
+#include "error-reporter.h"
+#include "helpers.h"
+#include "logging.h"
 
 // -----------------------------------------------------------------------------
 
