@@ -7,7 +7,7 @@
 
 // -----------------------------------------------------------------------------
 
-#include "calqapp/helpers.h"
+#include "helpers.h"
 
 // -----------------------------------------------------------------------------
 
@@ -37,9 +37,9 @@
         fflush(stdout); \
         fprintf(stdout, \
                 "LOG  %s %s: " c"\n", \
-                calqapp::currentDateAndTime().c_str(), \
-                calqapp::removeFileNameExtension( \
-                calqapp::fileBaseName(std::string(__FILE__))).c_str(), \
+                cip::currentDateAndTime().c_str(), \
+                cip::removeFileNameExtension( \
+                cip::fileBaseName(std::string(__FILE__))).c_str(), \
                 ##__VA_ARGS__); \
     } while (false)
 

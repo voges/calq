@@ -10,7 +10,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calqapp {
+namespace cip {
 
 // -----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ std::string fileBaseName(const std::string& path);
 std::string fileNameExtension(const std::string& path);
 std::string removeFileNameExtension(const std::string& path);
 
-}  // namespace calqapp
+}  // namespace cip
 
 // -----------------------------------------------------------------------------
 

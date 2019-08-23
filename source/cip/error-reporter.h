@@ -15,7 +15,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calqapp {
+namespace cip {
 
 // -----------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ class ErrorExceptionReporter
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calqapp
+}  // namespace cip
 
 // -----------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ class ErrorExceptionReporter
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException calqapp::ErrorExceptionReporter(__FILE__, \
+#define throwErrorException cip::ErrorExceptionReporter(__FILE__, \
                                                             __FUNCTION__, \
                                                             __LINE__ \
 )

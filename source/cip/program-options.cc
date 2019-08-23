@@ -12,7 +12,7 @@
 
 // -----------------------------------------------------------------------------
 
-namespace calqapp {
+namespace cip {
 
 // -----------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ ProgramOptions::~ProgramOptions() = default;
 // -----------------------------------------------------------------------------
 
 void ProgramOptions::validateCompress(){
-    if (calqapp::fileNameExtension(inputFilePath) != std::string("sam")) {
+    if (cip::fileNameExtension(inputFilePath) != std::string("sam")) {
         throwErrorException("Input file name extension must be 'sam'");
     }
 
@@ -191,12 +191,12 @@ void ProgramOptions::validateV2(){
     if (referenceFilePath.empty()) {
         throwErrorException("Reference file name not provided");
     }
-    if (!calqapp::fileExists(referenceFilePath)) {
+    if (!cip::fileExists(referenceFilePath)) {
         throwErrorException("Cannot access reference file");
     }
-    if (calqapp::fileNameExtension(referenceFilePath)
+    if (cip::fileNameExtension(referenceFilePath)
         != std::string("fa")
-        && calqapp::fileNameExtension(referenceFilePath)
+        && cip::fileNameExtension(referenceFilePath)
            != std::string("fasta")) {
         throwErrorException(
                 "Reference file name extension must "
@@ -210,7 +210,7 @@ void ProgramOptions::validateV2(){
 void ProgramOptions::validateDecompress(){
     CALQ_LOG("Decompressing");
 
-    if (calqapp::fileNameExtension(inputFilePath) != std::string("cq")) {
+    if (cip::fileNameExtension(inputFilePath) != std::string("cq")) {
         CALQ_LOG("Warning: Input file name extension is not 'cq'");
     }
 
@@ -220,14 +220,14 @@ void ProgramOptions::validateDecompress(){
     if (sideInformationFilePath.empty()) {
         throwErrorException("No side information file name provided");
     }
-    if (calqapp::fileNameExtension(sideInformationFilePath)
+    if (cip::fileNameExtension(sideInformationFilePath)
         != std::string("sam")) {
         throwErrorException(
                 "Side information file name "
                 "extension must be 'sam'"
         );
     }
-    if (!calqapp::fileExists(sideInformationFilePath)) {
+    if (!cip::fileExists(sideInformationFilePath)) {
         throwErrorException("Cannot access side information file");
     }
 }
@@ -264,12 +264,12 @@ void ProgramOptions::validateCommon(){
         throwErrorException("No input file name provided");
     }
 
-    if (!calqapp::fileExists(inputFilePath)) {
+    if (!cip::fileExists(inputFilePath)) {
         throwErrorException("Cannot access input file");
     }
 
     CALQ_LOG("Output file name: %s", outputFilePath.c_str());
-    if (calqapp::fileExists(outputFilePath)) {
+    if (cip::fileExists(outputFilePath)) {
         if (!force) {
             throwErrorException(
                     "Not overwriting output file "
@@ -456,12 +456,12 @@ void ProgramOptions::processCommandLine(
 
     // First thing to do is to print the help
     if (optionsMap.count("help") || optionsMap.count("h")) {
-        std::cout << "Usage calq V1:\n $ ./calqapp -i [input_file] "
+        std::cout << "Usage calq V1:\n $ ./cip -i [input_file] "
                      "-o [output_file] [optional parameters]\n\n"
-                     "Usage calq V2:\n $ ./calqapp -i [input_file] "
+                     "Usage calq V2:\n $ ./cip -i [input_file] "
                      "-o [output_file] -r [reference file] "
                      "--calq_version v2 [optional parameters]\n\n"
-                     "Usage calq Decoder:\n $ ./calqapp -i [input_file] "
+                     "Usage calq Decoder:\n $ ./cip -i [input_file] "
                      "-o [output_file] -s [sam side file] "
                      "-d [optional parameters]\n" << std::endl;
         std::cout << options;
@@ -476,7 +476,7 @@ void ProgramOptions::processCommandLine(
 
 // -----------------------------------------------------------------------------
 
-}  // namespace calqapp
+}  // namespace cip
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
