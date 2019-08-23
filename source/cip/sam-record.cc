@@ -4,7 +4,7 @@
 
 namespace cip {
 
-SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
+SamRecord::SamRecord(char *fields[NUM_FIELDS])
     : qname(fields[0]),
       flag((uint16_t)strtol(fields[1], nullptr, 10)),
       rname(fields[2]),
@@ -59,7 +59,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
     }
 }
 
-bool SAMRecord::isMapped() const {
+bool SamRecord::isMapped() const {
     return (flag & 0x4) == 0;  // NOLINT(hicpp-signed-bitwise)
 }
 

@@ -8,11 +8,11 @@ namespace cip {
 
 class FASTAFile;
 
-class SAMRecord {
+class SamRecord {
    public:
     static const int NUM_FIELDS = 12;
 
-    explicit SAMRecord(char *fields[NUM_FIELDS]);
+    explicit SamRecord(char *fields[NUM_FIELDS]);
     bool isMapped() const;
 
     std::string qname;  // Query template NAME
