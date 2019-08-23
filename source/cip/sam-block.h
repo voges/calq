@@ -1,50 +1,28 @@
-#ifndef CALQAPP_SAM_BLOCK_H_
-#define CALQAPP_SAM_BLOCK_H_
-
-// -----------------------------------------------------------------------------
+#ifndef CIP_SAM_BLOCK_H_
+#define CIP_SAM_BLOCK_H_
 
 #include <deque>
-
-// -----------------------------------------------------------------------------
-
 #include "sam-record.h"
-
-// -----------------------------------------------------------------------------
 
 namespace cip {
 
-// -----------------------------------------------------------------------------
-
-class SAMBlock {
-    // -------------------------------------------------------------------------
-
+class SamBlock {
     friend class SAMFile;
 
-    // -------------------------------------------------------------------------
-
    public:
-    SAMBlock();
-    ~SAMBlock();
-
+    SamBlock();
     size_t nrMappedRecords() const;
     size_t nrUnmappedRecords() const;
     size_t nrRecords() const;
     void reset();
 
-    std::deque<SAMRecord> records;
+    std::deque<SamRecord> records;
 
    private:
     size_t nrMappedRecords_;
     size_t nrUnmappedRecords_;
 };
 
-// -----------------------------------------------------------------------------
-
 }  // namespace cip
 
-// -----------------------------------------------------------------------------
-
-#endif  // CALQAPP_SAM_BLOCK_H_
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
+#endif  // CIP_SAM_BLOCK_H_
