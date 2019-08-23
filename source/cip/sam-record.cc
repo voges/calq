@@ -1,19 +1,8 @@
 #include "sam-record.h"
-
-// -----------------------------------------------------------------------------
-
 #include <queue>
-
-// -----------------------------------------------------------------------------
-
-#include "fasta-file.h"
-#include "logging.h"
-
-// -----------------------------------------------------------------------------
+#include "error.h"
 
 namespace cip {
-
-// -----------------------------------------------------------------------------
 
 SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
     : qname(fields[0]),
@@ -29,11 +18,8 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
       qual(fields[10]),
       opt(fields[11]),
       posMin(0),
-      posMax(0),
-      mapped_(false) {
-    check();
-
-    if (mapped_) {
+      posMax(0) {
+    if (isMapped()) {
         // Compute 0-based first position and 0-based last position this record
         // is mapped to on the reference used for alignment
         posMin = pos - 1;
@@ -41,7 +27,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
         size_t cigarIdx = 0;
         size_t cigarLen = cigar.length();
-        uint32_t opLen = 0;  // length of current CIGAR operation
+        uint32_t opLen = 0;  // Length of current CIGAR operation
 
         for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
             if (isdigit(cigar[cigarIdx])) {
@@ -63,7 +49,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
                     break;
                 case 'H':
                 case 'P':
-                    break;  // these have been clipped
+                    break;  // These have been clipped
                 default:
                     throwErrorException("Bad CIGAR string");
             }
@@ -73,97 +59,8 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
     }
 }
 
-// -----------------------------------------------------------------------------
-
-SAMRecord::~SAMRecord() = default;
-
-// -----------------------------------------------------------------------------
-
-bool SAMRecord::isMapped() const { return mapped_; }
-
-// -----------------------------------------------------------------------------
-
-void SAMRecord::printLong() const {
-    printShort();
-    printf("isMapped: %d, ", mapped_);
-    printf("posMin: %d, ", posMin);
-    printf("posMax: %d\n", posMax);
+bool SAMRecord::isMapped() const {
+    return (flag & 0x4) == 0;  // NOLINT(hicpp-signed-bitwise)
 }
-
-// -----------------------------------------------------------------------------
-
-void SAMRecord::printShort() const {
-    printf("%s\t", qname.c_str());
-    printf("%d\t", flag);
-    printf("%s\t", rname.c_str());
-    printf("%d\t", pos);
-    printf("%d\t", mapq);
-    printf("%s\t", cigar.c_str());
-    printf("%s\t", rnext.c_str());
-    printf("%d\t", pnext);
-    printf("%" PRId64 "\t", tlen);
-    printf("%s\t", seq.c_str());
-    printf("%s\t", qual.c_str());
-    printf("%s\t", opt.c_str());
-    printf("\n");
-}
-
-// -----------------------------------------------------------------------------
-
-void SAMRecord::printSeqWithPositionOffset() const {
-    printf("%s %6d-%6d|", rname.c_str(), posMin, posMax);
-    for (unsigned int i = 0; i < posMin; i++) {
-        printf(" ");
-    }
-    printf("%s\n", seq.c_str());
-}
-
-// -----------------------------------------------------------------------------
-
-void SAMRecord::check() {
-    // Check all fields
-    if (qname.empty()) {
-        throwErrorException("qname is empty");
-    }
-    // flag
-    if (rname.empty()) {
-        throwErrorException("rname is empty");
-    }
-    // pos
-    // mapq
-    if (cigar.empty()) {
-        throwErrorException("cigar is empty");
-    }
-    if (rnext.empty()) {
-        throwErrorException("rnext is empty");
-    }
-    // pnext
-    // tlen
-    if (seq.empty()) {
-        throwErrorException("seq is empty");
-    }
-    if (qual.empty()) {
-        throwErrorException("qual is empty");
-    }
-    if (opt.empty()) {
-        CALQ_LOG("opt is empty");
-    }
-
-    // Check if this record is mapped
-    if ((flag & 0x4) != 0) {  // NOLINT
-        mapped_ = false;
-    } else {
-        mapped_ = true;
-        if (rname == "*" || pos == 0 || cigar == "*" || seq == "*" ||
-            qual == "*") {
-            throwErrorException("Corrupted record");
-        }
-    }
-}
-
-// -----------------------------------------------------------------------------
 
 }  // namespace cip
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

@@ -1,36 +1,19 @@
-#ifndef CALQAPP_SAM_RECORD_H_
-#define CALQAPP_SAM_RECORD_H_
-
-// -----------------------------------------------------------------------------
+#ifndef CIP_SAM_RECORD_H_
+#define CIP_SAM_RECORD_H_
 
 #include <cinttypes>
-
-// -----------------------------------------------------------------------------
-
-#include <deque>
 #include <string>
-
-// -----------------------------------------------------------------------------
 
 namespace cip {
 
-// -----------------------------------------------------------------------------
-
 class FASTAFile;
-
-// -----------------------------------------------------------------------------
 
 class SAMRecord {
    public:
     static const int NUM_FIELDS = 12;
 
     explicit SAMRecord(char *fields[NUM_FIELDS]);
-    ~SAMRecord();
-
     bool isMapped() const;
-    void printLong() const;
-    void printShort() const;
-    void printSeqWithPositionOffset() const;
 
     std::string qname;  // Query template NAME
     uint16_t flag;      // bitwise FLAG (uint16_t)
@@ -47,19 +30,8 @@ class SAMRecord {
 
     uint32_t posMin;  // 0-based leftmost mapping position
     uint32_t posMax;  // 0-based rightmost mapping position
-
-   private:
-    void check();
-    bool mapped_;
 };
-
-// -----------------------------------------------------------------------------
 
 }  // namespace cip
 
-// -----------------------------------------------------------------------------
-
-#endif  // CALQAPP_SAM_RECORD_H_
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
+#endif  // CIP_SAM_RECORD_H_
