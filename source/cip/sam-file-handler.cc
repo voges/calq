@@ -1,5 +1,5 @@
-#include <algorithm>
 #include "sam-file-handler.h"
+#include <algorithm>
 
 // -----------------------------------------------------------------------------
 
@@ -13,21 +13,19 @@ namespace cip {
 // -----------------------------------------------------------------------------
 
 SAMFileHandler::SAMFileHandler(const std::string& inputFileName,
-                               const std::string& referenceFileName
-)
-        : samFile_(nullptr),
-        fastaFile(nullptr),
-        side(),
-        encBlock(),
-        unmapped(),
-        refStart(),
-        refEnd(),
-        rname(){
+                               const std::string& referenceFileName)
+    : samFile_(nullptr),
+      fastaFile(nullptr),
+      side(),
+      encBlock(),
+      unmapped(),
+      refStart(),
+      refEnd(),
+      rname() {
     samFile_ = std::unique_ptr<SAMFile>(new SAMFile(inputFileName));
     if (!referenceFileName.empty()) {
-        fastaFile = std::unique_ptr<FASTAFile>(
-                new FASTAFile(referenceFileName)
-        );
+        fastaFile =
+            std::unique_ptr<FASTAFile>(new FASTAFile(referenceFileName));
     }
 }
 
@@ -37,7 +35,7 @@ SAMFileHandler::~SAMFileHandler() = default;
 
 // -----------------------------------------------------------------------------
 
-uint32_t computeRefLength(const std::string& cigar){
+uint32_t computeRefLength(const std::string& cigar) {
     // Compute 0-based first position and 0-based last position this record
     // is mapped to on the reference used for alignment
     uint32_t posMax = 0;
@@ -48,7 +46,7 @@ uint32_t computeRefLength(const std::string& cigar){
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(cigar[cigarIdx])) {
-            opLen = opLen * 10 + (uint32_t) cigar[cigarIdx] - (uint32_t) '0';
+            opLen = opLen * 10 + (uint32_t)cigar[cigarIdx] - (uint32_t)'0';
             continue;
         }
         switch (cigar[cigarIdx]) {
@@ -77,7 +75,7 @@ uint32_t computeRefLength(const std::string& cigar){
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::readBlock(const size_t& blockSize){
+size_t SAMFileHandler::readBlock(const size_t& blockSize) {
     this->unmapped.mappedFlags.clear();
     this->unmapped.unmappedQualityScores.clear();
     this->encBlock.qvalues.clear();
@@ -111,17 +109,9 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
         return returnCode;
     }
 
-    side.reference = fastaFile->getReferencesInRange(
-            rname,
-            refStart,
-            refEnd
-    );
-    std::transform(
-            side.reference.begin(),
-            side.reference.end(),
-            side.reference.begin(),
-            ::toupper
-    );
+    side.reference = fastaFile->getReferencesInRange(rname, refStart, refEnd);
+    std::transform(side.reference.begin(), side.reference.end(),
+                   side.reference.begin(), ::toupper);
 
     if (side.positions.empty()) {
         side.posOffset = 0;
@@ -134,20 +124,20 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize){
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getMappedBlock(calq::EncodingBlock *var){
+void SAMFileHandler::getMappedBlock(calq::EncodingBlock* var) {
     var->qvalues.swap(encBlock.qvalues);
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getUnmappedBlock(UnmappedInformation *var){
+void SAMFileHandler::getUnmappedBlock(UnmappedInformation* var) {
     var->mappedFlags.swap(unmapped.mappedFlags);
     var->unmappedQualityScores.swap(unmapped.unmappedQualityScores);
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getSideInformation(calq::SideInformation *var){
+void SAMFileHandler::getSideInformation(calq::SideInformation* var) {
     side.cigars.swap(var->cigars);
     side.sequences.swap(var->sequences);
     side.positions.swap(var->positions);
@@ -158,25 +148,25 @@ void SAMFileHandler::getSideInformation(calq::SideInformation *var){
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrBlocksRead() const{
+size_t SAMFileHandler::nrBlocksRead() const {
     return this->samFile_->nrBlocksRead();
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrMappedRecordsRead() const{
+size_t SAMFileHandler::nrMappedRecordsRead() const {
     return this->samFile_->nrMappedRecordsRead();
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrUnmappedRecordsRead() const{
+size_t SAMFileHandler::nrUnmappedRecordsRead() const {
     return this->samFile_->nrUnmappedRecordsRead();
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrRecordsRead() const{
+size_t SAMFileHandler::nrRecordsRead() const {
     return this->samFile_->nrRecordsRead();
 }
 

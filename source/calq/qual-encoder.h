@@ -27,8 +27,7 @@ struct DecodingBlock;
 enum struct Version;
 // -----------------------------------------------------------------------------
 
-struct EncodingRead
-{
+struct EncodingRead {
     uint32_t posMin;
     uint32_t posMax;
     std::string qvalues;
@@ -39,22 +38,20 @@ struct EncodingRead
 
 // -----------------------------------------------------------------------------
 
-class QualEncoder
-{
- public:
+class QualEncoder {
+   public:
     explicit QualEncoder(const EncodingOptions& options,
                          const std::map<int, Quantizer>& quant,
-                         DecodingBlock *out
-    );
+                         DecodingBlock* out);
     ~QualEncoder();
     void addMappedRecordToBlock(const EncodingRead& samRecord);
     void finishBlock();
     size_t nrMappedRecords() const;
 
- private:
+   private:
     void encodeMappedQual(const EncodingRead& samRecord);
 
- private:
+   private:
     // Sizes & counters
     size_t nrMappedRecords_;
 
@@ -71,7 +68,7 @@ class QualEncoder
 
     Haplotyper haplotyper_;
     Genotyper genotyper_;
-    DecodingBlock *out;
+    DecodingBlock* out;
     size_t posCounter;
 
     uint8_t hqSoftClipThreshold;

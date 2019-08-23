@@ -4,8 +4,8 @@
 // -----------------------------------------------------------------------------
 
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 
 // -----------------------------------------------------------------------------
 
@@ -17,22 +17,18 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-class FASTAFile : public File
-{
- public:
+class FASTAFile : public File {
+   public:
     explicit FASTAFile(const std::string& path,
-                       const Mode& mode = Mode::MODE_READ
-    );
+                       const Mode& mode = Mode::MODE_READ);
     ~FASTAFile() override;
 
     std::map<std::string, std::string> references;
 
     std::string getReferencesInRange(const std::string& header,
-                                     const size_t& start,
-                                     const size_t& end
-    );
+                                     const size_t& start, const size_t& end);
 
- private:
+   private:
     static const size_t LINE_SIZE = sizeof(char) * (4 * 1000);  // 4 KB
 
     void parse();

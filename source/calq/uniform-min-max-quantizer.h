@@ -11,13 +11,10 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-class UniformMinMaxQuantizer : public UniformQuantizer
-{
- public:
-    UniformMinMaxQuantizer(const int& valueMin,
-                           const int& valueMax,
-                           const int& nrSteps
-    );
+class UniformMinMaxQuantizer : public UniformQuantizer {
+   public:
+    UniformMinMaxQuantizer(const int& valueMin, const int& valueMax,
+                           const int& nrSteps);
 
     ~UniformMinMaxQuantizer() override;
 };

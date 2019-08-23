@@ -7,12 +7,7 @@ namespace calq {
 // -----------------------------------------------------------------------------
 
 SAMPileup::SAMPileup()
-        : pos(0),
-        qual(""),
-        seq(""),
-        ref('N'),
-        hq_softcounter(0){
-}
+    : pos(0), qual(""), seq(""), ref('N'), hq_softcounter(0) {}
 
 // -----------------------------------------------------------------------------
 
@@ -20,13 +15,11 @@ SAMPileup::~SAMPileup() = default;
 
 // -----------------------------------------------------------------------------
 
-bool SAMPileup::empty() const{
-    return seq.empty();
-}
+bool SAMPileup::empty() const { return seq.empty(); }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::clear(){
+void SAMPileup::clear() {
     pos = 0;
     qual = "";
     seq = "";
@@ -35,21 +28,17 @@ void SAMPileup::clear(){
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::print() const{
+void SAMPileup::print() const {
     printf("%6u: %s %s\n", pos, seq.c_str(), qual.c_str());
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::printQual() const{
-    printf("%6u: %s\n", pos, qual.c_str());
-}
+void SAMPileup::printQual() const { printf("%6u: %s\n", pos, qual.c_str()); }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileup::printSeq() const{
-    printf("%6u: %s\n", pos, seq.c_str());
-}
+void SAMPileup::printSeq() const { printf("%6u: %s\n", pos, seq.c_str()); }
 
 // -----------------------------------------------------------------------------
 

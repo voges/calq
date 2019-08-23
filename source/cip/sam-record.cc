@@ -16,21 +16,21 @@ namespace cip {
 // -----------------------------------------------------------------------------
 
 SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
-        : qname(fields[0]),
-        flag((uint16_t) strtol(fields[1], nullptr, 10)),
-        rname(fields[2]),
-        pos((uint32_t) strtol(fields[3], nullptr, 10)),
-        mapq((uint8_t) strtol(fields[4], nullptr, 10)),
-        cigar(fields[5]),
-        rnext(fields[6]),
-        pnext((uint32_t) strtol(fields[7], nullptr, 10)),
-        tlen((int64_t) strtol(fields[8], nullptr, 10)),
-        seq(fields[9]),
-        qual(fields[10]),
-        opt(fields[11]),
-        posMin(0),
-        posMax(0),
-        mapped_(false){
+    : qname(fields[0]),
+      flag((uint16_t)strtol(fields[1], nullptr, 10)),
+      rname(fields[2]),
+      pos((uint32_t)strtol(fields[3], nullptr, 10)),
+      mapq((uint8_t)strtol(fields[4], nullptr, 10)),
+      cigar(fields[5]),
+      rnext(fields[6]),
+      pnext((uint32_t)strtol(fields[7], nullptr, 10)),
+      tlen((int64_t)strtol(fields[8], nullptr, 10)),
+      seq(fields[9]),
+      qual(fields[10]),
+      opt(fields[11]),
+      posMin(0),
+      posMax(0),
+      mapped_(false) {
     check();
 
     if (mapped_) {
@@ -45,8 +45,7 @@ SAMRecord::SAMRecord(char *fields[NUM_FIELDS])
 
         for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
             if (isdigit(cigar[cigarIdx])) {
-                opLen = opLen * 10 + (uint32_t) cigar[cigarIdx]
-                        - (uint32_t) '0';
+                opLen = opLen * 10 + (uint32_t)cigar[cigarIdx] - (uint32_t)'0';
                 continue;
             }
             switch (cigar[cigarIdx]) {
@@ -80,13 +79,11 @@ SAMRecord::~SAMRecord() = default;
 
 // -----------------------------------------------------------------------------
 
-bool SAMRecord::isMapped() const{
-    return mapped_;
-}
+bool SAMRecord::isMapped() const { return mapped_; }
 
 // -----------------------------------------------------------------------------
 
-void SAMRecord::printLong() const{
+void SAMRecord::printLong() const {
     printShort();
     printf("isMapped: %d, ", mapped_);
     printf("posMin: %d, ", posMin);
@@ -95,7 +92,7 @@ void SAMRecord::printLong() const{
 
 // -----------------------------------------------------------------------------
 
-void SAMRecord::printShort() const{
+void SAMRecord::printShort() const {
     printf("%s\t", qname.c_str());
     printf("%d\t", flag);
     printf("%s\t", rname.c_str());
@@ -113,7 +110,7 @@ void SAMRecord::printShort() const{
 
 // -----------------------------------------------------------------------------
 
-void SAMRecord::printSeqWithPositionOffset() const{
+void SAMRecord::printSeqWithPositionOffset() const {
     printf("%s %6d-%6d|", rname.c_str(), posMin, posMax);
     for (unsigned int i = 0; i < posMin; i++) {
         printf(" ");
@@ -123,7 +120,7 @@ void SAMRecord::printSeqWithPositionOffset() const{
 
 // -----------------------------------------------------------------------------
 
-void SAMRecord::check(){
+void SAMRecord::check() {
     // Check all fields
     if (qname.empty()) {
         throwErrorException("qname is empty");
@@ -153,14 +150,11 @@ void SAMRecord::check(){
     }
 
     // Check if this record is mapped
-    if ((flag & 0x4) != 0) { //NOLINT
+    if ((flag & 0x4) != 0) {  // NOLINT
         mapped_ = false;
     } else {
         mapped_ = true;
-        if (rname == "*" ||
-            pos == 0 ||
-            cigar == "*" ||
-            seq == "*" ||
+        if (rname == "*" || pos == 0 || cigar == "*" || seq == "*" ||
             qual == "*") {
             throwErrorException("Corrupted record");
         }

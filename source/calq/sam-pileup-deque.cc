@@ -11,11 +11,7 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-SAMPileupDeque::SAMPileupDeque()
-        : pileups_(),
-        posMax_(0),
-        posMin_(0){
-}
+SAMPileupDeque::SAMPileupDeque() : pileups_(), posMax_(0), posMin_(0) {}
 
 // -----------------------------------------------------------------------------
 
@@ -23,7 +19,7 @@ SAMPileupDeque::~SAMPileupDeque() = default;
 
 // -----------------------------------------------------------------------------
 
-const SAMPileup& SAMPileupDeque::back() const{
+const SAMPileup& SAMPileupDeque::back() const {
     if (pileups_.empty()) {
         throwErrorException("Deque is empty");
     }
@@ -32,7 +28,7 @@ const SAMPileup& SAMPileupDeque::back() const{
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::clear(){
+void SAMPileupDeque::clear() {
     pileups_.clear();
     posMax_ = 0;
     posMin_ = 0;
@@ -40,13 +36,11 @@ void SAMPileupDeque::clear(){
 
 // -----------------------------------------------------------------------------
 
-bool SAMPileupDeque::empty() const{
-    return pileups_.empty();
-}
+bool SAMPileupDeque::empty() const { return pileups_.empty(); }
 
 // -----------------------------------------------------------------------------
 
-const SAMPileup& SAMPileupDeque::front() const{
+const SAMPileup& SAMPileupDeque::front() const {
     if (pileups_.empty()) {
         throwErrorException("Deque is empty");
     }
@@ -55,19 +49,17 @@ const SAMPileup& SAMPileupDeque::front() const{
 
 // -----------------------------------------------------------------------------
 
-size_t SAMPileupDeque::length() const{
-    return posMax_ - posMin_ + 1;
-}
+size_t SAMPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 
 // -----------------------------------------------------------------------------
 
-const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const{
+const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const {
     return pileups_.at(n);
 }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::pop_back(){
+void SAMPileupDeque::pop_back() {
     if (pileups_.empty()) {
         throwErrorException("Deque is empty");
     }
@@ -77,7 +69,7 @@ void SAMPileupDeque::pop_back(){
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::pop_front(){
+void SAMPileupDeque::pop_front() {
     if (pileups_.empty()) {
         throwErrorException("Deque is empty");
     }
@@ -87,13 +79,11 @@ void SAMPileupDeque::pop_front(){
 
 // -----------------------------------------------------------------------------
 
-size_t SAMPileupDeque::size() const{
-    return pileups_.size();
-}
+size_t SAMPileupDeque::size() const { return pileups_.size(); }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::print() const{
+void SAMPileupDeque::print() const {
     if (pileups_.empty()) {
         throwErrorException("Deque is empty");
     }
@@ -105,19 +95,15 @@ void SAMPileupDeque::print() const{
 
 // -----------------------------------------------------------------------------
 
-uint32_t SAMPileupDeque::posMax() const{
-    return posMax_;
-}
+uint32_t SAMPileupDeque::posMax() const { return posMax_; }
 
 // -----------------------------------------------------------------------------
 
-uint32_t SAMPileupDeque::posMin() const{
-    return posMin_;
-}
+uint32_t SAMPileupDeque::posMin() const { return posMin_; }
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::setPosMax(const uint32_t& posMax){
+void SAMPileupDeque::setPosMax(const uint32_t& posMax) {
     if (posMax < posMax_) {
         throwErrorException("posMax range");
     }
@@ -127,7 +113,7 @@ void SAMPileupDeque::setPosMax(const uint32_t& posMax){
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::setPosMin(const uint32_t& posMin){
+void SAMPileupDeque::setPosMin(const uint32_t& posMin) {
     if (posMin < posMin_) {
         throwErrorException("posMin range");
     }
@@ -143,10 +129,8 @@ void SAMPileupDeque::setPosMin(const uint32_t& posMin){
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::add(const EncodingRead& r,
-                         uint8_t qvalOffset,
-                         uint8_t hqSoftClipThreshold
-){
+void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvalOffset,
+                         uint8_t hqSoftClipThreshold) {
     if (this->empty()) {
         throwErrorException("samPileupQueue is empty");
     }
@@ -164,37 +148,33 @@ void SAMPileupDeque::add(const EncodingRead& r,
 
     for (cigarIdx = 0; cigarIdx < cigarLen; cigarIdx++) {
         if (isdigit(r.cigar[cigarIdx])) {
-            opLen = opLen * 10 + (size_t) r.cigar[cigarIdx] - (size_t) '0';
+            opLen = opLen * 10 + (size_t)r.cigar[cigarIdx] - (size_t)'0';
             continue;
         }
 
         const auto HQ_SOFTCLIP_THRESHOLD =
-                static_cast<const char>(hqSoftClipThreshold + qvalOffset);
-
+            static_cast<const char>(hqSoftClipThreshold + qvalOffset);
 
         switch (r.cigar[cigarIdx]) {
             case 'M':
             case '=':
             case 'X':
                 for (size_t i = 0; i < opLen; i++) {
-                    this->pileups_[pileupIdx].pos
-                            = static_cast<uint32_t>(this->posMin() + pileupIdx);
+                    this->pileups_[pileupIdx].pos =
+                        static_cast<uint32_t>(this->posMin() + pileupIdx);
                     this->pileups_[pileupIdx].seq += r.sequence[idx];
                     this->pileups_[pileupIdx].qual += r.qvalues[idx];
                     if (!r.reference.empty()) {
                         if (this->pileups_[pileupIdx].ref != 'N' &&
                             this->pileups_[pileupIdx].ref !=
-                            r.reference[
-                                    pileupIdx + this->posMin() - r.posMin
-                            ]) {
+                                r.reference[pileupIdx + this->posMin() -
+                                            r.posMin]) {
                             throwErrorException(
-                                    "Non matching reference "
-                                    "between reads!"
-                            );
+                                "Non matching reference "
+                                "between reads!");
                         }
                         this->pileups_[pileupIdx].ref =
-                                r.reference
-                                [pileupIdx + this->posMin() - r.posMin];
+                            r.reference[pileupIdx + this->posMin() - r.posMin];
                     }
 
                     idx++;

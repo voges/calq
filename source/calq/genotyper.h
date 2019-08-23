@@ -13,40 +13,28 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-class Genotyper
-{
- public:
-    Genotyper(const int& polyploidy,
-              const int& qualOffset,
-              const int& nrQuantizers,
-              bool debug
-    );
+class Genotyper {
+   public:
+    Genotyper(const int& polyploidy, const int& qualOffset,
+              const int& nrQuantizers, bool debug);
     ~Genotyper();
 
     double computeEntropy(const std::string& seqPileup,
-                          const std::string& qualPileup
-    );
+                          const std::string& qualPileup);
     int computeQuantizerIndex(const std::string& seqPileup,
-                              const std::string& qualPileup
-    );
+                              const std::string& qualPileup);
 
-    const std::map<std::string, double>&
-    getGenotypelikelihoods(const std::string& seqPileup,
-                           const std::string& qualPileup
-    );
+    const std::map<std::string, double>& getGenotypelikelihoods(
+        const std::string& seqPileup, const std::string& qualPileup);
 
- private:
+   private:
     void initLikelihoods();
     void resetLikelihoods();
     void computeGenotypeLikelihoods(const std::string& seqPileup,
                                     const std::string& qualPileup,
-                                    const size_t& depth
-    );
+                                    const size_t& depth);
 
-    const std::vector<char> ALLELE_ALPHABET = {'A',
-                                               'C',
-                                               'G',
-                                               'T'};
+    const std::vector<char> ALLELE_ALPHABET = {'A', 'C', 'G', 'T'};
     const size_t ALLELE_ALPHABET_SIZE = 4;
 
     const std::vector<char> alleleAlphabet_;

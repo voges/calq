@@ -16,28 +16,19 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-class File
-{
- public:
+class File {
+   public:
     // -------------------------------------------------------------------------
 
-    enum class Mode
-    {
-        MODE_READ = 0,
-        MODE_WRITE = 1
-    };
+    enum class Mode { MODE_READ = 0, MODE_WRITE = 1 };
 
     // -------------------------------------------------------------------------
 
     File();
-    File(const std::string& path,
-         Mode mode
-    );
+    File(const std::string &path, Mode mode);
     virtual ~File();
 
-    void open(const std::string& path,
-              Mode mode
-    );
+    void open(const std::string &path, Mode mode);
     void close();
 
     void advance(size_t offset);
@@ -49,26 +40,20 @@ class File
     size_t nrReadBytes() const;
     size_t nrWrittenBytes() const;
 
-    bool readLine(char *s,
-                  std::streamsize n
-    );
+    bool readLine(char *s, std::streamsize n);
 
     bool isReadable() const;
     bool isWritable() const;
 
     // -------------------------------------------------------------------------
 
-    template<typename T>
-    size_t readValue(T *dword,
-                     size_t number = 1
-    ){
+    template <typename T>
+    size_t readValue(T *dword, size_t number = 1) {
         size_t ret = sizeof(T) * number;
         try {
-            filestream.read(
-                    reinterpret_cast<char *>(dword), sizeof(T) * number
-            );
-        }
-        catch (std::exception& e) {
+            filestream.read(reinterpret_cast<char *>(dword),
+                            sizeof(T) * number);
+        } catch (std::exception &e) {
             throwErrorException(std::string("Read failed: ") + e.what());
         }
         nrReadBytes_ += ret;
@@ -77,18 +62,13 @@ class File
 
     // -------------------------------------------------------------------------
 
-    template<typename T>
-    size_t writeValue(const T *dword,
-                      size_t number = 1
-    ){
+    template <typename T>
+    size_t writeValue(const T *dword, size_t number = 1) {
         size_t ret = sizeof(T) * number;
         try {
-            filestream.write(
-                    reinterpret_cast<const char *>(dword),
-                    sizeof(T) * number
-            );
-        }
-        catch (std::exception& e) {
+            filestream.write(reinterpret_cast<const char *>(dword),
+                             sizeof(T) * number);
+        } catch (std::exception &e) {
             throwErrorException(std::string("Write failed: ") + e.what());
         }
         nrWrittenBytes_ += ret;
@@ -97,12 +77,8 @@ class File
 
     // -------------------------------------------------------------------------
 
-    size_t read(void *buffer,
-                size_t size
-    );
-    size_t write(const void *buffer,
-                 size_t size
-    );
+    size_t read(void *buffer, size_t size);
+    size_t write(const void *buffer, size_t size);
 
     size_t readByte(unsigned char *byte);
     size_t readUint8(uint8_t *byte);
@@ -116,7 +92,7 @@ class File
     size_t writeUint32(uint32_t dword);
     size_t writeUint64(uint64_t qword);
 
- protected:
+   protected:
     size_t fsize_;
     Mode mode_;
     size_t nrReadBytes_;

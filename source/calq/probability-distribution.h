@@ -14,23 +14,18 @@
 namespace calq {
 
 // Samples a probability distribution
-class ProbabilityDistribution
-{
- private:
+class ProbabilityDistribution {
+   private:
     std::vector<size_t> pdf;
 
     // Offset
     size_t rangeMin;
 
- public:
-    ProbabilityDistribution(size_t rangeMin,
-                            size_t rangeMax
-    );
+   public:
+    ProbabilityDistribution(size_t rangeMin, size_t rangeMax);
 
     // Increases counter of value
-    void addToPdf(size_t qualScore,
-                  size_t number = 1
-    );
+    void addToPdf(size_t qualScore, size_t number = 1);
 
     // Reset all counters to zero
     void resetPdf();

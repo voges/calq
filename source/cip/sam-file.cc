@@ -14,9 +14,7 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-static void parseLine(char *fields[SAMRecord::NUM_FIELDS],
-                      char *line
-){
+static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line) {
     char *c = line;
     char *pc = c;
     int f = 0;
@@ -74,17 +72,15 @@ static void parseLine(char *fields[SAMRecord::NUM_FIELDS],
 
 // -----------------------------------------------------------------------------
 
-SAMFile::SAMFile(const std::string& path,
-                 const Mode& mode
-)
-        : File(path, mode),
-        currentBlock(),
-        header(""),
-        line_(nullptr),
-        nrBlocksRead_(0),
-        nrMappedRecordsRead_(0),
-        nrUnmappedRecordsRead_(0),
-        startTime_(std::chrono::steady_clock::now()){
+SAMFile::SAMFile(const std::string &path, const Mode &mode)
+    : File(path, mode),
+      currentBlock(),
+      header(""),
+      line_(nullptr),
+      nrBlocksRead_(0),
+      nrMappedRecordsRead_(0),
+      nrUnmappedRecordsRead_(0),
+      startTime_(std::chrono::steady_clock::now()) {
     if (path.empty()) {
         throwErrorException("path is empty");
     }
@@ -95,8 +91,7 @@ SAMFile::SAMFile(const std::string& path,
     try {
         // 1 million chars should be enough
         line_ = std::unique_ptr<char[]>(new char[LINE_SIZE]);
-    }
-    catch (std::exception& e) {
+    } catch (std::exception &e) {
         throwErrorException(std::string("New failed: ") + e.what());
     }
 
@@ -133,31 +128,25 @@ SAMFile::~SAMFile() = default;
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFile::nrBlocksRead() const{
-    return nrBlocksRead_;
-}
+size_t SAMFile::nrBlocksRead() const { return nrBlocksRead_; }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFile::nrMappedRecordsRead() const{
-    return nrMappedRecordsRead_;
-}
+size_t SAMFile::nrMappedRecordsRead() const { return nrMappedRecordsRead_; }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFile::nrUnmappedRecordsRead() const{
-    return nrUnmappedRecordsRead_;
-}
+size_t SAMFile::nrUnmappedRecordsRead() const { return nrUnmappedRecordsRead_; }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFile::nrRecordsRead() const{
+size_t SAMFile::nrRecordsRead() const {
     return (nrMappedRecordsRead_ + nrUnmappedRecordsRead_);
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFile::readBlock(const size_t& blockSize){
+size_t SAMFile::readBlock(const size_t &blockSize) {
     if (blockSize < 1) {
         throwErrorException("blockSize must be greater than zero");
     }
@@ -205,10 +194,10 @@ size_t SAMFile::readBlock(const size_t& blockSize){
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        CALQ_LOG("RNAME changed - read only %zu record(s) "
-                                 "(%zu requested)",
-                                 currentBlock.nrRecords(),
-                                 blockSize);
+                        CALQ_LOG(
+                            "RNAME changed - read only %zu record(s) "
+                            "(%zu requested)",
+                            currentBlock.nrRecords(), blockSize);
                         break;
                     }
                 }
@@ -217,10 +206,10 @@ size_t SAMFile::readBlock(const size_t& blockSize){
                 currentBlock.nrUnmappedRecords_++;
             }
         } else {
-            CALQ_LOG("Truncated block - read only %zu record(s) "
-                     "(%zu requested) - reached EOF",
-                     currentBlock.nrRecords(),
-                     blockSize);
+            CALQ_LOG(
+                "Truncated block - read only %zu record(s) "
+                "(%zu requested) - reached EOF",
+                currentBlock.nrRecords(), blockSize);
             break;
         }
     }
@@ -232,17 +221,14 @@ size_t SAMFile::readBlock(const size_t& blockSize){
     }
 
     auto elapsedTime = std::chrono::steady_clock::now() - startTime_;
-    auto elapsedTimeS = std::chrono::duration_cast<std::chrono::seconds>(
-            elapsedTime
-    ).count();
+    auto elapsedTimeS =
+        std::chrono::duration_cast<std::chrono::seconds>(elapsedTime).count();
     double elapsedTimeM = static_cast<double>(elapsedTimeS) / 60.0;
-    double processedPercentage = (static_cast<double>(tell())
-                                  / static_cast<double>(size())) * 100.0;
+    double processedPercentage =
+        (static_cast<double>(tell()) / static_cast<double>(size())) * 100.0;
     auto remainingPercentage = 100 - processedPercentage;
     CALQ_LOG("Processed: %.2f%% (elapsed: %.2f m), remaining: %.2f%% (~%.2f m)",
-             processedPercentage,
-             elapsedTimeM,
-             remainingPercentage,
+             processedPercentage, elapsedTimeM, remainingPercentage,
              elapsedTimeM * (remainingPercentage / processedPercentage));
 
     return currentBlock.nrRecords();

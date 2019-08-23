@@ -18,12 +18,10 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-class SAMFile : public File
-{
- public:
+class SAMFile : public File {
+   public:
     explicit SAMFile(const std::string& path,
-                     const Mode& mode = Mode::MODE_READ
-    );
+                     const Mode& mode = Mode::MODE_READ);
     ~SAMFile() override;
 
     size_t nrBlocksRead() const;
@@ -35,7 +33,7 @@ class SAMFile : public File
     SAMBlock currentBlock;
     std::string header;
 
- private:
+   private:
     static const size_t LINE_SIZE = sizeof(char) * (1 * 1000000);  // 1 MB
 
     std::unique_ptr<char[]> line_;

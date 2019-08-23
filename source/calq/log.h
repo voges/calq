@@ -14,8 +14,7 @@ namespace calq {
 /**
  * Output streams for logging
  */
-struct LogConfiguration
-{
+struct LogConfiguration {
     /**
      * Output to stdout
      */

@@ -16,9 +16,8 @@ namespace calq {
 /**
  * Default exception
  */
-class Exception : public std::exception
-{
- public:
+class Exception : public std::exception {
+   public:
     /**
      * Create new exception
      */
@@ -42,9 +41,9 @@ class Exception : public std::exception
     /**
      * Get message
      */
-    const char *what() const noexcept override;
+    const char* what() const noexcept override;
 
- protected:
+   protected:
     std::string msg_;
 };
 
@@ -53,16 +52,13 @@ class Exception : public std::exception
 /**
  * Error exception
  */
-class ErrorException : public Exception
-{
- public:
+class ErrorException : public Exception {
+   public:
     /**
      * Constructor
      * @param msg
      */
-    explicit ErrorException(const std::string& msg)
-            : Exception(msg){
-    }
+    explicit ErrorException(const std::string& msg) : Exception(msg) {}
 };
 
 // -----------------------------------------------------------------------------

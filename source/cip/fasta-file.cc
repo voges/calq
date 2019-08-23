@@ -2,8 +2,8 @@
 
 // -----------------------------------------------------------------------------
 
-#include <utility>
 #include <memory>
+#include <utility>
 
 // -----------------------------------------------------------------------------
 
@@ -15,14 +15,8 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-FASTAFile::FASTAFile(const std::string& path,
-                     const Mode& mode
-)
-        : File(
-        path,
-        mode
-),
-        line_(nullptr){
+FASTAFile::FASTAFile(const std::string& path, const Mode& mode)
+    : File(path, mode), line_(nullptr) {
     if (path.empty()) {
         throwErrorException("path is empty");
     }
@@ -34,12 +28,11 @@ FASTAFile::FASTAFile(const std::string& path,
     // should be enough
     try {
         line_ = std::unique_ptr<char[]>(new char[LINE_SIZE]);
-    }
-    catch (std::exception& e) {
+    } catch (std::exception& e) {
         throwErrorException(std::string("New failed: ") + e.what());
     }
 
-// Parse the complete FASTA file
+    // Parse the complete FASTA file
     parse();
 }
 
@@ -49,7 +42,7 @@ FASTAFile::~FASTAFile() = default;
 
 // -----------------------------------------------------------------------------
 
-void FASTAFile::parse(){
+void FASTAFile::parse() {
     std::string currentHeader;
     std::string currentSequence;
 
@@ -75,21 +68,15 @@ void FASTAFile::parse(){
 
                 // Everything ok, insert header-sequence pair into our
                 // references map
-                references.insert(
-                        std::pair<std::string, std::string>(
-                                currentHeader,
-                                currentSequence
-                        )
-                );
+                references.insert(std::pair<std::string, std::string>(
+                    currentHeader, currentSequence));
             }
 
             // Store the header and trim it: do not take the leading '>' and
             // remove everything after the first space
             currentHeader = line_.get() + 1;
-            currentHeader = currentHeader.substr(
-                    0,
-                    currentHeader.find_first_of(' ')
-            );
+            currentHeader =
+                currentHeader.substr(0, currentHeader.find_first_of(' '));
 
             // Reset sequence
             currentSequence = "";
@@ -99,19 +86,14 @@ void FASTAFile::parse(){
     }
 
     references.insert(
-            std::pair<std::string, std::string>(
-                    currentHeader,
-                    currentSequence
-            )
-    );
+        std::pair<std::string, std::string>(currentHeader, currentSequence));
 }
 
 // -----------------------------------------------------------------------------
 
 std::string FASTAFile::getReferencesInRange(const std::string& header,
                                             const size_t& start,
-                                            const size_t& end
-){
+                                            const size_t& end) {
     return references.at(header).substr(start - 1, end - start);
 }
 

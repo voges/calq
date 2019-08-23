@@ -8,13 +8,8 @@ namespace calq {
 
 UniformMinMaxQuantizer::UniformMinMaxQuantizer(const int& valueMin,
                                                const int& valueMax,
-                                               const int& nrSteps
-)
-        : UniformQuantizer(
-        valueMin,
-        valueMax,
-        nrSteps
-){
+                                               const int& nrSteps)
+    : UniformQuantizer(valueMin, valueMax, nrSteps) {
     // Change the smallest and largest reconstruction values
 
     int smallestIndex = 0;

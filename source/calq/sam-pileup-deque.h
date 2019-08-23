@@ -19,11 +19,10 @@ struct EncodingRead;
 
 // -----------------------------------------------------------------------------
 
-class SAMPileupDeque
-{
+class SAMPileupDeque {
     friend class SAMRecord;
 
- public:
+   public:
     SAMPileupDeque();
     ~SAMPileupDeque();
 
@@ -45,12 +44,10 @@ class SAMPileupDeque
     void setPosMax(const uint32_t& posMax);
     void setPosMin(const uint32_t& posMin);
 
-    void add(const EncodingRead& r,
-             uint8_t qvalOffset,
-             uint8_t hqSoftClipThreshold
-    );
+    void add(const EncodingRead& r, uint8_t qvalOffset,
+             uint8_t hqSoftClipThreshold);
 
- private:
+   private:
     std::deque<SAMPileup> pileups_;
     uint32_t posMax_;
     uint32_t posMin_;

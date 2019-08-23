@@ -11,17 +11,13 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-double SoftclipSpreader::squash(double activity,
-                                double antiActivity
-) const{
+double SoftclipSpreader::squash(double activity, double antiActivity) const {
     return activity / (activity + antiActivity);
 }
 
 // -----------------------------------------------------------------------------
 
-double SoftclipSpreader::push(double score,
-                              size_t softclips
-){
+double SoftclipSpreader::push(double score, size_t softclips) {
     // Trigger spreading
     if (softclips >= MIN_HQ_SOFTCLIPS) {
         // Radius
@@ -52,29 +48,23 @@ double SoftclipSpreader::push(double score,
 
     double orig = std::min(original.push(score), 1.0);
 
-    return squashed ?
-           squash(buffer.push(ownscore), 1.0 - orig) :
-           buffer.push(ownscore);
+    return squashed ? squash(buffer.push(ownscore), 1.0 - orig)
+                    : buffer.push(ownscore);
 }
 
 // -----------------------------------------------------------------------------
 
-size_t SoftclipSpreader::getOffset() const{
-    return MAX_PROPAGATION;
-}
+size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
 
 // -----------------------------------------------------------------------------
 
-SoftclipSpreader::SoftclipSpreader(size_t max_prop,
-                                   size_t min_hq_clips,
-                                   bool isSquashed
-)
-        : buffer(max_prop, 0.0),
-        original(max_prop, 0.0),
-        MAX_PROPAGATION(max_prop),
-        MIN_HQ_SOFTCLIPS(min_hq_clips),
-        squashed(isSquashed){
-}
+SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips,
+                                   bool isSquashed)
+    : buffer(max_prop, 0.0),
+      original(max_prop, 0.0),
+      MAX_PROPAGATION(max_prop),
+      MIN_HQ_SOFTCLIPS(min_hq_clips),
+      squashed(isSquashed) {}
 
 }  // namespace calq
 

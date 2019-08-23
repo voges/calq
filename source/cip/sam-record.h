@@ -20,9 +20,8 @@ class FASTAFile;
 
 // -----------------------------------------------------------------------------
 
-class SAMRecord
-{
- public:
+class SAMRecord {
+   public:
     static const int NUM_FIELDS = 12;
 
     explicit SAMRecord(char *fields[NUM_FIELDS]);
@@ -46,10 +45,10 @@ class SAMRecord
     std::string qual;   // QUALity scores
     std::string opt;    // OPTional information
 
-    uint32_t posMin;    // 0-based leftmost mapping position
-    uint32_t posMax;    // 0-based rightmost mapping position
+    uint32_t posMin;  // 0-based leftmost mapping position
+    uint32_t posMax;  // 0-based rightmost mapping position
 
- private:
+   private:
     void check();
     bool mapped_;
 };

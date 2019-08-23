@@ -8,8 +8,8 @@
 
 #include <iomanip>
 #include <numeric>
-#include <utility>
 #include <sstream>
+#include <utility>
 
 // -----------------------------------------------------------------------------
 
@@ -22,14 +22,10 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-static int combinationsWithRepetitions(std::vector<std::string> *genoAlphabet,
+static int combinationsWithRepetitions(std::vector<std::string>* genoAlphabet,
                                        const std::vector<char>& alleleAlphabet,
-                                       int *got,
-                                       int nChosen,
-                                       int len,
-                                       int at,
-                                       int maxTypes
-){
+                                       int* got, int nChosen, int len, int at,
+                                       int maxTypes) {
     if (nChosen == len) {
         if (!got) {
             return 1;
@@ -47,15 +43,8 @@ static int combinationsWithRepetitions(std::vector<std::string> *genoAlphabet,
         if (got) {
             got[nChosen] = i;
         }
-        count += combinationsWithRepetitions(
-                genoAlphabet,
-                alleleAlphabet,
-                got,
-                nChosen + 1,
-                len,
-                i,
-                maxTypes
-        );
+        count += combinationsWithRepetitions(genoAlphabet, alleleAlphabet, got,
+                                             nChosen + 1, len, i, maxTypes);
     }
 
     return count;
@@ -63,19 +52,16 @@ static int combinationsWithRepetitions(std::vector<std::string> *genoAlphabet,
 
 // -----------------------------------------------------------------------------
 
-Genotyper::Genotyper(const int& polyploidy,
-                     const int& qualOffset,
-                     const int& nrQuantizers,
-                     const bool debug
-)
-        : alleleAlphabet_(ALLELE_ALPHABET),
-        alleleLikelihoods_(),
-        genotypeAlphabet_(),
-        genotypeLikelihoods_(),
-        nrQuantizers_(nrQuantizers),
-        polyploidy_(polyploidy),
-        qualOffset_(qualOffset),
-        DEBUG(debug){
+Genotyper::Genotyper(const int& polyploidy, const int& qualOffset,
+                     const int& nrQuantizers, const bool debug)
+    : alleleAlphabet_(ALLELE_ALPHABET),
+      alleleLikelihoods_(),
+      genotypeAlphabet_(),
+      genotypeLikelihoods_(),
+      nrQuantizers_(nrQuantizers),
+      polyploidy_(polyploidy),
+      qualOffset_(qualOffset),
+      DEBUG(debug) {
     if (nrQuantizers < 1) {
         throwErrorException("nrQuantizers must be greater than zero");
     }
@@ -96,8 +82,7 @@ Genotyper::~Genotyper() = default;
 // -----------------------------------------------------------------------------
 
 double Genotyper::computeEntropy(const std::string& seqPileup,
-                                 const std::string& qualPileup
-){
+                                 const std::string& qualPileup) {
     const size_t depth = seqPileup.length();
 
     if (depth != qualPileup.length()) {
@@ -114,14 +99,10 @@ double Genotyper::computeEntropy(const std::string& seqPileup,
     computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
 
     double entropy = std::accumulate(
-            genotypeLikelihoods_.begin(),
-            genotypeLikelihoods_.end(),
-            0.0,
-            [](const double& a, const std::pair<std::string, double>& b)
-            {
-                return a - b.second * log(b.second);
-            }
-    );
+        genotypeLikelihoods_.begin(), genotypeLikelihoods_.end(), 0.0,
+        [](const double& a, const std::pair<std::string, double>& b) {
+            return a - b.second * log(b.second);
+        });
 
     return entropy;
 }
@@ -129,8 +110,7 @@ double Genotyper::computeEntropy(const std::string& seqPileup,
 // -----------------------------------------------------------------------------
 
 int Genotyper::computeQuantizerIndex(const std::string& seqPileup,
-                                     const std::string& qualPileup
-){
+                                     const std::string& qualPileup) {
     const size_t depth = seqPileup.length();
 
     if (depth != qualPileup.length()) {
@@ -158,8 +138,8 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup,
         }
     }
 
-    double confidence = largestGenotypeLikelihood
-                        - secondLargestGenotypeLikelihood;
+    double confidence =
+        largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
 
     auto quant = static_cast<int>((1 - confidence) * (nrQuantizers_ - 1));
 
@@ -170,10 +150,8 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup,
         s << std::fixed << std::setw(6) << std::setprecision(4)
           << std::setfill('0') << 1 - confidence;
 
-        s << " " << std::fixed << std::setw(6)
-          << std::setprecision(4) << std::setfill('0')
-          << 1 - confidence << " " << quant << std::endl;
-
+        s << " " << std::fixed << std::setw(6) << std::setprecision(4)
+          << std::setfill('0') << 1 - confidence << " " << quant << std::endl;
 
         std::string line;
         while (std::getline(s, line)) {
@@ -186,7 +164,7 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup,
 
 // -----------------------------------------------------------------------------
 
-void Genotyper::initLikelihoods(){
+void Genotyper::initLikelihoods() {
     // Initialize map containing the allele likelihoods
     for (auto const& allele : alleleAlphabet_) {
         alleleLikelihoods_.insert(std::pair<char, double>(allele, 0.0));
@@ -194,23 +172,20 @@ void Genotyper::initLikelihoods(){
 
     // Initialize map containing the genotype likelihoods
     int chosen[ALLELE_ALPHABET_SIZE];
-    combinationsWithRepetitions(
-            &genotypeAlphabet_, alleleAlphabet_, chosen, 0, polyploidy_, 0,
-            static_cast<int>(ALLELE_ALPHABET_SIZE));
+    combinationsWithRepetitions(&genotypeAlphabet_, alleleAlphabet_, chosen, 0,
+                                polyploidy_, 0,
+                                static_cast<int>(ALLELE_ALPHABET_SIZE));
 
     // Initialize genotype alphabet
     for (auto& genotype : genotypeAlphabet_) {
         genotypeLikelihoods_.insert(
-                std::pair<std::string, double>(
-                        genotype,
-                        0.0
-                ));
+            std::pair<std::string, double>(genotype, 0.0));
     }
 }
 
 // -----------------------------------------------------------------------------
 
-void Genotyper::resetLikelihoods(){
+void Genotyper::resetLikelihoods() {
     for (auto& genotypeLikelihood : genotypeLikelihoods_) {
         genotypeLikelihood.second = 0.0;
     }
@@ -224,13 +199,11 @@ void Genotyper::resetLikelihoods(){
 
 void Genotyper::computeGenotypeLikelihoods(const std::string& seqPileup,
                                            const std::string& qualPileup,
-                                           const size_t& depth
-){
+                                           const size_t& depth) {
     resetLikelihoods();
 
-    auto *tempGenotypeLikelihoods = static_cast<double *>(calloc(
-            genotypeAlphabet_.size(),
-            sizeof(double)));
+    auto* tempGenotypeLikelihoods =
+        static_cast<double*>(calloc(genotypeAlphabet_.size(), sizeof(double)));
     int itr = 0;
     for (size_t d = 0; d < depth; d++) {
         auto y = static_cast<char>(seqPileup[d]);
@@ -270,10 +243,8 @@ void Genotyper::computeGenotypeLikelihoods(const std::string& seqPileup,
 
 // -----------------------------------------------------------------------------
 
-const std::map<std::string, double>&
-Genotyper::getGenotypelikelihoods(const std::string& seqPileup,
-                                  const std::string& qualPileup
-){
+const std::map<std::string, double>& Genotyper::getGenotypelikelihoods(
+    const std::string& seqPileup, const std::string& qualPileup) {
     computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
     return genotypeLikelihoods_;
 }

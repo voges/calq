@@ -12,52 +12,40 @@
 
 #include "calq/exceptions.h"
 
-
 // -----------------------------------------------------------------------------
 
 namespace cip {
 
 // -----------------------------------------------------------------------------
 
-inline void throwErrorException(const std::string& msg){
+inline void throwErrorException(const std::string& msg) {
     std::cout.flush();
     throw calq::ErrorException(msg);
 }
 
 // -----------------------------------------------------------------------------
 
-class ErrorExceptionReporter
-{
+class ErrorExceptionReporter {
     // -------------------------------------------------------------------------
 
- public:
-    ErrorExceptionReporter(std::string file,
-                           std::string function,
-                           const int& line
-    )
-            : file_(std::move(file)),
-            function_(std::move(function)),
-            line_(line){
-    }
+   public:
+    ErrorExceptionReporter(std::string file, std::string function,
+                           const int& line)
+        : file_(std::move(file)), function_(std::move(function)), line_(line) {}
 
     // -------------------------------------------------------------------------
 
-    void operator()(const std::string& msg){
+    void operator()(const std::string& msg) {
         // std::cerr << file << ":" << function << ":" << line << ": ";
-        std::string tmp = file_.substr(file_.find_last_of("/\\") + 1) +
-                          ":" +
-                          function_ +
-                          ":" +
-                          std::to_string(line_) +
-                          ": " +
-                          msg;
+        std::string tmp = file_.substr(file_.find_last_of("/\\") + 1) + ":" +
+                          function_ + ":" + std::to_string(line_) + ": " + msg;
         // Can use the original name here, as it is still defined
         throwErrorException(tmp);
     }
 
     // -------------------------------------------------------------------------
 
- private:
+   private:
     std::string file_;
     std::string function_;
     int line_;
@@ -73,10 +61,8 @@ class ErrorExceptionReporter
 // creates a stack temporary instance of ErrorExceptionReporter initialized
 // with the caller.
 #undef throwErrorException
-#define throwErrorException cip::ErrorExceptionReporter(__FILE__, \
-                                                            __FUNCTION__, \
-                                                            __LINE__ \
-)
+#define throwErrorException \
+    cip::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
 // -----------------------------------------------------------------------------
 

@@ -16,13 +16,9 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-class ProgramOptions
-{
- public:
-    ProgramOptions(
-            int argc,
-            char *argv[]
-    );
+class ProgramOptions {
+   public:
+    ProgramOptions(int argc, char *argv[]);
 
     ~ProgramOptions();
 
@@ -45,17 +41,13 @@ class ProgramOptions
     bool decompress;
     std::string sideInformationFilePath;
 
-
     size_t quantizationMin;
     size_t quantizationMax;
     size_t polyploidy;
     size_t hqSoftClipThreshold;
 
- private:
-    void processCommandLine(
-            int argc,
-            char *argv[]
-    );
+   private:
+    void processCommandLine(int argc, char *argv[]);
 
     void validateV1();
     void validateV2();

@@ -12,9 +12,8 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-class SAMPileup
-{
- public:
+class SAMPileup {
+   public:
     SAMPileup();
     ~SAMPileup();
 

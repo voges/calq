@@ -19,9 +19,8 @@
 namespace calq {
 
 // Detects areas with high-quality-softclips and spreads their activity score
-class SoftclipSpreader
-{
- private:
+class SoftclipSpreader {
+   private:
     // Memory in order to spread to future positions
     std::vector<std::pair<size_t, double>> forwardSpread;
 
@@ -40,25 +39,18 @@ class SoftclipSpreader
 
     // Squashes activity score between 0 and 1 using the unsquashed activity
     // score and an "anti score" measuring probability of no variant occurring
-    double squash(double activity,
-                  double antiActivity
-    ) const;
+    double squash(double activity, double antiActivity) const;
 
- public:
+   public:
     // Push an activity score and average number of softclips at that position
     // into buffer. Returns the oldest activity score which can't be influenced
     // by new clips anymore.
-    double push(double score,
-                size_t softclips
-    );
+    double push(double score, size_t softclips);
 
     // Delay between push of score and processed output
     size_t getOffset() const;
 
-    SoftclipSpreader(size_t max_prop,
-                     size_t min_hq_clips,
-                     bool isSquashed
-    );
+    SoftclipSpreader(size_t max_prop, size_t min_hq_clips, bool isSquashed);
 };
 
 // -----------------------------------------------------------------------------

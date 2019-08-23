@@ -15,15 +15,14 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-class SAMBlock
-{
+class SAMBlock {
     // -------------------------------------------------------------------------
 
     friend class SAMFile;
 
     // -------------------------------------------------------------------------
 
- public:
+   public:
     SAMBlock();
     ~SAMBlock();
 
@@ -34,7 +33,7 @@ class SAMBlock
 
     std::deque<SAMRecord> records;
 
- private:
+   private:
     size_t nrMappedRecords_;
     size_t nrUnmappedRecords_;
 };

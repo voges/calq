@@ -8,8 +8,8 @@
 // -----------------------------------------------------------------------------
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 // -----------------------------------------------------------------------------
 
@@ -26,32 +26,29 @@ class FASTAFile;
 
 // -----------------------------------------------------------------------------
 
-struct UnmappedInformation
-{
+struct UnmappedInformation {
     std::vector<bool> mappedFlags;
     std::vector<std::string> unmappedQualityScores;
 };
 
 // -----------------------------------------------------------------------------
 
-class SAMFileHandler
-{
- public:
+class SAMFileHandler {
+   public:
     SAMFileHandler(const std::string& inputFileName,
-                   const std::string& referenceFileName
-    );
+                   const std::string& referenceFileName);
     ~SAMFileHandler();
 
     size_t readBlock(const size_t& blocksize);
-    void getMappedBlock(calq::EncodingBlock *var);
-    void getUnmappedBlock(UnmappedInformation *var);
-    void getSideInformation(calq::SideInformation *var);
+    void getMappedBlock(calq::EncodingBlock* var);
+    void getUnmappedBlock(UnmappedInformation* var);
+    void getSideInformation(calq::SideInformation* var);
     size_t nrBlocksRead() const;
     size_t nrMappedRecordsRead() const;
     size_t nrUnmappedRecordsRead() const;
     size_t nrRecordsRead() const;
 
- private:
+   private:
     std::unique_ptr<SAMFile> samFile_;
     std::unique_ptr<FASTAFile> fastaFile;
 
