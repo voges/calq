@@ -6,24 +6,24 @@ Coverage-adaptive lossy quality value compression
 
 ---
 
-## Quick start on Linux
+## Quick start
 
-Clone the CALQ repository:
+Clone the repository:
 
     git clone https://github.com/voges/calq.git
 
-Build the CALQ executable using CMake:
+Build all libraries and executables using CMake:
 
     mkdir build
     cd build
     cmake ..
     make
 
-This will generate the CALQ application (named ``cip``) at ``cmake-build/bin/cip``.
+This will generate the CALQ encoder/decoder (named ``cip``) at ``build/bin/cip``.
 
 ## Usage examples
 
-A list of the available command line options can be obtained via ``cip --help`` or ``cip -h``.
+A list of the available command line options can be obtained via ``cip --help``.
 
 ### Compression
 
@@ -37,13 +37,13 @@ The compressed quality values are written to the file ``file.sam.cip``.
 
 ### Decompression
 
-To perform the decompression of the file ``file.sam.cip``, the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The switch ``-d`` invokes the decoder.
+To perform the decompression of the file ``file.sam.cip`` the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The switch ``-d`` invokes the decoder.
 
     cip -d -s file.sam file.sam.cip
 
 The reconstructed quality values are written to the file ``file.sam.cip.qual``.
 
-Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py``. This and other supplementary scripts can be found at https://github.com/voges/htstools.
+Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` which is located in the ``scripts`` folder.
 
 ## Continuous integration
 
