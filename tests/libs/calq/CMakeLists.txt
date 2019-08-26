@@ -1,8 +1,10 @@
 project("calq-tests")
 
 set(source_files
+        circular-buffer-test.cc
         lloyd-max-quantizer-test.cc
         main.cc
+        softclip-spreader-test.cc
 )
 
 add_executable(calq-tests ${source_files})

@@ -38,7 +38,7 @@ class ProgramOptions {
 
     void validateV1();
     void validateV2();
-    void validateCompress();
+    static void validateCompress();
     void validateDecompress();
     void validateCommon();
 };

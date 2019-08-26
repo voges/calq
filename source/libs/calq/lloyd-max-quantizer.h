@@ -11,9 +11,9 @@
 
 // -----------------------------------------------------------------------------
 
-#include "cip/exceptions.h"
-#include "calq/probability-distribution.h"
-#include "calq/quantizer.h"
+#include "exceptions.h"
+#include "probability-distribution.h"
+#include "quantizer.h"
 
 // -----------------------------------------------------------------------------
 

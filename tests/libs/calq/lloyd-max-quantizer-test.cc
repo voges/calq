@@ -1,9 +1,9 @@
-// #include <iostream>
+#include <iostream>
 //
 // #include "filter_buffer.h"
 // #include "softclip_spreader.h"
 // #include "haplotyper.h"
-// #include "lloyd_max_quantizer.h"
+#include "calq/lloyd-max-quantizer.h"
 //
 // namespace calq {
 //

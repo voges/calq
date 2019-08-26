@@ -6,7 +6,7 @@ set(source_files
         exceptions.cc
         # fasta-file.cc
         # file.cc
-        # helpers.cc
+        helpers.cc
         program-options.cc
         # sam-block.cc
         # sam-file-handler.cc

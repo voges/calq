@@ -1,6 +1,6 @@
-#include "calq/quantizer.h"
+#include "quantizer.h"
 #include <utility>
-#include "error-exception-reporter.h"
+#include "errors.h"
 
 namespace calq {
 

@@ -1,7 +1,7 @@
 #include "program-options.h"
 
 #include "errors.h"
-// #include "helpers.h"
+#include "helpers.h"
 // #include "logging.h"
 #include <cli11/cli11.h>
 
@@ -24,7 +24,7 @@ ProgramOptions::ProgramOptions(int argc, char *argv[])
     processCommandLine(argc, argv);
 }
 
-// void ProgramOptions::validateCompress() {
+void ProgramOptions::validateCompress() {
 //     if (cip::fileNameExtension(inputFilePath) != std::string("sam")) {
 //         throwErrorException("Input file name extension must be 'sam'");
 //     }
@@ -114,16 +114,7 @@ ProgramOptions::ProgramOptions(int argc, char *argv[])
 //     if (debugStreams) {
 //         CALQ_LOG("Outputting full streams as debug information");
 //     }
-// }
-//
-// // -----------------------------------------------------------------------------
-//
-// void ProgramOptions::validateV1() {
-//     options.version = calq::Version::V1;
-//     CALQ_LOG("Compressing using CALQ version 1");
-// }
-//
-// // -----------------------------------------------------------------------------
+}
 //
 // void ProgramOptions::validateV2() {
 //     options.version = calq::Version::V2;
@@ -174,102 +165,76 @@ ProgramOptions::ProgramOptions(int argc, char *argv[])
 //             "be 'fa' or 'fasta'");
 //     }
 // }
-//
-// // -----------------------------------------------------------------------------
-//
-// void ProgramOptions::validateDecompress() {
-//     CALQ_LOG("Decompressing");
-//
-//     if (cip::fileNameExtension(inputFilePath) != std::string("cq")) {
-//         CALQ_LOG("Warning: Input file name extension is not 'cq'");
-//     }
-//
-//     CALQ_LOG("Side information file name: %s", sideInformationFilePath.c_str());
-//     if (sideInformationFilePath.empty()) {
-//         throwErrorException("No side information file name provided");
-//     }
-//     if (cip::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
-//         throwErrorException(
-//             "Side information file name "
-//             "extension must be 'sam'");
-//     }
-//     if (!cip::fileExists(sideInformationFilePath)) {
-//         throwErrorException("Cannot access side information file");
-//     }
-// }
-//
-// // -----------------------------------------------------------------------------
-//
-// void ProgramOptions::validateCommon() {
-//     this->options.squash = !this->options.squash;
-//     if (this->quantizationMin > 255) {
-//         throwErrorException("Option quantizationMin too big");
-//     }
-//     this->options.quantizationMin = uint8_t(this->quantizationMin);
-//
-//     if (this->quantizationMax > 255) {
-//         throwErrorException("Option quantizationMax too big");
-//     }
-//     this->options.quantizationMax = uint8_t(this->quantizationMax);
-//
-//     if (this->polyploidy > 255) {
-//         throwErrorException("Option polyploidy too big");
-//     }
-//     this->options.polyploidy = uint8_t(this->polyploidy);
-//
-//     if (this->hqSoftClipThreshold > 255) {
-//         throwErrorException("Option hqSoftClipThreshold too big");
-//     }
-//     this->options.hqSoftClipThreshold = uint8_t(this->hqSoftClipThreshold);
-//
-//     // inputFileName
-//     CALQ_LOG("Input file name: %s", inputFilePath.c_str());
-//     if (inputFilePath.empty()) {
-//         throwErrorException("No input file name provided");
-//     }
-//
-//     if (!cip::fileExists(inputFilePath)) {
-//         throwErrorException("Cannot access input file");
-//     }
-//
-//     CALQ_LOG("Output file name: %s", outputFilePath.c_str());
-//     if (cip::fileExists(outputFilePath)) {
-//         if (!force) {
-//             throwErrorException(
-//                 "Not overwriting output file "
-//                 "(use option 'f' to force overwriting)");
-//         } else {
-//             CALQ_LOG("Force switch set - overwriting output file(s)");
-//         }
-//     }
-// }
 
-// -----------------------------------------------------------------------------
+void ProgramOptions::validateDecompress() {
+    if (cip::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
+        throwErrorException("Side information file name extension must be '.sam'");
+    }
+    if (!fileExists(sideInformationFilePath)) {
+        throwErrorException("Cannot access side information file");
+    }
+}
 
-// void ProgramOptions::validate() {
-//     validateCommon();
-//
-//     if (decompress) {
-//         validateDecompress();
-//     } else {
-//         if (versionStr == "v1") {
-//             validateV1();
-//         } else if (versionStr == "v2") {
-//             validateV2();
-//         } else {
-//             throwErrorException("Unknown CALQ version");
-//         }
-//         validateCompress();
-//     }
-// }
+void ProgramOptions::validateCommon() {
+    //     this->options.squash = !this->options.squash;
+    //     if (this->quantizationMin > 255) {
+    //         throwErrorException("Option quantizationMin too big");
+    //     }
+    //     this->options.quantizationMin = uint8_t(this->quantizationMin);
+    //
+    //     if (this->quantizationMax > 255) {
+    //         throwErrorException("Option quantizationMax too big");
+    //     }
+    //     this->options.quantizationMax = uint8_t(this->quantizationMax);
+    //
+    //     if (this->polyploidy > 255) {
+    //         throwErrorException("Option polyploidy too big");
+    //     }
+    //     this->options.polyploidy = uint8_t(this->polyploidy);
+    //
+    //     if (this->hqSoftClipThreshold > 255) {
+    //         throwErrorException("Option hqSoftClipThreshold too big");
+    //     }
+    //     this->options.hqSoftClipThreshold = uint8_t(this->hqSoftClipThreshold);
+
+    // force
+    if (force) {
+        std::cout << "Force switch set - overwriting output file(s)" << std::endl;
+    }
+
+    // inputFilePath
+    if (inputFilePath.empty()) {
+        throwErrorException("No input file name provided");
+    }
+
+    if (!fileExists(inputFilePath)) {
+        throwErrorException("Cannot access input file");
+    }
+
+    // outputFilePath
+    if (fileExists(outputFilePath) && !force) {
+        throwErrorException("Not overwriting output file (use option '-f' to force overwriting)");
+    }
+}
+
+void ProgramOptions::validate() {
+    validateCommon();
+
+    if (decompress) {
+        validateDecompress();
+    } else {
+        validateCompress();
+    }
+}
 
 // -----------------------------------------------------------------------------
 
 void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     CLI::App app("CALQ");
 
-    app.add_option("input-file", inputFilePath, "Input SAM file");
-
+    app.add_flag("-f,--force", force, "Force overwriting of output file(s)");
+    app.add_option("-i,--input-file", inputFilePath, "Input file")->required();
+    app.add_option("-o,--output-file", outputFilePath, "Output file")->required();
 
     // options.add_options()("help,h", "[D, V1, V2] Print help")(
     //     "force,f", po::bool_switch(&(this->force))->default_value(false),
@@ -352,6 +317,8 @@ void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     } catch (const CLI::ParseError &e) {
         throwErrorException("Command line parsing failed: " + std::to_string(app.exit(e)));
     }
+
+    validate();
 }
 
 }  // namespace cip
