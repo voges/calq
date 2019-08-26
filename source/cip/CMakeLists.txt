@@ -14,7 +14,7 @@ set(source_files
         sam-file-handler.cc
         sam-file.cc
         sam-record.cc
-        )
+)
 
 add_executable(cip ${source_files})
 
