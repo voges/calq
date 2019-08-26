@@ -1,20 +1,9 @@
 #include "sam-file.h"
-
-// -----------------------------------------------------------------------------
-
 #include <cstring>
-
-// -----------------------------------------------------------------------------
-
-#include "logging.h"
-
-// -----------------------------------------------------------------------------
 
 namespace cip {
 
-// -----------------------------------------------------------------------------
-
-static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line) {
+static void parseLine(char *fields[SamRecord::NUM_FIELDS], char *line) {
     char *c = line;
     char *pc = c;
     int f = 0;
@@ -70,8 +59,6 @@ static void parseLine(char *fields[SAMRecord::NUM_FIELDS], char *line) {
     // if (f == 11) { fields[f] = pc; }
 }
 
-// -----------------------------------------------------------------------------
-
 SAMFile::SAMFile(const std::string &path, const Mode &mode)
     : File(path, mode),
       currentBlock(),
@@ -122,29 +109,17 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
     }
 }
 
-// -----------------------------------------------------------------------------
-
 SAMFile::~SAMFile() = default;
-
-// -----------------------------------------------------------------------------
 
 size_t SAMFile::nrBlocksRead() const { return nrBlocksRead_; }
 
-// -----------------------------------------------------------------------------
-
 size_t SAMFile::nrMappedRecordsRead() const { return nrMappedRecordsRead_; }
 
-// -----------------------------------------------------------------------------
-
 size_t SAMFile::nrUnmappedRecordsRead() const { return nrUnmappedRecordsRead_; }
-
-// -----------------------------------------------------------------------------
 
 size_t SAMFile::nrRecordsRead() const {
     return (nrMappedRecordsRead_ + nrUnmappedRecordsRead_);
 }
-
-// -----------------------------------------------------------------------------
 
 size_t SAMFile::readBlock(const size_t &blockSize) {
     if (blockSize < 1) {
@@ -166,9 +141,9 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
             }
 
             // Parse line and construct samRecord
-            char *fields[SAMRecord::NUM_FIELDS];
+            char *fields[SamRecord::NUM_FIELDS];
             parseLine(fields, line_.get());
-            SAMRecord samRecord(fields);
+            SamRecord samRecord(fields);
 
             if (samRecord.isMapped()) {
                 if (rnamePrev.empty()) {
@@ -234,9 +209,4 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
     return currentBlock.nrRecords();
 }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace cip
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

@@ -1,22 +1,14 @@
 #ifndef CALQAPP_SAM_FILE_H_
 #define CALQAPP_SAM_FILE_H_
 
-// -----------------------------------------------------------------------------
-
 #include <chrono>
 #include <memory>
 #include <string>
 
-// -----------------------------------------------------------------------------
-
 #include "file.h"
 #include "sam-block.h"
 
-// -----------------------------------------------------------------------------
-
 namespace cip {
-
-// -----------------------------------------------------------------------------
 
 class SAMFile : public File {
    public:
@@ -30,7 +22,7 @@ class SAMFile : public File {
     size_t nrRecordsRead() const;
     size_t readBlock(const size_t& blockSize);
 
-    SAMBlock currentBlock;
+    SamBlock currentBlock;
     std::string header;
 
    private:
@@ -44,13 +36,6 @@ class SAMFile : public File {
     std::chrono::steady_clock::time_point startTime_;
 };
 
-// -----------------------------------------------------------------------------
-
 }  // namespace cip
 
-// -----------------------------------------------------------------------------
-
 #endif  // CALQAPP_SAM_FILE_H_
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

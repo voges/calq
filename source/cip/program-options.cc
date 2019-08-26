@@ -2,7 +2,7 @@
 
 // -----------------------------------------------------------------------------
 
-#include "error-reporter.h"
+#include "error.h"
 #include "helpers.h"
 #include "logging.h"
 

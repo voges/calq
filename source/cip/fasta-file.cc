@@ -1,22 +1,11 @@
+#include "fasta-file.h"
 #include <cstring>
-
-// -----------------------------------------------------------------------------
-
 #include <memory>
 #include <utility>
 
-// -----------------------------------------------------------------------------
-
-#include "fasta-file.h"
-
-// -----------------------------------------------------------------------------
-
 namespace cip {
 
-// -----------------------------------------------------------------------------
-
-FASTAFile::FASTAFile(const std::string& path, const Mode& mode)
-    : File(path, mode), line_(nullptr) {
+FASTAFile::FASTAFile(const std::string& path, const Mode& mode) : File(path, mode), line_(nullptr) {
     if (path.empty()) {
         throwErrorException("path is empty");
     }
@@ -36,11 +25,7 @@ FASTAFile::FASTAFile(const std::string& path, const Mode& mode)
     parse();
 }
 
-// -----------------------------------------------------------------------------
-
 FASTAFile::~FASTAFile() = default;
-
-// -----------------------------------------------------------------------------
 
 void FASTAFile::parse() {
     std::string currentHeader;
@@ -68,15 +53,13 @@ void FASTAFile::parse() {
 
                 // Everything ok, insert header-sequence pair into our
                 // references map
-                references.insert(std::pair<std::string, std::string>(
-                    currentHeader, currentSequence));
+                references.insert(std::pair<std::string, std::string>(currentHeader, currentSequence));
             }
 
             // Store the header and trim it: do not take the leading '>' and
             // remove everything after the first space
             currentHeader = line_.get() + 1;
-            currentHeader =
-                currentHeader.substr(0, currentHeader.find_first_of(' '));
+            currentHeader = currentHeader.substr(0, currentHeader.find_first_of(' '));
 
             // Reset sequence
             currentSequence = "";
@@ -85,21 +68,11 @@ void FASTAFile::parse() {
         }
     }
 
-    references.insert(
-        std::pair<std::string, std::string>(currentHeader, currentSequence));
+    references.insert(std::pair<std::string, std::string>(currentHeader, currentSequence));
 }
 
-// -----------------------------------------------------------------------------
-
-std::string FASTAFile::getReferencesInRange(const std::string& header,
-                                            const size_t& start,
-                                            const size_t& end) {
+std::string FASTAFile::getReferencesInRange(const std::string& header, const size_t& start, const size_t& end) {
     return references.at(header).substr(start - 1, end - start);
 }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace cip
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
