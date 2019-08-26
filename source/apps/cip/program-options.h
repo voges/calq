@@ -1,30 +1,17 @@
-#ifndef CALQAPP_PROGRAM_OPTIONS_H_
-#define CALQAPP_PROGRAM_OPTIONS_H_
-
-// -----------------------------------------------------------------------------
+#ifndef CIP_PROGRAM_OPTIONS_H_
+#define CIP_PROGRAM_OPTIONS_H_
 
 #include <string>
-#include <vector>
-
-// -----------------------------------------------------------------------------
-
-#include "calq/calq-codec.h"
-
-// -----------------------------------------------------------------------------
 
 namespace cip {
-
-// -----------------------------------------------------------------------------
 
 class ProgramOptions {
    public:
     ProgramOptions(int argc, char *argv[]);
 
-    ~ProgramOptions();
-
     void validate();
 
-    calq::EncodingOptions options;
+    // cip::EncodingOptions options;
 
     bool force;
     bool debugStreams;
@@ -62,7 +49,7 @@ class ProgramOptions {
 
 // -----------------------------------------------------------------------------
 
-#endif  // CALQAPP_PROGRAM_OPTIONS_H_
+#endif  // CIP_PROGRAM_OPTIONS_H_
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

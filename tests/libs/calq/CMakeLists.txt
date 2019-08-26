@@ -1,6 +1,7 @@
 project("calq-tests")
 
 set(source_files
+        lloyd-max-quantizer-test.cc
         main.cc
 )
 

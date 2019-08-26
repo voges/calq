@@ -1,2 +1,2 @@
-add_subdirectory(calq)
-add_subdirectory(cip)
+add_subdirectory(apps)
+add_subdirectory(libs)

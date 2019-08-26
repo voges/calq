@@ -12,7 +12,7 @@ namespace cip {
 
 inline void throwErrorException(const std::string& msg) {
     std::cout.flush();
-    throw calq::ErrorException(msg);
+    throw cip::ErrorException(msg);
 }
 
 class ErrorExceptionReporter {
