@@ -6,9 +6,6 @@
 namespace cip {
 
 FASTAFile::FASTAFile(const std::string& path, const Mode& mode) : File(path, mode), line_(nullptr) {
-    if (path.empty()) {
-        throwErrorException("path is empty");
-    }
     if (mode != FASTAFile::Mode::MODE_READ) {
         throwErrorException("Currently only MODE_READ supported");
     }
