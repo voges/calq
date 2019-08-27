@@ -1,7 +1,7 @@
 #include "calq/lloyd-max-quantizer.h"
 #include <gtest/gtest.h>
 
-TEST(LloydMaxQuantizerTest, UniformDistribution) {
+TEST(LloydMaxQuantizerTest, UniformDistribution) { // NOLINT(cert-err58-cpp)
     calq::LloydMaxQuantizer q(10);
     calq::ProbabilityDistribution pdf(0, 99);
 
@@ -17,7 +17,7 @@ TEST(LloydMaxQuantizerTest, UniformDistribution) {
     EXPECT_EQ(q.valueToIndex(0), 0);
 }
 
-TEST(LloydMaxQuantizerTest, NonUniformDistribution) {
+TEST(LloydMaxQuantizerTest, NonUniformDistribution) { // NOLINT(cert-err58-cpp)
     calq::LloydMaxQuantizer q(10);
     calq::ProbabilityDistribution pdf(1, 100);
 

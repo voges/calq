@@ -1,19 +1,11 @@
 #include "haplotyper.h"
-
-// -----------------------------------------------------------------------------
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <sstream>
-
-// -----------------------------------------------------------------------------
-
 #include "calq-codec.h"
-#include "error-exception-reporter.h"
-
-// -----------------------------------------------------------------------------
+#include "errors.h"
 
 namespace calq {
 

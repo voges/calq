@@ -1,12 +1,6 @@
-#include "calq/qual-decoder.h"
-
-// -----------------------------------------------------------------------------
-
-#include "calq/calq-codec.h"
-#include "calq/error-exception-reporter.h"
-#include "calq/qual-encoder.h"
-
-// -----------------------------------------------------------------------------
+#include "qual-decoder.h"
+#include "calq-codec.h"
+#include "errors.h"
 
 namespace calq {
 

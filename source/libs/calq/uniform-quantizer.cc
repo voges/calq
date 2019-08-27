@@ -1,41 +1,39 @@
 #include "uniform-quantizer.h"
-
 #include <cmath>
 #include <queue>
 #include <utility>
-
-#include "error-exception-reporter.h"
+#include "errors.h"
 
 namespace calq {
 
-UniformQuantizer::UniformQuantizer(const int& valueMin, const int& valueMax, const int& numSteps) : Quantizer() {
-    if ((valueMin > valueMax) || (nrSteps <= 1)) {
+UniformQuantizer::UniformQuantizer(const int minValue, const int maxValue, const int numSteps) : Quantizer() {
+    if (minValue > maxValue || numSteps <= 1) {
         throwErrorException("Error in quantizer initialization");
     }
 
     // Compute the step size
     auto stepSize =
-        static_cast<int>(floor((static_cast<double>(valueMax - valueMin)) / (static_cast<double>(nrSteps))));
+        static_cast<int>(floor((static_cast<double>(maxValue - minValue)) / (static_cast<double>(numSteps))));
 
     // Compute the borders and the representative values
     std::queue<int> borders;
     std::queue<int> reconstructionValues;
-    int newBorder = valueMin;
-    borders.push(valueMin);
-    reconstructionValues.push(valueMin + static_cast<int>(round(static_cast<double>(stepSize) / 2.0)));
-    for (int i = 0; i < (nrSteps - 1); i++) {
+    int newBorder = minValue;
+    borders.push(minValue);
+    reconstructionValues.push(minValue + static_cast<int>(round(static_cast<double>(stepSize) / 2.0)));
+    for (int i = 0; i < (numSteps - 1); i++) {
         newBorder += stepSize;
         borders.push(newBorder);
         reconstructionValues.push(newBorder + static_cast<int>(round((static_cast<double>(stepSize) / 2.0))));
     }
-    borders.push(valueMax);
+    borders.push(maxValue);
 
     // Fill the quantization table
     borders.pop();
     int currentIndex = 0;
     int currentReconstructionValue = reconstructionValues.front();
     int currentBorder = borders.front();
-    for (int value = valueMin; value <= valueMax; ++value) {
+    for (int value = minValue; value <= maxValue; ++value) {
         if (value > currentBorder) {
             currentIndex++;
             reconstructionValues.pop();

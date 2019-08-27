@@ -1,46 +1,33 @@
 #include "uniform-min-max-quantizer.h"
 
-// -----------------------------------------------------------------------------
-
 namespace calq {
 
-// -----------------------------------------------------------------------------
-
-UniformMinMaxQuantizer::UniformMinMaxQuantizer(const int& valueMin, const int& valueMax, const int& nrSteps)
-    : UniformQuantizer(valueMin, valueMax, nrSteps) {
+UniformMinMaxQuantizer::UniformMinMaxQuantizer(const int minValue, const int maxValue, const int numSteps)
+    : UniformQuantizer(minValue, maxValue, numSteps) {
     // Change the smallest and largest reconstruction values
 
     int smallestIndex = 0;
-    int largestIndex = nrSteps - 1;
+    int largestIndex = numSteps - 1;
 
     for (auto& lutElem : lut_) {
         int currentIndex = lutElem.second.first;
         if (currentIndex == smallestIndex) {
-            lutElem.second.second = valueMin;
+            lutElem.second.second = minValue;
         }
         if (currentIndex == largestIndex) {
-            lutElem.second.second = valueMax;
+            lutElem.second.second = maxValue;
         }
     }
 
     for (auto& inverseLutElem : inverseLut_) {
         int currentIndex = inverseLutElem.first;
         if (currentIndex == smallestIndex) {
-            inverseLutElem.second = valueMin;
+            inverseLutElem.second = minValue;
         }
         if (currentIndex == largestIndex) {
-            inverseLutElem.second = valueMax;
+            inverseLutElem.second = maxValue;
         }
     }
 }
 
-// -----------------------------------------------------------------------------
-
-UniformMinMaxQuantizer::~UniformMinMaxQuantizer() = default;
-
-// -----------------------------------------------------------------------------
-
 }  // namespace calq
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

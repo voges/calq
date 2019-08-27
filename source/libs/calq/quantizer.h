@@ -12,8 +12,8 @@ class Quantizer {
     explicit Quantizer(std::map<int, int> inverseLut);
     virtual ~Quantizer();
 
-    int valueToIndex(const int& value) const;
-    int indexToReconstructionValue(const int& index) const;
+    int valueToIndex(int value) const;
+    int indexToReconstructionValue(int index) const;
 
     const std::map<int, int>& inverseLut() const;
 

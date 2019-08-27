@@ -10,14 +10,14 @@ Quantizer::Quantizer(std::map<int, int> inverseLut) : lut_(), inverseLut_(std::m
 
 Quantizer::~Quantizer() = default;
 
-int Quantizer::valueToIndex(const int& value) const {
+int Quantizer::valueToIndex(const int value) const {
     if (lut_.find(value) == lut_.end()) {
         throwErrorException("Value out of range");
     }
     return lut_.at(value).first;
 }
 
-int Quantizer::indexToReconstructionValue(const int& index) const {
+int Quantizer::indexToReconstructionValue(const int index) const {
     if (inverseLut_.find(index) == inverseLut_.end()) {
         throwErrorException("Index not found");
     }

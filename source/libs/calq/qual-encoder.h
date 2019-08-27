@@ -1,22 +1,15 @@
 #ifndef CALQ_QUAL_ENCODER_H_
 #define CALQ_QUAL_ENCODER_H_
 
-// -----------------------------------------------------------------------------
-
 #include <chrono>
 #include <deque>
 #include <map>
 #include <string>
 #include <vector>
-
-// -----------------------------------------------------------------------------
-
 #include "genotyper.h"
 #include "haplotyper.h"
 #include "quantizer.h"
-#include "sam-pileup-deque.h"
-
-// -----------------------------------------------------------------------------
+#include "sam-pileup.h"
 
 namespace calq {
 
@@ -27,20 +20,13 @@ struct DecodingBlock;
 enum struct Version;
 // -----------------------------------------------------------------------------
 
-struct EncodingRead {
-    uint32_t posMin;
-    uint32_t posMax;
-    std::string qvalues;
-    std::string cigar;
-    std::string sequence;
-    std::string reference;
-};
+
 
 // -----------------------------------------------------------------------------
 
 class QualEncoder {
    public:
-    explicit QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* out);
+    explicit QualEncoder(const EncodingOptions& options, std::map<int, Quantizer>  quant, DecodingBlock* out);
     ~QualEncoder();
     void addMappedRecordToBlock(const EncodingRead& samRecord);
     void finishBlock();

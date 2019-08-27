@@ -1,23 +1,13 @@
 #include "qual-encoder.h"
-
-// -----------------------------------------------------------------------------
-
 #include <algorithm>
-#include <fstream>
 #include <iostream>
-
-// -----------------------------------------------------------------------------
-
+#include <utility>
 #include "calq-codec.h"
-#include "error-exception-reporter.h"
-
-// -----------------------------------------------------------------------------
+#include "errors.h"
 
 namespace calq {
 
-// -----------------------------------------------------------------------------
-
-QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* o)
+QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer>  quant, DecodingBlock* o)
     : nrMappedRecords_(0),
       NR_QUANTIZERS(options.quantizationMax - options.quantizationMin + 1),
 
@@ -34,18 +24,12 @@ QualEncoder::QualEncoder(const EncodingOptions& options, const std::map<int, Qua
 
       posCounter(0),
       hqSoftClipThreshold(options.hqSoftClipThreshold),
-      quantizers_(quant),
+      quantizers_(std::move(quant)),
 
       samRecordDeque_(),
       debugOut(options.debugPileup),
 
       version_(options.version) {}
-
-// -----------------------------------------------------------------------------
-
-QualEncoder::~QualEncoder() = default;
-
-// -----------------------------------------------------------------------------
 
 void QualEncoder::addMappedRecordToBlock(const EncodingRead& r) {
     if (nrMappedRecords() == 0) {
@@ -77,7 +61,7 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r) {
     if (version_ == Version::V2) {
         while (samPileupDeque_.posMin() < r.posMin) {
             auto k = uint8_t(haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual,
-                                              samPileupDeque_.front().hq_softcounter, samPileupDeque_.front().ref));
+                                              samPileupDeque_.front().hqSoftclipCnt, samPileupDeque_.front().ref));
             ++posCounter;
             // Start not until pipeline is full
             if (posCounter > haplotyper_.getOffset()) {
@@ -107,14 +91,12 @@ void QualEncoder::addMappedRecordToBlock(const EncodingRead& r) {
     nrMappedRecords_++;
 }
 
-// -----------------------------------------------------------------------------
-
 void QualEncoder::finishBlock() {
     // Compute all remaining quantizers
     if (version_ == Version::V2) {
         while (!samPileupDeque_.empty()) {
             auto k = static_cast<uint8_t>(haplotyper_.push(samPileupDeque_.front().seq, samPileupDeque_.front().qual,
-                                                           samPileupDeque_.front().hq_softcounter,
+                                                           samPileupDeque_.front().hqSoftclipCnt,
                                                            samPileupDeque_.front().ref));
             ++posCounter;
             if (posCounter > haplotyper_.getOffset()) {
@@ -150,11 +132,7 @@ void QualEncoder::finishBlock() {
     posCounter = 0;
 }
 
-// -----------------------------------------------------------------------------
-
 size_t QualEncoder::nrMappedRecords() const { return nrMappedRecords_; }
-
-// -----------------------------------------------------------------------------
 
 void QualEncoder::encodeMappedQual(const EncodingRead& samRecord) {
     size_t cigarIdx = 0;
@@ -204,9 +182,4 @@ void QualEncoder::encodeMappedQual(const EncodingRead& samRecord) {
     }
 }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace calq
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

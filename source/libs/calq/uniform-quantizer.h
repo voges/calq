@@ -7,8 +7,7 @@ namespace calq {
 
 class UniformQuantizer : public Quantizer {
    public:
-    UniformQuantizer(const int& valueMin, const int& valueMax, const int& numSteps);
-    ~UniformQuantizer() override;
+    UniformQuantizer(int minValue, int maxValue, int numSteps);
 };
 
 }  // namespace calq

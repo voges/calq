@@ -1,6 +1,5 @@
 #include "softclip-spreader.h"
 #include <algorithm>
-#include <iostream>
 
 namespace calq {
 
@@ -23,11 +22,11 @@ double SoftclipSpreader::push(double score, size_t softclips) {
         }
     }
 
-    double ownscore = score;
+    double ownScore = score;
 
     // Apply all changes to current position in memory from other softclips
     for (auto it = forwardSpread.begin(); it != forwardSpread.end();) {
-        ownscore += (*it).second;
+        ownScore += (*it).second;
         --(*it).first;
         if ((*it).first == 0) {
             it = forwardSpread.erase(it);
@@ -38,7 +37,7 @@ double SoftclipSpreader::push(double score, size_t softclips) {
 
     double orig = std::min(original.push(score), 1.0);
 
-    return squashed ? squash(buffer.push(ownscore), 1.0 - orig) : buffer.push(ownscore);
+    return squashed ? squash(buffer.push(ownScore), 1.0 - orig) : buffer.push(ownScore);
 }
 
 size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
