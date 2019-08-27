@@ -33,3 +33,4 @@ before_script:
 
 script:
   - ./ci/build.sh
+  - ./ci/test.sh
