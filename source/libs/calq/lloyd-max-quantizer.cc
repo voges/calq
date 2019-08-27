@@ -20,9 +20,8 @@ void LloydMaxQuantizer::fillLUT(const ProbabilityDistribution& pdf) {
             if (pos >= borders[index]) {
                 break;
             }
-            this->lut_[pos] = std::pair<int, int>(
-                static_cast<const int&>(index),
-                static_cast<const int&>(std::round(values[index])));
+            this->lut_[pos] =
+                std::pair<int, int>(static_cast<const int&>(index), static_cast<const int&>(std::round(values[index])));
             pos += 1;
         }
         index += 1;
@@ -35,8 +34,7 @@ void LloydMaxQuantizer::fillLUT(const ProbabilityDistribution& pdf) {
 
 // -----------------------------------------------------------------------------
 
-double LloydMaxQuantizer::calcCentroid(size_t left, size_t right,
-                                       const ProbabilityDistribution& pdf) {
+double LloydMaxQuantizer::calcCentroid(size_t left, size_t right, const ProbabilityDistribution& pdf) {
     double sum = 0;
     double weightSum = 0;
 
@@ -53,8 +51,7 @@ double LloydMaxQuantizer::calcCentroid(size_t left, size_t right,
         weightSum += i * pdf[i - pdf.getRangeMin()];
     }
 
-    return (sum > THRESHOLD) ? (weightSum / sum)
-                             : (std::floor((left + right) / 2.0));
+    return (sum > THRESHOLD) ? (weightSum / sum) : (std::floor((left + right) / 2.0));
 }
 
 // -----------------------------------------------------------------------------
@@ -75,8 +72,7 @@ void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf) {
         double right = borders[k];
 
         // Calc centroid
-        double centroid = calcCentroid(static_cast<size_t>(ceil(left)),
-                                       static_cast<size_t>(floor(right)), pdf);
+        double centroid = calcCentroid(static_cast<size_t>(ceil(left)), static_cast<size_t>(floor(right)), pdf);
 
         change = std::max(change, std::abs(values[k] - centroid));
         values[k] = centroid;

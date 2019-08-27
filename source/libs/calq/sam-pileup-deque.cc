@@ -53,9 +53,7 @@ size_t SAMPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 
 // -----------------------------------------------------------------------------
 
-const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const {
-    return pileups_.at(n);
-}
+const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
 
 // -----------------------------------------------------------------------------
 
@@ -129,8 +127,7 @@ void SAMPileupDeque::setPosMin(const uint32_t& posMin) {
 
 // -----------------------------------------------------------------------------
 
-void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvalOffset,
-                         uint8_t hqSoftClipThreshold) {
+void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvalOffset, uint8_t hqSoftClipThreshold) {
     if (this->empty()) {
         throwErrorException("samPileupQueue is empty");
     }
@@ -152,29 +149,24 @@ void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvalOffset,
             continue;
         }
 
-        const auto HQ_SOFTCLIP_THRESHOLD =
-            static_cast<const char>(hqSoftClipThreshold + qvalOffset);
+        const auto HQ_SOFTCLIP_THRESHOLD = static_cast<const char>(hqSoftClipThreshold + qvalOffset);
 
         switch (r.cigar[cigarIdx]) {
             case 'M':
             case '=':
             case 'X':
                 for (size_t i = 0; i < opLen; i++) {
-                    this->pileups_[pileupIdx].pos =
-                        static_cast<uint32_t>(this->posMin() + pileupIdx);
+                    this->pileups_[pileupIdx].pos = static_cast<uint32_t>(this->posMin() + pileupIdx);
                     this->pileups_[pileupIdx].seq += r.sequence[idx];
                     this->pileups_[pileupIdx].qual += r.qvalues[idx];
                     if (!r.reference.empty()) {
                         if (this->pileups_[pileupIdx].ref != 'N' &&
-                            this->pileups_[pileupIdx].ref !=
-                                r.reference[pileupIdx + this->posMin() -
-                                            r.posMin]) {
+                            this->pileups_[pileupIdx].ref != r.reference[pileupIdx + this->posMin() - r.posMin]) {
                             throwErrorException(
                                 "Non matching reference "
                                 "between reads!");
                         }
-                        this->pileups_[pileupIdx].ref =
-                            r.reference[pileupIdx + this->posMin() - r.posMin];
+                        this->pileups_[pileupIdx].ref = r.reference[pileupIdx + this->posMin() - r.posMin];
                     }
 
                     idx++;

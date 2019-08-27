@@ -32,8 +32,7 @@ struct DecodingRead {
 
 class QualDecoder {
    public:
-    QualDecoder(const DecodingBlock& in, uint32_t positionOffset,
-                uint8_t qualityOffset, EncodingBlock* out);
+    QualDecoder(const DecodingBlock& in, uint32_t positionOffset, uint8_t qualityOffset, EncodingBlock* out);
     ~QualDecoder();
 
     void decodeMappedRecordFromBlock(const DecodingRead& samRecord);

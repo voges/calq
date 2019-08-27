@@ -25,95 +25,95 @@ ProgramOptions::ProgramOptions(int argc, char *argv[])
 }
 
 void ProgramOptions::validateCompress() {
-//     if (cip::fileNameExtension(inputFilePath) != std::string("sam")) {
-//         throwErrorException("Input file name extension must be 'sam'");
-//     }
-//
-//     CALQ_LOG("Block size: %d", static_cast<int>(blockSize));
-//     if (blockSize < 1) {
-//         throwErrorException("Block size must be greater than 0");
-//     }
-//
-//     CALQ_LOG("Quantization min steps: %d",
-//              static_cast<int>(options.quantizationMin));
-//     if (options.quantizationMin < 2) {
-//         throwErrorException("Quantization must be greater than 1");
-//     }
-//
-//     CALQ_LOG("Quantization max steps: %d",
-//              static_cast<int>(options.quantizationMax));
-//     if (options.quantizationMax < 2 ||
-//         options.quantizationMax < options.quantizationMin) {
-//         throwErrorException(
-//             "Quantization must be greater than"
-//             " 1 and quantizationMin");
-//     }
-//
-//     CALQ_LOG("Polyploidy: %d", static_cast<int>(options.polyploidy));
-//     if (options.polyploidy < 1) {
-//         throwErrorException("Polyploidy must be greater than 0");
-//     }
-//
-//     CALQ_LOG("Quantizer type: %s", quantizerTypeStr.c_str());
-//     if (quantizerTypeStr == "Uniform") {
-//         options.quantizerType = calq::QuantizerType::UNIFORM;
-//     } else if (quantizerTypeStr == "Lloyd") {
-//         options.quantizerType = calq::QuantizerType::LLOYD_MAX;
-//     } else {
-//         throwErrorException("Quantizer type not supported");
-//     }
-//
-//     CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
-//     if (qualityValueType == "Sanger") {
-//         // Sanger: Phred+33 [0,40]
-//         options.qualityValueOffset = 33;
-//         options.qualityValueMin = 0;
-//         options.qualityValueMax = 40;
-//     } else if (qualityValueType == "Illumina-1.3+") {
-//         // Illumina 1.3+: Phred+64 [0,40]
-//         options.qualityValueOffset = 64;
-//         options.qualityValueMin = 0;
-//         options.qualityValueMax = 40;
-//     } else if (qualityValueType == "Illumina-1.5+") {
-//         // Illumina 1.5+: Phred+64 [0,40] with 0=unused,
-//         // 1=unused, 2=Read Segment Quality Control Indicator ('B')
-//         CALQ_LOG(
-//             "Warning: Read Segment Quality Control Indicator"
-//             " will not be treated specifically by CALQ");
-//         options.qualityValueOffset = 64;
-//         options.qualityValueMin = 0;
-//         options.qualityValueMax = 40;
-//     } else if (qualityValueType == "Illumina-1.8+") {
-//         // Illumina 1.8+ Phred+33 [0,41]
-//         options.qualityValueOffset = 33;
-//         options.qualityValueMin = 0;
-//         options.qualityValueMax = 41;
-//     } else if (qualityValueType == "Max33") {
-//         // Max33 Phred+33 [0,93]
-//         options.qualityValueOffset = 33;
-//         options.qualityValueMin = 0;
-//         options.qualityValueMax = 93;
-//     } else if (qualityValueType == "Max64") {
-//         // Max64 Phred+64 [0,62]
-//         options.qualityValueOffset = 64;
-//         options.qualityValueMin = 0;
-//         options.qualityValueMax = 62;
-//     } else {
-//         throwErrorException("Quality value type not supported");
-//     }
-//     CALQ_LOG("Quality value offset: %d",
-//              static_cast<int>(options.qualityValueOffset));
-//     CALQ_LOG("Quality value range: [%d,%d]",
-//              static_cast<int>(options.qualityValueMin),
-//              static_cast<int>(options.qualityValueMax));
-//
-//     if (options.debugPileup) {
-//         CALQ_LOG("Outputting full pileup as debug information");
-//     }
-//
-//     if (debugStreams) {
-//         CALQ_LOG("Outputting full streams as debug information");
-//     }
+    //     if (cip::fileNameExtension(inputFilePath) != std::string("sam")) {
+    //         throwErrorException("Input file name extension must be 'sam'");
+    //     }
+    //
+    //     CALQ_LOG("Block size: %d", static_cast<int>(blockSize));
+    //     if (blockSize < 1) {
+    //         throwErrorException("Block size must be greater than 0");
+    //     }
+    //
+    //     CALQ_LOG("Quantization min steps: %d",
+    //              static_cast<int>(options.quantizationMin));
+    //     if (options.quantizationMin < 2) {
+    //         throwErrorException("Quantization must be greater than 1");
+    //     }
+    //
+    //     CALQ_LOG("Quantization max steps: %d",
+    //              static_cast<int>(options.quantizationMax));
+    //     if (options.quantizationMax < 2 ||
+    //         options.quantizationMax < options.quantizationMin) {
+    //         throwErrorException(
+    //             "Quantization must be greater than"
+    //             " 1 and quantizationMin");
+    //     }
+    //
+    //     CALQ_LOG("Polyploidy: %d", static_cast<int>(options.polyploidy));
+    //     if (options.polyploidy < 1) {
+    //         throwErrorException("Polyploidy must be greater than 0");
+    //     }
+    //
+    //     CALQ_LOG("Quantizer type: %s", quantizerTypeStr.c_str());
+    //     if (quantizerTypeStr == "Uniform") {
+    //         options.quantizerType = calq::QuantizerType::UNIFORM;
+    //     } else if (quantizerTypeStr == "Lloyd") {
+    //         options.quantizerType = calq::QuantizerType::LLOYD_MAX;
+    //     } else {
+    //         throwErrorException("Quantizer type not supported");
+    //     }
+    //
+    //     CALQ_LOG("Quality value type: %s", qualityValueType.c_str());
+    //     if (qualityValueType == "Sanger") {
+    //         // Sanger: Phred+33 [0,40]
+    //         options.qualityValueOffset = 33;
+    //         options.qualityValueMin = 0;
+    //         options.qualityValueMax = 40;
+    //     } else if (qualityValueType == "Illumina-1.3+") {
+    //         // Illumina 1.3+: Phred+64 [0,40]
+    //         options.qualityValueOffset = 64;
+    //         options.qualityValueMin = 0;
+    //         options.qualityValueMax = 40;
+    //     } else if (qualityValueType == "Illumina-1.5+") {
+    //         // Illumina 1.5+: Phred+64 [0,40] with 0=unused,
+    //         // 1=unused, 2=Read Segment Quality Control Indicator ('B')
+    //         CALQ_LOG(
+    //             "Warning: Read Segment Quality Control Indicator"
+    //             " will not be treated specifically by CALQ");
+    //         options.qualityValueOffset = 64;
+    //         options.qualityValueMin = 0;
+    //         options.qualityValueMax = 40;
+    //     } else if (qualityValueType == "Illumina-1.8+") {
+    //         // Illumina 1.8+ Phred+33 [0,41]
+    //         options.qualityValueOffset = 33;
+    //         options.qualityValueMin = 0;
+    //         options.qualityValueMax = 41;
+    //     } else if (qualityValueType == "Max33") {
+    //         // Max33 Phred+33 [0,93]
+    //         options.qualityValueOffset = 33;
+    //         options.qualityValueMin = 0;
+    //         options.qualityValueMax = 93;
+    //     } else if (qualityValueType == "Max64") {
+    //         // Max64 Phred+64 [0,62]
+    //         options.qualityValueOffset = 64;
+    //         options.qualityValueMin = 0;
+    //         options.qualityValueMax = 62;
+    //     } else {
+    //         throwErrorException("Quality value type not supported");
+    //     }
+    //     CALQ_LOG("Quality value offset: %d",
+    //              static_cast<int>(options.qualityValueOffset));
+    //     CALQ_LOG("Quality value range: [%d,%d]",
+    //              static_cast<int>(options.qualityValueMin),
+    //              static_cast<int>(options.qualityValueMax));
+    //
+    //     if (options.debugPileup) {
+    //         CALQ_LOG("Outputting full pileup as debug information");
+    //     }
+    //
+    //     if (debugStreams) {
+    //         CALQ_LOG("Outputting full streams as debug information");
+    //     }
 }
 //
 // void ProgramOptions::validateV2() {

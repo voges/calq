@@ -35,8 +35,7 @@ class LloydMaxQuantizer : public Quantizer {
     void fillLUT(const ProbabilityDistribution& pdf);
 
     // Calculates the centroid in a region of a pdf
-    double calcCentroid(size_t left, size_t right,
-                        const ProbabilityDistribution& pdf);
+    double calcCentroid(size_t left, size_t right, const ProbabilityDistribution& pdf);
 
     // Calculates quantization borders using pdf
     void calcBorders(const ProbabilityDistribution& pdf);

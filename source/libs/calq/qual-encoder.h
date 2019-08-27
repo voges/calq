@@ -40,9 +40,7 @@ struct EncodingRead {
 
 class QualEncoder {
    public:
-    explicit QualEncoder(const EncodingOptions& options,
-                         const std::map<int, Quantizer>& quant,
-                         DecodingBlock* out);
+    explicit QualEncoder(const EncodingOptions& options, const std::map<int, Quantizer>& quant, DecodingBlock* out);
     ~QualEncoder();
     void addMappedRecordToBlock(const EncodingRead& samRecord);
     void finishBlock();

@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "calq/softclip-spreader.h"
+#include <gtest/gtest.h>
 
 TEST(SoftclipSpreaderTest, Everything) {
     calq::SoftclipSpreader b(5, 3, false);

@@ -19,19 +19,25 @@ class CircularBuffer {
 
     const T& operator[](size_t index) const { return data[(pos + index) % data.size()]; }
 
-    // Leftmost value
+    /**
+     * Leftmost value
+     */
     T& back() { return (*this)[pos]; }
 
     const T& back() const { return (*this)[pos]; }
 
-    // Rightmost value
+    /**
+     * Rightmost value
+     */
     T& front() { return (*this)[(pos + data.size() - 1) % data.size()]; }
 
     const T& front() const { return (*this)[(pos + data.size() - 1) % data.size()]; }
 
     size_t size() const { return data.size(); }
 
-    // Returns oldest value, deletes it and puts new value
+    /**
+     * Returns oldest value, deletes it and puts new value
+     */
     T push(const T& val) {
         T oldVal = data[pos];
         data[pos] = val;

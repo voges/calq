@@ -53,7 +53,8 @@
 //         size_t mappedSize;
 //         size_t unmappedSize;
 //
-//         file.writeBlock(programOptions.options, config, decBlock, encSide, unmappedString, programOptions.debugStreams,
+//         file.writeBlock(programOptions.options, config, decBlock, encSide, unmappedString,
+//         programOptions.debugStreams,
 //                         &mappedSize, &unmappedSize);
 //
 //         compressedMappedQualSize += mappedSize;
@@ -75,11 +76,11 @@
 //     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 //
 //     CALQ_LOG("COMPRESSION STATISTICS");
-//     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-//     const unsigned MB = 1 * 1000 * 1000;
-//     CALQ_LOG(
+//     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM,
+//     (int)diffTimeH); const unsigned MB = 1 * 1000 * 1000; CALQ_LOG(
 //         "  Speed (uncompressed size/time): %.2f MB/s",
-//         ((static_cast<double>(uncompressedMappedQualSize + uncompressedUnmappedQualSize) / static_cast<double>(MB))) /
+//         ((static_cast<double>(uncompressedMappedQualSize + uncompressedUnmappedQualSize) / static_cast<double>(MB)))
+//         /
 //             (static_cast<double>(diffTimeS)));
 //     CALQ_LOG("  Wrote %zu block(s)", sH.nrBlocksRead());
 //     CALQ_LOG("  Record(s):  %12zu", sH.nrRecordsRead());
@@ -93,7 +94,8 @@
 //     CALQ_LOG("    Mapped:        %12zu", compressedMappedQualSize);
 //     CALQ_LOG("    Unmapped:      %12zu", compressedUnmappedQualSize);
 //     CALQ_LOG("  Compression ratio: %4.2f%%",
-//              (double)file.nrWrittenBytes() * 100 / (double)(uncompressedMappedQualSize + uncompressedUnmappedQualSize));
+//              (double)file.nrWrittenBytes() * 100 / (double)(uncompressedMappedQualSize +
+//              uncompressedUnmappedQualSize));
 //     CALQ_LOG("    Mapped:          %4.2f%%",
 //              (double)compressedMappedQualSize * 100 / (double)(uncompressedMappedQualSize));
 //     CALQ_LOG("    Unmapped:        %4.2f%%",
@@ -109,7 +111,8 @@
 //     CALQ_LOG("    Mapped:               %2.4f",
 //              (static_cast<double>(compressedMappedQualSize) * 8) / static_cast<double>(uncompressedMappedQualSize));
 //     CALQ_LOG("    Unmapped:             %2.4f",
-//              (static_cast<double>(compressedUnmappedQualSize) * 8) / static_cast<double>(uncompressedUnmappedQualSize));
+//              (static_cast<double>(compressedUnmappedQualSize) * 8) /
+//              static_cast<double>(uncompressedUnmappedQualSize));
 //
 //     return EXIT_SUCCESS;
 // }
@@ -179,10 +182,10 @@
 //     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 //
 //     CALQ_LOG("DECOMPRESSION STATISTICS");
-//     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM, (int)diffTimeH);
-//     const unsigned MB = 1 * 1000 * 1000;
-//     CALQ_LOG("  Speed (compressed size/time): %.2f MB/s",
-//              ((static_cast<double>(file.nrReadBytes()) / static_cast<double>(MB))) / (static_cast<double>(diffTimeS)));
+//     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM,
+//     (int)diffTimeH); const unsigned MB = 1 * 1000 * 1000; CALQ_LOG("  Speed (compressed size/time): %.2f MB/s",
+//              ((static_cast<double>(file.nrReadBytes()) / static_cast<double>(MB))) /
+//              (static_cast<double>(diffTimeS)));
 //     std::cout << "  Decoded %zu block(s)" << sH.nrBlocksRead() << std::endl;
 //
 //     return EXIT_SUCCESS;

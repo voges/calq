@@ -19,8 +19,7 @@ struct UnmappedInformation {
 
 class SAMFileHandler {
    public:
-    SAMFileHandler(const std::string& inputFileName,
-                   const std::string& referenceFileName);
+    SAMFileHandler(const std::string& inputFileName, const std::string& referenceFileName);
     ~SAMFileHandler();
 
     size_t readBlock(const size_t& blocksize);

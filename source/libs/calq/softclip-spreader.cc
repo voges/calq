@@ -18,8 +18,7 @@ double SoftclipSpreader::push(double score, size_t softclips) {
         forwardSpread.emplace_back(clipped + 1, score);
 
         // Change past positions
-        for (auto i = static_cast<int>(buffer.size() - clipped);
-             i < static_cast<int>(buffer.size()); ++i) {
+        for (auto i = static_cast<int>(buffer.size() - clipped); i < static_cast<int>(buffer.size()); ++i) {
             buffer[i] += score;
         }
     }
@@ -39,14 +38,12 @@ double SoftclipSpreader::push(double score, size_t softclips) {
 
     double orig = std::min(original.push(score), 1.0);
 
-    return squashed ? squash(buffer.push(ownscore), 1.0 - orig)
-                    : buffer.push(ownscore);
+    return squashed ? squash(buffer.push(ownscore), 1.0 - orig) : buffer.push(ownscore);
 }
 
 size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
 
-SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips,
-                                   bool isSquashed)
+SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips, bool isSquashed)
     : buffer(max_prop, 0.0),
       original(max_prop, 0.0),
       MAX_PROPAGATION(max_prop),

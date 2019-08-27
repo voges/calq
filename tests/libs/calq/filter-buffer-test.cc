@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "calq/filter-buffer.h"
+#include <gtest/gtest.h>
 
 TEST(FilterBufferTest, Convolution) {
     calq::FilterBuffer buffer([](size_t pos, size_t size) -> double { return pos / static_cast<double>(size - 1); }, 3);
@@ -18,7 +18,6 @@ TEST(FilterBufferTest, Offset) {
     calq::FilterBuffer buffer([](size_t pos, size_t size) -> double { return pos / static_cast<double>(size - 1); }, 3);
     EXPECT_EQ(buffer.getOffset(), 2);
 }
-
 
 // void gaussKernelTest() {
 //     // Test variance 1

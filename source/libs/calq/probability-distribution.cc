@@ -10,8 +10,7 @@ namespace calq {
 
 // -----------------------------------------------------------------------------
 
-ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin,
-                                                 size_t rangeMax) {
+ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin, size_t rangeMax) {
     this->rangeMin = rangeMin;
     this->pdf.resize(rangeMax - rangeMin + 1);
 }
@@ -19,22 +18,18 @@ ProbabilityDistribution::ProbabilityDistribution(size_t rangeMin,
 // -----------------------------------------------------------------------------
 
 void ProbabilityDistribution::addToPdf(size_t qualScore, size_t number) {
-    if (qualScore < rangeMin || qualScore > rangeMin + pdf.size() - 1)
-        throwErrorException("PDF: Score not in range");
+    if (qualScore < rangeMin || qualScore > rangeMin + pdf.size() - 1) throwErrorException("PDF: Score not in range");
     pdf[qualScore - rangeMin] += number;
 }
 
 // -----------------------------------------------------------------------------
 
-void ProbabilityDistribution::resetPdf() {
-    std::fill(pdf.begin(), pdf.end(), 0);
-}
+void ProbabilityDistribution::resetPdf() { std::fill(pdf.begin(), pdf.end(), 0); }
 
 // -----------------------------------------------------------------------------
 
 size_t ProbabilityDistribution::getCount(size_t value) const {
-    if (value < rangeMin || value > rangeMin + pdf.size() - 1)
-        throwErrorException("PDF: Value not in range");
+    if (value < rangeMin || value > rangeMin + pdf.size() - 1) throwErrorException("PDF: Value not in range");
     return value;
 }
 
@@ -55,9 +50,7 @@ size_t ProbabilityDistribution::getRangeMin() const { return rangeMin; }
 
 // -----------------------------------------------------------------------------
 
-size_t ProbabilityDistribution::getRangeMax() const {
-    return rangeMin + pdf.size() - 1;
-}
+size_t ProbabilityDistribution::getRangeMax() const { return rangeMin + pdf.size() - 1; }
 
 // -----------------------------------------------------------------------------
 

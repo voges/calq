@@ -25,9 +25,7 @@ namespace cip {
 // -----------------------------------------------------------------------------
 
 CQFile::CQFile(const std::string &path, const Mode &mode)
-    : File(path, mode),
-      nrReadFileFormatBytes_(0),
-      nrWrittenFileFormatBytes_(0) {
+    : File(path, mode), nrReadFileFormatBytes_(0), nrWrittenFileFormatBytes_(0) {
     if (path.empty()) {
         throwErrorException("path is empty");
     }
@@ -43,9 +41,7 @@ size_t CQFile::nrReadFileFormatBytes() const { return nrReadFileFormatBytes_; }
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::nrWrittenFileFormatBytes() const {
-    return nrWrittenFileFormatBytes_;
-}
+size_t CQFile::nrWrittenFileFormatBytes() const { return nrWrittenFileFormatBytes_; }
 
 // -----------------------------------------------------------------------------
 
@@ -76,8 +72,7 @@ size_t CQFile::readHeader(size_t *blockSize) {
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::readQuantizers(
-    std::vector<std::vector<uint8_t>> *const quantizers) {
+size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>> *const quantizers) {
     if (!quantizers->empty()) {
         throwErrorException("quantizers is not empty");
     }
@@ -111,8 +106,7 @@ size_t CQFile::readQuantizers(
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::readQualBlock(
-    std::string *block, const gabac::EncodingConfiguration &configuration) {
+size_t CQFile::readQualBlock(std::string *block, const gabac::EncodingConfiguration &configuration) {
     if (block == nullptr) {
         throwErrorException("block is nullptr");
     } else if (!block->empty()) {
@@ -177,8 +171,7 @@ size_t CQFile::readQualBlock(
 
     gabac::BufferOutputStream outputStream;
 
-    gabac::IOConfiguration ioConf = {&inputStream, &outputStream, tmpSize,
-                                     &std::cout,
+    gabac::IOConfiguration ioConf = {&inputStream, &outputStream, tmpSize, &std::cout,
                                      gabac::IOConfiguration::LogLevel::INFO};
 
     gabac::decode(ioConf, configuration);
@@ -208,8 +201,7 @@ size_t CQFile::writeHeader(const size_t &blockSize) {
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::writeQuantizers(
-    const std::vector<std::vector<uint8_t>> &quantizers) {
+size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers) {
     if (quantizers.empty()) {
         throwErrorException("lut is empty");
     }
@@ -235,9 +227,8 @@ size_t CQFile::writeQuantizers(
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::writeQualBlock(
-    unsigned char *block, const size_t &blockSize,
-    const gabac::EncodingConfiguration &configuration) {
+size_t CQFile::writeQualBlock(unsigned char *block, const size_t &blockSize,
+                              const gabac::EncodingConfiguration &configuration) {
     /*
     if (block == nullptr) {
             throwErrorException("block is nullptr");
@@ -315,8 +306,7 @@ size_t CQFile::writeQualBlock(
 
     gabac::BufferOutputStream outputStream;
 
-    gabac::IOConfiguration ioConf = {&inputStream, &outputStream, blockSize,
-                                     &std::cout,
+    gabac::IOConfiguration ioConf = {&inputStream, &outputStream, blockSize, &std::cout,
                                      gabac::IOConfiguration::LogLevel::INFO};
 
     gabac::encode(ioConf, configuration);
@@ -328,8 +318,7 @@ size_t CQFile::writeQualBlock(
     compressedSize = buffer.size() * sizeof(unsigned char);
 
     ret += writeUint32(compressedSize);
-    ret += write(reinterpret_cast<unsigned char *>(buffer.getData()),
-                 compressedSize);
+    ret += write(reinterpret_cast<unsigned char *>(buffer.getData()), compressedSize);
 
     compressed.clear();
     toCompress.clear();
@@ -339,19 +328,15 @@ size_t CQFile::writeQualBlock(
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::writeBlock(const calq::EncodingOptions &opts,
-                          const gabac::EncodingConfiguration &configuration,
-                          const calq::DecodingBlock &block,
-                          const calq::SideInformation &side,
-                          const std::string &unmappedQualityValues_,
-                          bool STREAMOUT, size_t *compressedSizeMapped,
+size_t CQFile::writeBlock(const calq::EncodingOptions &opts, const gabac::EncodingConfiguration &configuration,
+                          const calq::DecodingBlock &block, const calq::SideInformation &side,
+                          const std::string &unmappedQualityValues_, bool STREAMOUT, size_t *compressedSizeMapped,
                           size_t *compressedSizeUnmapped) {
     *compressedSizeMapped = 0;
     *compressedSizeUnmapped = 0;
     // Write block parameters
     *compressedSizeMapped += this->writeUint32(side.positions[0] - 1);
-    *compressedSizeMapped +=
-        this->writeUint32((uint32_t)opts.qualityValueOffset);
+    *compressedSizeMapped += this->writeUint32((uint32_t)opts.qualityValueOffset);
 
     // Write inverse quantization LUTs
     *compressedSizeMapped += this->writeQuantizers(block.codeBooks);
@@ -369,8 +354,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions &opts,
 
             std::cerr << std::endl;
         }
-        *compressedSizeUnmapped +=
-            this->writeQualBlock(uqv, uqvSize, configuration);
+        *compressedSizeUnmapped += this->writeQualBlock(uqv, uqvSize, configuration);
     } else {
         *compressedSizeUnmapped += this->writeUint8(0x00);
     }
@@ -394,8 +378,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions &opts,
     size_t mqiSize = mqiString.length();
     if (mqiSize > 0) {
         *compressedSizeMapped += this->writeUint8(0x01);
-        *compressedSizeMapped +=
-            this->writeQualBlock(mqi, mqiSize, configuration);
+        *compressedSizeMapped += this->writeQualBlock(mqi, mqiSize, configuration);
     } else {
         *compressedSizeMapped += this->writeUint8(0x00);
     }
@@ -419,8 +402,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions &opts,
             std::cerr << std::endl;
         }
         if (mqviSize > 0) {
-            *compressedSizeMapped +=
-                this->writeQualBlock(mqvi, mqviSize, configuration);
+            *compressedSizeMapped += this->writeQualBlock(mqvi, mqviSize, configuration);
         } else {
             *compressedSizeMapped += this->writeUint8(0x00);
         }
@@ -431,8 +413,7 @@ size_t CQFile::writeBlock(const calq::EncodingOptions &opts,
 
 // -----------------------------------------------------------------------------
 
-size_t CQFile::readBlock(calq::DecodingBlock *out, calq::SideInformation *side,
-                         std::string *unmapped,
+size_t CQFile::readBlock(calq::DecodingBlock *out, calq::SideInformation *side, std::string *unmapped,
                          const gabac::EncodingConfiguration &configuration
 
 ) {
@@ -465,8 +446,7 @@ size_t CQFile::readBlock(calq::DecodingBlock *out, calq::SideInformation *side,
     ret += this->readUint8(&mqiFlags);
     if (mqiFlags & 0x1) {  // NOLINT
         ret += this->readQualBlock(&buffer, configuration);
-        std::copy(buffer.begin(), buffer.end(),
-                  std::back_inserter(out->quantizerIndices));
+        std::copy(buffer.begin(), buffer.end(), std::back_inserter(out->quantizerIndices));
         buffer.clear();
     }
 
@@ -477,8 +457,7 @@ size_t CQFile::readBlock(calq::DecodingBlock *out, calq::SideInformation *side,
         ret += this->readUint8(&mqviFlags);
         if (mqviFlags & 0x1) {  // NOLINT
             ret += this->readQualBlock(&buffer, configuration);
-            std::copy(buffer.begin(), buffer.end(),
-                      std::back_inserter(out->stepindices[i]));
+            std::copy(buffer.begin(), buffer.end(), std::back_inserter(out->stepindices[i]));
             buffer.clear();
         }
     }

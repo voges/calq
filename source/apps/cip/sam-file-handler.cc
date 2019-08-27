@@ -12,20 +12,11 @@ namespace cip {
 
 // -----------------------------------------------------------------------------
 
-SAMFileHandler::SAMFileHandler(const std::string& inputFileName,
-                               const std::string& referenceFileName)
-    : samFile_(nullptr),
-      fastaFile(nullptr),
-      side(),
-      encBlock(),
-      unmapped(),
-      refStart(),
-      refEnd(),
-      rname() {
+SAMFileHandler::SAMFileHandler(const std::string& inputFileName, const std::string& referenceFileName)
+    : samFile_(nullptr), fastaFile(nullptr), side(), encBlock(), unmapped(), refStart(), refEnd(), rname() {
     samFile_ = std::unique_ptr<SAMFile>(new SAMFile(inputFileName));
     if (!referenceFileName.empty()) {
-        fastaFile =
-            std::unique_ptr<FASTAFile>(new FASTAFile(referenceFileName));
+        fastaFile = std::unique_ptr<FASTAFile>(new FASTAFile(referenceFileName));
     }
 }
 
@@ -110,8 +101,7 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize) {
     }
 
     side.reference = fastaFile->getReferencesInRange(rname, refStart, refEnd);
-    std::transform(side.reference.begin(), side.reference.end(),
-                   side.reference.begin(), ::toupper);
+    std::transform(side.reference.begin(), side.reference.end(), side.reference.begin(), ::toupper);
 
     if (side.positions.empty()) {
         side.posOffset = 0;
@@ -124,9 +114,7 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize) {
 
 // -----------------------------------------------------------------------------
 
-void SAMFileHandler::getMappedBlock(calq::EncodingBlock* var) {
-    var->qvalues.swap(encBlock.qvalues);
-}
+void SAMFileHandler::getMappedBlock(calq::EncodingBlock* var) { var->qvalues.swap(encBlock.qvalues); }
 
 // -----------------------------------------------------------------------------
 
@@ -148,27 +136,19 @@ void SAMFileHandler::getSideInformation(calq::SideInformation* var) {
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrBlocksRead() const {
-    return this->samFile_->nrBlocksRead();
-}
+size_t SAMFileHandler::nrBlocksRead() const { return this->samFile_->nrBlocksRead(); }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrMappedRecordsRead() const {
-    return this->samFile_->nrMappedRecordsRead();
-}
+size_t SAMFileHandler::nrMappedRecordsRead() const { return this->samFile_->nrMappedRecordsRead(); }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrUnmappedRecordsRead() const {
-    return this->samFile_->nrUnmappedRecordsRead();
-}
+size_t SAMFileHandler::nrUnmappedRecordsRead() const { return this->samFile_->nrUnmappedRecordsRead(); }
 
 // -----------------------------------------------------------------------------
 
-size_t SAMFileHandler::nrRecordsRead() const {
-    return this->samFile_->nrRecordsRead();
-}
+size_t SAMFileHandler::nrRecordsRead() const { return this->samFile_->nrRecordsRead(); }
 
 // -----------------------------------------------------------------------------
 

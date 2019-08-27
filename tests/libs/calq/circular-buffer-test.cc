@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "calq/circular-buffer.h"
+#include <gtest/gtest.h>
 
 TEST(CircularBufferTest, Size) {
     calq::CircularBuffer<int> buffer(3, 0);

@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "calq/lloyd-max-quantizer.h"
+#include <gtest/gtest.h>
 
 TEST(LloydMaxQuantizerTest, UniformDistribution) {
     calq::LloydMaxQuantizer q(10);

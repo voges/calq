@@ -117,9 +117,7 @@ size_t SAMFile::nrMappedRecordsRead() const { return nrMappedRecordsRead_; }
 
 size_t SAMFile::nrUnmappedRecordsRead() const { return nrUnmappedRecordsRead_; }
 
-size_t SAMFile::nrRecordsRead() const {
-    return (nrMappedRecordsRead_ + nrUnmappedRecordsRead_);
-}
+size_t SAMFile::nrRecordsRead() const { return (nrMappedRecordsRead_ + nrUnmappedRecordsRead_); }
 
 size_t SAMFile::readBlock(const size_t &blockSize) {
     if (blockSize < 1) {
@@ -196,15 +194,12 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
     }
 
     auto elapsedTime = std::chrono::steady_clock::now() - startTime_;
-    auto elapsedTimeS =
-        std::chrono::duration_cast<std::chrono::seconds>(elapsedTime).count();
+    auto elapsedTimeS = std::chrono::duration_cast<std::chrono::seconds>(elapsedTime).count();
     double elapsedTimeM = static_cast<double>(elapsedTimeS) / 60.0;
-    double processedPercentage =
-        (static_cast<double>(tell()) / static_cast<double>(size())) * 100.0;
+    double processedPercentage = (static_cast<double>(tell()) / static_cast<double>(size())) * 100.0;
     auto remainingPercentage = 100 - processedPercentage;
-    CALQ_LOG("Processed: %.2f%% (elapsed: %.2f m), remaining: %.2f%% (~%.2f m)",
-             processedPercentage, elapsedTimeM, remainingPercentage,
-             elapsedTimeM * (remainingPercentage / processedPercentage));
+    CALQ_LOG("Processed: %.2f%% (elapsed: %.2f m), remaining: %.2f%% (~%.2f m)", processedPercentage, elapsedTimeM,
+             remainingPercentage, elapsedTimeM * (remainingPercentage / processedPercentage));
 
     return currentBlock.nrRecords();
 }

@@ -1,20 +1,10 @@
-#ifndef CALQ_CALQ_CODER_H_
-#define CALQ_CALQ_CODER_H_
-
-// -----------------------------------------------------------------------------
+#ifndef CALQ_CALQ_CODEC_H_
+#define CALQ_CALQ_CODEC_H_
 
 #include <cstdint>
-
-// -----------------------------------------------------------------------------
-
 #include <string>
 #include <vector>
-
-// -----------------------------------------------------------------------------
-
-#include "calq/log.h"
-
-// -----------------------------------------------------------------------------
+#include "log.h"
 
 namespace calq {
 
@@ -63,8 +53,6 @@ struct SideInformation {
     uint8_t qualOffset;
 };
 
-// -----------------------------------------------------------------------------
-
 /**
  * Block of quality values to be encoded.
  */
@@ -75,29 +63,21 @@ struct EncodingBlock {
     std::vector<std::string> qvalues;
 };
 
-// -----------------------------------------------------------------------------
-
 /**
  * Quantizer types. Static uniform, adaptive lloyd quantizer.
  */
 enum struct QuantizerType { UNIFORM, LLOYD_MAX };
-
-// -----------------------------------------------------------------------------
 
 /**
  * Filter for calq V2. Smooth gauss vs hard rectangle.
  */
 enum struct FilterType { GAUSS, RECTANGLE };
 
-// -----------------------------------------------------------------------------
-
 /**
  * V1: Original Calq version. Based on genotype certainty, using no reference
  * V2: Based on variant probability, using reference
  */
 enum struct Version { V1, V2 };
-
-// -----------------------------------------------------------------------------
 
 /**
  * Additional parameters for encoding
@@ -192,14 +172,10 @@ struct EncodingOptions {
     Version version = Version::V1;
 };
 
-// -----------------------------------------------------------------------------
-
 /**
  * Decoding parameters
  */
 struct DecodingOptions {};
-
-// -----------------------------------------------------------------------------
 
 /**
  * Encoded streams that can be decoded by calq.
@@ -221,18 +197,14 @@ struct DecodingBlock {
     std::vector<std::vector<uint8_t>> codeBooks;
 };
 
-// -----------------------------------------------------------------------------
-
 /**
  * Decode quality values.
  * @param sideInformation Alignment information.
  * @param input Encoded quality values
  * @param output Decoded quality values
  */
-void decode(const DecodingOptions& opt, const SideInformation& sideInformation,
-            const DecodingBlock& input, EncodingBlock* output);
-
-// -----------------------------------------------------------------------------
+void decode(const DecodingOptions& opt, const SideInformation& sideInformation, const DecodingBlock& input,
+            EncodingBlock* output);
 
 /**
  * Encode quality values.
@@ -241,16 +213,9 @@ void decode(const DecodingOptions& opt, const SideInformation& sideInformation,
  * @param input Decoded quality values
  * @param output Encoded quality values
  */
-void encode(const EncodingOptions& opt, const SideInformation& sideInformation,
-            const EncodingBlock& input, DecodingBlock* output);
-
-// -----------------------------------------------------------------------------
+void encode(const EncodingOptions& opt, const SideInformation& sideInformation, const EncodingBlock& input,
+            DecodingBlock* output);
 
 }  // namespace calq
 
-// -----------------------------------------------------------------------------
-
-#endif  // CALQ_CALQ_CODER_H_
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
+#endif  // CALQ_CALQ_CODEC_H_

@@ -1,23 +1,13 @@
-#include "calq/calq-codec.h"
-
-// -----------------------------------------------------------------------------
-
+#include "calq-codec.h"
 #include <map>
 #include <utility>
-
-// -----------------------------------------------------------------------------
-
-#include "calq/error-exception-reporter.h"
-#include "calq/lloyd-max-quantizer.h"
-#include "calq/qual-decoder.h"
-#include "calq/qual-encoder.h"
-#include "calq/uniform-min-max-quantizer.h"
-
-// -----------------------------------------------------------------------------
+#include "errors.h"
+#include "lloyd-max-quantizer.h"
+#include "qual-decoder.h"
+#include "qual-encoder.h"
+#include "uniform-min-max-quantizer.h"
 
 namespace calq {
-
-// -----------------------------------------------------------------------------
 
 static uint32_t computeLength(const std::string& cigar) {
     // Compute 0-based first position and 0-based last position this record
@@ -57,21 +47,17 @@ static uint32_t computeLength(const std::string& cigar) {
     return posMax;
 }
 
-// -----------------------------------------------------------------------------
-
-void encode(const EncodingOptions& opt, const SideInformation& sideInformation,
-            const EncodingBlock& input, DecodingBlock* output) {
+void encode(const EncodingOptions& opt, const SideInformation& sideInformation, const EncodingBlock& input,
+            DecodingBlock* output) {
     ProbabilityDistribution pdf(opt.qualityValueMin, opt.qualityValueMax);
 
     // Check quality value range
     for (auto const& samRecord : input.qvalues) {
         for (auto const& q : samRecord) {
-            if ((static_cast<int>(q) - opt.qualityValueOffset) <
-                opt.qualityValueMin) {
+            if ((static_cast<int>(q) - opt.qualityValueOffset) < opt.qualityValueMin) {
                 throwErrorException("Quality value too small");
             }
-            if ((static_cast<int>(q) - opt.qualityValueOffset) >
-                opt.qualityValueMax) {
+            if ((static_cast<int>(q) - opt.qualityValueOffset) > opt.qualityValueMax) {
                 throwErrorException("Quality value too large");
             }
             pdf.addToPdf((static_cast<size_t>(q) - opt.qualityValueOffset));
@@ -80,19 +66,15 @@ void encode(const EncodingOptions& opt, const SideInformation& sideInformation,
 
     std::map<int, Quantizer> quantizers;
 
-    for (auto i = static_cast<int>(opt.quantizationMin);
-         i <= static_cast<int>(opt.quantizationMax); ++i) {
+    for (auto i = static_cast<int>(opt.quantizationMin); i <= static_cast<int>(opt.quantizationMax); ++i) {
         if (opt.quantizerType == QuantizerType::UNIFORM) {
-            UniformMinMaxQuantizer quantizer(
-                static_cast<const int&>(opt.qualityValueMin),
-                static_cast<const int&>(opt.qualityValueMax), i);
-            quantizers.insert(std::pair<int, Quantizer>(
-                static_cast<const int&>(i - opt.quantizationMin), quantizer));
+            UniformMinMaxQuantizer quantizer(static_cast<const int&>(opt.qualityValueMin),
+                                             static_cast<const int&>(opt.qualityValueMax), i);
+            quantizers.insert(std::pair<int, Quantizer>(static_cast<const int&>(i - opt.quantizationMin), quantizer));
         } else if (opt.quantizerType == QuantizerType::LLOYD_MAX) {
             LloydMaxQuantizer quantizer(static_cast<size_t>(i));
             quantizer.build(pdf);
-            quantizers.insert(std::pair<int, Quantizer>(
-                static_cast<const int&>(i - opt.quantizationMin), quantizer));
+            quantizers.insert(std::pair<int, Quantizer>(static_cast<const int&>(i - opt.quantizationMin), quantizer));
         } else {
             throwErrorException("Quantization Type not supported");
         }
@@ -104,40 +86,25 @@ void encode(const EncodingOptions& opt, const SideInformation& sideInformation,
         std::string ref;
         uint32_t len = computeLength(sideInformation.cigars[i]);
         if (opt.version == Version::V2) {
-            ref = sideInformation.reference.substr(
-                sideInformation.positions[i] - sideInformation.positions[0],
-                len);
+            ref = sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len);
         }
-        EncodingRead r = {sideInformation.positions[i],
-                          sideInformation.positions[i] + len,
-                          input.qvalues[i],
-                          sideInformation.cigars[i],
-                          sideInformation.sequences[i],
-                          ref};
+        EncodingRead r = {sideInformation.positions[i], sideInformation.positions[i] + len, input.qvalues[i],
+                          sideInformation.cigars[i],    sideInformation.sequences[i],       ref};
         qualEncoder.addMappedRecordToBlock(r);
     }
 
     qualEncoder.finishBlock();
 }
 
-// -----------------------------------------------------------------------------
-
-void decode(const DecodingOptions&, const SideInformation& sideInformation,
-            const DecodingBlock& input, EncodingBlock* output) {
+void decode(const DecodingOptions&, const SideInformation& sideInformation, const DecodingBlock& input,
+            EncodingBlock* output) {
     // Decode the quality values
-    QualDecoder qualDecoder(input, sideInformation.positions[0],
-                            sideInformation.qualOffset, output);
+    QualDecoder qualDecoder(input, sideInformation.positions[0], sideInformation.qualOffset, output);
     output->qvalues.clear();
     for (size_t i = 0; i < sideInformation.positions.size(); ++i) {
-        DecodingRead r = {sideInformation.positions[i],
-                          sideInformation.cigars[i]};
+        DecodingRead r = {sideInformation.positions[i], sideInformation.cigars[i]};
         qualDecoder.decodeMappedRecordFromBlock(r);
     }
 }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace calq
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

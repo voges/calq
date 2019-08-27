@@ -6,8 +6,7 @@ namespace calq {
 
 Quantizer::Quantizer() : lut_(), inverseLut_() {}
 
-Quantizer::Quantizer(std::map<int, int>  inverseLut)
-    : lut_(), inverseLut_(std::move(inverseLut)) {}
+Quantizer::Quantizer(std::map<int, int> inverseLut) : lut_(), inverseLut_(std::move(inverseLut)) {}
 
 Quantizer::~Quantizer() = default;
 
@@ -25,8 +24,6 @@ int Quantizer::indexToReconstructionValue(const int& index) const {
     return inverseLut_.at(index);
 }
 
-const std::map<int, int>& Quantizer::inverseLut() const {
-    return inverseLut_;
-}
+const std::map<int, int>& Quantizer::inverseLut() const { return inverseLut_; }
 
 }  // namespace calq
