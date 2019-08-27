@@ -1,21 +1,12 @@
 #include "softclip-spreader.h"
-
-// -----------------------------------------------------------------------------
-
 #include <algorithm>
 #include <iostream>
 
-// -----------------------------------------------------------------------------
-
 namespace calq {
-
-// -----------------------------------------------------------------------------
 
 double SoftclipSpreader::squash(double activity, double antiActivity) const {
     return activity / (activity + antiActivity);
 }
-
-// -----------------------------------------------------------------------------
 
 double SoftclipSpreader::push(double score, size_t softclips) {
     // Trigger spreading
@@ -52,11 +43,7 @@ double SoftclipSpreader::push(double score, size_t softclips) {
                     : buffer.push(ownscore);
 }
 
-// -----------------------------------------------------------------------------
-
 size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
-
-// -----------------------------------------------------------------------------
 
 SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips,
                                    bool isSquashed)
@@ -67,6 +54,3 @@ SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips,
       squashed(isSquashed) {}
 
 }  // namespace calq
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

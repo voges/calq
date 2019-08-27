@@ -2,6 +2,8 @@ project("calq-tests")
 
 set(source_files
         circular-buffer-test.cc
+        filter-buffer-test.cc
+        haplotyper-test.cc
         lloyd-max-quantizer-test.cc
         main.cc
         softclip-spreader-test.cc
