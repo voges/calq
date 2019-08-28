@@ -25,7 +25,6 @@ class QualDecoder {
    private:
     uint32_t posOffset_;
     int qualityValueOffset_;
-    size_t uqvIdx_;
     std::vector<size_t> qviIdx_;
     std::vector<Quantizer> quantizers_;
     EncodingBlock* out;

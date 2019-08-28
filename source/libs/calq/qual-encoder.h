@@ -43,7 +43,6 @@ class QualEncoder {
     // are finally encoded
     std::deque<EncodingRead> samRecordDeque_;
 
-    bool debugOut;
     Version version_;
 };
 

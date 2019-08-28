@@ -27,7 +27,6 @@ QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer
       quantizers_(std::move(quantizers)),
 
       samRecordDeque_(),
-      debugOut(options.debugPileup),
 
       version_(options.version) {}
 

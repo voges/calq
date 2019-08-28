@@ -7,7 +7,6 @@ namespace calq {
 QualDecoder::QualDecoder(const DecodingBlock& b, uint32_t positionOffset, uint8_t qualityOffset, EncodingBlock* o)
     : posOffset_(positionOffset),
       qualityValueOffset_(qualityOffset),
-      uqvIdx_(0),
       qviIdx_(b.stepindices.size(), 0),
       quantizers_(0),
       out(o),
