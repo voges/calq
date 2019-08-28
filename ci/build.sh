@@ -13,3 +13,4 @@ fi
 cd "${build_dir}"
 cmake ..
 make
+# make doc
