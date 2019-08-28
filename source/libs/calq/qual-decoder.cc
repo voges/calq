@@ -4,8 +4,6 @@
 
 namespace calq {
 
-// -----------------------------------------------------------------------------
-
 QualDecoder::QualDecoder(const DecodingBlock& b, uint32_t positionOffset, uint8_t qualityOffset, EncodingBlock* o)
     : posOffset_(positionOffset),
       qualityValueOffset_(qualityOffset),
@@ -24,11 +22,7 @@ QualDecoder::QualDecoder(const DecodingBlock& b, uint32_t positionOffset, uint8_
     }
 }
 
-// -----------------------------------------------------------------------------
-
 QualDecoder::~QualDecoder() = default;
-
-// -----------------------------------------------------------------------------
 
 void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
     std::string qual;
@@ -56,7 +50,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
                     uint8_t qualityValueIndex =
                         in.stepindices.at(static_cast<size_t>(quantizerIndex))[qviIdx_[quantizerIndex]++] - '0';
 
-                    uint8_t q = uint8_t(quantizers_.at(quantizerIndex).indexToReconstructionValue(qualityValueIndex));
+                    auto q = uint8_t(quantizers_.at(quantizerIndex).indexToReconstructionValue(qualityValueIndex));
 
                     qual += static_cast<char>(q + qualityValueOffset_);
                 }
@@ -86,9 +80,4 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
     out->qvalues.push_back(std::move(qual));
 }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace calq
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

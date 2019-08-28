@@ -11,7 +11,6 @@ namespace calq {
 class SAMPileup {
    public:
     SAMPileup();
-
     bool empty() const;
     void clear();
 
@@ -27,25 +26,20 @@ class SAMPileupDeque {
 
    public:
     SAMPileupDeque();
-    ~SAMPileupDeque();
-
     const SAMPileup& back() const;
     void clear();
     bool empty() const;
     const SAMPileup& front() const;
     size_t length() const;
     const SAMPileup& operator[](const size_t& n) const;
-    void pop_back();
+//    void pop_back();
     void pop_front();
     size_t size() const;
-
     uint32_t posMax() const;
     uint32_t posMin() const;
-
     void setPosMax(const uint32_t& posMax);
     void setPosMin(const uint32_t& posMin);
-
-    void add(const EncodingRead& r, uint8_t qvalOffset, uint8_t hqSoftClipThreshold);
+    void add(const EncodingRead& r, uint8_t qvOffset, uint8_t hqSoftClipThreshold);
 
    private:
     std::deque<SAMPileup> pileups_{};

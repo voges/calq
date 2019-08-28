@@ -7,7 +7,7 @@
 
 namespace calq {
 
-QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer>  quant, DecodingBlock* o)
+QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer>  quantizers, DecodingBlock* o)
     : nrMappedRecords_(0),
       NR_QUANTIZERS(options.quantizationMax - options.quantizationMin + 1),
 
@@ -24,7 +24,7 @@ QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer
 
       posCounter(0),
       hqSoftClipThreshold(options.hqSoftClipThreshold),
-      quantizers_(std::move(quant)),
+      quantizers_(std::move(quantizers)),
 
       samRecordDeque_(),
       debugOut(options.debugPileup),

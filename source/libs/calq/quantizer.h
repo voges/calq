@@ -11,16 +11,13 @@ class Quantizer {
     Quantizer();
     explicit Quantizer(std::map<int, int> inverseLut);
     virtual ~Quantizer();
-
     int valueToIndex(int value) const;
     int indexToReconstructionValue(int index) const;
-
     const std::map<int, int>& inverseLut() const;
 
    protected:
-    // value->(index,reconstructionValue)
-    std::map<int, std::pair<int, int>> lut_;
-    std::map<int, int> inverseLut_;  // index->reconstructionValue
+    std::map<int, std::pair<int, int>> lut_;  // value->(index,reconstructionValue)
+    std::map<int, int> inverseLut_;           // index->reconstructionValue
 };
 
 }  // namespace calq

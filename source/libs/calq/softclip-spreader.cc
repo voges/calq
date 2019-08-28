@@ -3,9 +3,12 @@
 
 namespace calq {
 
-double SoftclipSpreader::squash(double activity, double antiActivity) const {
-    return activity / (activity + antiActivity);
-}
+SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips, bool isSquashed)
+    : buffer(max_prop, 0.0),
+      original(max_prop, 0.0),
+      MAX_PROPAGATION(max_prop),
+      MIN_HQ_SOFTCLIPS(min_hq_clips),
+      squashed(isSquashed) {}
 
 double SoftclipSpreader::push(double score, size_t softclips) {
     // Trigger spreading
@@ -42,11 +45,8 @@ double SoftclipSpreader::push(double score, size_t softclips) {
 
 size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
 
-SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips, bool isSquashed)
-    : buffer(max_prop, 0.0),
-      original(max_prop, 0.0),
-      MAX_PROPAGATION(max_prop),
-      MIN_HQ_SOFTCLIPS(min_hq_clips),
-      squashed(isSquashed) {}
+double SoftclipSpreader::squash(double activity, double antiActivity) const {
+    return activity / (activity + antiActivity);
+}
 
 }  // namespace calq

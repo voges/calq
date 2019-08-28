@@ -43,13 +43,13 @@ size_t SAMPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 
 const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
 
-void SAMPileupDeque::pop_back() {
-    if (pileups_.empty()) {
-        throwErrorException("Deque is empty");
-    }
-    pileups_.pop_back();
-    posMax_--;
-}
+//void SAMPileupDeque::pop_back() {
+//    if (pileups_.empty()) {
+//        throwErrorException("Deque is empty");
+//    }
+//    pileups_.pop_back();
+//    posMax_--;
+//}
 
 void SAMPileupDeque::pop_front() {
     if (pileups_.empty()) {
@@ -87,7 +87,7 @@ void SAMPileupDeque::setPosMin(const uint32_t& posMin) {
     }
 }
 
-void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvalOffset, uint8_t hqSoftClipThreshold) {
+void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvOffset, uint8_t hqSoftClipThreshold) {
     if (this->empty()) {
         throwErrorException("samPileupQueue is empty");
     }
@@ -109,7 +109,7 @@ void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvalOffset, uint8_t hqSo
             continue;
         }
 
-        const auto HQ_SOFTCLIP_THRESHOLD = static_cast<const char>(hqSoftClipThreshold + qvalOffset);
+        const auto HQ_SOFTCLIP_THRESHOLD = static_cast<const char>(hqSoftClipThreshold + qvOffset);
 
         switch (r.cigar[cigarIdx]) {
             case 'M':
