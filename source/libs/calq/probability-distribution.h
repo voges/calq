@@ -6,37 +6,20 @@
 
 namespace calq {
 
-// Samples a probability distribution
 class ProbabilityDistribution {
-   private:
-    std::vector<size_t> pdf;
-
-    // Offset
-    size_t rangeMin;
-
    public:
     ProbabilityDistribution(size_t rangeMin, size_t rangeMax);
-
-    // Increases counter of value
-    void addToPdf(size_t qualScore, size_t number = 1);
-
-    // Reset all counters to zero
-    void resetPdf();
-
-    // Returns size of interval of valid values
+    void add(size_t value, size_t count = 1);
+    void reset();
     size_t size() const;
-
-    // Returns current count of value
-    size_t getCount(size_t value) const;
-
-    // Returns current count of index (starting at zero)
+    size_t count(size_t value) const;
     size_t operator[](size_t index) const;
+    size_t rangeMin() const;
+    size_t rangeMax() const;
 
-    // Lowest possible value
-    size_t getRangeMin() const;
-
-    // Greatest possible value
-    size_t getRangeMax() const;
+   private:
+    std::vector<size_t> pdf_;
+    size_t rangeMin_;
 };
 
 }  // namespace calq

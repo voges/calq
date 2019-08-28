@@ -60,7 +60,7 @@ void encode(const EncodingOptions& opt, const SideInformation& sideInformation, 
             if ((static_cast<int>(q) - opt.qualityValueOffset) > opt.qualityValueMax) {
                 throwErrorException("Quality value too large");
             }
-            pdf.addToPdf((static_cast<size_t>(q) - opt.qualityValueOffset));
+            pdf.add((static_cast<size_t>(q) - opt.qualityValueOffset));
         }
     }
 

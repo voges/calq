@@ -6,7 +6,7 @@ TEST(LloydMaxQuantizerTest, UniformDistribution) { // NOLINT(cert-err58-cpp)
     calq::ProbabilityDistribution pdf(0, 99);
 
     for (int i = 0; i <= 99; i++) {
-        pdf.addToPdf(static_cast<size_t>(i));
+        pdf.add(static_cast<size_t>(i));
     }
     q.build(pdf);
 
@@ -22,7 +22,7 @@ TEST(LloydMaxQuantizerTest, NonUniformDistribution) { // NOLINT(cert-err58-cpp)
     calq::ProbabilityDistribution pdf(1, 100);
 
     for (int i = 1; i <= 100; ++i) {
-        pdf.addToPdf(static_cast<size_t>(i), static_cast<size_t>(pow(abs(i - 50), 4)));
+        pdf.add(static_cast<size_t>(i), static_cast<size_t>(pow(abs(i - 50), 4)));
     }
 
     q.build(pdf);
