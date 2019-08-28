@@ -15,7 +15,7 @@ QualDecoder::QualDecoder(const DecodingBlock& b, uint32_t positionOffset, uint8_
     out->qvalues.clear();
     for (const auto& q : b.codeBooks) {
         std::map<int, int> steps;
-        for (unsigned int i = 0; i < q.size(); ++i) {
+        for (size_t i = 0; i < q.size(); ++i) {
             steps[i] = q[i];
         }
         quantizers_.emplace_back(steps);

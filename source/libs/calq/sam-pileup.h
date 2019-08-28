@@ -22,8 +22,6 @@ class SAMPileup {
 };
 
 class SAMPileupDeque {
-    friend class SAMRecord;
-
    public:
     SAMPileupDeque();
     const SAMPileup& back() const;
