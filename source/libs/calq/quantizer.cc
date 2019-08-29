@@ -21,7 +21,7 @@ int Quantizer::valueToIndex(const int value) const {
     return lut_.at(value).first;
 }
 
-int Quantizer::indexToReconstructionValue(const int index) const {
+int Quantizer::indexToReconstructedValue(const int index) const {
     if (inverseLut_.find(index) == inverseLut_.end()) {
         throwErrorException("Index not found");
     }

@@ -53,7 +53,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
                     uint8_t qualityValueIndex =
                         in.stepindices.at(static_cast<size_t>(quantizerIndex))[qviIdx_[quantizerIndex]++] - '0';
 
-                    auto q = uint8_t(quantizers_.at(quantizerIndex).indexToReconstructionValue(qualityValueIndex));
+                    auto q = uint8_t(quantizers_.at(quantizerIndex).indexToReconstructedValue(qualityValueIndex));
 
                     qual += static_cast<char>(q + qualityValueOffset_);
                 }
@@ -64,7 +64,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
                 for (size_t i = 0; i < opLen; i++) {
                     int qualityValueIndex =
                         in.stepindices.at(quantizers_.size() - 1)[qviIdx_[quantizers_.size() - 1]++] - '0';
-                    int q = quantizers_.at(quantizers_.size() - 1).indexToReconstructionValue(qualityValueIndex);
+                    int q = quantizers_.at(quantizers_.size() - 1).indexToReconstructedValue(qualityValueIndex);
                     qual += static_cast<char>(q + qualityValueOffset_);
                 }
                 break;
