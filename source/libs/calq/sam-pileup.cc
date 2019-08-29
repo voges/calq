@@ -47,7 +47,7 @@ size_t SAMPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 
 const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
 
-//void SAMPileupDeque::pop_back() {
+// void SAMPileupDeque::pop_back() {
 //    if (pileups_.empty()) {
 //        throwErrorException("Deque is empty");
 //    }

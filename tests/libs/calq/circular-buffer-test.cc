@@ -1,13 +1,13 @@
 #include "calq/circular-buffer.h"
 #include <gtest/gtest.h>
 
-TEST(CircularBufferTest, Size) { // NOLINT(cert-err58-cpp)
+TEST(CircularBufferTest, Size) {  // NOLINT(cert-err58-cpp)
     calq::CircularBuffer<int> buffer(3, 0);
 
     EXPECT_EQ(buffer.size(), 3);
 }
 
-TEST(CircularBufferTest, Access) { // NOLINT(cert-err58-cpp)
+TEST(CircularBufferTest, Access) {  // NOLINT(cert-err58-cpp)
     calq::CircularBuffer<int> buffer(3, 0);
 
     buffer.push(1);

@@ -1,7 +1,7 @@
 #include "calq/softclip-spreader.h"
 #include <gtest/gtest.h>
 
-TEST(SoftclipSpreaderTest, Everything) { // NOLINT(cert-err58-cpp)
+TEST(SoftclipSpreaderTest, Everything) {  // NOLINT(cert-err58-cpp)
     calq::SoftclipSpreader b(5, 3, false);
 
     EXPECT_EQ(b.getOffset(), 5);

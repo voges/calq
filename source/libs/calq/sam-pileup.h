@@ -34,7 +34,7 @@ class SAMPileupDeque {
     const SAMPileup& front() const;
     size_t length() const;
     const SAMPileup& operator[](const size_t& n) const;
-//    void pop_back();
+    //    void pop_back();
     void pop_front();
     size_t size() const;
     uint32_t posMax() const;

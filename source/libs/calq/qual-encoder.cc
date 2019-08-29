@@ -11,7 +11,7 @@
 
 namespace calq {
 
-QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer>  quantizers, DecodingBlock* o)
+QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer> quantizers, DecodingBlock* o)
     : nrMappedRecords_(0),
       NR_QUANTIZERS(options.quantizationMax - options.quantizationMin + 1),
 
