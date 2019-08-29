@@ -198,8 +198,9 @@ struct DecodingBlock {
 };
 
 /**
- * Decode quality values.
- * @param sideInformation Alignment information.
+ * Decode quality values
+ * @param opt Encoding options
+ * @param sideInformation Alignment information
  * @param input Encoded quality values
  * @param output Decoded quality values
  */
@@ -207,9 +208,9 @@ void decode(const DecodingOptions& opt, const SideInformation& sideInformation, 
             EncodingBlock* output);
 
 /**
- * Encode quality values.
- * @param opt Encoding options.
- * @param sideInformation Alignment information.
+ * Encode quality values
+ * @param opt Encoding options
+ * @param sideInformation Alignment information
  * @param input Decoded quality values
  * @param output Encoded quality values
  */
