@@ -6,6 +6,7 @@ set(source_files
         haplotyper-test.cc
         lloyd-max-quantizer-test.cc
         main.cc
+        quantizer-test.cc
         softclip-spreader-test.cc
 )
 
