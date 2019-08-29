@@ -6,7 +6,7 @@ if(DOXYGEN_FOUND)
 
     if(NOT DOXYGEN_DOT_FOUND)
         message(WARNING
-            "'dot' tool from graphviz not found; "
+            "'dot' tool from Graphviz not found; "
             "Doxygen documentation will not include graphs"
         )
     endif()
