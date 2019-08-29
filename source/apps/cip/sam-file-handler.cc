@@ -1,16 +1,9 @@
 #include "sam-file-handler.h"
 #include <algorithm>
-
-// -----------------------------------------------------------------------------
-
 #include "fasta-file.h"
 #include "sam-file.h"
 
-// -----------------------------------------------------------------------------
-
 namespace cip {
-
-// -----------------------------------------------------------------------------
 
 SAMFileHandler::SAMFileHandler(const std::string& inputFileName, const std::string& referenceFileName)
     : samFile_(nullptr), fastaFile(nullptr), side(), encBlock(), unmapped(), refStart(), refEnd(), rname() {
@@ -20,11 +13,7 @@ SAMFileHandler::SAMFileHandler(const std::string& inputFileName, const std::stri
     }
 }
 
-// -----------------------------------------------------------------------------
-
 SAMFileHandler::~SAMFileHandler() = default;
-
-// -----------------------------------------------------------------------------
 
 uint32_t computeRefLength(const std::string& cigar) {
     // Compute 0-based first position and 0-based last position this record
@@ -63,8 +52,6 @@ uint32_t computeRefLength(const std::string& cigar) {
     }
     return posMax;
 }
-
-// -----------------------------------------------------------------------------
 
 size_t SAMFileHandler::readBlock(const size_t& blockSize) {
     this->unmapped.mappedFlags.clear();
@@ -112,18 +99,12 @@ size_t SAMFileHandler::readBlock(const size_t& blockSize) {
     return returnCode;
 }
 
-// -----------------------------------------------------------------------------
-
 void SAMFileHandler::getMappedBlock(calq::EncodingBlock* var) { var->qvalues.swap(encBlock.qvalues); }
-
-// -----------------------------------------------------------------------------
 
 void SAMFileHandler::getUnmappedBlock(UnmappedInformation* var) {
     var->mappedFlags.swap(unmapped.mappedFlags);
     var->unmappedQualityScores.swap(unmapped.unmappedQualityScores);
 }
-
-// -----------------------------------------------------------------------------
 
 void SAMFileHandler::getSideInformation(calq::SideInformation* var) {
     side.cigars.swap(var->cigars);
@@ -134,25 +115,12 @@ void SAMFileHandler::getSideInformation(calq::SideInformation* var) {
     var->qualOffset = side.qualOffset;
 }
 
-// -----------------------------------------------------------------------------
-
 size_t SAMFileHandler::nrBlocksRead() const { return this->samFile_->nrBlocksRead(); }
-
-// -----------------------------------------------------------------------------
 
 size_t SAMFileHandler::nrMappedRecordsRead() const { return this->samFile_->nrMappedRecordsRead(); }
 
-// -----------------------------------------------------------------------------
-
 size_t SAMFileHandler::nrUnmappedRecordsRead() const { return this->samFile_->nrUnmappedRecordsRead(); }
-
-// -----------------------------------------------------------------------------
 
 size_t SAMFileHandler::nrRecordsRead() const { return this->samFile_->nrRecordsRead(); }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace cip
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------

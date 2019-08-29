@@ -1,28 +1,12 @@
 #include "cq-file.h"
-
-// -----------------------------------------------------------------------------
-
 #include <cmath>
 #include <cstring>
-
-// -----------------------------------------------------------------------------
-
 #include <memory>
-
-// -----------------------------------------------------------------------------
-
 #include "calq/calq-codec.h"
-
-// -----------------------------------------------------------------------------
-
 #include "gabac/buffer_input_stream.h"
 #include "gabac/buffer_output_stream.h"
 
-// -----------------------------------------------------------------------------
-
 namespace cip {
-
-// -----------------------------------------------------------------------------
 
 CQFile::CQFile(const std::string &path, const Mode &mode)
     : File(path, mode), nrReadFileFormatBytes_(0), nrWrittenFileFormatBytes_(0) {
@@ -31,19 +15,11 @@ CQFile::CQFile(const std::string &path, const Mode &mode)
     }
 }
 
-// -----------------------------------------------------------------------------
-
 CQFile::~CQFile() = default;
-
-// -----------------------------------------------------------------------------
 
 size_t CQFile::nrReadFileFormatBytes() const { return nrReadFileFormatBytes_; }
 
-// -----------------------------------------------------------------------------
-
 size_t CQFile::nrWrittenFileFormatBytes() const { return nrWrittenFileFormatBytes_; }
-
-// -----------------------------------------------------------------------------
 
 size_t CQFile::readHeader(size_t *blockSize) {
     if (blockSize == nullptr) {
@@ -69,8 +45,6 @@ size_t CQFile::readHeader(size_t *blockSize) {
 
     return ret;
 }
-
-// -----------------------------------------------------------------------------
 
 size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>> *const quantizers) {
     if (!quantizers->empty()) {
@@ -103,8 +77,6 @@ size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>> *const quantizer
 
     return ret;
 }
-
-// -----------------------------------------------------------------------------
 
 size_t CQFile::readQualBlock(std::string *block, const gabac::EncodingConfiguration &configuration) {
     if (block == nullptr) {
@@ -182,8 +154,6 @@ size_t CQFile::readQualBlock(std::string *block, const gabac::EncodingConfigurat
     return ret;
 }
 
-// -----------------------------------------------------------------------------
-
 size_t CQFile::writeHeader(const size_t &blockSize) {
     if (blockSize == 0) {
         throwErrorException("blockSize must be greater than zero");
@@ -198,8 +168,6 @@ size_t CQFile::writeHeader(const size_t &blockSize) {
 
     return ret;
 }
-
-// -----------------------------------------------------------------------------
 
 size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers) {
     if (quantizers.empty()) {
@@ -224,8 +192,6 @@ size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantize
 
     return ret;
 }
-
-// -----------------------------------------------------------------------------
 
 size_t CQFile::writeQualBlock(unsigned char *block, const size_t &blockSize,
                               const gabac::EncodingConfiguration &configuration) {
@@ -326,8 +292,6 @@ size_t CQFile::writeQualBlock(unsigned char *block, const size_t &blockSize,
     return ret;
 }
 
-// -----------------------------------------------------------------------------
-
 size_t CQFile::writeBlock(const calq::EncodingOptions &opts, const gabac::EncodingConfiguration &configuration,
                           const calq::DecodingBlock &block, const calq::SideInformation &side,
                           const std::string &unmappedQualityValues_, bool STREAMOUT, size_t *compressedSizeMapped,
@@ -411,8 +375,6 @@ size_t CQFile::writeBlock(const calq::EncodingOptions &opts, const gabac::Encodi
     return *compressedSizeUnmapped + *compressedSizeMapped;
 }
 
-// -----------------------------------------------------------------------------
-
 size_t CQFile::readBlock(calq::DecodingBlock *out, calq::SideInformation *side, std::string *unmapped,
                          const gabac::EncodingConfiguration &configuration
 
@@ -464,9 +426,4 @@ size_t CQFile::readBlock(calq::DecodingBlock *out, calq::SideInformation *side, 
     return ret;
 }
 
-// -----------------------------------------------------------------------------
-
 }  // namespace cip
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
