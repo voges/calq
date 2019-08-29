@@ -1,3 +1,7 @@
+/**
+ * @file errors.h
+ */
+
 #ifndef CALQ_ERROR_H_
 #define CALQ_ERROR_H_
 

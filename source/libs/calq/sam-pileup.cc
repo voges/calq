@@ -1,3 +1,7 @@
+/**
+ * @file sam-pileup.cc
+ */
+
 #include "sam-pileup.h"
 #include "encoding-read.h"
 #include "errors.h"

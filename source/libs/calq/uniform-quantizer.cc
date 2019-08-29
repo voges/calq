@@ -1,3 +1,7 @@
+/**
+ * @file uniform-quantizer.cc
+ */
+
 #include "uniform-quantizer.h"
 #include <cmath>
 #include <queue>

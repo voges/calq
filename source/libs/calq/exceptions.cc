@@ -1,3 +1,7 @@
+/**
+ * @file exceptions.cc
+ */
+
 #include "exceptions.h"
 
 #include <utility>

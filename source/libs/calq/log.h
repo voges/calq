@@ -1,3 +1,7 @@
+/**
+ * @file log.h
+ */
+
 #ifndef CALQ_LOG_H_
 #define CALQ_LOG_H_
 

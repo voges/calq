@@ -1,3 +1,7 @@
+/**
+ * @file qual-encoder.cc
+ */
+
 #include "qual-encoder.h"
 #include <algorithm>
 #include <iostream>

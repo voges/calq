@@ -1,3 +1,7 @@
+/**
+ * @file calq-codec.cc
+ */
+
 #include "calq-codec.h"
 #include <map>
 #include <utility>

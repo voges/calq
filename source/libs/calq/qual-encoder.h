@@ -1,3 +1,7 @@
+/**
+ * @file qual-encoder.h
+ */
+
 #ifndef CALQ_QUAL_ENCODER_H_
 #define CALQ_QUAL_ENCODER_H_
 

@@ -1,3 +1,7 @@
+/**
+ * @file circular-buffer.h
+ */
+
 #ifndef CALQ_CIRCULAR_BUFFER_H_
 #define CALQ_CIRCULAR_BUFFER_H_
 

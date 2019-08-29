@@ -1,3 +1,7 @@
+/**
+ * @file uniform-quantizer.h
+ */
+
 #ifndef CALQ_UNIFORM_QUANTIZER_H_
 #define CALQ_UNIFORM_QUANTIZER_H_
 

@@ -1,3 +1,7 @@
+/**
+ * @file encoding-read.h
+ */
+
 #ifndef CALQ_ENCODING_READ_H_
 #define CALQ_ENCODING_READ_H_
 

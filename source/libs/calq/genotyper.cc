@@ -1,3 +1,7 @@
+/**
+ * @file genotyper.cc
+ */
+
 #include "genotyper.h"
 #include <cmath>
 #include <iomanip>

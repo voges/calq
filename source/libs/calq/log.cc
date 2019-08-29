@@ -1,3 +1,7 @@
+/**
+ * @file log.cc
+ */
+
 #include "calq/log.h"
 #include <memory>
 

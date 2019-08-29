@@ -1,3 +1,7 @@
+/**
+ * @file quantizer.cc
+ */
+
 #include "quantizer.h"
 #include <utility>
 #include "errors.h"

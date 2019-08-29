@@ -1,3 +1,7 @@
+/**
+ * @file filter-buffer.cc
+ */
+
 #include "filter-buffer.h"
 #include <algorithm>
 #include <cmath>

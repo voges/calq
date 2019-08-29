@@ -1,3 +1,7 @@
+/**
+ * @file qual-decoder.cc
+ */
+
 #include "qual-decoder.h"
 #include "calq-codec.h"
 #include "errors.h"

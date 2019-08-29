@@ -1,3 +1,7 @@
+/**
+ * @file calq-codec.h
+ */
+
 #ifndef CALQ_CALQ_CODEC_H_
 #define CALQ_CALQ_CODEC_H_
 
