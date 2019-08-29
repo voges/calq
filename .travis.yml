@@ -20,6 +20,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - doxygen
             - g++-5
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
@@ -32,5 +33,5 @@ before_install:
 before_script:
 
 script:
-  - ./ci/build.sh
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./ci/build-with-doc.sh; else ./ci/build.sh; fi
   - ./ci/test.sh
