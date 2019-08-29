@@ -1,3 +1,5 @@
 - [x] Remove/Replace Boost
 - [x] Clean up todo folder
 - [ ] Make GABAC work again and add rANS
+- [ ] Update README.md once everything is working
+- [ ] Clean up scripts/benchmark and scripts/variant-calling
