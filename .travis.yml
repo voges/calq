@@ -37,12 +37,12 @@ script:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./ci/build-with-doc.sh; else ./ci/build.sh; fi
   - ./ci/test.sh
 
-deploy:
-  provider: pages
-  skip_cleanup: true
-  local_dir: ./build/doc
-  github_token: "${GITHUB_TOKEN}"
-  keep_history: true
-  on:
-    branch: master
-    condition: "${TRAVIS_OS_NAME}" = "linux"
+#deploy:
+#  provider: pages
+#  skip_cleanup: true
+#  local_dir: ./build/doc
+#  github_token: "${GITHUB_TOKEN}"
+#  keep_history: true
+#  on:
+#    branch: master
+#    condition: "${TRAVIS_OS_NAME}" = "linux"
