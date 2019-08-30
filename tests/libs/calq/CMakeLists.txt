@@ -3,11 +3,16 @@ project("calq-tests")
 set(source_files
         circular-buffer-test.cc
         filter-buffer-test.cc
+        genotyper-test.cc
         haplotyper-test.cc
         lloyd-max-quantizer-test.cc
         main.cc
+        probability-distribution-test.cc
         quantizer-test.cc
+        sam-pileup-test.cc
         softclip-spreader-test.cc
+        uniform-min-max-quantizer-test.cc
+        uniform-quantizer-test.cc
 )
 
 add_executable(calq-tests ${source_files})
