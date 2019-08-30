@@ -53,6 +53,10 @@ Commits to this repository are continuously tested on **Travis CI** (https://tra
 
 We use **CMake** (https://cmake.org) as build system.
 
+## Documentation
+
+The Doxygen documentation of the CALQ library is available at https://voges.github.io/calq/.
+
 ## Who do I talk to?
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
