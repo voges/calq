@@ -2,7 +2,7 @@
 #include <calq/calq-codec.h>
 #include <gtest/gtest.h>
 
-TEST(HaplotyperTest, Everything) {  // NOLINT(cert-err58-cpp)
+TEST(Haplotyper, Everything) {  // NOLINT(cert-err58-cpp)
     calq::Haplotyper h(5, 2, 33, 8, 5, 3, 5, false, true, calq::FilterType::GAUSS);
 
     EXPECT_EQ(h.getOffset(), 10);

@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include "calq/exceptions.h"
 
-TEST(QuantizerTest, EmptyLut) {  // NOLINT(cert-err58-cpp)
+TEST(Quantizer, EmptyLut) {  // NOLINT(cert-err58-cpp)
     calq::Quantizer q;
 
     // The is no table in the quantizer. Thus we expect these functions to
@@ -15,7 +15,7 @@ TEST(QuantizerTest, EmptyLut) {  // NOLINT(cert-err58-cpp)
     EXPECT_EQ(inverseLut.size(), 0);
 }
 
-TEST(QuantizerTest, PopulatedLut) {  // NOLINT(cert-err58-cpp)
+TEST(Quantizer, PopulatedLut) {  // NOLINT(cert-err58-cpp)
     std::map<int, int> inverseLut = {{0, 0}, {1, 0}, {2, 1}, {3, 1}};
     calq::Quantizer q(inverseLut);
 

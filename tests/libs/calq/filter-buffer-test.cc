@@ -1,7 +1,7 @@
 #include "calq/filter-buffer.h"
 #include <gtest/gtest.h>
 
-TEST(FilterBufferTest, Convolution) {  // NOLINT(cert-err58-cpp)
+TEST(FilterBuffer, Convolution) {  // NOLINT(cert-err58-cpp)
     calq::FilterBuffer buffer([](size_t pos, size_t size) -> double { return pos / static_cast<double>(size - 1); }, 3);
 
     EXPECT_EQ(buffer.filter(), 0);
@@ -14,7 +14,7 @@ TEST(FilterBufferTest, Convolution) {  // NOLINT(cert-err58-cpp)
     buffer.push(4);
 }
 
-TEST(FilterBufferTest, Offset) {  // NOLINT(cert-err58-cpp)
+TEST(FilterBuffer, Offset) {  // NOLINT(cert-err58-cpp)
     calq::FilterBuffer buffer([](size_t pos, size_t size) -> double { return pos / static_cast<double>(size - 1); }, 3);
     EXPECT_EQ(buffer.getOffset(), 2);
 }
