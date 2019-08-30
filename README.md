@@ -55,7 +55,7 @@ We use **CMake** (https://cmake.org) as build system.
 
 ## Documentation
 
-The Doxygen documentation of the CALQ library is available at https://voges.github.io/calq/.
+The Doxygen documentation of the CALQ library (i.e., the documentation of all source code in ``source/libs/calq/``) is available at https://voges.github.io/calq/.
 
 ## Who do I talk to?
 
