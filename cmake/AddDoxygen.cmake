@@ -4,8 +4,11 @@ if(DOXYGEN_FOUND)
     message(STATUS "Doxygen is available")
     message(STATUS "Issue 'make doc' to build documentation")
 
-    if(NOT DOXYGEN_DOT_FOUND)
-        message(WARNING
+    if(DOXYGEN_DOT_FOUND)
+        message(STATUS "'dot' tool from Graphviz is available")
+    else()
+        message(
+            WARNING
             "'dot' tool from Graphviz not found; "
             "Doxygen documentation will not include graphs"
         )
@@ -17,7 +20,8 @@ if(DOXYGEN_FOUND)
 
     configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 
-    add_custom_target(doc
+    add_custom_target(
+        doc
         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
         WORKING_DIRECTORY ${DOCUMENTATION_DIRECTORY}
         COMMENT "Generating API documentation with Doxygen"
