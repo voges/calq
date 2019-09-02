@@ -15,8 +15,6 @@ namespace calq {
 class SAMPileup {
    public:
     SAMPileup();
-    bool empty() const;
-    void clear();
 
     uint32_t pos;            // 0-based position of this pileup
     std::string qual;        // Quality values
@@ -25,16 +23,15 @@ class SAMPileup {
     uint16_t hqSoftclipCnt;  // High quality softclips next to this position
 };
 
-class SAMPileupDeque {
+class SamPileupDeque {
    public:
-    SAMPileupDeque();
+    SamPileupDeque();
     const SAMPileup& back() const;
     void clear();
     bool empty() const;
     const SAMPileup& front() const;
     size_t length() const;
     const SAMPileup& operator[](const size_t& n) const;
-    //    void pop_back();
     void pop_front();
     size_t size() const;
     uint32_t posMax() const;

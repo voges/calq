@@ -10,52 +10,35 @@ namespace calq {
 
 SAMPileup::SAMPileup() : pos(0), qual(""), seq(""), ref('N'), hqSoftclipCnt(0) {}
 
-bool SAMPileup::empty() const { return seq.empty(); }
+SamPileupDeque::SamPileupDeque() : pileups_(), posMax_(0), posMin_(0) {}
 
-void SAMPileup::clear() {
-    pos = 0;
-    qual = "";
-    seq = "";
-    ref = 'N';
-}
-
-SAMPileupDeque::SAMPileupDeque() : pileups_(), posMax_(0), posMin_(0) {}
-
-const SAMPileup& SAMPileupDeque::back() const {
+const SAMPileup& SamPileupDeque::back() const {
     if (pileups_.empty()) {
         throwErrorException("Cannot access back() of empty deque");
     }
     return pileups_.back();
 }
 
-void SAMPileupDeque::clear() {
+void SamPileupDeque::clear() {
     pileups_.clear();
     posMax_ = 0;
     posMin_ = 0;
 }
 
-bool SAMPileupDeque::empty() const { return pileups_.empty(); }
+bool SamPileupDeque::empty() const { return pileups_.empty(); }
 
-const SAMPileup& SAMPileupDeque::front() const {
+const SAMPileup& SamPileupDeque::front() const {
     if (pileups_.empty()) {
         throwErrorException("Cannot access front() of empty deque");
     }
     return pileups_.front();
 }
 
-size_t SAMPileupDeque::length() const { return posMax_ - posMin_ + 1; }
+size_t SamPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 
-const SAMPileup& SAMPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
+const SAMPileup& SamPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
 
-// void SAMPileupDeque::pop_back() {
-//    if (pileups_.empty()) {
-//        throwErrorException("Deque is empty");
-//    }
-//    pileups_.pop_back();
-//    posMax_--;
-//}
-
-void SAMPileupDeque::pop_front() {
+    void SamPileupDeque::pop_front() {
     if (pileups_.empty()) {
         throwErrorException("Deque is empty");
     }
@@ -63,23 +46,23 @@ void SAMPileupDeque::pop_front() {
     posMin_++;
 }
 
-size_t SAMPileupDeque::size() const { return pileups_.size(); }
+size_t SamPileupDeque::size() const { return pileups_.size(); }
 
-uint32_t SAMPileupDeque::posMax() const { return posMax_; }
+uint32_t SamPileupDeque::posMax() const { return posMax_; }
 
-uint32_t SAMPileupDeque::posMin() const { return posMin_; }
+uint32_t SamPileupDeque::posMin() const { return posMin_; }
 
-void SAMPileupDeque::setPosMax(const uint32_t& posMax) {
+void SamPileupDeque::setPosMax(const uint32_t& posMax) {
     if (posMax < posMax_) {
-        throwErrorException("posMax range");
+        throwErrorException("posMax out of range");
     }
     posMax_ = posMax;
     pileups_.resize(length());
 }
 
-void SAMPileupDeque::setPosMin(const uint32_t& posMin) {
+void SamPileupDeque::setPosMin(const uint32_t& posMin) {
     if (posMin < posMin_) {
-        throwErrorException("posMin range");
+        throwErrorException("posMin out of range");
     }
 
     if (empty()) {
@@ -91,9 +74,9 @@ void SAMPileupDeque::setPosMin(const uint32_t& posMin) {
     }
 }
 
-void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvOffset, uint8_t hqSoftClipThreshold) {
+void SamPileupDeque::add(const EncodingRead& r, const uint8_t qvOffset, const uint8_t hqSoftClipThreshold) {
     if (this->empty()) {
-        throwErrorException("samPileupQueue is empty");
+        throwErrorException("Pileup queue is empty");
     }
     if ((this->posMin() > r.posMin) || (this->posMax() < r.posMax - 1)) {
         throwErrorException("samPileupQueue does not overlap record");
@@ -144,7 +127,7 @@ void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvOffset, uint8_t hqSoft
                         ++softclips;
                     }
                 }
-                /* fall through */
+                // Fall through
             case 'I':
                 idx += opLen;
                 break;
@@ -154,7 +137,7 @@ void SAMPileupDeque::add(const EncodingRead& r, uint8_t qvOffset, uint8_t hqSoft
                 break;
             case 'H':
             case 'P':
-                break;  // these have been clipped
+                break;  // These have been clipped
             default:
                 throwErrorException("Bad CIGAR string");
         }

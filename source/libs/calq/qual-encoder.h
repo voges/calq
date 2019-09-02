@@ -35,7 +35,7 @@ class QualEncoder {
     int NR_QUANTIZERS;
     uint8_t qualityValueOffset_;  // Quality value offset for this block
     uint32_t posOffset_;          // 0-based position offset of this block
-    SAMPileupDeque samPileupDeque_;
+    SamPileupDeque samPileupDeque_;
     Haplotyper haplotyper_;
     Genotyper genotyper_;
     DecodingBlock* out;
