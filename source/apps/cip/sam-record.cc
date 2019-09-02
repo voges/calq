@@ -1,6 +1,6 @@
 #include "sam-record.h"
 #include <queue>
-#include "error.h"
+#include "errors.h"
 
 namespace cip {
 

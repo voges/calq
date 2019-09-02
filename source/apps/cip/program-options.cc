@@ -206,9 +206,13 @@ void ProgramOptions::validateCommon() {
     if (inputFilePath.empty()) {
         throwErrorException("No input file name provided");
     }
-
     if (!fileExists(inputFilePath)) {
         throwErrorException("Cannot access input file");
+    }
+
+    // polyploidy
+    if (polyploidy < 1 || polyploidy > 6) {
+
     }
 
     // outputFilePath
@@ -227,90 +231,70 @@ void ProgramOptions::validate() {
     }
 }
 
-// -----------------------------------------------------------------------------
-
 void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     CLI::App app("CALQ");
 
+    app.add_flag("-d,--decompress", decompress, "Decompress");
     app.add_flag("-f,--force", force, "Force overwriting of output file(s)");
     app.add_option("-i,--input-file", inputFilePath, "Input file")->required();
     app.add_option("-o,--output-file", outputFilePath, "Output file")->required();
+    app.add_option("-b,--block-size", blockSize, "Block size (in number of SAM records)")->default_val("10000");
+    app.add_option("-p,--polyploidy", polyploidy, "Polyploidy")->default_val("2");
 
-    // options.add_options()("help,h", "[D, V1, V2] Print help")(
-    //     "force,f", po::bool_switch(&(this->force))->default_value(false),
-    //     "[D, V1, V2] Force overwriting of output files\n")(
-    //     "input_file_path,i",
-    //     po::value<std::string>(&(this->inputFilePath))->required(),
-    //     "[D, V1, V2] Input file path")(
-    //     "output_file_path,o",
-    //     po::value<std::string>(&(this->outputFilePath))->required(),
-    //     "[D, V1, V2] Output file path")(
-    //     "pileup", po::bool_switch(&(this->options.debugPileup)),
-    //     "[-, V1, V2] Be verbose and print pileup")(
-    //     "streams", po::bool_switch(&(this->debugStreams))->default_value(false),
-    //     "[-, V1, V2] Be verbose and print raw streams\n")(
-    //     "blocksize,b",
-    //     po::value<size_t>(&(this->blockSize))->default_value(10000),
-    //     "[-, V1, V2] Block size (in number of SAM records)\n")(
-    //     "quantization_min",
-    //     po::value<size_t>(&(this->quantizationMin))->default_value(2),
-    //     "[-, V1, V2] Minimum quantization steps")(
-    //     "quantization_max",
-    //     po::value<size_t>(&(this->quantizationMax))->default_value(8),
-    //     "[-, V1, V2] Maximum quantization steps")(
-    //     "polyploidy,p",
-    //     po::value<size_t>(&(this->polyploidy))->default_value(2),
-    //     "[-, V1, V2] Polyploidy\n")(
-    //     "qual_type,q",
-    //     po::value<std::string>(&(this->qualityValueType))
-    //         ->default_value("Illumina-1.8+"),
-    //     "[-, V1, V2] Quality value type \nSanger: Phred+33 "
-    //     "[0,40];\nIllumina-1.3+: Phred+64 [0,40];\nIllumina-1.5+:"
-    //     " Phred+64 [0,40];\n"
-    //     "Illumina-1.8+: Phred+33 [0,41];\nMax33: Phred+33 [0,93];\n"
-    //     "Max64: Phred+64 [0,62];\n\n")(
-    //     "quantizer_type",
-    //     po::value<std::string>(&(this->quantizerTypeStr))
-    //         ->default_value("Uniform"),
-    //     "[-, V1, V2] Quantizer type\n(Uniform; Lloyd)\n")(
-    //     "calq_version",
-    //     po::value<std::string>(&(this->versionStr))->default_value("v1"),
-    //     "[-, V1, V2] v1 or v2")(
-    //     "decompress,d",
-    //     po::bool_switch(&(this->decompress))->default_value(false),
-    //     "[D, --, --] Decompress")(
-    //     "side_info_file_path,s",
-    //     po::value<std::string>(&(this->sideInformationFilePath)),
-    //     "[D, --, --] Side information file path")(
-    //     "filter_size",
-    //     po::value<size_t>(&(this->options.filterSize))->default_value(17),
-    //     "[-, --, V2] Haplotyper filter radius")(
-    //     "filter_type",
-    //     po::value<std::string>(&(this->filterTypeStr))->default_value("Gauss"),
-    //     "[-, --, V2] Haplotyper Filter Type (Gauss; Rectangle)\n")(
-    //     "filter_cutoff",
-    //     po::value<size_t>(&(this->options.filterCutOff))->default_value(50),
-    //     "[-, --, V2] Haplotyper filter cutoff radius\n")(
-    //     "hq_softclip_threshold",
-    //     po::value<size_t>(&(this->hqSoftClipThreshold))->default_value(29),
-    //     "[-, --, V2] Quality (no offset) at which a "
-    //     "softclip is considered HQ\n")(
-    //     "hq_softclip_streak",
-    //     po::value<size_t>(&(this->options.hqSoftClipStreak))->default_value(7),
-    //     "[-, --, V2] Number of hq-softclips in one "
-    //     "position which triggers spreading of activity values\n")(
-    //     "hq_softclip_propagation",
-    //     po::value<size_t>(&(this->options.hqSoftClipPropagation))
-    //         ->default_value(50),
-    //     "[-, --, V2] Distance at which hq-softclips impact "
-    //     "the activity score\n")(
-    //     "reference_file_path,r",
-    //     po::value<std::string>(&(this->referenceFilePath)),
-    //     "[-, --, V2] Reference file (FASTA format)\n")(
-    //     "no_squash",
-    //     po::bool_switch(&(this->options.squash))->default_value(false),
-    //     "[-, --, V2] Don't squash activity values "
-    //     "between 0.0 and 1.0");
+//     options.add_options()(
+//         "quantization_min",
+//         po::value<size_t>(&(this->quantizationMin))->default_value(2),
+//         "[-, V1, V2] Minimum quantization steps")(
+//         "quantization_max",
+//         po::value<size_t>(&(this->quantizationMax))->default_value(8),
+//         "[-, V1, V2] Maximum quantization steps")(
+//         "qual_type,q",
+//         po::value<std::string>(&(this->qualityValueType))
+//             ->default_value("Illumina-1.8+"),
+//         "[-, V1, V2] Quality value type \nSanger: Phred+33 "
+//         "[0,40];\nIllumina-1.3+: Phred+64 [0,40];\nIllumina-1.5+:"
+//         " Phred+64 [0,40];\n"
+//         "Illumina-1.8+: Phred+33 [0,41];\nMax33: Phred+33 [0,93];\n"
+//         "Max64: Phred+64 [0,62];\n\n")(
+//         "quantizer_type",
+//         po::value<std::string>(&(this->quantizerTypeStr))
+//             ->default_value("Uniform"),
+//         "[-, V1, V2] Quantizer type\n(Uniform; Lloyd)\n")(
+//         "calq_version",
+//         po::value<std::string>(&(this->versionStr))->default_value("v1"),
+//         "[-, V1, V2] v1 or v2")(
+//         "side_info_file_path,s",
+//         po::value<std::string>(&(this->sideInformationFilePath)),
+//         "[D, --, --] Side information file path")(
+//         "filter_size",
+//         po::value<size_t>(&(this->options.filterSize))->default_value(17),
+//         "[-, --, V2] Haplotyper filter radius")(
+//         "filter_type",
+//         po::value<std::string>(&(this->filterTypeStr))->default_value("Gauss"),
+//         "[-, --, V2] Haplotyper Filter Type (Gauss; Rectangle)\n")(
+//         "filter_cutoff",
+//         po::value<size_t>(&(this->options.filterCutOff))->default_value(50),
+//         "[-, --, V2] Haplotyper filter cutoff radius\n")(
+//         "hq_softclip_threshold",
+//         po::value<size_t>(&(this->hqSoftClipThreshold))->default_value(29),
+//         "[-, --, V2] Quality (no offset) at which a "
+//         "softclip is considered HQ\n")(
+//         "hq_softclip_streak",
+//         po::value<size_t>(&(this->options.hqSoftClipStreak))->default_value(7),
+//         "[-, --, V2] Number of hq-softclips in one "
+//         "position which triggers spreading of activity values\n")(
+//         "hq_softclip_propagation",
+//         po::value<size_t>(&(this->options.hqSoftClipPropagation))
+//             ->default_value(50),
+//         "[-, --, V2] Distance at which hq-softclips impact "
+//         "the activity score\n")(
+//         "reference_file_path,r",
+//         po::value<std::string>(&(this->referenceFilePath)),
+//         "[-, --, V2] Reference file (FASTA format)\n")(
+//         "no_squash",
+//         po::bool_switch(&(this->options.squash))->default_value(false),
+//         "[-, --, V2] Don't squash activity values "
+//         "between 0.0 and 1.0");
 
     try {
         app.parse(argc, argv);

@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 #include "file.h"
-#include "gabac/configuration.h"
-#include "gabac/gabac.h"
+//#include "gabac/configuration.h"
+//#include "gabac/gabac.h"
 
 namespace calq {
 struct EncodingOptions;
@@ -21,13 +21,13 @@ class CQFile : public File {
     CQFile(const std::string& path, const Mode& mode);
     ~CQFile() override;
 
-    size_t readBlock(calq::DecodingBlock* out, calq::SideInformation* side, std::string* unmapped,
-                     const gabac::EncodingConfiguration& configuration);
-
-    size_t writeBlock(const calq::EncodingOptions& opts, const gabac::EncodingConfiguration& configuration,
-                      const calq::DecodingBlock& block, const calq::SideInformation& side,
-                      const std::string& unmappedQualityValues_, bool STREAMOUT, size_t* compressedSizeMapped,
-                      size_t* compressedSizeUnmapped);
+//    size_t readBlock(calq::DecodingBlock* out, calq::SideInformation* side, std::string* unmapped,
+//                     const gabac::EncodingConfiguration& configuration);
+//
+//    size_t writeBlock(const calq::EncodingOptions& opts, const gabac::EncodingConfiguration& configuration,
+//                      const calq::DecodingBlock& block, const calq::SideInformation& side,
+//                      const std::string& unmappedQualityValues_, bool STREAMOUT, size_t* compressedSizeMapped,
+//                      size_t* compressedSizeUnmapped);
 
     size_t readHeader(size_t* blockSize);
 
@@ -45,11 +45,11 @@ class CQFile : public File {
     size_t nrReadFileFormatBytes() const;
 
     size_t readQuantizers(std::vector<std::vector<uint8_t>>* quantizers);
-    size_t readQualBlock(std::string* block, const gabac::EncodingConfiguration& configuration);
+//    size_t readQualBlock(std::string* block, const gabac::EncodingConfiguration& configuration);
 
     size_t writeQuantizers(const std::vector<std::vector<uint8_t>>& quantizers);
-    size_t writeQualBlock(unsigned char* block, const size_t& blockSize,
-                          const gabac::EncodingConfiguration& configuration);
+//    size_t writeQualBlock(unsigned char* block, const size_t& blockSize,
+//                          const gabac::EncodingConfiguration& configuration);
 };
 
 }  // namespace cip

@@ -105,7 +105,7 @@ SAMFile::SAMFile(const std::string &path, const Mode &mode)
     }
     seek(fpos);  // rewind to the begin of the alignment section
     if (header.empty()) {
-        CALQ_LOG("No SAM header found");
+        std::cout << "CALQ: Warning: No SAM header found" << std::endl;
     }
 }
 
@@ -167,10 +167,7 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
                     } else {
                         // RNAME changed, seek back and break
                         seek(fpos);
-                        CALQ_LOG(
-                            "RNAME changed - read only %zu record(s) "
-                            "(%zu requested)",
-                            currentBlock.nrRecords(), blockSize);
+                        std::cout << "CALQ: Warning: RNAME changed - read only " << currentBlock.nrRecords() << "record(s) (" << blockSize << " record(s) requested)" << std::endl;
                         break;
                     }
                 }
@@ -179,10 +176,7 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
                 currentBlock.nrUnmappedRecords_++;
             }
         } else {
-            CALQ_LOG(
-                "Truncated block - read only %zu record(s) "
-                "(%zu requested) - reached EOF",
-                currentBlock.nrRecords(), blockSize);
+            std::cout << "CALQ: Warning: Truncated block - read only " << currentBlock.nrRecords() << " record(s) (" << blockSize << " record(s) requested) - reached EOF" << std::endl;
             break;
         }
     }
@@ -198,8 +192,7 @@ size_t SAMFile::readBlock(const size_t &blockSize) {
     double elapsedTimeM = static_cast<double>(elapsedTimeS) / 60.0;
     double processedPercentage = (static_cast<double>(tell()) / static_cast<double>(size())) * 100.0;
     auto remainingPercentage = 100 - processedPercentage;
-    CALQ_LOG("Processed: %.2f%% (elapsed: %.2f m), remaining: %.2f%% (~%.2f m)", processedPercentage, elapsedTimeM,
-             remainingPercentage, elapsedTimeM * (remainingPercentage / processedPercentage));
+    std::cout << "Processed " << processedPercentage << "% (elapsed: " << elapsedTimeM << " m), remaining: " << remainingPercentage << "% (~" << elapsedTimeM * (remainingPercentage / processedPercentage) << "m)" << std::endl;
 
     return currentBlock.nrRecords();
 }

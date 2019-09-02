@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <string>
-#include "error.h"
+#include "errors.h"
 
 namespace cip {
 
