@@ -7,14 +7,14 @@
 
 namespace calq {
 
-SoftclipSpreader::SoftclipSpreader(size_t max_prop, size_t min_hq_clips, bool isSquashed)
-    : buffer(max_prop, 0.0),
-      original(max_prop, 0.0),
-      MAX_PROPAGATION(max_prop),
-      MIN_HQ_SOFTCLIPS(min_hq_clips),
+SoftclipSpreader::SoftclipSpreader(const size_t maxPropagation, const size_t minHqSoftclips, const bool isSquashed)
+    : buffer(maxPropagation, 0.0),
+      original(maxPropagation, 0.0),
+      MAX_PROPAGATION(maxPropagation),
+      MIN_HQ_SOFTCLIPS(minHqSoftclips),
       squashed(isSquashed) {}
 
-double SoftclipSpreader::push(double score, size_t softclips) {
+double SoftclipSpreader::push(const double score, const size_t softclips) {
     // Trigger spreading
     if (softclips >= MIN_HQ_SOFTCLIPS) {
         // Radius
@@ -49,7 +49,7 @@ double SoftclipSpreader::push(double score, size_t softclips) {
 
 size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
 
-double SoftclipSpreader::squash(double activity, double antiActivity) const {
+double SoftclipSpreader::squash(const double activity, const double antiActivity) const {
     return activity / (activity + antiActivity);
 }
 
