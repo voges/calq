@@ -11,8 +11,6 @@ class ProgramOptions {
 
     void validate();
 
-    // cip::EncodingOptions options;
-
     bool force;
     bool debugStreams;
     bool test;
@@ -28,8 +26,8 @@ class ProgramOptions {
     bool decompress;
     std::string sideInformationFilePath;
 
-    size_t quantizationMin;
-    size_t quantizationMax;
+    size_t minNumQuantSteps;
+    size_t manNumQuantSteps;
     size_t polyploidy;
     size_t hqSoftClipThreshold;
 

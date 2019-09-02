@@ -1,7 +1,7 @@
 #include "helpers.h"
 #include <fstream>
 
-namespace cip {
+namespace util {
 
 bool fileExists(const std::string& path) {
     std::ifstream ifs(path.c_str());
@@ -15,4 +15,4 @@ std::string fileNameExtension(const std::string& path) {
     return "";
 }
 
-}  // namespace cip
+}  // namespace util

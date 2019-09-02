@@ -1,20 +1,20 @@
-#include "file.h"
+#include "file-writer.h"
 #include <climits>
 
 namespace cip {
 
-File::File() : fsize_(0), mode_(File::Mode::MODE_READ), nrReadBytes_(0), nrWrittenBytes_(0) {
+FileWriter::FileWriter() : fsize_(0), mode_(FileWriter::Mode::MODE_READ), nrReadBytes_(0), nrWrittenBytes_(0) {
     filestream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 }
 
-File::File(const std::string &path, Mode mode) : fsize_(0), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
+FileWriter::FileWriter(const std::string &path, Mode mode) : fsize_(0), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
     filestream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     this->open(path, mode);
 }
 
-File::~File() { close(); }
+FileWriter::~FileWriter() { close(); }
 
-void File::open(const std::string &path, Mode mode) {
+void FileWriter::open(const std::string &path, Mode mode) {
     if (path.empty()) {
         throwErrorException("path is empty");
     }
@@ -37,7 +37,7 @@ void File::open(const std::string &path, Mode mode) {
     }
 }
 
-void File::close() {
+void FileWriter::close() {
     if (filestream.is_open()) {
         try {
             filestream.close();
@@ -47,9 +47,9 @@ void File::close() {
     }
 }
 
-bool File::eof() const { return filestream.eof(); }
+bool FileWriter::eof() const { return filestream.eof(); }
 
-void File::seek(size_t pos) {
+void FileWriter::seek(size_t pos) {
     if (pos > LONG_MAX) {
         throwErrorException("pos out of range");
     }
@@ -60,9 +60,9 @@ void File::seek(size_t pos) {
     }
 }
 
-size_t File::size() const { return fsize_; }
+size_t FileWriter::size() const { return fsize_; }
 
-size_t File::tell() {
+size_t FileWriter::tell() {
     try {
         return static_cast<size_t>(filestream.tellg());
     } catch (std::exception &e) {
@@ -72,25 +72,25 @@ size_t File::tell() {
     return fsize_;
 }
 
-size_t File::read(void *buffer, size_t size) { return readValue(reinterpret_cast<unsigned char *>(buffer), size); }
+size_t FileWriter::read(void *buffer, size_t size) { return readValue(reinterpret_cast<unsigned char *>(buffer), size); }
 
-size_t File::write(const void *buffer, size_t size) {
+size_t FileWriter::write(const void *buffer, size_t size) {
     return writeValue(reinterpret_cast<const unsigned char *>(buffer), size);
 }
 
-size_t File::readUint8(uint8_t *byte) { return readValue(byte, 1); }
+size_t FileWriter::readUint8(uint8_t *byte) { return readValue(byte, 1); }
 
-size_t File::readUint32(uint32_t *dword) { return readValue(dword, 1); }
+size_t FileWriter::readUint32(uint32_t *dword) { return readValue(dword, 1); }
 
-size_t File::readUint64(uint64_t *qword) { return readValue(qword, 1); }
+size_t FileWriter::readUint64(uint64_t *qword) { return readValue(qword, 1); }
 
-size_t File::writeUint8(uint8_t byte) { return writeValue(&byte, 1); }
+size_t FileWriter::writeUint8(uint8_t byte) { return writeValue(&byte, 1); }
 
-size_t File::writeUint32(uint32_t dword) { return writeValue(&dword, 1); }
+size_t FileWriter::writeUint32(uint32_t dword) { return writeValue(&dword, 1); }
 
-size_t File::writeUint64(uint64_t qword) { return writeValue(&qword, 1); }
+size_t FileWriter::writeUint64(uint64_t qword) { return writeValue(&qword, 1); }
 
-bool File::readLine(char *s, std::streamsize n) {
+bool FileWriter::readLine(char *s, std::streamsize n) {
     try {
         filestream.getline(s, n);
     } catch (std::exception &e) {

@@ -1,14 +1,14 @@
-#ifndef CIP_HELPERS_H_
-#define CIP_HELPERS_H_
+#ifndef UTIL_HELPERS_H_
+#define UTIL_HELPERS_H_
 
 #include <string>
 
-namespace cip {
+namespace util {
 
 bool fileExists(const std::string& path);
 
 std::string fileNameExtension(const std::string& path);
 
-}  // namespace cip
+}  // namespace util
 
-#endif  // CIP_HELPERS_H_
+#endif  // UTIL_HELPERS_H_

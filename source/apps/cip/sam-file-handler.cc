@@ -1,13 +1,13 @@
 #include "sam-file-handler.h"
 #include <algorithm>
-#include "fasta-file.h"
-#include "sam-file.h"
+#include "util/fasta-file-reader.h"
+#include "util/sam-file-reader.h"
 
 namespace cip {
 
 SAMFileHandler::SAMFileHandler(const std::string& inputFileName, const std::string& referenceFileName)
     : samFile_(nullptr), fastaFile(nullptr), side(), encBlock(), unmapped(), refStart(), refEnd(), rname() {
-    samFile_ = std::unique_ptr<SAMFile>(new SAMFile(inputFileName));
+    samFile_ = std::unique_ptr<util::SamFileReader>(new SAMFile(inputFileName));
     if (!referenceFileName.empty()) {
         fastaFile = std::unique_ptr<FASTAFile>(new FASTAFile(referenceFileName));
     }

@@ -5,11 +5,11 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <util/sam-file-reader.h>
 #include "calq/calq-codec.h"
 
 namespace cip {
 
-class SAMFile;
 class FASTAFile;
 
 struct UnmappedInformation {
@@ -32,7 +32,7 @@ class SAMFileHandler {
     size_t nrRecordsRead() const;
 
    private:
-    std::unique_ptr<SAMFile> samFile_;
+    std::unique_ptr<util::SamFileReader> samFile_;
     std::unique_ptr<FASTAFile> fastaFile;
 
     calq::SideInformation side;

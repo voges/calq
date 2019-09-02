@@ -1,7 +1,8 @@
 #include "program-options.h"
 
+#include <sstream>
 #include "errors.h"
-#include "helpers.h"
+#include "util/helpers.h"
 // #include "logging.h"
 #include <cli11/cli11.h>
 
@@ -167,10 +168,10 @@ void ProgramOptions::validateCompress() {
 // }
 
 void ProgramOptions::validateDecompress() {
-    if (cip::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
+    if (util::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
         throwErrorException("Side information file name extension must be '.sam'");
     }
-    if (!fileExists(sideInformationFilePath)) {
+    if (!util::fileExists(sideInformationFilePath)) {
         throwErrorException("Cannot access side information file");
     }
 }
@@ -206,7 +207,7 @@ void ProgramOptions::validateCommon() {
     if (inputFilePath.empty()) {
         throwErrorException("No input file name provided");
     }
-    if (!fileExists(inputFilePath)) {
+    if (!util::fileExists(inputFilePath)) {
         throwErrorException("Cannot access input file");
     }
 
@@ -216,7 +217,7 @@ void ProgramOptions::validateCommon() {
     }
 
     // outputFilePath
-    if (fileExists(outputFilePath) && !force) {
+    if (util::fileExists(outputFilePath) && !force) {
         throwErrorException("Not overwriting output file (use option '-f' to force overwriting)");
     }
 }
@@ -234,32 +235,35 @@ void ProgramOptions::validate() {
 void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     CLI::App app("CALQ");
 
+    std::stringstream qualityValueTypeDesc;
+    qualityValueTypeDesc << "Quality value type" << std::endl;
+    qualityValueTypeDesc << "  Sanger:        Phred+33 [0,40]" << std::endl;
+    qualityValueTypeDesc << "  Illumina-1.3+: Phred+64 [0,40]" << std::endl;
+    qualityValueTypeDesc << "  Illumina-1.5+: Phred+64 [0,40]" << std::endl;
+    qualityValueTypeDesc << "  Illumina-1.8+: Phred+33 [0,41]" << std::endl;
+    qualityValueTypeDesc << "  Max33:         Phred+33 [0,93]" << std::endl;
+    qualityValueTypeDesc << "  Max64:         Phred+64 [0,62]" << std::endl;
+
+    std::stringstream quantizerTypeDesc;
+    quantizerTypeDesc << "Quantizer type" << std::endl;
+    quantizerTypeDesc << "  Uniform" << std::endl;
+    quantizerTypeDesc << "  UniformMinMax" << std::endl;
+    quantizerTypeDesc << "  MaxLloyd" << std::endl;
+
+    app.add_option("-b,--block-size", blockSize, "Block size (in number of SAM records)")->default_val("10000");
     app.add_flag("-d,--decompress", decompress, "Decompress");
     app.add_flag("-f,--force", force, "Force overwriting of output file(s)");
     app.add_option("-i,--input-file", inputFilePath, "Input file")->required();
+    app.add_option("--max-q-steps", manNumQuantSteps, "Maximum number of quantization steps")->default_val("8");
+    app.add_option("--min-q-steps", minNumQuantSteps, "Minimum number of quantization steps")->default_val("2");
     app.add_option("-o,--output-file", outputFilePath, "Output file")->required();
-    app.add_option("-b,--block-size", blockSize, "Block size (in number of SAM records)")->default_val("10000");
     app.add_option("-p,--polyploidy", polyploidy, "Polyploidy")->default_val("2");
+    app.add_option("--qual-type", qualityValueType, qualityValueTypeDesc.str())->default_str("Illumina-1.8+");
+    // app.add_option("--quant-type", quantizerType, quantizerTypeDesc.str())->default_str("Uniform");
+
+
 
 //     options.add_options()(
-//         "quantization_min",
-//         po::value<size_t>(&(this->quantizationMin))->default_value(2),
-//         "[-, V1, V2] Minimum quantization steps")(
-//         "quantization_max",
-//         po::value<size_t>(&(this->quantizationMax))->default_value(8),
-//         "[-, V1, V2] Maximum quantization steps")(
-//         "qual_type,q",
-//         po::value<std::string>(&(this->qualityValueType))
-//             ->default_value("Illumina-1.8+"),
-//         "[-, V1, V2] Quality value type \nSanger: Phred+33 "
-//         "[0,40];\nIllumina-1.3+: Phred+64 [0,40];\nIllumina-1.5+:"
-//         " Phred+64 [0,40];\n"
-//         "Illumina-1.8+: Phred+33 [0,41];\nMax33: Phred+33 [0,93];\n"
-//         "Max64: Phred+64 [0,62];\n\n")(
-//         "quantizer_type",
-//         po::value<std::string>(&(this->quantizerTypeStr))
-//             ->default_value("Uniform"),
-//         "[-, V1, V2] Quantizer type\n(Uniform; Lloyd)\n")(
 //         "calq_version",
 //         po::value<std::string>(&(this->versionStr))->default_value("v1"),
 //         "[-, V1, V2] v1 or v2")(

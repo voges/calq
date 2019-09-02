@@ -1,19 +1,17 @@
-#ifndef CIP_FILE_H_
-#define CIP_FILE_H_
+#ifndef CIP_FILE_WRITER_H_
+#define CIP_FILE_WRITER_H_
 
 #include <fstream>
 #include <string>
-#include "errors.h"
+#include "cip/errors.h"
 
 namespace cip {
 
-class File {
+class FileWriter {
    public:
-    enum class Mode { MODE_READ = 0, MODE_WRITE = 1 };
-
-    File();
-    File(const std::string &path, Mode mode);
-    virtual ~File();
+    FileWriter();
+    FileWriter(const std::string &path);
+    virtual ~FileWriter();
 
     void open(const std::string &path, Mode mode);
     void close();
@@ -70,4 +68,4 @@ class File {
 
 }  // namespace cip
 
-#endif  // CIP_FILE_H_
+#endif  // CIP_FILE_WRITER_H_
