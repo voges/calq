@@ -13,10 +13,23 @@ if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "Using fall-back build type '${CMAKE_BUILD_TYPE}'")
 endif()
 
-include(AddGoogleTest)
-
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
+
+
+#==============================================================================
+# CMake packages
+#==============================================================================
+
+include(AddGoogleTest)
+
+option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
+if(${BUILD_DOCUMENTATION})
+    message(STATUS "Building Doxygen documentation")
+    include(AddDoxygen)
+else()
+    message(STATUS "*Not* building Doxygen documentation")
+endif()
 
 
 #==============================================================================
@@ -54,18 +67,3 @@ include_directories("${CMAKE_SOURCE_DIR}/source/libs/third-party")
 
 add_subdirectory(source)
 add_subdirectory(tests)
-
-
-#==============================================================================
-# Doxygen documentation
-#==============================================================================
-
-option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
-# message(STATUS "BUILD_DOCUMENTATION=${BUILD_DOCUMENTATION}")
-
-if(${BUILD_DOCUMENTATION})
-    message(STATUS "Building Doxygen documentation")
-    include(AddDoxygen)
-else()
-    message(STATUS "*Not* building Doxygen documentation")
-endif()

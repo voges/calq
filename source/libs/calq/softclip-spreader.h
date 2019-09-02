@@ -17,10 +17,10 @@ namespace calq {
  */
 class SoftclipSpreader {
    public:
-    SoftclipSpreader(size_t max_prop, size_t min_hq_clips, bool isSquashed);
+    SoftclipSpreader(size_t maxPropagation, size_t minHqSoftclips, bool isSquashed);
 
     /**
-     * Push an activity score and average number of softclips at that position
+     * Push an activity score and average number of soft clips at that position
      * into buffer. Returns the oldest activity score which can't be influenced
      * by new clips anymore.
      */
