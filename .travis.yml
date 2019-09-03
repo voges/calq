@@ -23,6 +23,7 @@ matrix:
             - doxygen
             - graphviz
             - g++-5
+            - lcov
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
     - os: osx
@@ -31,12 +32,10 @@ matrix:
 before_install:
   - eval "${MATRIX_EVAL}"
 
-before_script:
-
 script:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./ci/build-debug-with-doc.sh; else ./ci/build-release.sh; fi
   - ./ci/run-calq-tests.sh
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./ci/report-code-coverage.sh; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" && "${TRAVIS_BRANCH}" = "master" ]; then ./ci/report-code-coverage.sh; fi
 
 deploy:
   provider: pages
