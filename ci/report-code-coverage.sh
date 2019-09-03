@@ -17,7 +17,6 @@ lcov --remove coverage.info '*/build/*' '/usr/*' '*/tests/*' --output-file cover
 lcov --list coverage.info
   #Generate HTML output:
 #genhtml coverage.info --output-directory ./build/codecov/html/
- # Uploading to CodeCov with TOKEN
 
   # '-f' specifies file(s) to use and disables manual coverage gathering and file search which has already been done above
-bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+bash <(curl -s https://codecov.io/bash) -f coverage.info -t $CODECOV_TOKEN || echo "Codecov did not collect coverage reports"
