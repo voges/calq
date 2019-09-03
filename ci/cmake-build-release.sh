@@ -5,12 +5,11 @@ set -euxo pipefail
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
-readonly build_dir="${git_root_dir}/build"
+readonly build_dir="${git_root_dir}/cmake-build-release"
 if [[ ! -d "${build_dir}" ]]; then
     mkdir -p "${build_dir}"
 fi
 
 cd "${build_dir}"
-cmake .. -DBUILD_DOCUMENTATION=ON -DCMAKE_BUILD_TYPE=Debug
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make
-make doc

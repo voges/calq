@@ -5,5 +5,8 @@ set -euxo pipefail
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
-"${git_root_dir}/build/bin/calq-tests"
-"${git_root_dir}/build/bin/util-tests"
+readonly build_dir="${git_root_dir}/cmake-build-release"
+[[ -d "${build_dir}" ]] # exit if build dir does *not* exist
+
+"${build_dir}/bin/calq-tests"
+"${build_dir}/bin/util-tests"
