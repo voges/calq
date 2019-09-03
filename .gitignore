@@ -11,3 +11,6 @@ cmake-build-release/
 
 # CLion project directory
 .idea/
+
+# lcov report
+coverage.info

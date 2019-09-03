@@ -11,6 +11,6 @@ if [[ ! -d "${build_dir}" ]]; then
 fi
 
 cd "${build_dir}"
-cmake .. -DBUILD_DOCUMENTATION=ON
+cmake .. -DBUILD_DOCUMENTATION=ON -DCMAKE_BUILD_TYPE=Debug
 make
 make doc
