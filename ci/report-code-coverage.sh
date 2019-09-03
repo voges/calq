@@ -3,20 +3,21 @@
 set -euxo pipefail
 
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
+readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
-GIT_REPO_PATH=$(git rev-parse --show-toplevel)
-cd $GIT_REPO_PATH
+cd "${git_root_dir}"
 
-# Create lcov report
-  # capture coverage info
+# Capture coverage info
 lcov --directory . --capture --output-file coverage.info
-  # filter out system and extra files.
-  # To also not include test code in coverage add them with full path to the patterns: '*/tests/*'
-lcov --remove coverage.info '*/build/*' '/usr/*' '*/tests/*' --output-file coverage.info
-  # output coverage data on the console for debugging (optional)
+
+# Filter out files
+lcov --remove coverage.info '*/calq/build/*' '/usr/*' '*/calq/tests/*' --output-file coverage.info
+
+# Output coverage data on the console (optional)
 lcov --list coverage.info
-  #Generate HTML output:
+
+# Generate HTML output
 #genhtml coverage.info --output-directory ./build/codecov/html/
 
-  # '-f' specifies file(s) to use and disables manual coverage gathering and file search which has already been done above
-bash <(curl -s https://codecov.io/bash) -f coverage.info -t $CODECOV_TOKEN || echo "Codecov did not collect coverage reports"
+# Upload report to codevio.io
+bash <(curl -s https://codecov.io/bash) -f coverage.info -t "${CODECOV_TOKEN}" || echo "Codecov did not collect coverage reports"
