@@ -2,6 +2,7 @@ project("util-tests")
 
 set(source_files
         fasta-file-reader-test.cc
+        main.cc
 )
 
 add_executable(util-tests ${source_files})
