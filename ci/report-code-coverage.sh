@@ -32,6 +32,10 @@ set +u # in the following lines do *not* treat unset variables as an error
 if [[ ! -z "${CI}" ]]; then
     bash <(curl -s https://codecov.io/bash) -f coverage.info -t "${CODECOV_TOKEN}"
 else
-    genhtml coverage.info --output-directory "${build_dir}/codecov/html/"
+    readonly local_codecov_dir="${build_dir}/codecov/html"
+    genhtml coverage.info --output-directory "${local_codecov_dir}"
+    set +x; echo ""; echo "Coverage report generated locally at: ${local_codecov_dir}"; echo ""; set -x
+    set +x; echo ""; echo "Maybe you'd like to use this command: firefox ${local_codecov_dir}/index.html &"; echo ""; set -x
+
 fi
 set -u # treat unset variables as error again
