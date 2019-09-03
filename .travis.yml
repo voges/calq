@@ -43,7 +43,7 @@ deploy:
   skip_cleanup: true
   github_token: ${GITHUB_TOKEN}
   keep_history: true
-  local_dir: ./build/doc/html
+  local_dir: ./cmake-build-debug-with-doc/doc/html
   target_branch: gh-pages
   on:
     branch: master
