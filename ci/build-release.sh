@@ -11,5 +11,5 @@ if [[ ! -d "${build_dir}" ]]; then
 fi
 
 cd "${build_dir}"
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make

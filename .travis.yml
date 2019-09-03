@@ -34,7 +34,7 @@ before_install:
 
 script:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./ci/build-debug-with-doc.sh; else ./ci/build-release.sh; fi
-  - ./ci/run-calq-tests.sh
+  - ./ci/run-all-tests.sh
   - if [ "${TRAVIS_OS_NAME}" = "linux" ] && [ "${TRAVIS_BRANCH}" = "master" ]; then ./ci/report-code-coverage.sh; fi
 
 deploy:

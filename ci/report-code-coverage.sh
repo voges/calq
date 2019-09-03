@@ -16,8 +16,5 @@ lcov --remove coverage.info '*/calq/build/*' '/usr/*' '*/calq/tests/*' --output-
 # Output coverage data on the console (optional)
 lcov --list coverage.info
 
-# Generate HTML output
-#genhtml coverage.info --output-directory ./build/codecov/html/
-
 # Upload report to codevio.io
-bash <(curl -s https://codecov.io/bash) -f coverage.info -t "${CODECOV_TOKEN}" || echo "Codecov did not collect coverage reports"
+bash <(curl -s https://codecov.io/bash) -f coverage.info -t "${CODECOV_TOKEN}"
