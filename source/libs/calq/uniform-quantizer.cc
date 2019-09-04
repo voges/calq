@@ -12,7 +12,7 @@ namespace calq {
 
 UniformQuantizer::UniformQuantizer(const int minValue, const int maxValue, const int numSteps) : Quantizer() {
     if (minValue > maxValue || numSteps <= 1) {
-        throwErrorException("Error in quantizer initialization");
+        throwErrorException("minValue > maxValue || numSteps <= 1");
     }
 
     // Compute the step size

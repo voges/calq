@@ -5,7 +5,7 @@
 TEST(Quantizer, EmptyLut) {  // NOLINT(cert-err58-cpp)
     calq::Quantizer q;
 
-    // The is no table in the quantizer. Thus we expect these functions to
+    // There is no table in the quantizer. Thus we expect these functions to
     // throw exceptions.
     EXPECT_THROW(q.valueToIndex(0), calq::ErrorException);
     EXPECT_THROW(q.indexToReconstructedValue(0), calq::ErrorException);
@@ -36,4 +36,7 @@ TEST(Quantizer, PopulatedLut) {  // NOLINT(cert-err58-cpp)
     EXPECT_EQ(q.indexToReconstructedValue(1), 0);
     EXPECT_EQ(q.indexToReconstructedValue(2), 1);
     EXPECT_EQ(q.indexToReconstructedValue(3), 1);
+
+    // Check for correct inverse LUT.
+    EXPECT_EQ(q.inverseLut(), inverseLut);
 }
