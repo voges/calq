@@ -213,7 +213,6 @@ void ProgramOptions::validateCommon() {
 
     // polyploidy
     if (polyploidy < 1 || polyploidy > 6) {
-
     }
 
     // outputFilePath
@@ -261,44 +260,42 @@ void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     app.add_option("--qual-type", qualityValueType, qualityValueTypeDesc.str())->default_str("Illumina-1.8+");
     // app.add_option("--quant-type", quantizerType, quantizerTypeDesc.str())->default_str("Uniform");
 
-
-
-//     options.add_options()(
-//         "calq_version",
-//         po::value<std::string>(&(this->versionStr))->default_value("v1"),
-//         "[-, V1, V2] v1 or v2")(
-//         "side_info_file_path,s",
-//         po::value<std::string>(&(this->sideInformationFilePath)),
-//         "[D, --, --] Side information file path")(
-//         "filter_size",
-//         po::value<size_t>(&(this->options.filterSize))->default_value(17),
-//         "[-, --, V2] Haplotyper filter radius")(
-//         "filter_type",
-//         po::value<std::string>(&(this->filterTypeStr))->default_value("Gauss"),
-//         "[-, --, V2] Haplotyper Filter Type (Gauss; Rectangle)\n")(
-//         "filter_cutoff",
-//         po::value<size_t>(&(this->options.filterCutOff))->default_value(50),
-//         "[-, --, V2] Haplotyper filter cutoff radius\n")(
-//         "hq_softclip_threshold",
-//         po::value<size_t>(&(this->hqSoftClipThreshold))->default_value(29),
-//         "[-, --, V2] Quality (no offset) at which a "
-//         "softclip is considered HQ\n")(
-//         "hq_softclip_streak",
-//         po::value<size_t>(&(this->options.hqSoftClipStreak))->default_value(7),
-//         "[-, --, V2] Number of hq-softclips in one "
-//         "position which triggers spreading of activity values\n")(
-//         "hq_softclip_propagation",
-//         po::value<size_t>(&(this->options.hqSoftClipPropagation))
-//             ->default_value(50),
-//         "[-, --, V2] Distance at which hq-softclips impact "
-//         "the activity score\n")(
-//         "reference_file_path,r",
-//         po::value<std::string>(&(this->referenceFilePath)),
-//         "[-, --, V2] Reference file (FASTA format)\n")(
-//         "no_squash",
-//         po::bool_switch(&(this->options.squash))->default_value(false),
-//         "[-, --, V2] Don't squash activity values "
-//         "between 0.0 and 1.0");
+    //     options.add_options()(
+    //         "calq_version",
+    //         po::value<std::string>(&(this->versionStr))->default_value("v1"),
+    //         "[-, V1, V2] v1 or v2")(
+    //         "side_info_file_path,s",
+    //         po::value<std::string>(&(this->sideInformationFilePath)),
+    //         "[D, --, --] Side information file path")(
+    //         "filter_size",
+    //         po::value<size_t>(&(this->options.filterSize))->default_value(17),
+    //         "[-, --, V2] Haplotyper filter radius")(
+    //         "filter_type",
+    //         po::value<std::string>(&(this->filterTypeStr))->default_value("Gauss"),
+    //         "[-, --, V2] Haplotyper Filter Type (Gauss; Rectangle)\n")(
+    //         "filter_cutoff",
+    //         po::value<size_t>(&(this->options.filterCutOff))->default_value(50),
+    //         "[-, --, V2] Haplotyper filter cutoff radius\n")(
+    //         "hq_softclip_threshold",
+    //         po::value<size_t>(&(this->hqSoftClipThreshold))->default_value(29),
+    //         "[-, --, V2] Quality (no offset) at which a "
+    //         "softclip is considered HQ\n")(
+    //         "hq_softclip_streak",
+    //         po::value<size_t>(&(this->options.hqSoftClipStreak))->default_value(7),
+    //         "[-, --, V2] Number of hq-softclips in one "
+    //         "position which triggers spreading of activity values\n")(
+    //         "hq_softclip_propagation",
+    //         po::value<size_t>(&(this->options.hqSoftClipPropagation))
+    //             ->default_value(50),
+    //         "[-, --, V2] Distance at which hq-softclips impact "
+    //         "the activity score\n")(
+    //         "reference_file_path,r",
+    //         po::value<std::string>(&(this->referenceFilePath)),
+    //         "[-, --, V2] Reference file (FASTA format)\n")(
+    //         "no_squash",
+    //         po::bool_switch(&(this->options.squash))->default_value(false),
+    //         "[-, --, V2] Don't squash activity values "
+    //         "between 0.0 and 1.0");
 
     try {
         app.parse(argc, argv);

@@ -7,7 +7,8 @@ FileWriter::FileWriter() : fsize_(0), mode_(FileWriter::Mode::MODE_READ), nrRead
     filestream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 }
 
-FileWriter::FileWriter(const std::string &path, Mode mode) : fsize_(0), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
+FileWriter::FileWriter(const std::string &path, Mode mode)
+    : fsize_(0), mode_(mode), nrReadBytes_(0), nrWrittenBytes_(0) {
     filestream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     this->open(path, mode);
 }
@@ -72,7 +73,9 @@ size_t FileWriter::tell() {
     return fsize_;
 }
 
-size_t FileWriter::read(void *buffer, size_t size) { return readValue(reinterpret_cast<unsigned char *>(buffer), size); }
+size_t FileWriter::read(void *buffer, size_t size) {
+    return readValue(reinterpret_cast<unsigned char *>(buffer), size);
+}
 
 size_t FileWriter::write(const void *buffer, size_t size) {
     return writeValue(reinterpret_cast<const unsigned char *>(buffer), size);

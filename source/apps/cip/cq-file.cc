@@ -9,20 +9,20 @@
 
 namespace cip {
 
-//CQFile::CQFile(const std::string &path, const Mode &mode)
+// CQFile::CQFile(const std::string &path, const Mode &mode)
 //    : File(path, mode), nrReadFileFormatBytes_(0), nrWrittenFileFormatBytes_(0) {
 //    if (path.empty()) {
 //        throwErrorException("path is empty");
 //    }
 //}
 //
-//CQFile::~CQFile() = default;
+// CQFile::~CQFile() = default;
 //
-//size_t CQFile::nrReadFileFormatBytes() const { return nrReadFileFormatBytes_; }
+// size_t CQFile::nrReadFileFormatBytes() const { return nrReadFileFormatBytes_; }
 //
-//size_t CQFile::nrWrittenFileFormatBytes() const { return nrWrittenFileFormatBytes_; }
+// size_t CQFile::nrWrittenFileFormatBytes() const { return nrWrittenFileFormatBytes_; }
 //
-//size_t CQFile::readHeader(size_t *blockSize) {
+// size_t CQFile::readHeader(size_t *blockSize) {
 //    if (blockSize == nullptr) {
 //        throwErrorException("Received nullptr as argument");
 //    }
@@ -47,7 +47,7 @@ namespace cip {
 //    return ret;
 //}
 //
-//size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>> *const quantizers) {
+// size_t CQFile::readQuantizers(std::vector<std::vector<uint8_t>> *const quantizers) {
 //    if (!quantizers->empty()) {
 //        throwErrorException("quantizers is not empty");
 //    }
@@ -155,7 +155,7 @@ namespace cip {
 ////    return ret;
 ////}
 //
-//size_t CQFile::writeHeader(const size_t &blockSize) {
+// size_t CQFile::writeHeader(const size_t &blockSize) {
 //    if (blockSize == 0) {
 //        throwErrorException("blockSize must be greater than zero");
 //    }
@@ -170,7 +170,7 @@ namespace cip {
 //    return ret;
 //}
 //
-//size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers) {
+// size_t CQFile::writeQuantizers(const std::vector<std::vector<uint8_t>> &quantizers) {
 //    if (quantizers.empty()) {
 //        throwErrorException("lut is empty");
 //    }

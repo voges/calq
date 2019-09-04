@@ -16,7 +16,7 @@ struct SideInformation;
 
 namespace cip {
 
-//class CQFile : public File {
+// class CQFile : public File {
 //   public:
 //    CQFile(const std::string& path, const Mode& mode);
 //    ~CQFile() override;

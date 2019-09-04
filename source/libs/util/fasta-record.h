@@ -5,13 +5,13 @@
 
 namespace util {
 
-    struct FastaRecord {
-    public:
-        FastaRecord(std::string head, std::string seq) : header(std::move(head)), sequence(std::move(seq)) {}
+struct FastaRecord {
+   public:
+    FastaRecord(std::string head, std::string seq) : header(std::move(head)), sequence(std::move(seq)) {}
 
-        std::string header;
-        std::string sequence;
-    };
+    std::string header;
+    std::string sequence;
+};
 
 }  // namespace util
 

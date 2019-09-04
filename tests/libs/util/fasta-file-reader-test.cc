@@ -5,12 +5,14 @@
 
 static std::string exec(const std::string& cmd) {
     FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) { return "ERROR"; }
+    if (!pipe) {
+        return "ERROR";
+    }
     const int bufferSize = 256;
     char buffer[bufferSize];
     std::string result;
-    while(!feof(pipe)) {
-        if(fgets(buffer, bufferSize, pipe) != nullptr) {
+    while (!feof(pipe)) {
+        if (fgets(buffer, bufferSize, pipe) != nullptr) {
             result += buffer;
         }
     }

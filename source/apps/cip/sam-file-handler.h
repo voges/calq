@@ -1,11 +1,11 @@
 #ifndef CALQAPP_SAMFILEHANDLER_H_
 #define CALQAPP_SAMFILEHANDLER_H_
 
+#include <util/sam-file-reader.h>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
-#include <util/sam-file-reader.h>
 #include "calq/calq-codec.h"
 
 namespace cip {

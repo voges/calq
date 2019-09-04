@@ -9,14 +9,14 @@
 
 namespace util {
 
-    class FastaFileReader : public FileReader {
-    public:
-        FastaFileReader(const std::string &path);
+class FastaFileReader : public FileReader {
+   public:
+    FastaFileReader(const std::string &path);
 
-        ~FastaFileReader();
+    ~FastaFileReader();
 
-        void parse(std::vector<FastaRecord> *const fastaRecords);
-    };
+    void parse(std::vector<FastaRecord> *const fastaRecords);
+};
 
 }  // namespace util
 
