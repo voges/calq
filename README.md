@@ -3,6 +3,7 @@
 Coverage-adaptive lossy quality value compression
 
 [![Build Status](https://travis-ci.org/voges/calq.svg?branch=master)](https://travis-ci.org/voges/calq)
+[![codecov](https://codecov.io/gh/voges/calq/branch/master/graph/badge.svg)](https://codecov.io/gh/voges/calq)
 
 ---
 
