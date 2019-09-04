@@ -5,7 +5,7 @@ set -euxo pipefail
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
-readonly build_dir="${git_root_dir}/cmake-build-debug-with-doc"
+readonly build_dir="${git_root_dir}/cmake-build-debug-with-doc-and-coverage"
 [[ -d "${build_dir}" ]] # exit if build dir does *not* exist
 
 cd "${git_root_dir}"
@@ -17,10 +17,7 @@ lcov --directory . --capture --output-file coverage.info
 lcov --remove coverage.info \
     '/usr/*' \
     '*/calq/build/*' \
-    '*/calq/cmake-build/*' \
-    '*/calq/cmake-build-debug/*' \
-    '*/calq/cmake-build-debug-with-doc/*' \
-    '*/calq/cmake-build-release/*' \
+    '*/calq/cmake-build-*/*' \
     '*/calq/tests/*' \
     --output-file coverage.info
 

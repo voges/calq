@@ -27,8 +27,6 @@ option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
 if(${BUILD_DOCUMENTATION})
     message(STATUS "Building Doxygen documentation")
     include(AddDoxygen)
-else()
-    message(STATUS "*Not* building Doxygen documentation")
 endif()
 
 
@@ -42,8 +40,12 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+option(BUILD_COVERAGE "Compile and link code instrumented for coverage analysis" OFF)
+if(${BUILD_COVERAGE})
+    message(STATUS "Compiling and linking code instrumented for coverage analysis")
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    endif()
 endif()
 
 

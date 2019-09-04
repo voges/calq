@@ -34,16 +34,16 @@ before_install:
 
 script:
   - ./ci/cmake-build-release.sh
-  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then ./ci/cmake-build-debug-with-doc.sh; fi
-  - ./ci/run-all-tests.sh
-  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_BRANCH}" == "master" ]]; then ./ci/report-code-coverage.sh; fi
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then ./ci/cmake-build-debug-with-doc-and-coverage.sh; fi
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then ./ci/run-all-tests.sh; fi
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]] && [[ "${TRAVIS_BRANCH}" == "master" ]]; then ./ci/report-code-coverage.sh; fi
 
 deploy:
   provider: pages
   skip_cleanup: true
   github_token: ${GITHUB_TOKEN}
   keep_history: true
-  local_dir: ./cmake-build-debug-with-doc/doc/html
+  local_dir: ./cmake-build-debug-with-doc-and-coverage/doc/html
   target_branch: gh-pages
   on:
     branch: master
