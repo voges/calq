@@ -4,14 +4,17 @@ if(DOXYGEN_FOUND)
     message(STATUS "Doxygen is available")
     message(STATUS "Issue 'make doc' to build documentation")
 
-    if(DOXYGEN_DOT_FOUND)
-        message(STATUS "'dot' tool from Graphviz is available")
-    else()
+    if(NOT DOXYGEN_DOT_FOUND)
         message(
             WARNING
             "'dot' tool from Graphviz not found; "
             "Doxygen documentation will not include graphs"
         )
+    endif()
+
+    # For forward compatibility with newer versions of CMake
+    if(NOT DEFINED DOXYGEN_HAVE_DOT)
+        set(DOXYGEN_HAVE_DOT ${DOXYGEN_DOT_FOUND})
     endif()
 
     set(DOCUMENTATION_DIRECTORY "${CMAKE_BINARY_DIR}/doc")

@@ -21,12 +21,12 @@ set(CMAKE_CXX_STANDARD 11)
 # CMake packages
 #==============================================================================
 
-include(AddGoogleTest)
+include(GoogleTest)
 
 option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
 if(${BUILD_DOCUMENTATION})
     message(STATUS "Building Doxygen documentation")
-    include(AddDoxygen)
+    include(Doxygen)
 endif()
 
 
