@@ -13,7 +13,7 @@ class FileWriter {
     FileWriter(const std::string &path);
     virtual ~FileWriter();
 
-    void open(const std::string &path, Mode mode);
+    void open(const std::string &path);
     void close();
 
     bool eof() const;
@@ -60,7 +60,6 @@ class FileWriter {
 
    protected:
     size_t fsize_;
-    Mode mode_;
     size_t nrReadBytes_;
     size_t nrWrittenBytes_;
     std::fstream filestream;
