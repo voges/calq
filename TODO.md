@@ -1,5 +1,25 @@
-- [ ] Clean up folders: scripts/benchmark/, scripts/variant-calling/
-- [ ] Make GABAC work again and add rANS
-- [ ] Finish C++ unit tests
-- [ ] Make CIP application work again
+- [ ] Write C++ unit tests
+  - [ ] <source|tests>/libs/calq/
+    - [ ] CircularBuffer
+    - [ ] FilterBuffer
+    - [ ] Genotyper
+    - [ ] Haplotyper
+    - [ ] LloydMaxQuantizer
+    - [ ] ProbabilityDistribution
+    - [ ] Quantizer
+    - [ ] SamPileup
+    - [ ] SoftclipSpreader
+    - [ ] UniformMinMaxQuantizer
+    - [ ] UniformQuantizer
+  - [ ] <source/tests>/libs/util/
+    - [ ] FastaFileReader
+    - [ ] FileReader
+    - [ ] FileWriter
+    - [ ] Helpers
+    - [ ] SamFileReader
+    - [ ] SamRecord
+- [ ] Make CIP application (source/apps/cip/) work again (including GABAC and rANS)
 - [ ] Update README.md once everything is working
+- [ ] Clean up scripts
+  - [ ] scripts/benchmark/
+  - [ ] scripts/variant-calling/
