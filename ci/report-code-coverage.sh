@@ -15,17 +15,17 @@ lcov --directory . --capture --output-file coverage.info
 
 # Filter out files
 lcov --remove coverage.info \
+    --output-file coverage.info \
     '/usr/*' \
-    '*/calq/build/*' \
     '*/calq/cmake-build-*/*' \
-    '*/calq/tests/*' \
-    --output-file coverage.info
+    '*/calq/tests/*'
 
 # Output coverage data on the console (optional)
 lcov --list coverage.info
 
 # Upload report to codevio.io (if run on Travis) or generate local HTML report
 set +u # in the following lines do *not* treat unset variables as an error
+# shellcheck disable=SC2236
 if [[ ! -z "${CI}" ]]; then
     bash <(curl -s https://codecov.io/bash) -f coverage.info -t "${CODECOV_TOKEN}"
 else
