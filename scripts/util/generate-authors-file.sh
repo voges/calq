@@ -9,7 +9,11 @@ set -euo pipefail
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
+readonly authors_file="${git_root_dir}/AUTHORS"
+
 git shortlog --summary --email \
   | perl -spe 's/^\s+\d+\s+//' \
   | sed -e '/^CommitSyncScript.*$/d' \
-  > "${git_root_dir}/AUTHORS"
+  > "${authors_file}"
+
+echo "Created/Updated AUTHORS file: ${authors_file}"
