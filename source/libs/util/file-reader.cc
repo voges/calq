@@ -10,10 +10,6 @@ namespace util {
     FileReader::FileReader() : fp_(nullptr), fsize_(0), line_(nullptr) {}
 
     FileReader::FileReader(const std::string &path) : fp_(nullptr), fsize_(0), line_(nullptr) {
-        if (path.empty()) {
-            throw std::runtime_error{"Tried to open void path"};
-        }
-
         open(path);
 
         line_ = reinterpret_cast<char *>(malloc(MAX_LINE_LENGTH));
@@ -28,12 +24,8 @@ namespace util {
     }
 
     void FileReader::open(const std::string &path) {
-        if (path.empty()) {
-            throw std::runtime_error{"Tried to open void path"};
-        }
-
         if (fp_ != nullptr) {
-            throw std::runtime_error{"File pointer already in use"};
+            throw std::runtime_error{"File pointer already in use while opening file: " + path};
         }
 
         const char *mode = "rb";
@@ -41,12 +33,12 @@ namespace util {
 #ifdef _WIN32
         int rc = fopen_s(&fp_, path.c_str(), mode);
     if (rc != 0) {
-        throw std::runtime_error{"Failed to open file"};
+        throw std::runtime_error{"Failed to open file: " + path};
     }
 #else
         fp_ = fopen(path.c_str(), mode);
         if (fp_ == nullptr) {
-            throw std::runtime_error{"Failed to open file"};
+            throw std::runtime_error{"Failed to open file: " + path};
         }
 #endif
 
@@ -115,7 +107,7 @@ namespace util {
 
     void FileReader::seek(const int64_t offset, const int whence) {
         if (offset > LONG_MAX) {
-            throw std::runtime_error{"Position out of range"};
+            throw std::runtime_error{"Offset out of range"};
         }
 
         int rc = fseek(fp_, offset, whence);
