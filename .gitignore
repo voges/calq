@@ -5,8 +5,8 @@
 .DS_Store
 
 # CMake build directories
-build
-cmake-build-*
+build/
+cmake-build-*/
 
 # CLion project directory
 .idea/
