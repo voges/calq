@@ -47,20 +47,6 @@ The reconstructed quality values are written to the file ``file.sam.cip.qual``.
 
 Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` which is located in the ``scripts`` folder.
 
-## Development
-
-### Continuous integration
-
-Commits to this repository are continuously tested on **Travis CI** (https://travis-ci.org/voges/calq). Take a look at the file ``.travis.yml`` to see what is being done on Travis' (virtual) machines.
-
-### Documentation
-
-The Doxygen documentation of the CALQ library (i.e., the documentation of all source code in ``source/libs/calq/``) is available at https://voges.github.io/calq/.
-
-### Code coverage
-
-Code coverage reports are available at https://codecov.io/gh/voges/calq.
-
 ## Who do I talk to?
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
