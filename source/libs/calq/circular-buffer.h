@@ -12,42 +12,42 @@ namespace calq {
 
 template <typename T>
 class CircularBuffer {
-   private:
-    std::vector<T> data;
-    size_t pos;
-
    public:
-    CircularBuffer(size_t size, const T& val) : pos(0) { data.resize(size, val); }
+    CircularBuffer(size_t size, const T& val) : pos_(0) { data_.resize(size, val); }
 
-    T& operator[](size_t index) { return data[(pos + index) % data.size()]; }
+    T& operator[](size_t index) { return data_[(pos_ + index) % data_.size()]; }
 
-    const T& operator[](size_t index) const { return data[(pos + index) % data.size()]; }
+    const T& operator[](size_t index) const { return data_[(pos_ + index) % data_.size()]; }
 
     /**
      * Leftmost value
      */
-    T& back() { return (*this)[pos]; }
+    T& back() { return (*this)[pos_]; }
 
-    const T& back() const { return (*this)[pos]; }
+    const T& back() const { return (*this)[pos_]; }
 
     /**
      * Rightmost value
      */
-    T& front() { return (*this)[(pos + data.size() - 1) % data.size()]; }
+    T& front() { return (*this)[(pos_ + data_.size() - 1) % data_.size()]; }
 
-    const T& front() const { return (*this)[(pos + data.size() - 1) % data.size()]; }
+    const T& front() const { return (*this)[(pos_ + data_.size() - 1) % data_.size()]; }
 
-    size_t size() const { return data.size(); }
+    size_t size() const { return data_.size(); }
 
     /**
      * Returns oldest value, deletes it and puts new value
      */
     T push(const T& val) {
-        T oldVal = data[pos];
-        data[pos] = val;
-        pos = (pos + 1) % data.size();
+        T oldVal = data_[pos_];
+        data_[pos_] = val;
+        pos_ = (pos_ + 1) % data_.size();
         return oldVal;
     }
+
+private:
+    std::vector<T> data_;
+    size_t pos_;
 };
 
 }  // namespace calq

@@ -1,9 +1,9 @@
 - [ ] Write C++ unit tests
-  - [ ] <source|tests>/libs/calq/
-    - [ ] CircularBuffer
-    - [ ] FilterBuffer
-    - [ ] Genotyper
-    - [ ] Haplotyper
+  - [x] <source|tests>/libs/calq/
+    - [x] CircularBuffer
+    - [x] FilterBuffer
+    - [x] Genotyper
+    - [x] Haplotyper
     - [x] LloydMaxQuantizer
     - [x] ProbabilityDistribution
     - [x] Quantizer

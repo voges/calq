@@ -27,8 +27,7 @@ class GaussKernel {
     explicit GaussKernel(double sigma = 1.0);
 
     /**
-     * Get Gauss value at position 'pos' and buffer size 'size' with
-     * mean = size / 2
+     * Get Gauss value at position 'pos' and buffer size 'size' with mean = size / 2
      */
     double calcValue(size_t pos, size_t size) const;
 

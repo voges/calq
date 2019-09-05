@@ -4,17 +4,15 @@
 
 #include "genotyper.h"
 #include <cmath>
-#include <iomanip>
 #include <numeric>
-#include <sstream>
 #include <utility>
 #include "errors.h"
-#include "log.h"
 
 namespace calq {
 
-static int combinationsWithRepetitions(std::vector<std::string>* genoAlphabet, const std::vector<char>& alleleAlphabet,
-                                       int* got, int nChosen, int len, int at, int maxTypes) {
+static int combinationsWithRepetitions(std::vector<std::string>* const genotypeAlphabet,
+                                       const std::vector<char>& alleleAlphabet, int* const got, const int nChosen,
+                                       const int len, const int at, const int maxTypes) {
     if (nChosen == len) {
         if (!got) {
             return 1;
@@ -23,7 +21,7 @@ static int combinationsWithRepetitions(std::vector<std::string>* genoAlphabet, c
         for (int i = 0; i < len; i++) {
             tmp += alleleAlphabet[got[i]];
         }
-        genoAlphabet->push_back(tmp);
+        genotypeAlphabet->push_back(tmp);
         return 1;
     }
 
@@ -32,22 +30,22 @@ static int combinationsWithRepetitions(std::vector<std::string>* genoAlphabet, c
         if (got) {
             got[nChosen] = i;
         }
-        count += combinationsWithRepetitions(genoAlphabet, alleleAlphabet, got, nChosen + 1, len, i, maxTypes);
+        count += combinationsWithRepetitions(genotypeAlphabet, alleleAlphabet, got, nChosen + 1, len, i, maxTypes);
     }
 
     return count;
 }
 
-Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int nrQuantizers, const bool debug)
+Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int numQuantizers, const bool debug)
     : alleleAlphabet_(ALLELE_ALPHABET),
       alleleLikelihoods_(),
       genotypeAlphabet_(),
       genotypeLikelihoods_(),
-      nrQuantizers_(nrQuantizers),
+      numQuantizers_(numQuantizers),
       polyploidy_(polyploidy),
       qualOffset_(qualOffset),
       DEBUG(debug) {
-    if (nrQuantizers < 1) {
+    if (numQuantizers < 1) {
         throwErrorException("nrQuantizers must be greater than zero");
     }
     if (polyploidy < 1) {
@@ -60,8 +58,6 @@ Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int nrQua
     initLikelihoods();
 }
 
-Genotyper::~Genotyper() = default;
-
 double Genotyper::computeEntropy(const std::string& seqPileup, const std::string& qualPileup) {
     const size_t depth = seqPileup.length();
 
@@ -70,10 +66,10 @@ double Genotyper::computeEntropy(const std::string& seqPileup, const std::string
     }
 
     if (depth == 0) {
-        return -1.0;  // computation of entropy not possible
+        return -1.0;  // Computation of entropy not possible
     }
     if (depth == 1) {
-        return 0.0;  // no information content for one symbol
+        return 0.0;  // No information content for one symbol
     }
 
     computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
@@ -93,10 +89,10 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup, const std::st
     }
 
     if (depth == 0) {
-        return nrQuantizers_;  // computation of quantizer index not possible
+        return numQuantizers_;  // computation of quantizer index not possible
     }
     if (depth == 1) {
-        return (nrQuantizers_ - 1);  // no inference can be made, stay safe
+        return (numQuantizers_ - 1);  // no inference can be made, stay safe
     }
 
     computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
@@ -115,22 +111,23 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup, const std::st
 
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
 
-    auto quant = static_cast<int>((1 - confidence) * (nrQuantizers_ - 1));
+    auto quant = static_cast<int>((1 - confidence) * (numQuantizers_ - 1));
 
-    if (DEBUG) {
-        std::stringstream s;
-        s << 'N' << " " << seqPileup << " ";
-
-        s << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << 1 - confidence;
-
-        s << " " << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << 1 - confidence << " "
-          << quant << std::endl;
-
-        std::string line;
-        while (std::getline(s, line)) {
-            getLogging().errorOut(line);
-        }
-    }
+    //    if (DEBUG) {
+    //        std::stringstream s;
+    //        s << 'N' << " " << seqPileup << " ";
+    //
+    //        s << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << 1 - confidence;
+    //
+    //        s << " " << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << 1 - confidence << "
+    //        "
+    //          << quant << std::endl;
+    //
+    //        std::string line;
+    //        while (std::getline(s, line)) {
+    //            getLogging().errorOut(line);
+    //        }
+    //    }
 
     return quant;
 }
@@ -163,7 +160,7 @@ void Genotyper::resetLikelihoods() {
 }
 
 void Genotyper::computeGenotypeLikelihoods(const std::string& seqPileup, const std::string& qualPileup,
-                                           const size_t& depth) {
+                                           const size_t depth) {
     resetLikelihoods();
 
     auto* tempGenotypeLikelihoods = static_cast<double*>(calloc(genotypeAlphabet_.size(), sizeof(double)));
@@ -173,7 +170,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string& seqPileup, const s
         auto q = static_cast<double>(qualPileup[d] - qualOffset_);
 
         double pStrike = 1 - pow(10.0, -q / 10.0);
-        double pError = (1 - pStrike) / (ALLELE_ALPHABET_SIZE - 1);
+        double pError = (1 - pStrike) / static_cast<double>(ALLELE_ALPHABET_SIZE - 1);
 
         itr = 0;
         for (auto const& genotype : genotypeAlphabet_) {
