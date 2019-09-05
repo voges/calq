@@ -7,7 +7,7 @@
     - [ ] LloydMaxQuantizer
     - [ ] ProbabilityDistribution
     - [x] Quantizer
-    - [ ] SamPileup
+    - [x] SamPileup
     - [x] SoftclipSpreader
     - [x] UniformMinMaxQuantizer
     - [x] UniformQuantizer

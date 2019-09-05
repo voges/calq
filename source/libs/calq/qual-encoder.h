@@ -24,12 +24,12 @@ enum struct Version;
 class QualEncoder {
    public:
     explicit QualEncoder(const EncodingOptions& options, std::map<int, Quantizer> quantizers, DecodingBlock* out);
-    void addMappedRecordToBlock(const EncodingRead& samRecord);
+    void addMappedRecordToBlock(const MinSamRecord& samRecord);
     void finishBlock();
     size_t nrMappedRecords() const;
 
    private:
-    void encodeMappedQual(const EncodingRead& samRecord);
+    void encodeMappedQual(const MinSamRecord& samRecord);
 
     size_t nrMappedRecords_;
     int NR_QUANTIZERS;
@@ -45,7 +45,7 @@ class QualEncoder {
 
     // Double-ended queue holding the SAM records; records get popped when they
     // are finally encoded
-    std::deque<EncodingRead> samRecordDeque_;
+    std::deque<MinSamRecord> samRecordDeque_;
 
     Version version_;
 };

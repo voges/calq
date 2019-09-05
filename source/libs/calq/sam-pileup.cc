@@ -3,16 +3,16 @@
  */
 
 #include "sam-pileup.h"
-#include "encoding-read.h"
 #include "errors.h"
+#include "min-sam-record.h"
 
 namespace calq {
 
-SAMPileup::SAMPileup() : pos(0), qual(""), seq(""), ref('N'), hqSoftclipCnt(0) {}
+SamPileup::SamPileup() : pos(0), qual(""), seq(""), ref('N'), hqSoftclipCnt(0) {}
 
 SamPileupDeque::SamPileupDeque() : pileups_(), posMax_(0), posMin_(0) {}
 
-const SAMPileup& SamPileupDeque::back() const {
+const SamPileup& SamPileupDeque::back() const {
     if (pileups_.empty()) {
         throwErrorException("Cannot access back() of empty deque");
     }
@@ -27,7 +27,7 @@ void SamPileupDeque::clear() {
 
 bool SamPileupDeque::empty() const { return pileups_.empty(); }
 
-const SAMPileup& SamPileupDeque::front() const {
+const SamPileup& SamPileupDeque::front() const {
     if (pileups_.empty()) {
         throwErrorException("Cannot access front() of empty deque");
     }
@@ -36,7 +36,7 @@ const SAMPileup& SamPileupDeque::front() const {
 
 size_t SamPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 
-const SAMPileup& SamPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
+const SamPileup& SamPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
 
 void SamPileupDeque::pop_front() {
     if (pileups_.empty()) {
@@ -52,7 +52,7 @@ uint32_t SamPileupDeque::posMax() const { return posMax_; }
 
 uint32_t SamPileupDeque::posMin() const { return posMin_; }
 
-void SamPileupDeque::setPosMax(const uint32_t& posMax) {
+void SamPileupDeque::setPosMax(const uint32_t posMax) {
     if (posMax < posMax_) {
         throwErrorException("posMax out of range");
     }
@@ -60,7 +60,7 @@ void SamPileupDeque::setPosMax(const uint32_t& posMax) {
     pileups_.resize(length());
 }
 
-void SamPileupDeque::setPosMin(const uint32_t& posMin) {
+void SamPileupDeque::setPosMin(const uint32_t posMin) {
     if (posMin < posMin_) {
         throwErrorException("posMin out of range");
     }
@@ -74,7 +74,7 @@ void SamPileupDeque::setPosMin(const uint32_t& posMin) {
     }
 }
 
-void SamPileupDeque::add(const EncodingRead& r, const uint8_t qvOffset, const uint8_t hqSoftClipThreshold) {
+void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const uint8_t hqSoftClipThreshold) {
     if (this->empty()) {
         throwErrorException("Pileup queue is empty");
     }
@@ -96,7 +96,7 @@ void SamPileupDeque::add(const EncodingRead& r, const uint8_t qvOffset, const ui
             continue;
         }
 
-        const auto HQ_SOFTCLIP_THRESHOLD = static_cast<const char>(hqSoftClipThreshold + qvOffset);
+        const auto HQ_SOFTCLIP_THRESHOLD = static_cast<const char>(hqSoftClipThreshold + qualOffset);
 
         switch (r.cigar[cigarIdx]) {
             case 'M':
@@ -104,16 +104,16 @@ void SamPileupDeque::add(const EncodingRead& r, const uint8_t qvOffset, const ui
             case 'X':
                 for (size_t i = 0; i < opLen; i++) {
                     this->pileups_[pileupIdx].pos = static_cast<uint32_t>(this->posMin() + pileupIdx);
-                    this->pileups_[pileupIdx].seq += r.sequence[idx];
-                    this->pileups_[pileupIdx].qual += r.qvalues[idx];
-                    if (!r.reference.empty()) {
+                    this->pileups_[pileupIdx].seq += r.seq[idx];
+                    this->pileups_[pileupIdx].qual += r.qual[idx];
+                    if (!r.ref.empty()) {
                         if (this->pileups_[pileupIdx].ref != 'N' &&
-                            this->pileups_[pileupIdx].ref != r.reference[pileupIdx + this->posMin() - r.posMin]) {
+                            this->pileups_[pileupIdx].ref != r.ref[pileupIdx + this->posMin() - r.posMin]) {
                             throwErrorException(
                                 "Non matching reference "
                                 "between reads!");
                         }
-                        this->pileups_[pileupIdx].ref = r.reference[pileupIdx + this->posMin() - r.posMin];
+                        this->pileups_[pileupIdx].ref = r.ref[pileupIdx + this->posMin() - r.posMin];
                     }
 
                     idx++;
@@ -123,11 +123,11 @@ void SamPileupDeque::add(const EncodingRead& r, const uint8_t qvOffset, const ui
 
             case 'S':
                 for (int l = 0; l < static_cast<int>(opLen); ++l) {
-                    if (r.qvalues[idx + l] >= HQ_SOFTCLIP_THRESHOLD) {
+                    if (r.qual[idx + l] >= HQ_SOFTCLIP_THRESHOLD) {
                         ++softclips;
                     }
                 }
-                // Fall through
+                // fall-through
             case 'I':
                 idx += opLen;
                 break;
@@ -137,7 +137,7 @@ void SamPileupDeque::add(const EncodingRead& r, const uint8_t qvOffset, const ui
                 break;
             case 'H':
             case 'P':
-                break;  // These have been clipped
+                break;  // these have been clipped
             default:
                 throwErrorException("Bad CIGAR string");
         }

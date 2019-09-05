@@ -92,7 +92,7 @@ void encode(const EncodingOptions& opt, const SideInformation& sideInformation, 
         if (opt.version == Version::V2) {
             ref = sideInformation.reference.substr(sideInformation.positions[i] - sideInformation.positions[0], len);
         }
-        EncodingRead r = {sideInformation.positions[i], sideInformation.positions[i] + len, input.qvalues[i],
+        MinSamRecord r = {sideInformation.positions[i], sideInformation.positions[i] + len, input.qvalues[i],
                           sideInformation.cigars[i],    sideInformation.sequences[i],       ref};
         qualEncoder.addMappedRecordToBlock(r);
     }

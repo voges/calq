@@ -34,7 +34,7 @@ QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer
 
       version_(options.version) {}
 
-void QualEncoder::addMappedRecordToBlock(const EncodingRead& r) {
+void QualEncoder::addMappedRecordToBlock(const MinSamRecord& r) {
     if (nrMappedRecords() == 0) {
         posOffset_ = r.posMin;
         samPileupDeque_.setPosMin(r.posMin);
@@ -137,7 +137,7 @@ void QualEncoder::finishBlock() {
 
 size_t QualEncoder::nrMappedRecords() const { return nrMappedRecords_; }
 
-void QualEncoder::encodeMappedQual(const EncodingRead& samRecord) {
+void QualEncoder::encodeMappedQual(const MinSamRecord& samRecord) {
     size_t cigarIdx = 0;
     size_t cigarLen = samRecord.cigar.length();
     size_t opLen = 0;  // length of current CIGAR operation
@@ -156,7 +156,7 @@ void QualEncoder::encodeMappedQual(const EncodingRead& samRecord) {
             case 'X':
                 // Encode opLen quality values with computed quantizer indices
                 for (size_t i = 0; i < opLen; i++) {
-                    uint8_t q = uint8_t(samRecord.qvalues[qualIdx++]) - qualityValueOffset_;
+                    uint8_t q = uint8_t(samRecord.qual[qualIdx++]) - qualityValueOffset_;
                     uint8_t quantizerIndex = out->quantizerIndices[quantizerIndicesIdx++];
                     uint8_t qualityValueIndex = uint8_t(quantizers_.at(quantizerIndex).valueToIndex(q));
                     out->stepindices.at(quantizerIndex).push_back(qualityValueIndex);
@@ -166,7 +166,7 @@ void QualEncoder::encodeMappedQual(const EncodingRead& samRecord) {
             case 'S':
                 // Encode opLen quality values with max quantizer index
                 for (size_t i = 0; i < opLen; i++) {
-                    auto q = static_cast<uint8_t>(samRecord.qvalues[qualIdx++]) - qualityValueOffset_;
+                    auto q = static_cast<uint8_t>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
                     uint8_t qualityValueIndex = uint8_t(quantizers_.at(NR_QUANTIZERS - 1).valueToIndex(q));
                     out->stepindices.at(static_cast<size_t>(NR_QUANTIZERS - 1)).push_back(qualityValueIndex);
                 }

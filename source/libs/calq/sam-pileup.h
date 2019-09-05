@@ -8,13 +8,13 @@
 #include <deque>
 #include <string>
 #include <vector>
-#include "encoding-read.h"
+#include "min-sam-record.h"
 
 namespace calq {
 
-class SAMPileup {
+class SamPileup {
    public:
-    SAMPileup();
+    SamPileup();
 
     uint32_t pos;            // 0-based position of this pileup
     std::string qual;        // Quality values
@@ -26,22 +26,22 @@ class SAMPileup {
 class SamPileupDeque {
    public:
     SamPileupDeque();
-    const SAMPileup& back() const;
+    const SamPileup& back() const;
     void clear();
     bool empty() const;
-    const SAMPileup& front() const;
+    const SamPileup& front() const;
     size_t length() const;
-    const SAMPileup& operator[](const size_t& n) const;
+    const SamPileup& operator[](const size_t& n) const;
     void pop_front();
     size_t size() const;
     uint32_t posMax() const;
     uint32_t posMin() const;
-    void setPosMax(const uint32_t& posMax);
-    void setPosMin(const uint32_t& posMin);
-    void add(const EncodingRead& r, uint8_t qvOffset, uint8_t hqSoftClipThreshold);
+    void setPosMax(uint32_t posMax);
+    void setPosMin(uint32_t posMin);
+    void add(const MinSamRecord& r, uint8_t qualOffset, uint8_t hqSoftClipThreshold);
 
    private:
-    std::deque<SAMPileup> pileups_{};
+    std::deque<SamPileup> pileups_{};
     uint32_t posMax_;
     uint32_t posMin_;
 };
