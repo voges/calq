@@ -8,11 +8,11 @@ TEST(SamPileupDeque, Generic) {  // NOLINT(cert-err58-cpp)
     record1.ref = "chr1";
     record1.cigar = "7M";
     record1.seq = "GATTACA";
-    record1.qual = "QQQQQQQ";
+    record1.qual = "QUALITY";
 
     calq::SamPileupDeque deque;
 
-    // TODO(Jan): the function add() should work w/o requiring the user to call setPos[Min|Max]() first
+    // TODO(Jan): The function add() should work w/o requiring the user to call setPos[Min|Max]() first.
     deque.setPosMin(record1.posMin);
     deque.setPosMax(record1.posMax);
 
