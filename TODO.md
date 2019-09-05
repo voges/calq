@@ -17,7 +17,7 @@
     - [ ] FileWriter
     - [ ] Helpers
     - [ ] SamFileReader
-    - [ ] SamRecord
+    - [x] SamRecord
 - [ ] Make CIP application (source/apps/cip/) work again (including GABAC and rANS)
 - [ ] Resolve FIXME's and TODO's
 - [ ] Update README.md once everything is working

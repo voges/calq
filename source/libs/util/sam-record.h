@@ -1,22 +1,17 @@
 #ifndef UTIL_SAM_RECORD_H_
 #define UTIL_SAM_RECORD_H_
 
-#include <inttypes.h>
-
+#include <cinttypes>
 #include <string>
 #include <vector>
 
 namespace util {
 
-struct SamRecord {
+class SamRecord {
    public:
-    SamRecord(const std::vector<std::string> &fields);
-
-    ~SamRecord();
-
+    explicit SamRecord(const std::vector<std::string> &fields);
     std::string str() const;
 
-   public:
     std::string qname;  // Query template NAME
     uint16_t flag;      // bitwise FLAG (uint16_t)
     std::string rname;  // Reference sequence NAME
