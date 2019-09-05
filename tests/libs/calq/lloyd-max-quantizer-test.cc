@@ -5,8 +5,8 @@ TEST(LloydMaxQuantizer, UniformDistribution) {  // NOLINT(cert-err58-cpp)
     calq::LloydMaxQuantizer q(10);
     calq::ProbabilityDistribution pdf(0, 99);
 
-    for (int i = 0; i <= 99; i++) {
-        pdf.add(static_cast<size_t>(i));
+    for (size_t i = 0; i <= 99; i++) {
+        pdf.add(i);
     }
     q.build(pdf);
 

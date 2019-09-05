@@ -14,30 +14,33 @@
 namespace calq {
 
 class LloydMaxQuantizer : public Quantizer {
-   private:
-    // Decision thresholds
-    std::vector<double> borders;
-
-    // Representative values for each interval
-    std::vector<double> values;
-
-    size_t steps;
-
-    // Fill LUT of base class
-    void fillLUT(const ProbabilityDistribution& pdf);
-
-    // Calculates the centroid in a region of a pdf
-    double calcCentroid(size_t left, size_t right, const ProbabilityDistribution& pdf);
-
-    // Calculates quantization borders using pdf
-    void calcBorders(const ProbabilityDistribution& pdf);
-
    public:
     explicit LloydMaxQuantizer(size_t steps);
 
-    // Creates quantization boundaries from a probability
-    // distribution and fills LUT
+    /**
+     * Create quantization boundaries from a probability distribution and fill LUT
+     */
     void build(const ProbabilityDistribution& pdf);
+
+   private:
+    std::vector<double> borders_;  /// decision thresholds
+    std::vector<double> values_;   /// representative values for each interval
+    size_t steps_;
+
+    /**
+     * Fill LUT of base class
+     */
+    void fillLUT(const ProbabilityDistribution& pdf);
+
+    /**
+     * Calculate the centroid in a region of a PDF
+     */
+    static double centroid(size_t left, size_t right, const ProbabilityDistribution& pdf);
+
+    /**
+     * Calculate quantization borders using PDF
+     */
+    void calcBorders(const ProbabilityDistribution& pdf);
 };
 
 }  // namespace calq

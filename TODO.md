@@ -4,7 +4,7 @@
     - [ ] FilterBuffer
     - [ ] Genotyper
     - [ ] Haplotyper
-    - [ ] LloydMaxQuantizer
+    - [x] LloydMaxQuantizer
     - [x] ProbabilityDistribution
     - [x] Quantizer
     - [x] SamPileup
