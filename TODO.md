@@ -5,7 +5,7 @@
     - [ ] Genotyper
     - [ ] Haplotyper
     - [ ] LloydMaxQuantizer
-    - [ ] ProbabilityDistribution
+    - [x] ProbabilityDistribution
     - [x] Quantizer
     - [x] SamPileup
     - [x] SoftclipSpreader
