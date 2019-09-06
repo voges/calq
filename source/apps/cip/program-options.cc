@@ -1,8 +1,8 @@
 #include "program-options.h"
 
+#include <cli11/cli11.h>
 #include <sstream>
 #include "util/helpers.h"
-#include <cli11/cli11.h>
 
 namespace cip {
 
