@@ -13,7 +13,7 @@
     - [x] UniformQuantizer
   - [ ] <source/tests>/libs/util/
     - [ ] FastaFileReader
-    - [ ] FileReader
+    - [x] FileReader
     - [ ] FileWriter
     - [x] Helpers
     - [ ] SamFileReader
