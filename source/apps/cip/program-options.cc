@@ -1,9 +1,7 @@
 #include "program-options.h"
 
 #include <sstream>
-#include "errors.h"
 #include "util/helpers.h"
-// #include "logging.h"
 #include <cli11/cli11.h>
 
 namespace cip {
@@ -169,10 +167,10 @@ void ProgramOptions::validateCompress() {
 
 void ProgramOptions::validateDecompress() {
     if (util::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
-        throwErrorException("Side information file name extension must be '.sam'");
+        // throwErrorException("Side information file name extension must be '.sam'");
     }
     if (!util::fileExists(sideInformationFilePath)) {
-        throwErrorException("Cannot access side information file");
+        // throwErrorException("Cannot access side information file");
     }
 }
 
@@ -205,10 +203,10 @@ void ProgramOptions::validateCommon() {
 
     // inputFilePath
     if (inputFilePath.empty()) {
-        throwErrorException("No input file name provided");
+        // throwErrorException("No input file name provided");
     }
     if (!util::fileExists(inputFilePath)) {
-        throwErrorException("Cannot access input file");
+        // throwErrorException("Cannot access input file");
     }
 
     // polyploidy
@@ -217,7 +215,7 @@ void ProgramOptions::validateCommon() {
 
     // outputFilePath
     if (util::fileExists(outputFilePath) && !force) {
-        throwErrorException("Not overwriting output file (use option '-f' to force overwriting)");
+        // throwErrorException("Not overwriting output file (use option '-f' to force overwriting)");
     }
 }
 
@@ -300,7 +298,7 @@ void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     try {
         app.parse(argc, argv);
     } catch (const CLI::ParseError &e) {
-        throwErrorException("Command line parsing failed: " + std::to_string(app.exit(e)));
+        // throwErrorException("Command line parsing failed: " + std::to_string(app.exit(e)));
     }
 
     validate();

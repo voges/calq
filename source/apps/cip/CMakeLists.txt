@@ -3,7 +3,6 @@ project("cip")
 set(source_files
         cip.cc
         cq-file.cc
-        exceptions.cc
         program-options.cc
         sam-block.cc
         # sam-file-handler.cc

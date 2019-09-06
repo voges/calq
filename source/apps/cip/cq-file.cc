@@ -3,7 +3,6 @@
 #include <cstring>
 #include <memory>
 #include "calq/calq-codec.h"
-#include "errors.h"
 //#include "gabac/buffer_input_stream.h"
 //#include "gabac/buffer_output_stream.h"
 

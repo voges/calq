@@ -1,6 +1,6 @@
 #include <iostream>
-#include "errors.h"
 #include "program-options.h"
+#include "calq/errors.h"
 
 // #include "calq/calq_coder.h"
 //
@@ -205,7 +205,7 @@ int calq_main(int argc, char* argv[]) {
         // } else {
         //     return decode(programOptions);
         // }
-    } catch (const cip::ErrorException& errorException) {
+    } catch (const calq::ErrorException& errorException) {
         std::cerr << "CALQ: Error: " << errorException.what() << std::endl;
         return EXIT_FAILURE;
     } catch (const std::exception& stdException) {

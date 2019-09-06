@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <string>
-#include "cip/errors.h"
+// #include "cip/errors.h"
 
 namespace cip {
 
@@ -29,7 +29,7 @@ class FileWriter {
         try {
             filestream.read(reinterpret_cast<char *>(dword), sizeof(T) * number);
         } catch (std::exception &e) {
-            throwErrorException(std::string("Read failed: ") + e.what());
+            // throwErrorException(std::string("Read failed: ") + e.what());
         }
         nrReadBytes_ += ret;
         return ret;
@@ -41,7 +41,7 @@ class FileWriter {
         try {
             filestream.write(reinterpret_cast<const char *>(dword), sizeof(T) * number);
         } catch (std::exception &e) {
-            throwErrorException(std::string("Write failed: ") + e.what());
+            // throwErrorException(std::string("Write failed: ") + e.what());
         }
         nrWrittenBytes_ += ret;
         return ret;
