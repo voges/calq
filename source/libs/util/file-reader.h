@@ -10,6 +10,7 @@ namespace util {
 class FileReader : public File {
    public:
     explicit FileReader(const std::string &path);
+    virtual ~FileReader();
     void readLine(std::string *line);
 
    private:

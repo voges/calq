@@ -5,7 +5,14 @@
 
 namespace util {
 
-FileReader::FileReader(const std::string &path) : File(path) {}
+FileReader::FileReader(const std::string &path) : File(path), line_(nullptr) {
+    line_ = reinterpret_cast<char *>(malloc(MAX_LINE_LENGTH));
+    if (line_ == nullptr) {
+        throw std::runtime_error{"failed to allocate memory"};
+    }
+}
+
+FileReader::~FileReader() { free(line_); }
 
 void FileReader::readLine(std::string *const line) {
     line->clear();
