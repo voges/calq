@@ -3,6 +3,7 @@ project("util-tests")
 set(source_files
         fasta-file-reader-test.cc
         file-reader-test.cc
+        file-test.cc
         file-writer-test.cc
         helpers.cc
         helpers-test.cc
