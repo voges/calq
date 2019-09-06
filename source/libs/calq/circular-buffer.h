@@ -45,7 +45,7 @@ class CircularBuffer {
         return oldVal;
     }
 
-private:
+   private:
     std::vector<T> data_;
     size_t pos_;
 };
