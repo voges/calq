@@ -18,8 +18,13 @@
     - [x] Helpers
     - [ ] SamFileReader
     - [x] SamRecord
+- [ ] Check whether both SamRecord and MinSamRecord classes are needed
+- [ ] Check comments
+  - [ ] Sentences should start with an uppercase letter and end with a full stop.
+  - [ ] Statements should start with an uppercase letter and not end with a full stop.
 - [ ] Make CIP application (source/apps/cip/) work again (including GABAC and rANS)
 - [ ] Resolve FIXME's and TODO's
+- [ ] Resolve clang-tidy warnings
 - [ ] Update README.md once everything is working
 - [ ] Clean up scripts
   - [ ] scripts/benchmark/
