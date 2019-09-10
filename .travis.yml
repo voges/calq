@@ -24,6 +24,7 @@ matrix:
             - graphviz
             - g++-5
             - lcov
+            - valgrind
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
     - os: osx
@@ -36,6 +37,7 @@ script:
   - ./ci/cmake-build-release.sh
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]]; then ./ci/cmake-build-debug-with-doc-and-coverage.sh; fi
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]]; then ./ci/run-all-tests.sh; fi
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]]; then ./ci/run-all-tests-with-valgrind.sh; fi
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]] && [[ "${TRAVIS_BRANCH}" == "master" ]]; then ./ci/report-code-coverage.sh; fi
 
 deploy:
