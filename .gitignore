@@ -13,6 +13,3 @@ cmake-build-*/
 
 # lcov report
 coverage.info
-
-# before-commit.sh log file
-before-commit.sh.log
