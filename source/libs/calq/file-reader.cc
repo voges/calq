@@ -1,3 +1,7 @@
+/**
+ * @file file-reader.cc
+ */
+
 #include "file-reader.h"
 #include <climits>
 #include <cstring>

@@ -1,3 +1,7 @@
+/**
+ * @file constants.h
+ */
+
 #ifndef CALQ_CONSTANTS_H_
 #define CALQ_CONSTANTS_H_
 

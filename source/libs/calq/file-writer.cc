@@ -1,3 +1,7 @@
+/**
+ * @file file-writer.cc
+ */
+
 #include "file-writer.h"
 #include <climits>
 

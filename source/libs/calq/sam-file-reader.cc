@@ -1,3 +1,7 @@
+/**
+ * @file sam-file-reader.cc
+ */
+
 #include "sam-file-reader.h"
 #include <string>
 #include <vector>

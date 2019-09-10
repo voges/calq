@@ -1,3 +1,7 @@
+/**
+ * @file sam-file-reader.h
+ */
+
 #ifndef CALQ_SAM_FILE_READER_H_
 #define CALQ_SAM_FILE_READER_H_
 

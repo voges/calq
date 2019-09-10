@@ -1,3 +1,7 @@
+/**
+ * @file file-writer.h
+ */
+
 #ifndef CALQ_FILE_WRITER_H_
 #define CALQ_FILE_WRITER_H_
 

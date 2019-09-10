@@ -1,3 +1,7 @@
+/**
+ * @file string-helpers.h
+ */
+
 #ifndef CALQ_STRING_HELPERS_H
 #define CALQ_STRING_HELPERS_H
 

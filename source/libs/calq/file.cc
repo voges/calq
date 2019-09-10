@@ -1,3 +1,7 @@
+/**
+ * @file file.cc
+ */
+
 #include "file.h"
 #include <climits>
 #include <stdexcept>
