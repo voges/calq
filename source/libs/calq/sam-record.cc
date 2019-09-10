@@ -2,7 +2,7 @@
 #include <queue>
 #include <sstream>
 
-namespace util {
+namespace calq {
 
 SamRecord::SamRecord(const std::vector<std::string> &fields)
     : qname(fields[0]),
@@ -37,4 +37,4 @@ std::string SamRecord::str() const {
     return ss.str();
 }
 
-}  // namespace util
+}  // namespace calq

@@ -1,5 +1,5 @@
-#ifndef UTIL_SAM_FILE_READER_H_
-#define UTIL_SAM_FILE_READER_H_
+#ifndef CALQ_SAM_FILE_READER_H_
+#define CALQ_SAM_FILE_READER_H_
 
 #include <list>
 #include <string>
@@ -7,7 +7,7 @@
 #include "file-reader.h"
 #include "sam-record.h"
 
-namespace util {
+namespace calq {
 
 class SamFileReader : public FileReader {
    public:
@@ -24,6 +24,6 @@ class SamFileReader : public FileReader {
     void readHeader();
 };
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_SAM_FILE_READER_H_
+#endif  // CALQ_SAM_FILE_READER_H_

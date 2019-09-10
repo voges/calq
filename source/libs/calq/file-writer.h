@@ -1,11 +1,11 @@
-#ifndef CIP_FILE_WRITER_H_
-#define CIP_FILE_WRITER_H_
+#ifndef CALQ_FILE_WRITER_H_
+#define CALQ_FILE_WRITER_H_
 
 #include <fstream>
 #include <string>
 // #include "cip/errors.h"
 
-namespace cip {
+namespace calq {
 
 class FileWriter {
    public:
@@ -65,6 +65,6 @@ class FileWriter {
     std::fstream filestream;
 };
 
-}  // namespace cip
+}  // namespace calq
 
-#endif  // CIP_FILE_WRITER_H_
+#endif  // CALQ_FILE_WRITER_H_

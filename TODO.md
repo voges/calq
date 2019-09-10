@@ -1,24 +1,22 @@
-- [ ] Write C++ unit tests
-  - [x] <source|tests>/libs/calq/
-    - [x] CircularBuffer
-    - [x] FilterBuffer
-    - [x] Genotyper
-    - [x] Haplotyper
-    - [x] LloydMaxQuantizer
-    - [x] ProbabilityDistribution
-    - [x] Quantizer
-    - [x] SamPileup
-    - [x] SoftclipSpreader
-    - [x] UniformMinMaxQuantizer
-    - [x] UniformQuantizer
-  - [ ] <source/tests>/libs/util/
-    - [ ] FastaFileReader
-    - [ ] FileReader
-    - [ ] FileWriter
-    - [ ] File
-    - [x] Helpers
-    - [ ] SamFileReader
-    - [x] SamRecord
+- [ ] Write C++ unit tests for <source|tests>/libs/calq/
+  - [x] CircularBuffer
+  - [ ] FastaFileReader
+  - [ ] File
+  - [ ] FileReader
+  - [ ] FileWriter
+  - [x] FilterBuffer
+  - [x] Genotyper
+  - [x] Haplotyper
+  - [x] Helpers
+  - [x] LloydMaxQuantizer
+  - [x] ProbabilityDistribution
+  - [x] Quantizer
+  - [ ] SamFileReader
+  - [x] SamPileup
+  - [x] SamRecord
+  - [x] SoftclipSpreader
+  - [x] UniformMinMaxQuantizer
+  - [x] UniformQuantizer    
 - [ ] Check whether both SamRecord and MinSamRecord classes are needed
 - [ ] Check comments
   - [ ] Sentences should start with an uppercase letter and end with a full stop.

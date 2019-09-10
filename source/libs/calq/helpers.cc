@@ -1,7 +1,7 @@
 #include "helpers.h"
 #include <fstream>
 
-namespace util {
+namespace calq {
 
 bool fileExists(const std::string& path) {
     std::ifstream ifs(path.c_str());
@@ -15,4 +15,4 @@ std::string fileNameExtension(const std::string& path) {
     return "";
 }
 
-}  // namespace util
+}  // namespace calq

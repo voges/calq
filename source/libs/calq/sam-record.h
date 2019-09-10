@@ -1,11 +1,11 @@
-#ifndef UTIL_SAM_RECORD_H_
-#define UTIL_SAM_RECORD_H_
+#ifndef CALQ_SAM_RECORD_H_
+#define CALQ_SAM_RECORD_H_
 
 #include <cinttypes>
 #include <string>
 #include <vector>
 
-namespace util {
+namespace calq {
 
 class SamRecord {
    public:
@@ -26,6 +26,6 @@ class SamRecord {
     std::string opt;    // OPTional information
 };
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_SAM_RECORD_H_
+#endif  // CALQ_SAM_RECORD_H_

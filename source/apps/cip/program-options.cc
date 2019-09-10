@@ -2,7 +2,7 @@
 
 #include <cli11/cli11.h>
 #include <sstream>
-#include "util/helpers.h"
+#include "calq/helpers.h"
 
 namespace cip {
 
@@ -166,10 +166,10 @@ void ProgramOptions::validateCompress() {
 // }
 
 void ProgramOptions::validateDecompress() {
-    if (util::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
+    if (calq::fileNameExtension(sideInformationFilePath) != std::string("sam")) {
         // throwErrorException("Side information file name extension must be '.sam'");
     }
-    if (!util::fileExists(sideInformationFilePath)) {
+    if (!calq::fileExists(sideInformationFilePath)) {
         // throwErrorException("Cannot access side information file");
     }
 }
@@ -205,7 +205,7 @@ void ProgramOptions::validateCommon() {
     if (inputFilePath.empty()) {
         // throwErrorException("No input file name provided");
     }
-    if (!util::fileExists(inputFilePath)) {
+    if (!calq::fileExists(inputFilePath)) {
         // throwErrorException("Cannot access input file");
     }
 
@@ -214,7 +214,7 @@ void ProgramOptions::validateCommon() {
     }
 
     // outputFilePath
-    if (util::fileExists(outputFilePath) && !force) {
+    if (calq::fileExists(outputFilePath) && !force) {
         // throwErrorException("Not overwriting output file (use option '-f' to force overwriting)");
     }
 }

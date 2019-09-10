@@ -3,7 +3,7 @@
 #include <cstring>
 #include <stdexcept>
 
-namespace util {
+namespace calq {
 
 FileReader::FileReader(const std::string &path) : File(path), line_(nullptr) {
     line_ = reinterpret_cast<char *>(malloc(MAX_LINE_LENGTH));
@@ -37,4 +37,4 @@ void FileReader::readLine(std::string *const line) {
     *line = line_;
 }
 
-}  // namespace util
+}  // namespace calq

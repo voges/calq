@@ -1,5 +1,5 @@
-#ifndef UTIL_FASTA_FILE_READER_H_
-#define UTIL_FASTA_FILE_READER_H_
+#ifndef CALQ_FASTA_FILE_READER_H_
+#define CALQ_FASTA_FILE_READER_H_
 
 #include <string>
 #include <vector>
@@ -7,7 +7,7 @@
 #include "fasta-record.h"
 #include "file-reader.h"
 
-namespace util {
+namespace calq {
 
 class FastaFileReader : public FileReader {
    public:
@@ -18,6 +18,6 @@ class FastaFileReader : public FileReader {
     void parse(std::vector<FastaRecord> *const fastaRecords);
 };
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_FASTA_FILE_READER_H_
+#endif  // CALQ_FASTA_FILE_READER_H_

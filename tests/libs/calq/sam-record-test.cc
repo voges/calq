@@ -1,4 +1,4 @@
-#include "util/sam-record.h"
+#include "calq/sam-record.h"
 #include <gtest/gtest.h>
 
 TEST(SamRecord, String) {  // NOLINT(cert-err58-cpp)
@@ -28,5 +28,5 @@ TEST(SamRecord, String) {  // NOLINT(cert-err58-cpp)
     fields.push_back(seq);
     fields.push_back(opt);
 
-    util::SamRecord record(fields);
+    calq::SamRecord record(fields);
 }

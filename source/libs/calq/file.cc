@@ -2,7 +2,7 @@
 #include <climits>
 #include <stdexcept>
 
-namespace util {
+namespace calq {
 
 File::File(const std::string &path) : fp_(nullptr), size_(0) {
     open(path);
@@ -77,4 +77,4 @@ void File::seek(const int64_t offset, const int whence) {
     }
 }
 
-}  // namespace util
+}  // namespace calq

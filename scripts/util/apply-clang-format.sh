@@ -10,10 +10,8 @@ readonly git_root_dir="$(git rev-parse --show-toplevel)"
 dirs=()
 dirs+=("${git_root_dir}/source/apps/cip")
 dirs+=("${git_root_dir}/source/libs/calq")
-dirs+=("${git_root_dir}/source/libs/util")
 dirs+=("${git_root_dir}/tests/example")
 dirs+=("${git_root_dir}/tests/libs/calq")
-dirs+=("${git_root_dir}/tests/libs/util")
 
 extensions=()
 extensions+=("h")

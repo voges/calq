@@ -1,14 +1,14 @@
-#ifndef UTIL_HELPERS_H_
-#define UTIL_HELPERS_H_
+#ifndef CALQ_HELPERS_H_
+#define CALQ_HELPERS_H_
 
 #include <string>
 
-namespace util {
+namespace calq {
 
 bool fileExists(const std::string& path);
 
 std::string fileNameExtension(const std::string& path);
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_HELPERS_H_
+#endif  // CALQ_HELPERS_H_

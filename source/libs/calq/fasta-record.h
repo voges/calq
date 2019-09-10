@@ -1,9 +1,9 @@
-#ifndef UTIL_FASTA_RECORD_H_
-#define UTIL_FASTA_RECORD_H_
+#ifndef CALQ_FASTA_RECORD_H_
+#define CALQ_FASTA_RECORD_H_
 
 #include <string>
 
-namespace util {
+namespace calq {
 
 struct FastaRecord {
    public:
@@ -13,6 +13,6 @@ struct FastaRecord {
     std::string sequence;
 };
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_FASTA_RECORD_H_
+#endif  // CALQ_FASTA_RECORD_H_

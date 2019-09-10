@@ -1,8 +1,10 @@
 #include "helpers.h"
-#include "util/string-helpers.h"
+#include "calq/string-helpers.h"
 
-std::string exec(const std::string& cmd) {
-    FILE* pipe = popen(cmd.c_str(), "r");
+namespace calq_tests {
+
+std::string exec(const std::string &cmd) {
+    FILE *pipe = popen(cmd.c_str(), "r");
     if (!pipe) {
         return "<exec(" + cmd + ") failed>";
     }
@@ -19,7 +21,9 @@ std::string exec(const std::string& cmd) {
 
     pclose(pipe);
 
-    util::rtrim(result);
+    calq::rtrim(result);
 
     return result;
 }
+
+}  // namespace calq_tests

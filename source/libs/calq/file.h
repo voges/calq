@@ -1,10 +1,10 @@
-#ifndef UTIL_FILE_H_
-#define UTIL_FILE_H_
+#ifndef CALQ_FILE_H_
+#define CALQ_FILE_H_
 
 #include <fstream>
 #include <string>
 
-namespace util {
+namespace calq {
 
 class File {
    public:
@@ -28,6 +28,6 @@ class File {
     void seek(int64_t offset, int whence);
 };
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_FILE_H_
+#endif  // CALQ_FILE_H_

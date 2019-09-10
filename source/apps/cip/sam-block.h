@@ -2,7 +2,7 @@
 #define CIP_SAM_BLOCK_H_
 
 #include <deque>
-#include "util/sam-record.h"
+#include "calq/sam-record.h"
 
 namespace cip {
 
@@ -16,7 +16,7 @@ class SamBlock {
     size_t nrRecords() const;
     void reset();
 
-    std::deque<util::SamRecord> records;
+    std::deque<calq::SamRecord> records;
 
    private:
     size_t nrMappedRecords_;

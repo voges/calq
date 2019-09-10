@@ -1,11 +1,11 @@
-#ifndef UTIL_FILE_READER_H_
-#define UTIL_FILE_READER_H_
+#ifndef CALQ_FILE_READER_H_
+#define CALQ_FILE_READER_H_
 
 #include <string>
 #include "constants.h"
 #include "file.h"
 
-namespace util {
+namespace calq {
 
 class FileReader : public File {
    public:
@@ -18,6 +18,6 @@ class FileReader : public File {
     char *line_;
 };
 
-}  // namespace util
+}  // namespace calq
 
-#endif  // UTIL_FILE_READER_H_
+#endif  // CALQ_FILE_READER_H_

@@ -4,7 +4,7 @@
 #include "sam-record.h"
 #include "string-helpers.h"
 
-namespace util {
+namespace calq {
 
 static void parseLine(const std::string &line, std::vector<std::string> *const fields) {
     fields->clear();
@@ -81,4 +81,4 @@ void SamFileReader::readHeader() {
     }
 }
 
-}  // namespace util
+}  // namespace calq
