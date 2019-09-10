@@ -43,8 +43,7 @@ Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int numQu
       genotypeLikelihoods_(),
       numQuantizers_(numQuantizers),
       polyploidy_(polyploidy),
-      qualOffset_(qualOffset),
-      DEBUG(debug) {
+      qualOffset_(qualOffset) {
     if (numQuantizers < 1) {
         throwErrorException("nrQuantizers must be greater than zero");
     }

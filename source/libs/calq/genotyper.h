@@ -33,7 +33,7 @@ class Genotyper {
     const int numQuantizers_;
     const int polyploidy_;
     const int qualOffset_;
-    const bool DEBUG;
+    // const bool DEBUG;
 };
 
 }  // namespace calq
