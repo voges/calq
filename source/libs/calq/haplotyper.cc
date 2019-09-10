@@ -19,7 +19,7 @@ Haplotyper::Haplotyper(const size_t sigma, const size_t ploidy, const size_t qua
                        bool debug, const bool squashed, const FilterType filterType)
     : spreader(maxHqSoftclipPropagation, hqSoftclipStreak, squashed),
       genotyper(static_cast<const int&>(ploidy), static_cast<const int&>(qualOffset),
-                static_cast<const int&>(numQuantizers), debug),
+                static_cast<const int&>(numQuantizers)),
       numQuantizers(numQuantizers),
       polyploidy(ploidy),
       DEBUG(debug),

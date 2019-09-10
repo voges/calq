@@ -13,7 +13,7 @@ namespace calq {
 
 class Genotyper {
    public:
-    Genotyper(int polyploidy, int qualOffset, int numQuantizers, bool debug);
+    Genotyper(int polyploidy, int qualOffset, int numQuantizers);
     double computeEntropy(const std::string& seqPileup, const std::string& qualPileup);
     int computeQuantizerIndex(const std::string& seqPileup, const std::string& qualPileup);
     const std::map<std::string, double>& getGenotypelikelihoods(const std::string& seqPileup,

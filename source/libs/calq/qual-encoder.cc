@@ -22,7 +22,7 @@ QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer
                   static_cast<size_t>(NR_QUANTIZERS), options.hqSoftClipPropagation, options.hqSoftClipStreak,
                   options.filterCutOff, options.debugPileup, options.squash, options.filterType),
       genotyper_(static_cast<const int&>(options.polyploidy), static_cast<const int&>(options.qualityValueOffset),
-                 NR_QUANTIZERS, options.debugPileup),
+                 NR_QUANTIZERS),
 
       out(o),
 

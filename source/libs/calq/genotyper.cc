@@ -36,7 +36,7 @@ static int combinationsWithRepetitions(std::vector<std::string>* const genotypeA
     return count;
 }
 
-Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int numQuantizers, const bool debug)
+Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int numQuantizers)
     : alleleAlphabet_(ALLELE_ALPHABET),
       alleleLikelihoods_(),
       genotypeAlphabet_(),
