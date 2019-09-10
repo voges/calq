@@ -1,7 +1,7 @@
 - [ ] Write C++ unit tests for <source|tests>/libs/calq/
   - [x] CircularBuffer
   - [ ] FastaFileReader
-  - [ ] File
+  - [x] File
   - [ ] FileReader
   - [ ] FileWriter
   - [x] FilterBuffer

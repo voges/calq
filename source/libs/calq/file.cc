@@ -3,8 +3,10 @@
  */
 
 #include "file.h"
+#include <cassert>
 #include <climits>
 #include <stdexcept>
+#include "errors.h"
 
 namespace calq {
 
@@ -35,7 +37,7 @@ int64_t File::tell() const {
     auto offset = static_cast<int64_t>(ftell(fp_));
 
     if (offset == -1) {
-        throw std::runtime_error{"failed to get file pointer position"};
+        throwErrorException("Failed to obtain the current value of the file position indicator");
     }
 
     return offset;
@@ -46,38 +48,36 @@ void File::close() {
         fclose(fp_);
         fp_ = nullptr;
     } else {
-        throw std::runtime_error{"failed to close file"};
+        throwErrorException("Failed to close file");
     }
 }
 
 void File::open(const std::string &path) {
-    if (fp_ != nullptr) {
-        throw std::runtime_error{"file pointer already in use while opening file: " + path};
-    }
+    assert(fp_ == nullptr);
 
     const char *mode = "rb";
 
 #ifdef _WIN32
     int rc = fopen_s(&fp_, path.c_str(), mode);
     if (rc != 0) {
-        throw std::runtime_error{"failed to open file: " + path};
+        throwErrorException("Failed to open file: " + path);
     }
 #else
     fp_ = fopen(path.c_str(), mode);
     if (fp_ == nullptr) {
-        throw std::runtime_error{"failed to open file: " + path};
+        throwErrorException("Failed to open file: " + path);
     }
 #endif
 }
 
 void File::seek(const int64_t offset, const int whence) {
-    if (offset > LONG_MAX) {
-        throw std::runtime_error{"pos out of range"};
+    if (offset < LONG_MIN || offset > LONG_MAX) {
+        throwErrorException("New value for the file position indicator is out of range");
     }
 
     int rc = fseek(fp_, offset, whence);
     if (rc != 0) {
-        throw std::runtime_error{"failed to get file pointer position"};
+        throwErrorException("Failed to set the file position indicator");
     }
 }
 
