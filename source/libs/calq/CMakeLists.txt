@@ -5,6 +5,7 @@ set(source_files
         exceptions.cc
         fasta-file-reader.cc
         file.cc
+        file-line-reader.cc
         file-reader.cc
         file-writer.cc
         filter-buffer.cc

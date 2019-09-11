@@ -9,7 +9,7 @@
 
 namespace calq {
 
-FastaFileReader::FastaFileReader(const std::string &path) : FileReader(path) {}
+FastaFileReader::FastaFileReader(const std::string &path) : FileLineReader(path) {}
 
 void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
     assert(fastaRecords != nullptr);

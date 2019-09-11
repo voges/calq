@@ -3,26 +3,59 @@
  */
 
 #include "file.h"
-#include <cassert>
+#include <cerrno>
 #include <climits>
+#include <cstring>
 #include "errors.h"
 
 namespace calq {
 
-File::File(const std::string &path) : fp_(nullptr), size_(0) {
-    open(path);
+File::File() : fp_(nullptr), size_(0) {}
+
+File::~File() { close(); }
+
+void File::advance(const int64_t offset) { seekFromCur(offset); }
+
+void File::close() {
+    if (fp_ != nullptr) {
+        fclose(fp_);
+        fp_ = nullptr;
+    }
+}
+
+bool File::eof() const { return feof(fp_) != 0; }
+
+bool File::error() const { return ferror(fp_) != 0; }
+
+void File::open(const std::string &path, const Mode mode = Mode::READ) {
+    if (fp_ != nullptr) {
+        throwErrorException("Failed to open file: " + path);
+    }
+
+    const char *m = "rb";
+    if (mode == Mode::WRITE) {
+        m = "wb";
+    }
+
+#ifdef _WIN32
+    int rc = fopen_s(&fp_, path.c_str(), m);
+    if (rc != 0) {
+        std::string modeStr = mode == Mode::READ ? "reading" : "writing";
+        throwErrorException("Failed to open file for " + modeStr + ": " + path);
+    }
+#else
+    fp_ = fopen(path.c_str(), m);
+    if (fp_ == nullptr) {
+        std::string modeStr = mode == Mode::READ ? "reading" : "writing";
+        throwErrorException("Failed to open file for " + modeStr + ": " + path + " (" + strerror(errno) + ")");
+    }
+#endif
 
     // Compute file size
     seekFromEnd(0);
     size_ = tell();
     seekFromSet(0);
 }
-
-File::~File() { close(); }
-
-void File::advance(const int64_t offset) { seekFromCur(offset); }
-
-bool File::eof() const { return feof(fp_) != 0; }
 
 void File::seekFromCur(const int64_t offset) { seek(offset, SEEK_CUR); }
 
@@ -40,33 +73,6 @@ int64_t File::tell() const {
     }
 
     return offset;
-}
-
-void File::close() {
-    if (fp_ != nullptr) {
-        fclose(fp_);
-        fp_ = nullptr;
-    } else {
-        throwErrorException("Failed to close file");
-    }
-}
-
-void File::open(const std::string &path) {
-    assert(fp_ == nullptr);
-
-    const char *mode = "rb";
-
-#ifdef _WIN32
-    int rc = fopen_s(&fp_, path.c_str(), mode);
-    if (rc != 0) {
-        throwErrorException("Failed to open file: " + path);
-    }
-#else
-    fp_ = fopen(path.c_str(), mode);
-    if (fp_ == nullptr) {
-        throwErrorException("Failed to open file: " + path);
-    }
-#endif
 }
 
 void File::seek(const int64_t offset, const int whence) {

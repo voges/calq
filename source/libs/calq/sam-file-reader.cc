@@ -32,7 +32,7 @@ static void parseLine(const std::string &line, std::vector<std::string> *const f
     }
 }
 
-SamFileReader::SamFileReader(const std::string &path) : FileReader(path) { readHeader(); }
+SamFileReader::SamFileReader(const std::string &path) : FileLineReader(path) { readHeader(); }
 
 std::string SamFileReader::header() { return header_; }
 

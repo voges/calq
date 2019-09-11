@@ -7,12 +7,12 @@
 
 #include <list>
 #include <string>
-#include "file-reader.h"
+#include "file-line-reader.h"
 #include "sam-record.h"
 
 namespace calq {
 
-class SamFileReader : public FileReader {
+class SamFileReader : public FileLineReader {
    public:
     explicit SamFileReader(const std::string &path);
     std::string header();

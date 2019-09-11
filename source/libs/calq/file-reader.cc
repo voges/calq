@@ -3,39 +3,21 @@
  */
 
 #include "file-reader.h"
-#include <cassert>
-#include "errors.h"
-#include "string-helpers.h"
 
 namespace calq {
 
-FileReader::FileReader(const std::string &path) : File(path), line_(nullptr) {
-    line_ = reinterpret_cast<char *>(malloc(MAX_LINE_LENGTH));
-    if (line_ == nullptr) {
-        throwErrorException("Failed to allocate memory");
-    }
+FileReader::FileReader(const std::string &path) : File() { open(path, Mode::READ); }
+
+size_t FileReader::read(void *const buffer, const size_t size) {
+    return readValue(reinterpret_cast<unsigned char *>(buffer), size);
 }
 
-FileReader::~FileReader() { free(line_); }
+size_t FileReader::readUint8(uint8_t *const byte) { return readValue(byte); }
 
-void FileReader::readLine(std::string *const line) {
-    assert(line != nullptr);
+size_t FileReader::readUint16(uint16_t *const word) { return readValue(word); }
 
-    line->clear();
+size_t FileReader::readUint32(uint32_t *const dword) { return readValue(dword); }
 
-    char *rc = fgets(line_, MAX_LINE_LENGTH, fp_);
-
-    if (rc == nullptr) {
-        // Error during read or EOF. Nothing has been read. We just return to the caller and leave 'line' empty.
-        return;
-    }
-
-    if (eof()) {
-        // EOF was reached but contents were read into 'line_'. We proceed processing the contents.
-    }
-
-    *line = line_;
-    *line = rtrim(*line);
-}
+size_t FileReader::readUint64(uint64_t *const qword) { return readValue(qword); }
 
 }  // namespace calq

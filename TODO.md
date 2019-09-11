@@ -2,8 +2,9 @@
   - [x] CircularBuffer
   - [x] FastaFileReader
   - [x] File
+  - [x] FileLineReader
   - [x] FileReader
-  - [ ] FileWriter
+  - [x] FileWriter
   - [x] FilterBuffer
   - [x] Genotyper
   - [x] Haplotyper

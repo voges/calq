@@ -12,10 +12,15 @@ namespace calq {
 
 class File {
    public:
-    explicit File(const std::string &path);
+    enum class Mode { READ, WRITE };
+
+    explicit File();
     virtual ~File();
     void advance(int64_t offset);
+    void close();
     bool eof() const;
+    bool error() const;
+    void open(const std::string &path, Mode mode);
     void seekFromCur(int64_t offset);
     void seekFromEnd(int64_t offset);
     void seekFromSet(int64_t offset);
@@ -27,8 +32,6 @@ class File {
     size_t size_;
 
    private:
-    void close();
-    void open(const std::string &path);
     void seek(int64_t offset, int whence);
 };
 

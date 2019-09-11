@@ -8,11 +8,11 @@
 #include <string>
 #include <vector>
 #include "fasta-record.h"
-#include "file-reader.h"
+#include "file-line-reader.h"
 
 namespace calq {
 
-class FastaFileReader : public FileReader {
+class FastaFileReader : public FileLineReader {
    public:
     explicit FastaFileReader(const std::string &path);
     void parse(std::vector<FastaRecord> *fastaRecords);
