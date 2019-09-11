@@ -3,17 +3,17 @@
  */
 
 #include "fasta-file-reader.h"
-
-#include <stdexcept>
+#include <cassert>
 #include <string>
+#include "errors.h"
 
 namespace calq {
 
 FastaFileReader::FastaFileReader(const std::string &path) : FileReader(path) {}
 
-FastaFileReader::~FastaFileReader() = default;
-
 void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
+    assert(fastaRecords != nullptr);
+
     // Reset file pointer to the beginning of the file
     size_t fpos = tell();
     seekFromSet(0);
@@ -35,7 +35,7 @@ void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
             if (!currentSequence.empty()) {
                 // We have a sequence, check if we have a header
                 if (currentHeader.empty()) {
-                    throw std::runtime_error{"Found FASTA sequence, but no header"};
+                    throwErrorException("Found FASTA sequence, but no header");
                 }
 
                 FastaRecord currentFastaRecord(currentHeader, currentSequence);
@@ -47,7 +47,7 @@ void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
 
             // Store the header and trim it: remove everything after the first space
             currentHeader = line;
-            currentHeader = currentHeader.substr(0, currentHeader.find_first_of(" "));
+            currentHeader = currentHeader.substr(0, currentHeader.find_first_of(' '));
         } else {
             currentSequence += line;
         }

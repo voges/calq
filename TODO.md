@@ -1,8 +1,8 @@
 - [ ] Write C++ unit tests for <source|tests>/libs/calq/
   - [x] CircularBuffer
-  - [ ] FastaFileReader
+  - [x] FastaFileReader
   - [x] File
-  - [ ] FileReader
+  - [x] FileReader
   - [ ] FileWriter
   - [x] FilterBuffer
   - [x] Genotyper
@@ -11,7 +11,7 @@
   - [x] LloydMaxQuantizer
   - [x] ProbabilityDistribution
   - [x] Quantizer
-  - [ ] SamFileReader
+  - [x] SamFileReader
   - [x] SamPileup
   - [x] SamRecord
   - [x] SoftclipSpreader

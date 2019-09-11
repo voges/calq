@@ -3,6 +3,7 @@
  */
 
 #include "sam-file-reader.h"
+#include <cassert>
 #include <string>
 #include <vector>
 #include "sam-record.h"
@@ -11,6 +12,8 @@
 namespace calq {
 
 static void parseLine(const std::string &line, std::vector<std::string> *const fields) {
+    assert(fields != nullptr);
+
     fields->clear();
     fields->push_back("");
 
@@ -31,9 +34,11 @@ static void parseLine(const std::string &line, std::vector<std::string> *const f
 
 SamFileReader::SamFileReader(const std::string &path) : FileReader(path) { readHeader(); }
 
-SamFileReader::~SamFileReader() = default;
+std::string SamFileReader::header() { return header_; }
 
 size_t SamFileReader::readRecords(const size_t numRecords, std::list<SamRecord> *const records) {
+    assert(records != nullptr);
+
     for (size_t i = 0; i < numRecords; i++) {
         // Read a line
         std::string line;
@@ -46,8 +51,6 @@ size_t SamFileReader::readRecords(const size_t numRecords, std::list<SamRecord> 
         std::vector<std::string> fields;
         parseLine(line, &fields);
         SamRecord samRecord(fields);
-
-        // std::cout << samRecord.str();
         records->push_back(samRecord);
     }
 
@@ -55,13 +58,13 @@ size_t SamFileReader::readRecords(const size_t numRecords, std::list<SamRecord> 
 }
 
 void SamFileReader::readHeader() {
-    // Set file pointer to the beginning of the file
+    // Set file position indicator to the beginning of the file
     seekFromSet(0);
 
     size_t fpos = 0;
 
     while (true) {
-        // Remember the file pointer position
+        // Remember the current file position indicator
         fpos = tell();
 
         // Read a line
@@ -70,19 +73,15 @@ void SamFileReader::readHeader() {
 
         // Add the line contents to the header
         if (line[0] == '@') {
-            header += line;
-            header += "\n";
+            header_ += line;
+            header_ += "\n";
         } else {
             break;
         }
     }
 
-    // Rewind to the beginning of the the alignment section
+    // Rewind file position indicator to the beginning of the the alignment section
     seekFromSet(fpos);
-
-    if (header.empty()) {
-        // LOG_WARNING << "SAM header not present";
-    }
 }
 
 }  // namespace calq

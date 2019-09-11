@@ -3,22 +3,24 @@
  */
 
 #include "file-reader.h"
-#include <climits>
-#include <cstring>
-#include <stdexcept>
+#include <cassert>
+#include "errors.h"
+#include "string-helpers.h"
 
 namespace calq {
 
 FileReader::FileReader(const std::string &path) : File(path), line_(nullptr) {
     line_ = reinterpret_cast<char *>(malloc(MAX_LINE_LENGTH));
     if (line_ == nullptr) {
-        throw std::runtime_error{"failed to allocate memory"};
+        throwErrorException("Failed to allocate memory");
     }
 }
 
 FileReader::~FileReader() { free(line_); }
 
 void FileReader::readLine(std::string *const line) {
+    assert(line != nullptr);
+
     line->clear();
 
     char *rc = fgets(line_, MAX_LINE_LENGTH, fp_);
@@ -29,16 +31,11 @@ void FileReader::readLine(std::string *const line) {
     }
 
     if (eof()) {
-        // EOF was reached but contents were read into 'line_'. We proceed processing the read contents.
-    }
-
-    // Trim line
-    size_t l = strlen(line_) - 1;
-    while (l && ((line_[l] == '\r') || (line_[l] == '\n'))) {
-        line_[l--] = '\0';
+        // EOF was reached but contents were read into 'line_'. We proceed processing the contents.
     }
 
     *line = line_;
+    *line = rtrim(*line);
 }
 
 }  // namespace calq

@@ -43,17 +43,17 @@ SamRecord::SamRecord(const std::vector<std::string> &fields)
 std::string SamRecord::str() const {
     std::stringstream ss;
 
-    ss << qname << " ";
-    ss << flag << " ";
-    ss << rname << " ";
-    ss << pos << " ";
-    ss << static_cast<int>(mapq) << " ";  // Cast needed because std::cout is overloaded for uint8_t
-    ss << cigar << " ";
-    ss << rnext << " ";
-    ss << pnext << " ";
-    ss << tlen << " ";
-    ss << seq << " ";
-    ss << qual << " ";
+    ss << qname << "\t";
+    ss << flag << "\t";
+    ss << rname << "\t";
+    ss << pos << "\t";
+    ss << static_cast<int>(mapq) << "\t";  // Cast needed because std::cout is overloaded for uint8_t
+    ss << cigar << "\t";
+    ss << rnext << "\t";
+    ss << pnext << "\t";
+    ss << tlen << "\t";
+    ss << seq << "\t";
+    ss << qual << "\t";
     ss << opt;
 
     return ss.str();

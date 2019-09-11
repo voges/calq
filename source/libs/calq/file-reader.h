@@ -14,7 +14,7 @@ namespace calq {
 class FileReader : public File {
    public:
     explicit FileReader(const std::string &path);
-    virtual ~FileReader();
+    ~FileReader() override;
     void readLine(std::string *line);
 
    private:

@@ -7,7 +7,6 @@
 
 #include <list>
 #include <string>
-
 #include "file-reader.h"
 #include "sam-record.h"
 
@@ -16,16 +15,12 @@ namespace calq {
 class SamFileReader : public FileReader {
    public:
     explicit SamFileReader(const std::string &path);
-
-    ~SamFileReader() override;
-
+    std::string header();
     size_t readRecords(size_t numRecords, std::list<SamRecord> *records);
-
-   public:
-    std::string header;
 
    private:
     void readHeader();
+    std::string header_;
 };
 
 }  // namespace calq

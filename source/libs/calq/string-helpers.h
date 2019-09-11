@@ -2,14 +2,14 @@
  * @file string-helpers.h
  */
 
-#ifndef CALQ_STRING_HELPERS_H
-#define CALQ_STRING_HELPERS_H
+#ifndef CALQ_STRING_HELPERS_H_
+#define CALQ_STRING_HELPERS_H_
 
 #include <string>
 
 namespace calq {
 
-const char *ws = " \t\n\r\f\v";
+static const char *ws = " \t\n\r\f\v";
 
 inline std::string &rtrim(std::string &s, const char *t = ws) {
     s.erase(s.find_last_not_of(t) + 1);
@@ -25,4 +25,4 @@ inline std::string &trim(std::string &s, const char *t = ws) { return ltrim(rtri
 
 }  // namespace calq
 
-#endif  // CALQ_STRING_HELPERS_H
+#endif  // CALQ_STRING_HELPERS_H_

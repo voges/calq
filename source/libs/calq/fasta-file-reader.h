@@ -7,7 +7,6 @@
 
 #include <string>
 #include <vector>
-
 #include "fasta-record.h"
 #include "file-reader.h"
 
@@ -15,11 +14,8 @@ namespace calq {
 
 class FastaFileReader : public FileReader {
    public:
-    FastaFileReader(const std::string &path);
-
-    ~FastaFileReader();
-
-    void parse(std::vector<FastaRecord> *const fastaRecords);
+    explicit FastaFileReader(const std::string &path);
+    void parse(std::vector<FastaRecord> *fastaRecords);
 };
 
 }  // namespace calq

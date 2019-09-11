@@ -4,14 +4,21 @@
 
 TEST(FileReader, Constructor) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader reader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
 }
 
 TEST(FileReader, ReadLine) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader reader(gitRootDir + "/resources/test-files/tests/test-text.txt");
+    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/test-text.txt");
 
     std::string line;
-    reader.readLine(&line);
-    EXPECT_EQ(line, "test-text");
+
+    fileReader.readLine(&line);
+    EXPECT_EQ(line, "test-line");
+
+    fileReader.readLine(&line);
+    EXPECT_EQ(line, "  test-line-leading-ws");
+
+    fileReader.readLine(&line);
+    EXPECT_EQ(line, "test-line-trailing-ws");
 }
