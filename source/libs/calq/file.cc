@@ -5,7 +5,6 @@
 #include "file.h"
 #include <cassert>
 #include <climits>
-#include <stdexcept>
 #include "errors.h"
 
 namespace calq {
