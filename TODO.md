@@ -29,3 +29,4 @@
 - [ ] Clean up scripts
   - [ ] scripts/benchmark/
   - [ ] scripts/variant-calling/
+- [ ] Check everything with valgrind
