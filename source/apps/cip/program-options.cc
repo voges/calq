@@ -17,7 +17,9 @@ void ProgramOptions::processCommandLine(int argc, char *argv[]) {
         app.parse(argc, argv);
         validate();
     } catch (const CLI::ParseError &e) {
-        if (app.exit(e) != 0) {
+        if (app.exit(e) == 0) {
+            throw std::runtime_error{"exiting after printing help"};
+        } else {
             throw std::runtime_error{"command line parsing failed: " + std::to_string(app.exit(e))};
         }
     }

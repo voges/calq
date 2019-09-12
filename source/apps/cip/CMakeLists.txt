@@ -2,6 +2,8 @@ project("cip")
 
 set(source_files
         cip.cc
+        decode.cc
+        encode.cc
         program-options.cc
 )
 

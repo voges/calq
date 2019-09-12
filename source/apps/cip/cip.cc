@@ -3,6 +3,8 @@
 #include <sstream>
 #include <vector>
 #include "calq/errors.h"
+#include "decode.h"
+#include "encode.h"
 #include "program-options.h"
 
 static std::string commandLineStr(int argc, char* argv[]) {
@@ -18,6 +20,12 @@ static int calq_main(int argc, char* argv[]) {
     try {
         std::cout << "cip: command line: " << commandLineStr(argc, argv) << std::endl;
         cip::ProgramOptions programOptions(argc, argv);
+
+        if (programOptions.decompress) {
+            decode(programOptions);
+        } else {
+            encode(programOptions);
+        }
     } catch (const calq::ErrorException& errorException) {
         std::cerr << "cip: CALQ error: " << errorException.what() << std::endl;
         return -1;
