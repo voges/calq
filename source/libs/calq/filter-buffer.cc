@@ -29,14 +29,8 @@ size_t GaussKernel::calcMinSize(double threshold, const size_t maximum) const {
     return std::min(size, maximum);
 }
 
-/**
- * New activity score in pipeline
- */
 void FilterBuffer::push(const double activityScore) { buffer.push(activityScore); }
 
-/**
- * Calculate filter score at offset position
- */
 double FilterBuffer::filter() const {
     double result = 0.0;
     for (size_t i = 0; i < kernel.size(); ++i) {
@@ -58,8 +52,6 @@ FilterBuffer::FilterBuffer(const std::function<double(size_t, size_t)>& kernelBu
 }
 
 FilterBuffer::FilterBuffer() : buffer(1, 0.0) {}
-
-size_t FilterBuffer::getSize() const { return buffer.size(); }
 
 size_t FilterBuffer::getOffset() const { return (buffer.size() + 1) / 2; }
 

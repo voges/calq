@@ -1,8 +1,6 @@
 project("calq")
 
 set(source_files
-        calq-codec.cc
-        exceptions.cc
         fasta-file-reader.cc
         file.cc
         file-line-reader.cc
@@ -13,7 +11,6 @@ set(source_files
         haplotyper.cc
         helpers.cc
         lloyd-max-quantizer.cc
-        log.cc
         probability-distribution.cc
         qual-decoder.cc
         qual-encoder.cc

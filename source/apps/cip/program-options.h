@@ -9,35 +9,12 @@ class ProgramOptions {
    public:
     ProgramOptions(int argc, char *argv[]);
 
-    void validate();
-
-    bool force;
-    bool debugStreams;
-    bool test;
-    bool help;
-    std::string inputFilePath;
-    std::string outputFilePath;
-    size_t blockSize;
-    std::string qualityValueType;
-    std::string referenceFilePath;
-    std::string filterTypeStr;
-    std::string quantizerTypeStr;
-    std::string versionStr;
     bool decompress;
-    std::string sideInformationFilePath;
-
-    size_t minNumQuantSteps;
-    size_t manNumQuantSteps;
-    size_t polyploidy;
-    size_t hqSoftClipThreshold;
+    bool force;
 
    private:
     void processCommandLine(int argc, char *argv[]);
-
-    void validateV1();
-    void validateV2();
-    static void validateCompress();
-    void validateDecompress();
+    void validate();
     void validateCommon();
 };
 

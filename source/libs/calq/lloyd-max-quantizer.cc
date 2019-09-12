@@ -43,7 +43,7 @@ double LloydMaxQuantizer::centroid(const size_t left, size_t right, const Probab
     double sum = 0.0;
     double weightSum = 0.0;
 
-    const double THRESHOLD = 0.01;  // avoid division by zero
+    const double THRESHOLD = 0.01;  // Avoid division by zero
 
     if (right == pdf.rangeMax() + 1) {
         sum += pdf[pdf.size() - 1];
@@ -60,7 +60,7 @@ double LloydMaxQuantizer::centroid(const size_t left, size_t right, const Probab
 }
 
 void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf) {
-    // step 1: init
+    // Step 1: init
     double stepSize = pdf.size() / static_cast<double>(steps_);
     for (size_t i = 0; i < steps_; ++i) {
         borders_[i] = pdf.rangeMin() + static_cast<double>(i + 1) * stepSize;
@@ -69,7 +69,7 @@ void LloydMaxQuantizer::calcBorders(const ProbabilityDistribution& pdf) {
 
     double change = 0.0;
 
-    // step 2: Lloyd's II. algorithm
+    // Step 2: Lloyd's II. algorithm
     for (int k = 0; k < static_cast<int>(borders_.size()); ++k) {
         double left = (k == 0) ? pdf.rangeMin() : borders_[k - 1];
         double right = borders_[k];

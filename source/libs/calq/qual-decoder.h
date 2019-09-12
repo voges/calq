@@ -8,12 +8,10 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "data-structures.h"
 #include "quantizer.h"
 
 namespace calq {
-
-struct EncodingBlock;
-struct DecodingBlock;
 
 struct DecodingRead {
     uint32_t posMin;
@@ -31,8 +29,8 @@ class QualDecoder {
     int qualityValueOffset_;
     std::vector<size_t> qviIdx_;
     std::vector<Quantizer> quantizers_;
-    EncodingBlock* out;
-    const DecodingBlock& in;
+    EncodingBlock* out_;
+    const DecodingBlock& in_;
 };
 
 }  // namespace calq

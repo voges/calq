@@ -4,25 +4,21 @@
 
 #include "haplotyper.h"
 #include <algorithm>
-#include <iomanip>
 #include <iostream>
 #include <limits>
-#include <sstream>
-#include "calq-codec.h"
+#include "data-structures.h"
 #include "errors.h"
 
 namespace calq {
 
-// Returns score, takes seq and qual pileup and position
 Haplotyper::Haplotyper(const size_t sigma, const size_t ploidy, const size_t qualOffset, const size_t numQuantizers,
                        const size_t maxHqSoftclipPropagation, const size_t hqSoftclipStreak, size_t const filterCutOff,
-                       bool debug, const bool squashed, const FilterType filterType)
+                       const bool squashed, const FilterType filterType)
     : spreader(maxHqSoftclipPropagation, hqSoftclipStreak, squashed),
       genotyper(static_cast<const int&>(ploidy), static_cast<const int&>(qualOffset),
                 static_cast<const int&>(numQuantizers)),
       numQuantizers(numQuantizers),
       polyploidy(ploidy),
-      DEBUG(debug),
       squashedActivity(squashed) {
     if (filterType == FilterType::GAUSS) {
         GaussKernel kernel(sigma);
@@ -32,7 +28,7 @@ Haplotyper::Haplotyper(const size_t sigma, const size_t ploidy, const size_t qua
         buffer =
             FilterBuffer([kernel](size_t pos, size_t size) -> double { return kernel.calcValue(pos, size); }, size);
         localDistortion = kernel.calcValue((size - 1) / 2, size);
-    } else if (filterType == FilterType::RECTANGLE) {
+    } else if (filterType == FilterType::RECT) {
         RectangleKernel kernel(sigma);
         size_t size = kernel.calcMinSize(filterCutOff * 2 + 1);
 
@@ -72,9 +68,9 @@ std::vector<double> Haplotyper::calcPriors(double hetero) {
 std::vector<double> Haplotyper::calcNonRefLikelihoods(const char ref, const std::string& seqPile,
                                                       const std::string& qualPile) {
     std::vector<double> result(polyploidy + 1, 0.0);
-    std::map<std::string, double> SNPlikelihoods = genotyper.getGenotypelikelihoods(seqPile, qualPile);
+    std::map<std::string, double> snpLikelihoods = genotyper.getGenotypeLikelihoods(seqPile, qualPile);
 
-    for (const auto& m : SNPlikelihoods) {
+    for (const auto& m : snpLikelihoods) {
         size_t altCount = polyploidy - std::count(m.first.begin(), m.first.end(), ref);
         result[altCount] += m.second;
     }
@@ -98,11 +94,11 @@ double Haplotyper::calcActivityScore(const char ref, const std::string& seqPile,
         priors = calcPriors(heterozygosity);
     }
 
-    // Calculate Posteriors like in GATK
-    double posteriori0 = likelihoods[0] + priors[0];
+    // Calculate posteriors like in GATK
+    double posterior = likelihoods[0] + priors[0];
     bool map0 = true;
     for (size_t i = 1; i < polyploidy + 1; ++i) {
-        if (likelihoods[i] + priors[i] > posteriori0) {
+        if (likelihoods[i] + priors[i] > posterior) {
             map0 = false;
             break;
         }
@@ -123,9 +119,9 @@ double Haplotyper::calcActivityScore(const char ref, const std::string& seqPile,
     double altPosteriorSum = altLikelihoodSum + altPriorSum;
 
     // Normalize
-    posteriori0 = posteriori0 - log10sum(altPosteriorSum, posteriori0);
+    posterior = posterior - log10sum(altPosteriorSum, posterior);
 
-    return 1.0 - pow(10, posteriori0);
+    return 1.0 - pow(10, posterior);
 }
 
 size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile, const size_t hqSoftclips,
@@ -150,32 +146,6 @@ size_t Haplotyper::push(const std::string& seqPile, const std::string& qualPile,
     }
 
     size_t quant = getQuantizerIndex(activity);
-
-    if (DEBUG) {
-        static CircularBuffer<std::string> debug(this->getOffset(), "\n");
-        std::stringstream s;
-
-        s << reference << " " << seqPile << " ";
-
-        s << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << altProb;
-
-        std::string out = debug.push(s.str());
-
-        s.str("");
-        if (out != "\n") {
-            s << out << " " << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << activity
-              << " " << quant << std::endl;
-        }
-
-        if (hqSoftclips > 0) {
-            s << hqSoftclips << " softclips detected!" << std::endl;
-        }
-
-        std::string line;
-        while (std::getline(s, line)) {
-            getLogging().errorOut(line);
-        }
-    }
 
     return quant;
 }

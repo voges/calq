@@ -109,9 +109,7 @@ void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const 
                     if (!r.ref.empty()) {
                         if (this->pileups_[pileupIdx].ref != 'N' &&
                             this->pileups_[pileupIdx].ref != r.ref[pileupIdx + this->posMin() - r.posMin]) {
-                            throwErrorException(
-                                "Non matching reference "
-                                "between reads!");
+                            throwErrorException("Non-matching reference between reads!");
                         }
                         this->pileups_[pileupIdx].ref = r.ref[pileupIdx + this->posMin() - r.posMin];
                     }
@@ -127,7 +125,7 @@ void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const 
                         ++softclips;
                     }
                 }
-                // fall-through
+                // Fall-through
             case 'I':
                 idx += opLen;
                 break;
@@ -137,7 +135,7 @@ void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const 
                 break;
             case 'H':
             case 'P':
-                break;  // these have been clipped
+                break;  // These have been clipped
             default:
                 throwErrorException("Bad CIGAR string");
         }

@@ -1,9 +1,9 @@
 #include "calq/haplotyper.h"
 #include <gtest/gtest.h>
-#include "calq/calq-codec.h"
+#include "calq/data-structures.h"
 
 TEST(Haplotyper, Everything) {  // NOLINT(cert-err58-cpp)
-    calq::Haplotyper h(5, 2, 33, 8, 5, 3, 5, false, true, calq::FilterType::GAUSS);
+    calq::Haplotyper h(5, 2, 33, 8, 5, 3, 5, true, calq::FilterType::GAUSS);
 
     EXPECT_EQ(h.getOffset(), 10);
 
@@ -20,7 +20,7 @@ TEST(Haplotyper, Everything) {  // NOLINT(cert-err58-cpp)
     EXPECT_EQ(h.push("C", "}", 0, 'A'), 7);
 
     // Reset
-    calq::Haplotyper h2(5, 2, 33, 8, 5, 3, 5, false, true, calq::FilterType::GAUSS);
+    calq::Haplotyper h2(5, 2, 33, 8, 5, 3, 5, true, calq::FilterType::GAUSS);
 
     h2.push("CCC", "}}}", 15, 'A');
 

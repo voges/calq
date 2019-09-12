@@ -21,7 +21,7 @@ enum struct FilterType;
 class Haplotyper {
    public:
     Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t numQuantizers, size_t maxHqSoftclipPropagation,
-               size_t hqSoftclipStreak, size_t filterCutOff, bool debug, bool squashed, FilterType filterType);
+               size_t hqSoftclipStreak, size_t filterCutOff, bool squashed, FilterType filterType);
 
     /**
      * Returns offset between activity scores position and front
@@ -45,7 +45,6 @@ class Haplotyper {
     Genotyper genotyper;
     size_t numQuantizers;
     size_t polyploidy;
-    const bool DEBUG;
     const bool squashedActivity;
     double localDistortion;
 

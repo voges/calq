@@ -6,21 +6,21 @@
 #include <algorithm>
 #include <iostream>
 #include <utility>
-#include "calq-codec.h"
+#include "data-structures.h"
 #include "errors.h"
 
 namespace calq {
 
 QualEncoder::QualEncoder(const EncodingOptions& options, std::map<int, Quantizer> quantizers, DecodingBlock* o)
     : nrMappedRecords_(0),
-      NR_QUANTIZERS(options.quantizationMax - options.quantizationMin + 1),
+      NR_QUANTIZERS(options.maxNumQuantSteps - options.minNumQuantSteps + 1),
 
       qualityValueOffset_(options.qualityValueOffset),
       posOffset_(0),
       samPileupDeque_(),
-      haplotyper_(options.filterSize, options.polyploidy, options.qualityValueOffset,
+      haplotyper_(options.filterRadius, options.polyploidy, options.qualityValueOffset,
                   static_cast<size_t>(NR_QUANTIZERS), options.hqSoftClipPropagation, options.hqSoftClipStreak,
-                  options.filterCutOff, options.debugPileup, options.squash, options.filterType),
+                  options.filterCutoff, options.squash, options.filterType),
       genotyper_(static_cast<const int&>(options.polyploidy), static_cast<const int&>(options.qualityValueOffset),
                  NR_QUANTIZERS),
 
@@ -40,17 +40,17 @@ void QualEncoder::addMappedRecordToBlock(const MinSamRecord& r) {
         samPileupDeque_.setPosMin(r.posMin);
         samPileupDeque_.setPosMax(r.posMax - 1);
 
-        out->codeBooks.clear();
-        out->stepindices.clear();
+        out->codebooks.clear();
+        out->quantizerStepIndexes.clear();
         for (int i = 0; i < NR_QUANTIZERS; ++i) {
             const auto& map = quantizers_[i].inverseLut();
-            out->codeBooks.emplace_back();
-            out->stepindices.emplace_back();
+            out->codebooks.emplace_back();
+            out->quantizerStepIndexes.emplace_back();
             for (const auto& pair : map) {
-                out->codeBooks.back().push_back(static_cast<uint8_t>(pair.second));
+                out->codebooks.back().push_back(static_cast<uint8_t>(pair.second));
             }
         }
-        out->quantizerIndices.clear();
+        out->quantizerIndexes.clear();
     }
 
     if (r.posMax - 1 > samPileupDeque_.posMax()) {
@@ -68,7 +68,7 @@ void QualEncoder::addMappedRecordToBlock(const MinSamRecord& r) {
             ++posCounter;
             // Start not until pipeline is full
             if (posCounter > haplotyper_.getOffset()) {
-                out->quantizerIndices.push_back(k);
+                out->quantizerIndexes.push_back(k);
             }
             samPileupDeque_.pop_front();
         }
@@ -81,7 +81,7 @@ void QualEncoder::addMappedRecordToBlock(const MinSamRecord& r) {
         while (samPileupDeque_.posMin() < r.posMin) {
             auto l =
                 uint8_t(genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual));
-            out->quantizerIndices.push_back(l);
+            out->quantizerIndexes.push_back(l);
             samPileupDeque_.pop_front();
         }
 
@@ -103,7 +103,7 @@ void QualEncoder::finishBlock() {
                                                            samPileupDeque_.front().ref));
             ++posCounter;
             if (posCounter > haplotyper_.getOffset()) {
-                out->quantizerIndices.push_back(k);
+                out->quantizerIndexes.push_back(k);
             }
             samPileupDeque_.pop_front();
         }
@@ -112,19 +112,19 @@ void QualEncoder::finishBlock() {
         size_t offset = std::min(posCounter, haplotyper_.getOffset());
         for (size_t i = 0; i < offset; ++i) {
             uint8_t k = static_cast<uint8_t>(haplotyper_.push("", "", 0, 'N'));
-            out->quantizerIndices.push_back(k);
+            out->quantizerIndexes.push_back(k);
         }
     } else {
         // Compute all remaining quantizers
         while (!samPileupDeque_.empty()) {
             auto k =
                 uint8_t(genotyper_.computeQuantizerIndex(samPileupDeque_.front().seq, samPileupDeque_.front().qual));
-            out->quantizerIndices.push_back(k);
+            out->quantizerIndexes.push_back(k);
             samPileupDeque_.pop_front();
         }
     }
 
-    // TODO(muenteferi): borders of blocks probably too low activity
+    // TODO(Fabian): borders of blocks probably too low activity
 
     // Process all remaining records from queue
     while (!samRecordDeque_.empty()) {
@@ -157,9 +157,9 @@ void QualEncoder::encodeMappedQual(const MinSamRecord& samRecord) {
                 // Encode opLen quality values with computed quantizer indices
                 for (size_t i = 0; i < opLen; i++) {
                     uint8_t q = uint8_t(samRecord.qual[qualIdx++]) - qualityValueOffset_;
-                    uint8_t quantizerIndex = out->quantizerIndices[quantizerIndicesIdx++];
+                    uint8_t quantizerIndex = out->quantizerIndexes[quantizerIndicesIdx++];
                     uint8_t qualityValueIndex = uint8_t(quantizers_.at(quantizerIndex).valueToIndex(q));
-                    out->stepindices.at(quantizerIndex).push_back(qualityValueIndex);
+                    out->quantizerStepIndexes.at(quantizerIndex).push_back(qualityValueIndex);
                 }
                 break;
             case 'I':
@@ -168,16 +168,16 @@ void QualEncoder::encodeMappedQual(const MinSamRecord& samRecord) {
                 for (size_t i = 0; i < opLen; i++) {
                     auto q = static_cast<uint8_t>(samRecord.qual[qualIdx++]) - qualityValueOffset_;
                     uint8_t qualityValueIndex = uint8_t(quantizers_.at(NR_QUANTIZERS - 1).valueToIndex(q));
-                    out->stepindices.at(static_cast<size_t>(NR_QUANTIZERS - 1)).push_back(qualityValueIndex);
+                    out->quantizerStepIndexes.at(static_cast<size_t>(NR_QUANTIZERS - 1)).push_back(qualityValueIndex);
                 }
                 break;
             case 'D':
             case 'N':
                 quantizerIndicesIdx += opLen;
-                break;  // do nothing as these bases are not present
+                break;  // Do nothing as these bases are not present
             case 'H':
             case 'P':
-                break;  // these have been clipped
+                break;  // These have been clipped
             default:
                 throwErrorException("Bad CIGAR string");
         }

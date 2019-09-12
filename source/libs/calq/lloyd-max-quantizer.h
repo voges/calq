@@ -23,8 +23,8 @@ class LloydMaxQuantizer : public Quantizer {
     void build(const ProbabilityDistribution& pdf);
 
    private:
-    std::vector<double> borders_;  /// decision thresholds
-    std::vector<double> values_;   /// representative values for each interval
+    std::vector<double> borders_;  /// Decision thresholds
+    std::vector<double> values_;   /// Representative values for each interval
     size_t steps_;
 
     /**

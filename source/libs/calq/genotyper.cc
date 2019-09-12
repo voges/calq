@@ -4,7 +4,6 @@
 
 #include "genotyper.h"
 #include <cmath>
-#include <numeric>
 #include <utility>
 #include "errors.h"
 
@@ -44,40 +43,7 @@ Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int numQu
       numQuantizers_(numQuantizers),
       polyploidy_(polyploidy),
       qualOffset_(qualOffset) {
-    if (numQuantizers < 1) {
-        throwErrorException("nrQuantizers must be greater than zero");
-    }
-    if (polyploidy < 1) {
-        throwErrorException("Polyploidy must be greater than zero");
-    }
-    if (qualOffset < 0) {
-        throwErrorException("qualOffset must not be negative");
-    }
-
     initLikelihoods();
-}
-
-double Genotyper::computeEntropy(const std::string& seqPileup, const std::string& qualPileup) {
-    const size_t depth = seqPileup.length();
-
-    if (depth != qualPileup.length()) {
-        throwErrorException("Lengths of seqPileup and qualPileup differ");
-    }
-
-    if (depth == 0) {
-        return -1.0;  // Computation of entropy not possible
-    }
-    if (depth == 1) {
-        return 0.0;  // No information content for one symbol
-    }
-
-    computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
-
-    double entropy = std::accumulate(
-        genotypeLikelihoods_.begin(), genotypeLikelihoods_.end(), 0.0,
-        [](const double& a, const std::pair<std::string, double>& b) { return a - b.second * log(b.second); });
-
-    return entropy;
 }
 
 int Genotyper::computeQuantizerIndex(const std::string& seqPileup, const std::string& qualPileup) {
@@ -88,10 +54,10 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup, const std::st
     }
 
     if (depth == 0) {
-        return numQuantizers_;  // computation of quantizer index not possible
+        return numQuantizers_;  // Computation of quantizer index not possible
     }
     if (depth == 1) {
-        return (numQuantizers_ - 1);  // no inference can be made, stay safe
+        return (numQuantizers_ - 1);  // No inference can be made, stay safe
     }
 
     computeGenotypeLikelihoods(seqPileup, qualPileup, depth);
@@ -111,22 +77,6 @@ int Genotyper::computeQuantizerIndex(const std::string& seqPileup, const std::st
     double confidence = largestGenotypeLikelihood - secondLargestGenotypeLikelihood;
 
     auto quant = static_cast<int>((1 - confidence) * (numQuantizers_ - 1));
-
-    //    if (DEBUG) {
-    //        std::stringstream s;
-    //        s << 'N' << " " << seqPileup << " ";
-    //
-    //        s << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << 1 - confidence;
-    //
-    //        s << " " << std::fixed << std::setw(6) << std::setprecision(4) << std::setfill('0') << 1 - confidence << "
-    //        "
-    //          << quant << std::endl;
-    //
-    //        std::string line;
-    //        while (std::getline(s, line)) {
-    //            getLogging().errorOut(line);
-    //        }
-    //    }
 
     return quant;
 }
@@ -200,7 +150,7 @@ void Genotyper::computeGenotypeLikelihoods(const std::string& seqPileup, const s
     }
 }
 
-const std::map<std::string, double>& Genotyper::getGenotypelikelihoods(const std::string& seqPileup,
+const std::map<std::string, double>& Genotyper::getGenotypeLikelihoods(const std::string& seqPileup,
                                                                        const std::string& qualPileup) {
     computeGenotypeLikelihoods(seqPileup, qualPileup, qualPileup.size());
     return genotypeLikelihoods_;

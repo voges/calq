@@ -2,14 +2,13 @@
  * @file errors.h
  */
 
-#ifndef CALQ_ERROR_H_
-#define CALQ_ERROR_H_
+#ifndef CALQ_ERRORS_H_
+#define CALQ_ERRORS_H_
 
 #include <exception>
 #include <iostream>
 #include <string>
 #include <utility>
-
 #include "exceptions.h"
 
 namespace calq {
@@ -21,7 +20,7 @@ inline void throwErrorException(const std::string& msg) {
 
 class ErrorExceptionReporter {
    public:
-    ErrorExceptionReporter(std::string file, std::string function, const int& line)
+    ErrorExceptionReporter(std::string file, std::string function, const int line)
         : file_(std::move(file)), function_(std::move(function)), line_(line) {}
 
     void operator()(const std::string& msg) {
@@ -39,10 +38,9 @@ class ErrorExceptionReporter {
 
 }  // namespace calq
 
-// Remove the symbol for the function, then define a new version that instead
-// creates a stack temporary instance of ErrorExceptionReporter initialized
-// with the caller.
+// Remove the symbol for the function, then define a new version that instead creates a stack temporary instance of
+// ErrorExceptionReporter initialized with the caller.
 #undef throwErrorException
 #define throwErrorException calq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
-#endif  // CALQ_ERROR_H_
+#endif  // CALQ_ERRORS_H_

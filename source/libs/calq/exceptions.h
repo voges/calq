@@ -13,15 +13,10 @@ namespace calq {
 
 class Exception : public std::exception {
    public:
-    explicit Exception(std::string msg);
-
-    Exception(const Exception& e) noexcept;
-
-    ~Exception() noexcept override;
-
-    virtual std::string getMessage() const;
-
-    const char* what() const noexcept override;
+    explicit Exception(std::string msg) : msg_(std::move(msg)) {}
+    Exception(const Exception& e) noexcept : msg_(e.msg_) {}
+    ~Exception() noexcept override = default;
+    const char* what() const noexcept override { return msg_.c_str(); }
 
    protected:
     std::string msg_;

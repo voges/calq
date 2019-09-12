@@ -58,3 +58,18 @@ TEST(FileWriter, Write) {  // NOLINT(cert-err58-cpp)
     EXPECT_EQ(readBuffer[3], 0xac);
     free(readBuffer);
 }
+
+TEST(FileWriter, WriteUintX) {  // NOLINT(cert-err58-cpp)
+    std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
+    calq::FileWriter fileWriter(gitRootDir + "/FileWriterWriteUintXTestFile");
+
+    uint8_t byte = 0x42;
+    uint16_t word = 0x4242;
+    uint32_t dword = 0x42424242;
+    uint64_t qword = 0x4242424242424242;
+
+    EXPECT_EQ(fileWriter.writeUint8(byte), sizeof(byte));
+    EXPECT_EQ(fileWriter.writeUint16(word), sizeof(word));
+    EXPECT_EQ(fileWriter.writeUint32(dword), sizeof(dword));
+    EXPECT_EQ(fileWriter.writeUint64(qword), sizeof(qword));
+}

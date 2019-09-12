@@ -20,9 +20,8 @@ class SoftclipSpreader {
     SoftclipSpreader(size_t maxPropagation, size_t minHqSoftclips, bool isSquashed);
 
     /**
-     * Push an activity score and average number of soft clips at that position
-     * into buffer. Returns the oldest activity score which can't be influenced
-     * by new clips anymore.
+     * Push an activity score and average number of soft clips at that position into buffer. Returns the oldest activity
+     * score which can't be influenced by new clips anymore.
      */
     double push(double score, size_t softclips);
 
@@ -60,8 +59,8 @@ class SoftclipSpreader {
     bool squashed;
 
     /**
-     * Squashes activity score between 0 and 1 using the un-squashed activity
-     * score and an "anti score" measuring probability of no variant occurring
+     * Squashes activity score between 0 and 1 using the un-squashed activity score and an "anti score" measuring
+     * probability of no variant occurring
      */
     double squash(double activity, double antiActivity) const;
 };

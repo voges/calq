@@ -32,8 +32,8 @@ class GaussKernel {
     double calcValue(size_t pos, size_t size) const;
 
     /**
-     * Calculates how big a buffer must be to contain all values above
-     * threshold. No size greater than maximum is returned.
+     * Calculates how big a buffer must be to contain all values above threshold. No size greater than maximum is
+     * returned.
      */
     size_t calcMinSize(double threshold, size_t maximum = 101) const;
 };
@@ -49,14 +49,13 @@ class RectangleKernel {
     explicit RectangleKernel(double size = 1.0);
 
     /**
-     * Get rect value at position 'pos' and buffer size 'size' with
-     * mean = size / 2
+     * Get rect value at position 'pos' and buffer size 'size' with mean = size / 2
      */
     double calcValue(size_t pos, size_t size) const;
 
     /**
-     * Calculates how big a buffer must be to contain all values above
-     * threshold. No size greater than maximum is returned.
+     * Calculates how big a buffer must be to contain all values above threshold. No size greater than maximum is
+     * returned.
      */
     size_t calcMinSize(size_t maximum = 101) const;
 };
@@ -86,11 +85,6 @@ class FilterBuffer {
      * Create dummy buffer
      */
     FilterBuffer();
-
-    /**
-     * Buffer size
-     */
-    size_t getSize() const;
 
     /**
      * Distance between buffer center and borders

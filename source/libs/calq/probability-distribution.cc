@@ -14,7 +14,7 @@ ProbabilityDistribution::ProbabilityDistribution(const size_t rangeMin, const si
 
 void ProbabilityDistribution::add(const size_t value, const size_t count) {
     if (value < rangeMin_ || value > rangeMax()) {
-        throwErrorException("value not in range");
+        throwErrorException("value < rangeMin_ || value > rangeMax()");
     }
     pdf_[value - rangeMin_] += count;
 }
@@ -25,14 +25,14 @@ size_t ProbabilityDistribution::size() const { return pdf_.size(); }
 
 size_t ProbabilityDistribution::count(const size_t value) const {
     if (value < rangeMin_ || value > rangeMax()) {
-        throwErrorException("value not in range");
+        throwErrorException("value < rangeMin_ || value > rangeMax()");
     }
     return value;
 }
 
 size_t ProbabilityDistribution::operator[](const size_t index) const {
     if (index >= pdf_.size()) {
-        throwErrorException("index not in range");
+        throwErrorException("index >= pdf_.size()");
     }
     return pdf_[index];
 }

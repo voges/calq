@@ -1,23 +1,3 @@
-- [ ] Write C++ unit tests for <source|tests>/libs/calq/
-  - [x] CircularBuffer
-  - [x] FastaFileReader
-  - [x] File
-  - [x] FileLineReader
-  - [x] FileReader
-  - [x] FileWriter
-  - [x] FilterBuffer
-  - [x] Genotyper
-  - [x] Haplotyper
-  - [x] Helpers
-  - [x] LloydMaxQuantizer
-  - [x] ProbabilityDistribution
-  - [x] Quantizer
-  - [x] SamFileReader
-  - [x] SamPileup
-  - [x] SamRecord
-  - [x] SoftclipSpreader
-  - [x] UniformMinMaxQuantizer
-  - [x] UniformQuantizer
 - [ ] Make CIP application (source/apps/cip/) work again (including GABAC and rANS)
 - [ ] Check whether both SamRecord and MinSamRecord classes are needed
 - [ ] Check comments
@@ -26,7 +6,5 @@
 - [ ] Resolve FIXME's and TODO's
 - [ ] Resolve clang-tidy warnings
 - [ ] Update README.md once everything is working
-- [ ] Clean up scripts
-  - [ ] scripts/benchmark/
-  - [ ] scripts/variant-calling/
-- [ ] Check everything with valgrind
+- [ ] Check everything with Valgrind
+- [ ] Check for correct usage of assertions versus exceptions
