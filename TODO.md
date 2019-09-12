@@ -1,4 +1,5 @@
 - [ ] Make CIP application (source/apps/cip/) work again (including GABAC and rANS)
+- [ ] Think about a logging solution (singleton class from Genie's ureads-encoder?)
 - [ ] Check whether both SamRecord and MinSamRecord classes are needed
 - [ ] Check comments
   - [ ] Sentences should start with an uppercase letter and end with a full stop.
