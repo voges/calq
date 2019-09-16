@@ -6,6 +6,13 @@ git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
 readonly build_dir="${git_root_dir}/cmake-build-debug-with-doc-and-coverage"
-[[ -d "${build_dir}" ]] # exit if build dir does *not* exist
+readonly calq_tests_app="${build_dir}/bin/calq-tests"
+[[ -x "${calq_tests_app}" ]] # exit if calq_tests_app does *not* exist
 
-valgrind --tool=memcheck --verbose --track-origins=yes --leak-check=full --show-leak-kinds=all "${build_dir}/bin/calq-tests"
+valgrind \
+    --tool=memcheck \
+    --verbose \
+    --track-origins=yes \
+    --leak-check=full \
+    --show-leak-kinds=all \
+    "${calq_tests_app}"
