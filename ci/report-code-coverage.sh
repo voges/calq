@@ -11,13 +11,13 @@ if [[ ! -d "${build_dir}" ]]; then
     exit 1
 fi
 
+# Check wether any .gcda files are present
 num_gcda_files=$(find "${build_dir}" -type f -name *.gcda | wc -l)
 num_gcda_files="${num_gcda_files//[[:space:]]/}"
 if [[ "${num_gcda_files}" == 0 ]]; then
     echo "error: no .gcda files found in build directory: ${build_dir}"
     exit 1
 fi
-
 
 cd "${git_root_dir}"
 
