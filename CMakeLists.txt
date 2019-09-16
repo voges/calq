@@ -18,19 +18,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 
 #==============================================================================
-# CMake packages
-#==============================================================================
-
-include(GoogleTest)
-
-option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
-if(${BUILD_DOCUMENTATION})
-    message(STATUS "Building Doxygen documentation")
-    include(Doxygen)
-endif()
-
-
-#==============================================================================
 # Compiler
 #==============================================================================
 
@@ -39,6 +26,15 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+
+
+#==============================================================================
+# Options
+#==============================================================================
+
+option(BUILD_COVERAGE "Compile and link code instrumented for coverage analysis" OFF)
+option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
+option(BUILD_TESTS "Build tests" OFF)
 
 option(BUILD_COVERAGE "Compile and link code instrumented for coverage analysis" OFF)
 if(${BUILD_COVERAGE})
@@ -49,6 +45,16 @@ if(${BUILD_COVERAGE})
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
     endif()
+endif()
+
+option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
+if(${BUILD_DOCUMENTATION})
+    include(Doxygen)
+endif()
+
+option(BUILD_TESTS "Build tests" OFF)
+if(${BUILD_TESTS})
+    include(GoogleTest)
 endif()
 
 
@@ -75,4 +81,7 @@ include_directories("${CMAKE_SOURCE_DIR}/source/libs/third-party")
 #==============================================================================
 
 add_subdirectory(source)
-add_subdirectory(tests)
+
+if(${BUILD_TESTS})
+    add_subdirectory(tests)
+endif()
