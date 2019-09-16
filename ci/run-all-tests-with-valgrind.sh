@@ -7,7 +7,10 @@ readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
 readonly build_dir="${git_root_dir}/cmake-build-debug-all"
 readonly calq_tests_app="${build_dir}/bin/calq-tests"
-[[ -x "${calq_tests_app}" ]] # exit if calq_tests_app does *not* exist
+if [[ ! -x "${calq_tests_app}" ]]; then
+    echo "error: calq-tests application does not exist: ${calq_tests_app}"
+    exit 1
+fi
 
 valgrind \
     --tool=memcheck \
