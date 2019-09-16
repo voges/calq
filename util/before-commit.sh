@@ -18,5 +18,6 @@ execute() {
     "${1}"
 }
 
-execute "${git_root_dir}/scripts/util/apply-clang-format.sh"
-execute "${git_root_dir}/scripts/util/generate-authors-file.sh"
+execute "${git_root_dir}/util/clang-format.sh"
+execute "${git_root_dir}/util/generate-authors-file.sh"
+execute "${git_root_dir}/util/shellcheck.sh"
