@@ -13,7 +13,6 @@
 
 namespace calq {
 
-
 static uint32_t computeLength(const std::string& cigar) {
     // Compute 0-based first position and 0-based last position this record
     // is mapped to on the reference used for alignment
