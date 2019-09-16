@@ -6,7 +6,18 @@ git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
 readonly build_dir="${git_root_dir}/cmake-build-debug-all"
-[[ -d "${build_dir}" ]] # exit if build dir does *not* exist
+if [[ ! -d "${build_dir}" ]]; then
+    echo "error: build directory does not exist: ${build_dir}"
+    exit 1
+fi
+
+num_gcda_files=$(find "${build_dir}" -type f -name *.gcda | wc -l)
+num_gcda_files="${num_gcda_files//[[:space:]]/}"
+if [[ "${num_gcda_files}" == 0 ]]; then
+    echo "error: no .gcda files found in build directory: ${build_dir}"
+    exit 1
+fi
+
 
 cd "${git_root_dir}"
 
@@ -31,8 +42,8 @@ if [[ ! -z "${CI}" ]]; then
 else
     readonly local_codecov_dir="${build_dir}/codecov/html"
     genhtml coverage.info --output-directory "${local_codecov_dir}"
-    set +x; echo ""; echo "Coverage report generated locally at: ${local_codecov_dir}"; echo ""; set -x
-    set +x; echo ""; echo "Maybe you'd like to use this command: firefox ${local_codecov_dir}/index.html &"; echo ""; set -x
+    set +x; echo ""; echo "coverage report generated locally at: ${local_codecov_dir}"; echo ""; set -x
+    set +x; echo ""; echo "maybe you'd like to use this command: firefox ${local_codecov_dir}/index.html &"; echo ""; set -x
 
 fi
 set -u # treat unset variables as error again
