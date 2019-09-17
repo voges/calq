@@ -10,22 +10,29 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
-    message(STATUS "Using fall-back build type '${CMAKE_BUILD_TYPE}'")
+    message(STATUS "Using fall-back build type: ${CMAKE_BUILD_TYPE}")
 endif()
+
+
+#==============================================================================
+# C/C++ properties
+#==============================================================================
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
-
-#==============================================================================
-# Compiler
-#==============================================================================
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+   # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow")
+   # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow")
+else()
+    message(FATAL_ERROR "C++ compiler currently not supported by CMake build")
+endif()
 
 
 #==============================================================================
@@ -36,18 +43,20 @@ option(BUILD_COVERAGE "Compile and link code instrumented for coverage analysis"
 option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 
-option(BUILD_COVERAGE "Compile and link code instrumented for coverage analysis" OFF)
+message(STATUS "Options:")
+message(STATUS "  BUILD_COVERAGE=${BUILD_COVERAGE}")
+message(STATUS "  BUILD_DOCUMENTATION=${BUILD_DOCUMENTATION}")
+message(STATUS "  BUILD_TESTS=${BUILD_TESTS}")
+
 if(${BUILD_COVERAGE})
-    message(STATUS "Compiling and linking code instrumented for coverage analysis")
-    if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-    endif()
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    else()
+        message(FATAL_ERROR "Coverage analysis not supported for compiler: ${CMAKE_CXX_COMPILER_ID}")
     endif()
 endif()
 
-option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
 if(${BUILD_DOCUMENTATION})
     include(Doxygen)
 endif()
@@ -73,7 +82,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 include_directories("${CMAKE_SOURCE_DIR}/source/apps/")
 include_directories("${CMAKE_SOURCE_DIR}/source/libs/")
-include_directories("${CMAKE_SOURCE_DIR}/source/libs/third-party")
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/source/libs/third-party")
 
 
 #==============================================================================
