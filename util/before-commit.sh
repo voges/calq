@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# This script performs some routine maintenance and should be executed
-# before every commit.
-
 set -euo pipefail
 
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
@@ -19,5 +16,5 @@ execute() {
 }
 
 execute "${git_root_dir}/util/clang-format.sh"
-execute "${git_root_dir}/util/generate-authors-file.sh"
+execute "${git_root_dir}/util/authors.sh"
 execute "${git_root_dir}/util/shellcheck.sh"
