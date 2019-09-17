@@ -40,13 +40,13 @@ class Haplotyper {
     std::vector<double> calcPriors(double hetero);
 
    private:
-    FilterBuffer buffer;  /// Saving kernel and old raw quality scores
-    SoftclipSpreader spreader;
-    Genotyper genotyper;
-    size_t numQuantizers;
-    size_t polyploidy;
-    const bool squashedActivity;
-    double localDistortion;
+    FilterBuffer buffer_;  /// Saving kernel and old raw quality scores
+    SoftclipSpreader spreader_;
+    Genotyper genotyper_;
+    size_t numQuantizers_;
+    size_t polyploidy_;
+    const bool squashedActivity_;
+    double localDistortion_;
 
     size_t getQuantizerIndex(double activity);
 };
