@@ -2,8 +2,6 @@ project("calq")
 
 set(source_files
         fasta-file-reader.cc
-        file.cc
-        file-line-reader.cc
         file-reader.cc
         file-writer.cc
         filter-buffer.cc

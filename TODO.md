@@ -9,3 +9,4 @@
 - [ ] Update README.md once everything is working
 - [ ] Check everything with Valgrind
 - [ ] Check for correct usage of assertions versus exceptions
+- [ ] Follow the C++ Core Guidelines (https://isocpp.github.io/CppCoreGuidelines), in particular C.21

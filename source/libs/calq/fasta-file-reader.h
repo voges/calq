@@ -5,17 +5,26 @@
 #ifndef CALQ_FASTA_FILE_READER_H_
 #define CALQ_FASTA_FILE_READER_H_
 
+#include <fstream>
 #include <string>
 #include <vector>
 #include "fasta-record.h"
-#include "file-line-reader.h"
 
 namespace calq {
 
-class FastaFileReader : public FileLineReader {
+class FastaFileReader {
    public:
-    explicit FastaFileReader(const std::string &path);
-    void parse(std::vector<FastaRecord> *fastaRecords);
+    FastaFileReader() = delete;
+    explicit FastaFileReader(const std::string& path);
+    FastaFileReader(const FastaFileReader&) = delete;
+    FastaFileReader& operator=(const FastaFileReader&) = delete;
+    FastaFileReader(FastaFileReader&&) = delete;
+    FastaFileReader& operator=(FastaFileReader&&) = delete;
+    ~FastaFileReader();
+    void parse(std::vector<FastaRecord>* fastaRecords);
+
+   private:
+    std::ifstream ifs_;
 };
 
 }  // namespace calq

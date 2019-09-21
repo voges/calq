@@ -9,14 +9,21 @@
 
 namespace calq {
 
-FastaFileReader::FastaFileReader(const std::string &path) : FileLineReader(path) {}
+FastaFileReader::FastaFileReader(const std::string &path) : ifs_() {
+    ifs_.open(path, std::ifstream::in | std::ifstream::binary);
+    if (!ifs_.is_open()) {
+        throwErrorException("Failed to open file: " + path);
+    }
+}
+
+FastaFileReader::~FastaFileReader() { ifs_.close(); }
 
 void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
     assert(fastaRecords != nullptr);
 
-    // Reset file pointer to the beginning of the file
-    size_t fpos = tell();
-    seekFromSet(0);
+    // Set file position indicator to the beginning of the file
+    size_t fpos = ifs_.tellg();
+    ifs_.seekg(std::ifstream::beg);
 
     std::string currentHeader;
     std::string currentSequence;
@@ -24,7 +31,7 @@ void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
     while (true) {
         // Read a line
         std::string line;
-        readLine(&line);
+        getline(ifs_, line);
         if (line.empty()) {
             break;
         }
@@ -56,7 +63,7 @@ void FastaFileReader::parse(std::vector<FastaRecord> *const fastaRecords) {
     FastaRecord currentFastaRecord(currentHeader, currentSequence);
     fastaRecords->push_back(currentFastaRecord);
 
-    seekFromSet(fpos);
+    ifs_.seekg(fpos);
 }
 
 }  // namespace calq

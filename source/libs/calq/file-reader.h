@@ -6,28 +6,43 @@
 #define CALQ_FILE_READER_H_
 
 #include <cassert>
+#include <fstream>
 #include "errors.h"
-#include "file.h"
 
 namespace calq {
 
-class FileReader : public File {
+class FileReader {
    public:
+    FileReader() = delete;
     explicit FileReader(const std::string &path);
+    FileReader(const FileReader &) = delete;
+    FileReader &operator=(const FileReader &) = delete;
+    FileReader(FileReader &&) = delete;
+    FileReader &operator=(FileReader &&) = delete;
+    ~FileReader();
+
+    void close();
+    size_t read(void *buffer, size_t size = 1);
+    size_t readUint8(uint8_t *byte);
+    size_t readUint16(uint16_t *word);
+    size_t readUint32(uint32_t *dword);
+    size_t readUint64(uint64_t *qword);
+
+   private:
+    void close_();
 
     template <typename T>
-    size_t readValue(T *const value, const size_t n = 1) {
-        assert(value != nullptr);
+    size_t read_(T *const buffer, const size_t n = 1) {
+        assert(buffer != nullptr);
 
-        size_t ret = fread(value, sizeof(T), n, fp_);
+        // Read from file
+        ifs_.read(reinterpret_cast<char *>(buffer), sizeof(T) * n);
 
         // Check whether we read exactly n items
-        if (ret != n) {
-            if (eof()) {
-                // Everything okay, we just reached the EOF
-                return 0;
-            } else if (error()) {
-                throwErrorException("Error occurred while trying to read from file");
+        if (!ifs_.good()) {
+            if (ifs_.eof() && !ifs_.fail() && !ifs_.bad()) {
+                // Everything okay, we just reached the EOF; only ifs_.gcount() bytes were read
+                return ifs_.gcount();
             } else {
                 throwErrorException("Failed to read from file");
             }
@@ -37,11 +52,7 @@ class FileReader : public File {
         return sizeof(T) * n;
     }
 
-    size_t read(void *buffer, size_t size);
-    size_t readUint8(uint8_t *byte);
-    size_t readUint16(uint16_t *word);
-    size_t readUint32(uint32_t *dword);
-    size_t readUint64(uint64_t *qword);
+    std::ifstream ifs_;
 };
 
 }  // namespace calq

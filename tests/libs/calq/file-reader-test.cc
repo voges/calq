@@ -7,67 +7,6 @@ TEST(FileReader, Constructor) {  // NOLINT(cert-err58-cpp)
     calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
 }
 
-TEST(FileReader, ReadValue) {  // NOLINT(cert-err58-cpp)
-    std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
-
-    // Read the first byte
-    uint8_t byte = 0x00;
-    size_t ret = fileReader.readValue(&byte);
-    EXPECT_EQ(ret, sizeof(byte));
-    EXPECT_EQ(byte, 0x04);
-
-    // Read the next 2 bytes as uint16_t
-    uint16_t word = 0x0000;
-    ret = fileReader.readValue(&word);
-    EXPECT_EQ(ret, sizeof(word));
-    EXPECT_EQ(word, 0x5a1f);
-
-    // Read the last byte as uint8_t
-    byte = 0x00;
-    ret = fileReader.readValue(&byte);
-    EXPECT_EQ(ret, sizeof(byte));
-    EXPECT_EQ(byte, 0xac);
-}
-
-TEST(FileReader, ReadValueAndSeekAndTellAndEof) {  // NOLINT(cert-err58-cpp)
-    std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
-
-    // Check that the file position indicator points to the beginning of the file
-    EXPECT_EQ(fileReader.tell(), 0);
-
-    // Read the first byte
-    uint8_t byte = 0x00;
-    size_t ret = fileReader.readValue(&byte);
-    EXPECT_EQ(ret, sizeof(byte));
-    EXPECT_EQ(byte, 0x04);
-
-    // Check the file position indicator
-    EXPECT_EQ(fileReader.tell(), 1);
-
-    // Seek past the next byte
-    fileReader.seekFromCur(1);
-
-    // Read the next (i.e., last) 2 bytes as uint16_t
-    uint16_t word = 0x0000;
-    ret = fileReader.readValue(&word);
-    EXPECT_EQ(ret, sizeof(word));
-    EXPECT_EQ(word, 0xac5a);
-
-    // The EOF flag should not be set yet
-    EXPECT_EQ(fileReader.eof(), false);
-
-    // Try to read beyond the EOF
-    byte = 0x00;
-    ret = fileReader.readValue(&byte);
-    EXPECT_EQ(ret, 0);
-    EXPECT_EQ(byte, 0x00);
-
-    // Now we expect eof() to yield true
-    EXPECT_EQ(fileReader.eof(), true);
-}
-
 TEST(FileReader, Read) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
     calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");

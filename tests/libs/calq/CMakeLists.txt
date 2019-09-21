@@ -3,9 +3,7 @@ project("calq-tests")
 set(source_files
         circular-buffer-test.cc
         fasta-file-reader-test.cc
-        file-line-reader-test.cc
         file-reader-test.cc
-        file-test.cc
         file-writer-test.cc
         filter-buffer-test.cc
         genotyper-test.cc

@@ -8,25 +8,6 @@ TEST(FileWriter, Constructor) {  // NOLINT(cert-err58-cpp)
     calq::FileWriter fileWriter(gitRootDir + "/FileWriterConstructorTestFile");
 }
 
-TEST(FileWriter, WriteValue) {  // NOLINT(cert-err58-cpp)
-    std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileWriter fileWriter(gitRootDir + "/FileWriterWriteValueTestFile");
-
-    // Write a byte
-    uint8_t byte = 0x42;
-    size_t ret = fileWriter.writeValue(&byte);
-    EXPECT_EQ(ret, sizeof(byte));
-
-    // Close the file in the file writer and open it with a file reader
-    EXPECT_NO_THROW(fileWriter.close());
-    calq::FileReader fileReader(gitRootDir + "/FileWriterWriteValueTestFile");
-
-    // Read the byte back in
-    ret = fileReader.readValue(&byte);
-    EXPECT_EQ(ret, sizeof(byte));
-    EXPECT_EQ(byte, 0x42);
-}
-
 TEST(FileWriter, Write) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
     calq::FileWriter fileWriter(gitRootDir + "/FileWriterWriteTestFile");
