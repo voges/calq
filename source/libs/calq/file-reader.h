@@ -40,7 +40,7 @@ class FileReader {
 
         // Check whether we read exactly n items
         if (!ifs_.good()) {
-            if (ifs_.eof() && !ifs_.fail() && !ifs_.bad()) {
+            if (ifs_.eof() && ifs_.fail() && !ifs_.bad()) {
                 // Everything okay, we just reached the EOF; only ifs_.gcount() bytes were read
                 return ifs_.gcount();
             } else {
