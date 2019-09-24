@@ -2,7 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include "calq/errors.h"
+#include <calq/exceptions.h>
+#include <util/log.h>
 #include "decode.h"
 #include "encode.h"
 #include "program-options.h"
@@ -18,8 +19,13 @@ static std::string commandLineStr(int argc, char* argv[]) {
 
 static int calq_main(int argc, char* argv[]) {
     try {
-        std::cout << "cip: command line: " << commandLineStr(argc, argv) << std::endl;
+        util::Log::setLevel(util::Log::Level::INFO);
         cip::ProgramOptions programOptions(argc, argv);
+        if (programOptions.help) {
+            return 0;
+        }
+        util::Log::setLevel(static_cast<util::Log::Level>(programOptions.logLevel));
+        LOG_INFO("command line: " + commandLineStr(argc, argv));
 
         if (programOptions.decompress) {
             decode(programOptions);
@@ -27,74 +33,24 @@ static int calq_main(int argc, char* argv[]) {
             encode(programOptions);
         }
     } catch (const calq::ErrorException& errorException) {
-        std::cerr << "cip: CALQ error: " << errorException.what() << std::endl;
+        LOG_ERROR("CALQ error: " + errorException.whatStr());
         return -1;
     } catch (const std::exception& stdException) {
-        std::cerr << "cip: error: " << stdException.what() << std::endl;
+        LOG_ERROR("error: " + std::string(stdException.what()));
         return -1;
     } catch (...) {
-        std::cerr << "cip: fatal: unknown error occurred" << std::endl;
+        LOG_ERROR("fatal: unknown error occurred");
         return -1;
     }
 
     return 0;
 }
 
-extern "C" void handleSignal(int sig) {
-    // Ignore the signal
-    std::signal(sig, SIG_IGN);
-
-    // Get signal string and log it
-    std::string signalString;
-    switch (sig) {
-        case SIGABRT:
-            signalString = "SIGABRT";
-            break;
-        case SIGFPE:
-            signalString = "SIGFPE";
-            break;
-        case SIGILL:
-            signalString = "SIGILL";
-            break;
-        case SIGINT:
-            signalString = "SIGINT";
-            break;
-        case SIGSEGV:
-            signalString = "SIGSEGV";
-            break;
-        case SIGTERM:
-            signalString = "SIGTERM";
-            break;
-        default:
-            signalString = "unknown";
-            break;
-    }
-    std::cout << "cip: caught signal: " << sig << " (" << signalString << ")";
-
-    // Invoke the default signal action
-    std::signal(sig, SIG_DFL);
-    std::raise(sig);
-}
-
 int main(int argc, char* argv[]) {
-    // Install signal handler for the following signal types:
-    //   SIGABRT  abnormal termination condition, as is e.g. initiated by std::abort()
-    //   SIGFPE   erroneous arithmetic operation such as divide by zero
-    //   SIGILL   invalid program image, such as invalid instruction
-    //   SIGINT   external interrupt, usually initiated by the user
-    //   SIGSEGV  invalid memory access (segmentation fault)
-    //   SIGTERM  termination request, sent to the program
-    std::signal(SIGABRT, handleSignal);
-    std::signal(SIGFPE, handleSignal);
-    std::signal(SIGILL, handleSignal);
-    std::signal(SIGINT, handleSignal);
-    std::signal(SIGSEGV, handleSignal);
-    std::signal(SIGTERM, handleSignal);
-
     // Fire up main method
     int mainRc = calq_main(argc, argv);
     if (mainRc != 0) {
-        std::cerr << "cip: error: failed to run cip" << std::endl;
+        LOG_ERROR("failed to run cip");
     }
 
     // The C standard makes no guarantees as to when output to stdout or stderr (standard error) is actually flushed. If
@@ -110,6 +66,6 @@ int main(int argc, char* argv[]) {
 
     // Return to the caller
     int callerRc = ((mainRc == 0) ? EXIT_SUCCESS : EXIT_FAILURE);
-    std::cout << "cip: exiting with return code: " << callerRc << std::endl;
+    LOG_DEBUG("exiting with return code: " + std::to_string(callerRc));
     return callerRc;
 }

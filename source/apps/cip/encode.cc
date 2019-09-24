@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <util/log.h>
 
 namespace cip {
 
@@ -11,7 +12,7 @@ void encode(const ProgramOptions &programOptions) {
     auto startTime = std::chrono::steady_clock::now();
 
     auto sleepTimeS = std::chrono::seconds(2);
-    std::cout << "cip: waiting for " << sleepTimeS.count() << "s" << std::endl;
+    LOG_INFO("waiting for " + std::to_string(sleepTimeS.count()) + "s");
     std::this_thread::sleep_for(sleepTimeS);
 
     //
@@ -76,8 +77,7 @@ void encode(const ProgramOptions &programOptions) {
     auto diffTimeMin = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
     auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
 
-    std::cout << "cip: took " << diffTimeMs << " ms ~= " << diffTimeS << " s ~= " << diffTimeMin
-              << " min ~= " << diffTimeH << " h" << std::endl;
+    LOG_INFO("took " + std::to_string(diffTimeMs) + " ms ~= " + std::to_string(diffTimeS) + " s ~= " + std::to_string(diffTimeMin) + " min ~= " + std::to_string(diffTimeH) + " h");
 
     //
     //     CALQ_LOG("COMPRESSION STATISTICS");

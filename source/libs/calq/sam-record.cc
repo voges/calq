@@ -5,7 +5,7 @@
 #include "sam-record.h"
 #include <queue>
 #include <sstream>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

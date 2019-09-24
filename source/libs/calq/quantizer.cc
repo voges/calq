@@ -4,7 +4,7 @@
 
 #include "quantizer.h"
 #include <utility>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

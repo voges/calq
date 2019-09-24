@@ -1,46 +1,47 @@
 #include "program-options.h"
-
+#include <util/log.h>
 #include <cli11@13becad/CLI11.hpp>
 #include <sstream>
 
 namespace cip {
 
-ProgramOptions::ProgramOptions(int argc, char *argv[]) : decompress(), force() { processCommandLine(argc, argv); }
+ProgramOptions::ProgramOptions(int argc, char *argv[]) : decompress(false), force(false), help(false), logLevel(static_cast<int>(util::Log::Level::INFO)) { processCommandLine(argc, argv); }
 
 void ProgramOptions::processCommandLine(int argc, char *argv[]) {
     CLI::App app("CALQ");
 
     app.add_flag("-d,--decompress", decompress, "Decompress");
     app.add_flag("-f,--force", force, "Force overwriting of output file(s)");
+    app.add_option("-l,--log-level", logLevel, "Log level (0 = fatal, 1 = error, 2 = warn, 3 = info, 4 = debug, 5 = trace)");
 
     try {
         app.parse(argc, argv);
         validate();
     } catch (const CLI::ParseError &e) {
-        if (app.exit(e) == 0) {
-            throw std::runtime_error{"exiting after printing help"};
+        if (app.count("--help")) {
+            // Set our internal help flag so that the caller can act on that
+            help = true;
+            app.exit(e);
+            return;
         } else {
-            throw std::runtime_error{"command line parsing failed: " + std::to_string(app.exit(e))};
+            throw std::runtime_error("command line parsing failed");
+            app.exit(e);
         }
     }
 }
 
 void ProgramOptions::validate() {
-    std::cout << "cip: validating command line" << std::endl;
     validateCommon();
 }
 
 void ProgramOptions::validateCommon() {
     // decompress
-    if (decompress) {
-        std::cout << "cip: decompressing" << std::endl;
-    } else {
-        std::cout << "cip: compressing" << std::endl;
-    }
 
     // force
-    if (force) {
-        std::cout << "cip: force switch set - overwriting output file(s)" << std::endl;
+
+    // logLevel
+    if (!util::isValidLogLevel(logLevel)) {
+        throw std::runtime_error("invalid log level: " + std::to_string(logLevel));
     }
 }
 

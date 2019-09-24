@@ -6,7 +6,7 @@
 #include <cmath>
 #include <queue>
 #include <utility>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

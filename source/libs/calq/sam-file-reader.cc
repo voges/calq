@@ -6,7 +6,7 @@
 #include <cassert>
 #include <string>
 #include <vector>
-#include "errors.h"
+#include "exceptions.h"
 #include "sam-record.h"
 #include "string-helpers.h"
 

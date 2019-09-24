@@ -5,7 +5,7 @@
 #include "genotyper.h"
 #include <cmath>
 #include <utility>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

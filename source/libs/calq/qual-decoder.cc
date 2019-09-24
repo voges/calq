@@ -3,7 +3,7 @@
  */
 
 #include "qual-decoder.h"
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

@@ -5,7 +5,7 @@
 #include "fasta-file-reader.h"
 #include <cassert>
 #include <string>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

@@ -3,7 +3,7 @@
  */
 
 #include "probability-distribution.h"
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

@@ -11,6 +11,8 @@ class ProgramOptions {
 
     bool decompress;
     bool force;
+    bool help;
+    int logLevel;
 
    private:
     void processCommandLine(int argc, char *argv[]);

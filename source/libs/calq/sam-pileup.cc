@@ -3,7 +3,7 @@
  */
 
 #include "sam-pileup.h"
-#include "errors.h"
+#include "exceptions.h"
 #include "min-sam-record.h"
 
 namespace calq {

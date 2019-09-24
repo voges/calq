@@ -7,7 +7,7 @@
 
 #include <cassert>
 #include <fstream>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

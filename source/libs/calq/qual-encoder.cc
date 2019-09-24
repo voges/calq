@@ -7,7 +7,7 @@
 #include <iostream>
 #include <utility>
 #include "data-structures.h"
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 

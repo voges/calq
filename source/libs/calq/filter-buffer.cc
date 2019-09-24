@@ -5,7 +5,7 @@
 #include "filter-buffer.h"
 #include <algorithm>
 #include <cmath>
-#include "errors.h"
+#include "exceptions.h"
 
 namespace calq {
 
