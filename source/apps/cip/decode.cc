@@ -3,16 +3,17 @@
 #include <iostream>
 #include <thread>
 #include <util/log.h>
+#include "common.h"
 
 namespace cip {
 
 void decode(const ProgramOptions& programOptions) {
     (void)programOptions;  // Silence warning about unused variable
 
-    auto startTime = std::chrono::steady_clock::now();
+    auto t1 = std::chrono::high_resolution_clock::now();
 
     auto sleepTimeS = std::chrono::seconds(2);
-    LOG_INFO("waiting for " + std::to_string(sleepTimeS.count()) + "s");
+    std::cout << "Waiting for " << sleepTimeS.count() << "s" << std::endl;
     std::this_thread::sleep_for(sleepTimeS);
 
     //
@@ -67,14 +68,8 @@ void decode(const ProgramOptions& programOptions) {
     //     }
     //
 
-    auto stopTime = std::chrono::steady_clock::now();
-    auto diffTime = stopTime - startTime;
-    auto diffTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(diffTime).count();
-    auto diffTimeS = std::chrono::duration_cast<std::chrono::seconds>(diffTime).count();
-    auto diffTimeMin = std::chrono::duration_cast<std::chrono::minutes>(diffTime).count();
-    auto diffTimeH = std::chrono::duration_cast<std::chrono::hours>(diffTime).count();
-
-    LOG_INFO("took " + std::to_string(diffTimeMs) + " ms ~= " + std::to_string(diffTimeS) + " s ~= " + std::to_string(diffTimeMin) + " min ~= " + std::to_string(diffTimeH) + " h");
+    auto now = std::chrono::high_resolution_clock::now();
+    logProgress(now - t1);
 
     //
     //     CALQ_LOG("DECOMPRESSION STATISTICS");
