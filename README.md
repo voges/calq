@@ -39,7 +39,7 @@ The compressed quality values are written to the file ``file.sam.cq``.
 
 ### Decompression
 
-To perform the decompression of the file ``file.sam.cq`` the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The CALQ decoder uses only the alignment information from the file ``file.sam''. The switch ``-d`` invokes the decoder.
+To perform the decompression of the file ``file.sam.cq`` the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The CALQ decoder uses only the alignment information from the file ``file.sam``. The switch ``-d`` invokes the decoder.
 
     calq-codec -d -s file.sam file.sam.cq
 
