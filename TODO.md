@@ -1,6 +1,8 @@
+# TODO
+
 - [ ] Make calq-codec work again (including GABAC and rANS)
 - [ ] Resolve FIXMEs and TODOs
-- [ ] Resolve clang-tidy warnings
+- [ ] Format log and error messages uniformly
 - [ ] Check whether both SamRecord and MinSamRecord classes are needed
 - [ ] Check comments
   - [ ] Sentences should start with an uppercase letter and end with a full stop.
