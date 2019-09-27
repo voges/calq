@@ -21,6 +21,7 @@ class FastaFileReader {
     FastaFileReader(FastaFileReader&&) = delete;
     FastaFileReader& operator=(FastaFileReader&&) = delete;
     ~FastaFileReader();
+
     void parse(std::vector<FastaRecord>* fastaRecords);
 
    private:

@@ -44,7 +44,7 @@ class FileReader {
                 // Everything okay, we just reached the EOF; only ifs_.gcount() bytes were read
                 return ifs_.gcount();
             } else {
-                throwErrorException("Failed to read from file");
+                throw ErrorException("failed to read from file");
             }
         }
 

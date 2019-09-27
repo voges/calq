@@ -13,7 +13,14 @@ namespace calq {
 template <typename T>
 class CircularBuffer {
    public:
+    CircularBuffer() = delete;
     CircularBuffer(size_t size, const T& val) : pos_(0) { data_.resize(size, val); }
+    CircularBuffer(const CircularBuffer&) = default;
+    CircularBuffer& operator=(const CircularBuffer&) = default;
+    CircularBuffer(CircularBuffer&&) = delete;
+    CircularBuffer& operator=(CircularBuffer&&) = delete;
+    ~CircularBuffer() = default;
+
     T& operator[](size_t index) { return data_[(pos_ + index) % data_.size()]; }
     const T& operator[](size_t index) const { return data_[(pos_ + index) % data_.size()]; }
     T& back() { return (*this)[pos_]; }

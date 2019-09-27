@@ -9,7 +9,7 @@ namespace calq {
 FileReader::FileReader(const std::string &path) : ifs_() {
     ifs_.open(path, std::ifstream::in | std::ifstream::binary);
     if (!ifs_.is_open()) {
-        throwErrorException("Failed to open file: " + path);
+        throw ErrorException("failed to open file: " + path);
     }
 }
 

@@ -4,8 +4,8 @@
 
 #include "filter-buffer.h"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
-#include "exceptions.h"
 
 namespace calq {
 
@@ -29,31 +29,29 @@ size_t GaussKernel::calcMinSize(double threshold, const size_t maximum) const {
     return std::min(size, maximum);
 }
 
-void FilterBuffer::push(const double activityScore) { buffer.push(activityScore); }
+void FilterBuffer::push(const double activityScore) { buffer_.push(activityScore); }
 
 double FilterBuffer::filter() const {
     double result = 0.0;
-    for (size_t i = 0; i < kernel.size(); ++i) {
-        result += kernel[i] * buffer[i];
+    for (size_t i = 0; i < kernel_.size(); ++i) {
+        result += kernel_[i] * buffer_[i];
     }
     return result;
 }
 
 FilterBuffer::FilterBuffer(const std::function<double(size_t, size_t)>& kernelBuilder, const size_t kernelSize)
-    : buffer(kernelSize, 0.0) {
-    if (!(kernelSize % 2)) {
-        throwErrorException("Kernel size must be an odd number");
-    }
-    kernel.resize(kernelSize, 0.0);
+    : buffer_(kernelSize, 0.0) {
+    assert(kernelSize % 2);  // Kernel size must be an odd number
+    kernel_.resize(kernelSize, 0.0);
 
-    for (size_t i = 0; i < kernel.size(); ++i) {
-        kernel[i] = kernelBuilder(i, kernelSize);
+    for (size_t i = 0; i < kernel_.size(); ++i) {
+        kernel_[i] = kernelBuilder(i, kernelSize);
     }
 }
 
-FilterBuffer::FilterBuffer() : buffer(1, 0.0) {}
+FilterBuffer::FilterBuffer() : buffer_(1, 0.0) {}
 
-size_t FilterBuffer::getOffset() const { return (buffer.size() + 1) / 2; }
+size_t FilterBuffer::getOffset() const { return (buffer_.size() + 1) / 2; }
 
 RectangleKernel::RectangleKernel(const double size) : SIZE(size) {}
 

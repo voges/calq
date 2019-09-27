@@ -3,9 +3,9 @@
  */
 
 #include "genotyper.h"
+#include <cassert>
 #include <cmath>
 #include <utility>
-#include "exceptions.h"
 
 namespace calq {
 
@@ -49,9 +49,7 @@ Genotyper::Genotyper(const int polyploidy, const int qualOffset, const int numQu
 int Genotyper::computeQuantizerIndex(const std::string& seqPileup, const std::string& qualPileup) {
     const size_t depth = seqPileup.length();
 
-    if (depth != qualPileup.length()) {
-        throwErrorException("Lengths of seqPileup and qualPileup differ");
-    }
+    assert(depth == qualPileup.length());
 
     if (depth == 0) {
         return numQuantizers_;  // Computation of quantizer index not possible

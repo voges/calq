@@ -3,9 +3,9 @@
  */
 
 #include "sam-record.h"
+#include <cassert>
 #include <queue>
 #include <sstream>
-#include "exceptions.h"
 
 namespace calq {
 
@@ -22,9 +22,7 @@ SamRecord::SamRecord(const std::vector<std::string> &fields)
       seq(""),
       qual(""),
       opt("") {
-    if (fields.size() != 12) {
-        throwErrorException("fields.size() != 12");
-    }
+    assert(fields.size() == 12);
 
     qname = fields[0];
     flag = static_cast<uint16_t>(std::stoi(fields[1]));

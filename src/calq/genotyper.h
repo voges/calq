@@ -13,7 +13,14 @@ namespace calq {
 
 class Genotyper {
    public:
+    Genotyper() = delete;
     Genotyper(int polyploidy, int qualOffset, int numQuantizers);
+    Genotyper(const Genotyper&) = delete;
+    Genotyper& operator=(const Genotyper&) = delete;
+    Genotyper(Genotyper&&) = delete;
+    Genotyper& operator=(Genotyper&&) = delete;
+    ~Genotyper() = default;
+
     int computeQuantizerIndex(const std::string& seqPileup, const std::string& qualPileup);
     const std::map<std::string, double>& getGenotypeLikelihoods(const std::string& seqPileup,
                                                                 const std::string& qualPileup);

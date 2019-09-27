@@ -40,7 +40,7 @@ class FileWriter {
 
         // Check whether the write was successful
         if (!ofs_.good()) {
-            throwErrorException("Failed to write to file");
+            throw ErrorException("failed to write to file");
         }
 
         // Return the number of written bytes

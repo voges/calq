@@ -20,8 +20,14 @@ enum struct FilterType;
 
 class Haplotyper {
    public:
+    Haplotyper() = delete;
     Haplotyper(size_t sigma, size_t ploidy, size_t qualOffset, size_t numQuantizers, size_t maxHqSoftclipPropagation,
                size_t hqSoftclipStreak, size_t filterCutOff, bool squashed, FilterType filterType);
+    Haplotyper(const Haplotyper&) = delete;
+    Haplotyper& operator=(const Haplotyper&) = delete;
+    Haplotyper(Haplotyper&&) = delete;
+    Haplotyper& operator=(Haplotyper&&) = delete;
+    ~Haplotyper() = default;
 
     /**
      * Returns offset between activity scores position and front

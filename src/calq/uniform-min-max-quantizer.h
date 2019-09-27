@@ -11,7 +11,13 @@ namespace calq {
 
 class UniformMinMaxQuantizer : public UniformQuantizer {
    public:
+    UniformMinMaxQuantizer() = delete;
     UniformMinMaxQuantizer(int minValue, int maxValue, int numSteps);
+    UniformMinMaxQuantizer(const UniformMinMaxQuantizer &) = delete;
+    UniformMinMaxQuantizer &operator=(const UniformMinMaxQuantizer &) = delete;
+    UniformMinMaxQuantizer(UniformMinMaxQuantizer &&) = delete;
+    UniformMinMaxQuantizer &operator=(UniformMinMaxQuantizer &&) = delete;
+    ~UniformMinMaxQuantizer() override = default;
 };
 
 }  // namespace calq

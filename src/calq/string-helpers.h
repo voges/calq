@@ -9,19 +9,17 @@
 
 namespace calq {
 
-static const char *ws = " \t\n\r\f\v";
-
-inline std::string &rtrim(std::string &s, const char *t = ws) {
+inline std::string &rtrim(std::string &s, const char *t = " \t\n\r\f\v") {
     s.erase(s.find_last_not_of(t) + 1);
     return s;
 }
 
-inline std::string &ltrim(std::string &s, const char *t = ws) {
+inline std::string &ltrim(std::string &s, const char *t = " \t\n\r\f\v") {
     s.erase(0, s.find_first_not_of(t));
     return s;
 }
 
-inline std::string &trim(std::string &s, const char *t = ws) { return ltrim(rtrim(s, t), t); }
+inline std::string &trim(std::string &s, const char *t = " \t\n\r\f\v") { return ltrim(rtrim(s, t), t); }
 
 }  // namespace calq
 

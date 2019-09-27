@@ -1,6 +1,5 @@
 #include "calq/probability-distribution.h"
 #include <gtest/gtest.h>
-#include "calq/exceptions.h"
 
 TEST(ProbabilityDistribution, Generic) {  // NOLINT(cert-err58-cpp)
     size_t rangeMin = 0;
@@ -11,7 +10,6 @@ TEST(ProbabilityDistribution, Generic) {  // NOLINT(cert-err58-cpp)
     // add()
     EXPECT_NO_THROW(dist.add(0, 1));
     EXPECT_NO_THROW(dist.add(1, 1));
-    EXPECT_THROW(dist.add(2, 1), calq::ErrorException);
 
     // size()
     EXPECT_EQ(dist.size(), 2);

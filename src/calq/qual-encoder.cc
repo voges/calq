@@ -179,7 +179,7 @@ void QualEncoder::encodeMappedQual(const MinSamRecord& samRecord) {
             case 'P':
                 break;  // These have been clipped
             default:
-                throwErrorException("Bad CIGAR string");
+                throw ErrorException("bad CIGAR string");
         }
         opLen = 0;
     }

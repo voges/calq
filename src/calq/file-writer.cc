@@ -9,7 +9,7 @@ namespace calq {
 FileWriter::FileWriter(const std::string &path) : ofs_() {
     ofs_.open(path, std::ifstream::out | std::ifstream::binary);
     if (!ofs_.is_open()) {
-        throwErrorException("Failed to open file: " + path);
+        throw ErrorException("failed to open file: " + path);
     }
 }
 

@@ -20,17 +20,23 @@ struct DecodingRead {
 
 class QualDecoder {
    public:
-    QualDecoder(const DecodingBlock& in, uint32_t positionOffset, uint8_t qualityOffset, EncodingBlock* out);
-    ~QualDecoder();
-    void decodeMappedRecordFromBlock(const DecodingRead& samRecord);
+    QualDecoder() = delete;
+    QualDecoder(const DecodingBlock &in, uint32_t positionOffset, uint8_t qualityOffset, EncodingBlock *out);
+    QualDecoder(const QualDecoder &) = delete;
+    QualDecoder &operator=(const QualDecoder &) = delete;
+    QualDecoder(QualDecoder &&) = delete;
+    QualDecoder &operator=(QualDecoder &&) = delete;
+    ~QualDecoder() = default;
+
+    void decodeMappedRecordFromBlock(const DecodingRead &samRecord);
 
    private:
     uint32_t posOffset_;
     int qualityValueOffset_;
     std::vector<size_t> qviIdx_;
     std::vector<Quantizer> quantizers_;
-    EncodingBlock* out_;
-    const DecodingBlock& in_;
+    EncodingBlock *out_;
+    const DecodingBlock &in_;
 };
 
 }  // namespace calq

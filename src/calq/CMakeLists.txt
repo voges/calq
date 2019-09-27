@@ -24,11 +24,12 @@ set(lib_source_files
 add_library(calq ${lib_source_files})
 
 set (app_source_files
-        cip.cc
+        calq-codec.cc
         decode.cc
         encode.cc
         program-options.cc
 )
 
 add_executable(calq-codec ${app_source_files})
+
 target_link_libraries(calq-codec calq)

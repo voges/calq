@@ -21,6 +21,7 @@ class SamFileReader {
     SamFileReader(SamFileReader &&) = delete;
     SamFileReader &operator=(SamFileReader &&) = delete;
     ~SamFileReader();
+
     std::string header();
     size_t readRecords(size_t numRecords, std::list<SamRecord> *records);
 

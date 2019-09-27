@@ -12,7 +12,14 @@ namespace calq {
 
 class ProbabilityDistribution {
    public:
+    ProbabilityDistribution() = delete;
     ProbabilityDistribution(size_t rangeMin, size_t rangeMax);
+    ProbabilityDistribution(const ProbabilityDistribution &) = delete;
+    ProbabilityDistribution &operator=(const ProbabilityDistribution &) = delete;
+    ProbabilityDistribution(ProbabilityDistribution &&) = delete;
+    ProbabilityDistribution &operator=(ProbabilityDistribution &&) = delete;
+    ~ProbabilityDistribution() = default;
+
     void add(size_t value, size_t count = 1);
     void reset();
     size_t size() const;

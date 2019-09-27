@@ -11,7 +11,13 @@ namespace calq {
 
 class UniformQuantizer : public Quantizer {
    public:
+    UniformQuantizer() = delete;
     UniformQuantizer(int minValue, int maxValue, int numSteps);
+    UniformQuantizer(const UniformQuantizer &) = delete;
+    UniformQuantizer &operator=(const UniformQuantizer &) = delete;
+    UniformQuantizer(UniformQuantizer &&) = delete;
+    UniformQuantizer &operator=(UniformQuantizer &&) = delete;
+    ~UniformQuantizer() override = default;
 };
 
 }  // namespace calq

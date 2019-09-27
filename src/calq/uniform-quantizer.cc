@@ -3,17 +3,16 @@
  */
 
 #include "uniform-quantizer.h"
+#include <cassert>
 #include <cmath>
 #include <queue>
 #include <utility>
-#include "exceptions.h"
 
 namespace calq {
 
 UniformQuantizer::UniformQuantizer(const int minValue, const int maxValue, const int numSteps) : Quantizer() {
-    if (minValue > maxValue || numSteps <= 1) {
-        throwErrorException("minValue > maxValue || numSteps <= 1");
-    }
+    assert(minValue <= maxValue);
+    assert(numSteps > 1);
 
     // Compute the step size
     auto stepSize =

@@ -23,13 +23,20 @@ enum struct Version;
 
 class QualEncoder {
    public:
-    explicit QualEncoder(const EncodingOptions& options, std::map<int, Quantizer> quantizers, DecodingBlock* out);
-    void addMappedRecordToBlock(const MinSamRecord& samRecord);
+    QualEncoder() = delete;
+    explicit QualEncoder(const EncodingOptions &options, std::map<int, Quantizer> quantizers, DecodingBlock *out);
+    QualEncoder(const QualEncoder &) = delete;
+    QualEncoder &operator=(const QualEncoder &) = delete;
+    QualEncoder(QualEncoder &&) = delete;
+    QualEncoder &operator=(QualEncoder &&) = delete;
+    ~QualEncoder() = default;
+
+    void addMappedRecordToBlock(const MinSamRecord &samRecord);
     void finishBlock();
     size_t nrMappedRecords() const;
 
    private:
-    void encodeMappedQual(const MinSamRecord& samRecord);
+    void encodeMappedQual(const MinSamRecord &samRecord);
 
     size_t nrMappedRecords_;
     int NR_QUANTIZERS;
@@ -38,7 +45,7 @@ class QualEncoder {
     SamPileupDeque samPileupDeque_;
     Haplotyper haplotyper_;
     Genotyper genotyper_;
-    DecodingBlock* out;
+    DecodingBlock *out;
     size_t posCounter;
     uint8_t hqSoftClipThreshold;
     std::map<int, Quantizer> quantizers_;

@@ -1,13 +1,7 @@
 #include "calq/uniform-quantizer.h"
 #include <gtest/gtest.h>
-#include "calq/exceptions.h"
 
 TEST(UniformQuantizer, Initialization) {  // NOLINT(cert-err58-cpp)
-    // These initializations should fail.
-    EXPECT_THROW(calq::UniformQuantizer q1(1, 0, 2), calq::ErrorException);  // minValue > maxValue
-    EXPECT_THROW(calq::UniformQuantizer q2(0, 1, 1), calq::ErrorException);  // numSteps <=1
-
-    // This should be ok.
     calq::UniformQuantizer q3(0, 1, 2);
 }
 

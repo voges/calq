@@ -14,10 +14,15 @@ class Quantizer {
    public:
     Quantizer();
     explicit Quantizer(std::map<int, int> inverseLut);
-    virtual ~Quantizer();
+    Quantizer(const Quantizer &) = delete;
+    Quantizer &operator=(const Quantizer &) = delete;
+    Quantizer(Quantizer &&) = default;
+    Quantizer &operator=(Quantizer &&) = delete;
+    virtual ~Quantizer() = default;
+
     int valueToIndex(int value) const;
     int indexToReconstructedValue(int index) const;
-    const std::map<int, int>& inverseLut() const;
+    const std::map<int, int> &inverseLut() const;
 
    protected:
     std::map<int, std::pair<int, int>> lut_;  // value->(index,reconstructedValue)

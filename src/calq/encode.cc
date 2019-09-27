@@ -1,10 +1,14 @@
+/**
+ * @file encode.cc
+ */
+
 #include "encode.h"
 #include <chrono>
 #include <iostream>
 #include <thread>
 #include "common.h"
 
-namespace cip {
+namespace calq {
 
 void encode(const ProgramOptions &programOptions) {
     (void)programOptions;  // Silence warning about unused variable
@@ -12,10 +16,9 @@ void encode(const ProgramOptions &programOptions) {
     auto t1 = std::chrono::high_resolution_clock::now();
 
     auto sleepTimeS = std::chrono::seconds(2);
-    std::cout << "Waiting for " << sleepTimeS.count() << "s" << std::endl;
+    std::cout << "waiting for " << sleepTimeS.count() << " s" << std::endl;
     std::this_thread::sleep_for(sleepTimeS);
 
-    //
     //     size_t compressedMappedQualSize = 0;
     //     size_t compressedUnmappedQualSize = 0;
     //     size_t uncompressedMappedQualSize = 0;
@@ -68,12 +71,10 @@ void encode(const ProgramOptions &programOptions) {
     //     }
     //
     //     file.close();
-    //
 
     auto now = std::chrono::high_resolution_clock::now();
     logProgress(now - t1);
 
-    //
     //     CALQ_LOG("COMPRESSION STATISTICS");
     //     CALQ_LOG("  Took %d ms ~= %d s ~= %d m ~= %d h", (int)diffTimeMs, (int)diffTimeS, (int)diffTimeM,
     //     (int)diffTimeH); const unsigned MB = 1 * 1000 * 1000; CALQ_LOG(
@@ -115,7 +116,6 @@ void encode(const ProgramOptions &programOptions) {
     //     CALQ_LOG("    Unmapped:             %2.4f",
     //              (static_cast<double>(compressedUnmappedQualSize) * 8) /
     //              static_cast<double>(uncompressedUnmappedQualSize));
-    //
 }
 
-}  // namespace cip
+}  // namespace calq

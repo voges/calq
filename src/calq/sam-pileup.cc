@@ -3,6 +3,7 @@
  */
 
 #include "sam-pileup.h"
+#include <cassert>
 #include "exceptions.h"
 #include "min-sam-record.h"
 
@@ -13,9 +14,7 @@ SamPileup::SamPileup() : pos(0), qual(""), seq(""), ref('N'), hqSoftclipCnt(0) {
 SamPileupDeque::SamPileupDeque() : pileups_(), posMax_(0), posMin_(0) {}
 
 const SamPileup& SamPileupDeque::back() const {
-    if (pileups_.empty()) {
-        throwErrorException("Cannot access back() of empty deque");
-    }
+    assert(!pileups_.empty());
     return pileups_.back();
 }
 
@@ -28,9 +27,7 @@ void SamPileupDeque::clear() {
 bool SamPileupDeque::empty() const { return pileups_.empty(); }
 
 const SamPileup& SamPileupDeque::front() const {
-    if (pileups_.empty()) {
-        throwErrorException("Cannot access front() of empty deque");
-    }
+    assert(!pileups_.empty());
     return pileups_.front();
 }
 
@@ -39,9 +36,7 @@ size_t SamPileupDeque::length() const { return posMax_ - posMin_ + 1; }
 const SamPileup& SamPileupDeque::operator[](const size_t& n) const { return pileups_.at(n); }
 
 void SamPileupDeque::pop_front() {
-    if (pileups_.empty()) {
-        throwErrorException("Deque is empty");
-    }
+    assert(!pileups_.empty());
     pileups_.pop_front();
     posMin_++;
 }
@@ -53,18 +48,13 @@ uint32_t SamPileupDeque::posMax() const { return posMax_; }
 uint32_t SamPileupDeque::posMin() const { return posMin_; }
 
 void SamPileupDeque::setPosMax(const uint32_t posMax) {
-    if (posMax < posMax_) {
-        throwErrorException("posMax out of range");
-    }
+    assert(posMax >= posMax_);
     posMax_ = posMax;
     pileups_.resize(length());
 }
 
 void SamPileupDeque::setPosMin(const uint32_t posMin) {
-    if (posMin < posMin_) {
-        throwErrorException("posMin out of range");
-    }
-
+    assert(posMin >= posMin_);
     if (empty()) {
         posMin_ = posMin;
     } else {
@@ -75,12 +65,9 @@ void SamPileupDeque::setPosMin(const uint32_t posMin) {
 }
 
 void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const uint8_t hqSoftClipThreshold) {
-    if (this->empty()) {
-        throwErrorException("Pileup queue is empty");
-    }
-    if ((this->posMin() > r.posMin) || (this->posMax() < r.posMax - 1)) {
-        throwErrorException("samPileupQueue does not overlap record");
-    }
+    assert(!pileups_.empty());
+    assert(posMin() <= r.posMin);
+    assert(posMax() >= r.posMax - 1);
 
     size_t cigarIdx = 0;
     size_t cigarLen = r.cigar.length();
@@ -109,7 +96,7 @@ void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const 
                     if (!r.ref.empty()) {
                         if (this->pileups_[pileupIdx].ref != 'N' &&
                             this->pileups_[pileupIdx].ref != r.ref[pileupIdx + this->posMin() - r.posMin]) {
-                            throwErrorException("Non-matching reference between reads!");
+                            throw ErrorException("non-matching reference between reads");
                         }
                         this->pileups_[pileupIdx].ref = r.ref[pileupIdx + this->posMin() - r.posMin];
                     }
@@ -137,7 +124,7 @@ void SamPileupDeque::add(const MinSamRecord& r, const uint8_t qualOffset, const 
             case 'P':
                 break;  // These have been clipped
             default:
-                throwErrorException("Bad CIGAR string");
+                throw ErrorException("bad CIGAR string");
         }
 
         opLen = 0;

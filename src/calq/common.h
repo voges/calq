@@ -1,6 +1,10 @@
+/**
+ * @file common.h
+ */
+
 #include <chrono>
 
-namespace cip {
+namespace calq {
 
 template <typename Diff>
 void logProgress(Diff d) {
@@ -10,4 +14,4 @@ void logProgress(Diff d) {
               << " min ~= " << std::chrono::duration_cast<std::chrono::hours>(d).count() << " h" << std::endl;
 }
 
-}  // namespace cip
+}  // namespace calq

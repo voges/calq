@@ -13,11 +13,15 @@ namespace calq {
 
 class Exception : public std::exception {
    public:
+    Exception() = delete;
     explicit Exception(std::string msg) : msg_(std::move(msg)) {}
-    Exception(const Exception& e) noexcept : msg_(e.msg_) {}
+    Exception(const Exception &e) noexcept : msg_(e.msg_) {}
+    Exception &operator=(const Exception &) = delete;
+    Exception(Exception &&) = default;
+    Exception &operator=(Exception &&) = delete;
     ~Exception() noexcept override = default;
-    const char* what() const noexcept override { return msg_.c_str(); }
-    std::string whatStr() const noexcept { return msg_; }
+
+    const char *what() const noexcept override { return msg_.c_str(); }
 
    protected:
     std::string msg_;
@@ -25,37 +29,15 @@ class Exception : public std::exception {
 
 class ErrorException : public Exception {
    public:
-    explicit ErrorException(const std::string& msg) : Exception(msg) {}
-};
-
-inline void throwErrorException(const std::string& msg) {
-    std::cout.flush();
-    throw calq::ErrorException(msg);
-}
-
-class ErrorExceptionReporter {
-   public:
-    ErrorExceptionReporter(std::string file, std::string function, const int line)
-        : file_(std::move(file)), function_(std::move(function)), line_(line) {}
-
-    void operator()(const std::string& msg) {
-        std::string tmp =
-            file_.substr(file_.find_last_of("/\\") + 1) + ":" + function_ + ":" + std::to_string(line_) + ": " + msg;
-        // Can use the original name here, as it is still defined
-        throwErrorException(tmp);
-    }
-
-   private:
-    std::string file_;
-    std::string function_;
-    int line_;
+    ErrorException() = delete;
+    explicit ErrorException(const std::string &msg) : Exception(msg) {}
+    ErrorException(const ErrorException &) = default;
+    ErrorException &operator=(const ErrorException &) = delete;
+    ErrorException(ErrorException &&) = default;
+    ErrorException &operator=(ErrorException &&) = delete;
+    ~ErrorException() override = default;
 };
 
 }  // namespace calq
-
-// Remove the symbol for the function, then define a new version that instead creates a stack temporary instance of
-// ErrorExceptionReporter initialized with the caller.
-#undef throwErrorException
-#define throwErrorException calq::ErrorExceptionReporter(__FILE__, __FUNCTION__, __LINE__)
 
 #endif  // CALQ_EXCEPTIONS_H_

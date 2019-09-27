@@ -36,7 +36,7 @@ Haplotyper::Haplotyper(const size_t sigma, const size_t ploidy, const size_t qua
             FilterBuffer([kernel](size_t pos, size_t size) -> double { return kernel.calcValue(pos, size); }, minSize);
         localDistortion_ = kernel.calcValue((minSize - 1) / 2, minSize);
     } else {
-        throwErrorException("FilterType not supported by haplotyper");
+        throw ErrorException("filter type not supported by haplotyper");
     }
 }
 

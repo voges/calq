@@ -17,7 +17,13 @@ namespace calq {
  */
 class SoftclipSpreader {
    public:
+    SoftclipSpreader() = delete;
     SoftclipSpreader(size_t maxPropagation, size_t minHqSoftclips, bool isSquashed);
+    SoftclipSpreader(const SoftclipSpreader &) = delete;
+    SoftclipSpreader &operator=(const SoftclipSpreader &) = delete;
+    SoftclipSpreader(SoftclipSpreader &&) = delete;
+    SoftclipSpreader &operator=(SoftclipSpreader &&) = delete;
+    ~SoftclipSpreader() = default;
 
     /**
      * Push an activity score and average number of soft clips at that position into buffer. Returns the oldest activity

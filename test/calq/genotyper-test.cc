@@ -2,5 +2,5 @@
 #include <gtest/gtest.h>
 
 TEST(Genotyper, Something) {  // NOLINT(cert-err58-cpp)
-    // TODO(Jan): Write unit test(s) for Genotyper
+    // TODO(Jan): write unit test(s) for Genotyper
 }

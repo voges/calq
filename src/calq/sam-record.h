@@ -13,7 +13,14 @@ namespace calq {
 
 class SamRecord {
    public:
+    SamRecord() = delete;
     explicit SamRecord(const std::vector<std::string> &fields);
+    SamRecord(const SamRecord &) = default;
+    SamRecord &operator=(const SamRecord &) = delete;
+    SamRecord(SamRecord &&) = delete;
+    SamRecord &operator=(SamRecord &&) = delete;
+    ~SamRecord() = default;
+
     std::string str() const;
 
     std::string qname;  // Query template NAME

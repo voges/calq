@@ -36,7 +36,7 @@ static void parseLine(const std::string &line, std::vector<std::string> *const f
 SamFileReader::SamFileReader(const std::string &path) : header_(), ifs_() {
     ifs_.open(path, std::ifstream::in | std::ifstream::binary);
     if (!ifs_.is_open()) {
-        throwErrorException("Failed to open file: " + path);
+        throw ErrorException("failed to open file: " + path);
     }
 
     readHeader();
@@ -48,6 +48,8 @@ std::string SamFileReader::header() { return header_; }
 
 size_t SamFileReader::readRecords(const size_t numRecords, std::list<SamRecord> *const records) {
     assert(records != nullptr);
+
+    records->clear();
 
     for (size_t i = 0; i < numRecords; i++) {
         // Read a line

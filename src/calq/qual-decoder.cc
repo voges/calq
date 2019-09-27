@@ -24,8 +24,6 @@ QualDecoder::QualDecoder(const DecodingBlock& b, uint32_t positionOffset, uint8_
     }
 }
 
-QualDecoder::~QualDecoder() = default;
-
 void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
     std::string qual;
 
@@ -44,8 +42,7 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
             case 'M':
             case '=':
             case 'X':
-                // Decode opLen quality value indices with computed
-                // quantizer indices
+                // Decode opLen quality value indices with computed quantizer indices
                 for (size_t i = 0; i < opLen; i++) {
                     uint8_t quantizerIndex = in_.quantizerIndexes[qvciPos++] - '0';
 
@@ -71,12 +68,12 @@ void QualDecoder::decodeMappedRecordFromBlock(const DecodingRead& samRecord) {
             case 'D':
             case 'N':
                 qvciPos += opLen;
-                break;  // do nothing as these bases are not present
+                break;  // Do nothing as these bases are not present
             case 'H':
             case 'P':
-                break;  // these have been clipped
+                break;  // These have been clipped
             default:
-                throwErrorException("Bad CIGAR string");
+                throw ErrorException("bad CIGAR string");
         }
         opLen = 0;
     }
