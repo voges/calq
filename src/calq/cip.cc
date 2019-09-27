@@ -2,10 +2,9 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <calq/exceptions.h>
-#include <util/log.h>
 #include "decode.h"
 #include "encode.h"
+#include "exceptions.h"
 #include "program-options.h"
 
 static std::string commandLineStr(int argc, char* argv[]) {
@@ -19,13 +18,13 @@ static std::string commandLineStr(int argc, char* argv[]) {
 
 static int calq_main(int argc, char* argv[]) {
     try {
-        util::Log::setLevel(util::Log::Level::INFO);
+        // util::Log::setLevel(util::Log::Level::INFO);
         cip::ProgramOptions programOptions(argc, argv);
         if (programOptions.help) {
             return 0;
         }
-        util::Log::setLevel(static_cast<util::Log::Level>(programOptions.logLevel));
-        LOG_INFO("command line: " + commandLineStr(argc, argv));
+        // util::Log::setLevel(static_cast<util::Log::Level>(programOptions.logLevel));
+        // LOG_INFO("command line: " + commandLineStr(argc, argv));
 
         if (programOptions.decompress) {
             decode(programOptions);
@@ -33,13 +32,13 @@ static int calq_main(int argc, char* argv[]) {
             encode(programOptions);
         }
     } catch (const calq::ErrorException& errorException) {
-        LOG_ERROR("CALQ error: " + errorException.whatStr());
+        // LOG_ERROR("CALQ error: " + errorException.whatStr());
         return -1;
     } catch (const std::exception& stdException) {
-        LOG_ERROR("error: " + std::string(stdException.what()));
+        // LOG_ERROR("error: " + std::string(stdException.what()));
         return -1;
     } catch (...) {
-        LOG_ERROR("fatal: unknown error occurred");
+        // LOG_ERROR("fatal: unknown error occurred");
         return -1;
     }
 
@@ -50,7 +49,7 @@ int main(int argc, char* argv[]) {
     // Fire up main method
     int mainRc = calq_main(argc, argv);
     if (mainRc != 0) {
-        LOG_ERROR("failed to run cip");
+        // LOG_ERROR("failed to run cip");
     }
 
     // The C standard makes no guarantees as to when output to stdout or stderr (standard error) is actually flushed. If
@@ -66,6 +65,6 @@ int main(int argc, char* argv[]) {
 
     // Return to the caller
     int callerRc = ((mainRc == 0) ? EXIT_SUCCESS : EXIT_FAILURE);
-    LOG_DEBUG("exiting with return code: " + std::to_string(callerRc));
+    // LOG_DEBUG("exiting with return code: " + std::to_string(callerRc));
     return callerRc;
 }

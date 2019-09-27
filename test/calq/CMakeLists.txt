@@ -1,4 +1,4 @@
-project("calq-tests")
+project("calq-test")
 
 set(source_files
         circular-buffer-test.cc
@@ -22,7 +22,7 @@ set(source_files
         uniform-quantizer-test.cc
 )
 
-add_executable(calq-tests ${source_files})
+add_executable(calq-test ${source_files})
 
-target_link_libraries(calq-tests PRIVATE gtest_main)
-target_link_libraries(calq-tests PRIVATE calq)
+target_link_libraries(calq-test PRIVATE gtest_main)
+target_link_libraries(calq-test PRIVATE calq)

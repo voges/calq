@@ -4,12 +4,12 @@
 
 TEST(FileReader, Constructor) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/data/misc/0x041f5aac");
 }
 
 TEST(FileReader, Read) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/data/misc/0x041f5aac");
 
     // Read all 4 bytes
     const size_t bufferSize = 4;
@@ -26,7 +26,7 @@ TEST(FileReader, Read) {  // NOLINT(cert-err58-cpp)
 
 TEST(FileReader, ReadUint8) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/data/misc/0x041f5aac");
 
     // Read a uint8_t
     uint8_t byte = 0x00;
@@ -37,7 +37,7 @@ TEST(FileReader, ReadUint8) {  // NOLINT(cert-err58-cpp)
 
 TEST(FileReader, ReadUint16) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/data/misc/0x041f5aac");
 
     // Read a uint16_t
     uint16_t word = 0x0000;
@@ -48,7 +48,7 @@ TEST(FileReader, ReadUint16) {  // NOLINT(cert-err58-cpp)
 
 TEST(FileReader, ReadUint32) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/data/misc/0x041f5aac");
 
     // Read a uint32_t
     uint32_t dword = 0x00000000;
@@ -59,7 +59,7 @@ TEST(FileReader, ReadUint32) {  // NOLINT(cert-err58-cpp)
 
 TEST(FileReader, ReadUint64) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FileReader fileReader(gitRootDir + "/resources/test-files/tests/0x041f5aac041f5aac");
+    calq::FileReader fileReader(gitRootDir + "/data/misc/0x041f5aac041f5aac");
 
     // Read a uint64_t
     uint64_t qword = 0x0000000000000000;

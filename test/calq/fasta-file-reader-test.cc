@@ -5,12 +5,12 @@
 
 TEST(FastaFileReader, Constructor) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FastaFileReader fastaFileReader(gitRootDir + "/resources/test-files/fasta/minimal.fasta");
+    calq::FastaFileReader fastaFileReader(gitRootDir + "/data/fasta/minimal.fasta");
 }
 
 TEST(FastaFileReader, Parse) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::FastaFileReader fastaFileReader(gitRootDir + "/resources/test-files/fasta/minimal.fasta");
+    calq::FastaFileReader fastaFileReader(gitRootDir + "/data/fasta/minimal.fasta");
 
     std::vector<calq::FastaRecord> fastaRecords;
     fastaFileReader.parse(&fastaRecords);

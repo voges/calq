@@ -5,12 +5,12 @@
 
 TEST(SamFileReader, Constructoor) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::SamFileReader samFileReader(gitRootDir + "/resources/test-files/sam/samspec.sam");
+    calq::SamFileReader samFileReader(gitRootDir + "/data/sam/samspec.sam");
 }
 
 TEST(SamFileReader, Header) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::SamFileReader samFileReader(gitRootDir + "/resources/test-files/sam/samspec.sam");
+    calq::SamFileReader samFileReader(gitRootDir + "/data/sam/samspec.sam");
 
     std::string samspecHeader = "@HD\tVN:1.5\tSO:coordinate\n";
     samspecHeader += "@SQ\tSN:ref\tLN:45\n";
@@ -20,7 +20,7 @@ TEST(SamFileReader, Header) {  // NOLINT(cert-err58-cpp)
 
 TEST(SamFileReader, ReadRecords1) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::SamFileReader samFileReader(gitRootDir + "/resources/test-files/sam/samspec.sam");
+    calq::SamFileReader samFileReader(gitRootDir + "/data/sam/samspec.sam");
 
     std::list<calq::SamRecord> samRecords;
 
@@ -37,7 +37,7 @@ TEST(SamFileReader, ReadRecords1) {  // NOLINT(cert-err58-cpp)
 
 TEST(SamFileReader, ReadRecords2) {  // NOLINT(cert-err58-cpp)
     std::string gitRootDir = calq_tests::exec("git rev-parse --show-toplevel");
-    calq::SamFileReader samFileReader(gitRootDir + "/resources/test-files/sam/samspec.sam");
+    calq::SamFileReader samFileReader(gitRootDir + "/data/sam/samspec.sam");
 
     std::list<calq::SamRecord> samRecords;
 

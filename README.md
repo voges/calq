@@ -21,11 +21,11 @@ Build all libraries and executables using CMake:
     cmake ..
     make
 
-This will generate the CALQ encoder/decoder (named ``cip``) at ``build/bin/cip``.
+This will generate the CALQ encoder/decoder (named ``calq-codec``) at ``build/bin/calq-codec``.
 
 ## Usage examples
 
-A list of the available command line options can be obtained via ``cip --help``.
+A list of the available command line options can be obtained via ``calq-codec --help``.
 
 ### Compression
 
@@ -33,19 +33,19 @@ The CALQ encoder accepts input files in the SAM format (https://github.com/samto
 
 The following command can be used to compress the quality values from the SAM file ``file.sam``.
 
-    cip file.sam
+    calq-codec file.sam
 
-The compressed quality values are written to the file ``file.sam.cip``.
+The compressed quality values are written to the file ``file.sam.cq``.
 
 ### Decompression
 
-To perform the decompression of the file ``file.sam.cip`` the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The CALQ decoder uses only the alignment information from the file ``file.sam''. The switch ``-d`` invokes the decoder.
+To perform the decompression of the file ``file.sam.cq`` the CALQ decoder requires the alignment information, namely the mapping positions, the CIGAR strings, and the reference sequence name(s). This information can be passed to the CALQ decoder with the argument ``-s file.sam``. The CALQ decoder uses only the alignment information from the file ``file.sam''. The switch ``-d`` invokes the decoder.
 
-    cip -d -s file.sam file.sam.cip
+    calq-codec -d -s file.sam file.sam.cq
 
-The reconstructed quality values are written to the file ``file.sam.cip.qual``.
+The reconstructed quality values are written to the file ``file.sam.cq.qual``.
 
-Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` which is located in the ``scripts/util`` folder.
+Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` which is located in the ``util`` folder.
 
 ## Who do I talk to?
 

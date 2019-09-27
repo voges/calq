@@ -1,6 +1,6 @@
 project("calq")
 
-set(source_files
+set(lib_source_files
         fasta-file-reader.cc
         file-reader.cc
         file-writer.cc
@@ -21,4 +21,14 @@ set(source_files
         uniform-quantizer.cc
 )
 
-add_library(calq ${source_files})
+add_library(calq ${lib_source_files})
+
+set (app_source_files
+        cip.cc
+        decode.cc
+        encode.cc
+        program-options.cc
+)
+
+add_executable(calq-codec ${app_source_files})
+target_link_libraries(calq-codec calq)

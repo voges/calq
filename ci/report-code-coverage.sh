@@ -2,20 +2,23 @@
 
 set -euxo pipefail
 
+self="${0}"
+self_name="${self##*/}"
+
 git rev-parse --git-dir 1>/dev/null # exit if not inside Git repo
 readonly git_root_dir="$(git rev-parse --show-toplevel)"
 
 readonly build_dir="${git_root_dir}/cmake-build-debug-all"
 if [[ ! -d "${build_dir}" ]]; then
-    echo "Error: build directory does not exist: ${build_dir}"
+    echo "[${self_name}] error: build directory does not exist: ${build_dir}"
     exit 1
 fi
 
 # Check wether any .gcda files are present
-num_gcda_files=$(find "${build_dir}" -type f -name "*.gcda" | wc -l)
+num_gcda_files=$(find "${build_dir}" -type f -name '*.gcda' | wc -l)
 num_gcda_files="${num_gcda_files//[[:space:]]/}"
 if [[ "${num_gcda_files}" == 0 ]]; then
-    echo "Error: no .gcda files found in build directory: ${build_dir}"
+    echo "[${self_name}] error: no .gcda files found in build directory: ${build_dir}"
     exit 1
 fi
 
@@ -38,10 +41,11 @@ lcov \
     '/Applications/*'
 
 # Filter out own build and unit test files
-lcov --remove coverage.info \
+lcov \
+    --remove coverage.info \
     --output-file coverage.info \
     '*/calq/cmake-build-*/*' \
-    '*/calq/tests/*'
+    '*/calq/test/*'
 
 # Output coverage data on the console (optional)
 lcov --list coverage.info
@@ -54,7 +58,7 @@ if [[ ! -z "${CI}" ]]; then
 else
     readonly local_codecov_dir="${build_dir}/codecov/html"
     genhtml coverage.info --output-directory "${local_codecov_dir}"
-    echo "Coverage report generated locally at: ${local_codecov_dir}";
+    echo "[${self_name}] coverage report generated locally at: ${local_codecov_dir}";
 
 fi
 set -u # treat unset variables as error again

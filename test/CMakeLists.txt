@@ -1,2 +1,2 @@
+add_subdirectory(calq)
 add_subdirectory(example)
-add_subdirectory(libs)

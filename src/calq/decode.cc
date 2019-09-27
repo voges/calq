@@ -2,7 +2,6 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
-#include <util/log.h>
 #include "common.h"
 
 namespace cip {

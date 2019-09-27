@@ -88,17 +88,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 # Include paths
 #==============================================================================
 
-include_directories("${CMAKE_SOURCE_DIR}/source/apps/")
-include_directories("${CMAKE_SOURCE_DIR}/source/libs/")
-include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/source/libs/third-party")
+include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/thirdparty")
 
 
 #==============================================================================
 # Subdirectories
 #==============================================================================
 
-add_subdirectory(source)
+add_subdirectory(src)
 
 if(${BUILD_TESTS})
-    add_subdirectory(tests)
+    add_subdirectory(test)
 endif()
