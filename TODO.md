@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Clean up tools folder
 - [ ] Make calq-codec work again (including GABAC and rANS)
 - [ ] Resolve FIXMEs and TODOs
 - [ ] Format log and error messages uniformly
