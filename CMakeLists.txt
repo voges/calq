@@ -49,12 +49,10 @@ endif()
 #==============================================================================
 
 option(BUILD_COVERAGE "Compile and link code instrumented for coverage analysis" OFF)
-option(BUILD_DOCUMENTATION "Build Doxygen documentation" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 
 message(STATUS "Options:")
 message(STATUS "  BUILD_COVERAGE=${BUILD_COVERAGE}")
-message(STATUS "  BUILD_DOCUMENTATION=${BUILD_DOCUMENTATION}")
 message(STATUS "  BUILD_TESTS=${BUILD_TESTS}")
 
 if(${BUILD_COVERAGE})
@@ -64,10 +62,6 @@ if(${BUILD_COVERAGE})
     else()
         message(FATAL_ERROR "Coverage analysis not supported for compiler: ${CMAKE_CXX_COMPILER_ID}")
     endif()
-endif()
-
-if(${BUILD_DOCUMENTATION})
-    include(Doxygen)
 endif()
 
 if(${BUILD_TESTS})

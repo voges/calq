@@ -20,8 +20,6 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - doxygen
-            - graphviz
             - g++-5
             - lcov
             - valgrind
@@ -39,14 +37,3 @@ script:
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]]; then ./ci/run-all-tests.sh; fi
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]]; then ./ci/run-all-tests-with-valgrind.sh; fi
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]] && [[ "${TRAVIS_COMPILER}" == "gcc" ]] && [[ "${TRAVIS_BRANCH}" == "master" ]]; then ./ci/report-code-coverage.sh; fi
-
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: ${GITHUB_TOKEN}
-  keep_history: true
-  local_dir: ./cmake-build-debug-all/doc/html
-  target_branch: gh-pages
-  on:
-    branch: master
-    condition: "${TRAVIS_OS_NAME} = linux"
