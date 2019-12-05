@@ -20,12 +20,10 @@ if(result)
     message(FATAL_ERROR "Build step for Google Test failed: ${result}")
 endif()
 
-# Prevent overriding the parent project's compiler/linker settings on
-# Windows
+# Prevent overriding the parent project's compiler/linker settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-# Add Google Test directly to our build and define the gtest and gtest_main
-# targets
+# Add Google Test directly to our build and define the gtest and gtest_main targets
 add_subdirectory(
     ${CMAKE_BINARY_DIR}/googletest-source
     ${CMAKE_BINARY_DIR}/googletest-build
