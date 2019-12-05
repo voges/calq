@@ -15,4 +15,4 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Debug \
     -DBUILD_COVERAGE=ON \
     -DBUILD_TESTS=ON
-make
+make --jobs

@@ -12,4 +12,4 @@ fi
 
 cd "${build_dir}"
 cmake .. -DCMAKE_BUILD_TYPE=Release
-make
+make --jobs
