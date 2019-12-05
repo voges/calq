@@ -1,7 +1,3 @@
-/**
- * @file filter-buffer.h
- */
-
 #ifndef CALQ_FILTER_BUFFER_H_
 #define CALQ_FILTER_BUFFER_H_
 

@@ -1,7 +1,3 @@
-/**
- * @file fasta-file-reader.h
- */
-
 #ifndef CALQ_FASTA_FILE_READER_H_
 #define CALQ_FASTA_FILE_READER_H_
 

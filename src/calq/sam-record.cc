@@ -1,7 +1,3 @@
-/**
- * @file sam-record.cc
- */
-
 #include "sam-record.h"
 #include <cassert>
 #include <queue>

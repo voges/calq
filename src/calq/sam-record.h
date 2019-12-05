@@ -1,7 +1,3 @@
-/**
- * @file sam-record.h
- */
-
 #ifndef CALQ_SAM_RECORD_H_
 #define CALQ_SAM_RECORD_H_
 

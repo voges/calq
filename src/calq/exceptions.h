@@ -1,7 +1,3 @@
-/**
- * @file exceptions.h
- */
-
 #ifndef CALQ_EXCEPTIONS_H_
 #define CALQ_EXCEPTIONS_H_
 

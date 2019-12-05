@@ -1,7 +1,3 @@
-/**
- * @file common.h
- */
-
 #include <chrono>
 
 namespace calq {

@@ -1,7 +1,3 @@
-/**
- * @file genotyper.h
- */
-
 #ifndef CALQ_GENOTYPER_H_
 #define CALQ_GENOTYPER_H_
 

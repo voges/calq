@@ -1,7 +1,3 @@
-/**
- * @file softclip-spreader.cc
- */
-
 #include "softclip-spreader.h"
 #include <algorithm>
 

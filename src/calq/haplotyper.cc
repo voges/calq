@@ -1,7 +1,3 @@
-/**
- * @file haplotyper.cc
- */
-
 #include "haplotyper.h"
 #include <algorithm>
 #include <iostream>

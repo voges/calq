@@ -1,7 +1,3 @@
-/**
- * @file sam-pileup.cc
- */
-
 #include "sam-pileup.h"
 #include <cassert>
 #include "exceptions.h"

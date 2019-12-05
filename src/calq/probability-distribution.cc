@@ -1,7 +1,3 @@
-/**
- * @file probability-distribution.cc
- */
-
 #include "probability-distribution.h"
 #include <cassert>
 

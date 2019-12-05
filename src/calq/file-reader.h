@@ -1,7 +1,3 @@
-/**
- * @file file-reader.h
- */
-
 #ifndef CALQ_FILE_READER_H_
 #define CALQ_FILE_READER_H_
 

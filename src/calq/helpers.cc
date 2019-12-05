@@ -1,7 +1,3 @@
-/**
- * @file helpers.cc
- */
-
 #include "helpers.h"
 #include <fstream>
 

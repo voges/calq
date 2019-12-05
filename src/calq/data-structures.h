@@ -1,7 +1,3 @@
-/**
- * @file data-structures.h
- */
-
 #ifndef CALQ_DATA_STRUCTURES_H_
 #define CALQ_DATA_STRUCTURES_H_
 

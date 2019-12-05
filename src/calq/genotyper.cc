@@ -1,7 +1,3 @@
-/**
- * @file genotyper.cc
- */
-
 #include "genotyper.h"
 #include <cassert>
 #include <cmath>

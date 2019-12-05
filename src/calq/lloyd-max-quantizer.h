@@ -1,7 +1,3 @@
-/**
- * @file lloyd-max-quantizer.h
- */
-
 #ifndef CALQ_LLOYD_MAX_QUANTIZER_H_
 #define CALQ_LLOYD_MAX_QUANTIZER_H_
 

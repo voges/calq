@@ -1,7 +1,3 @@
-/**
- * @file softclip-spreader.h
- */
-
 #ifndef CALQ_SOFTCLIP_SPREADER_H_
 #define CALQ_SOFTCLIP_SPREADER_H_
 

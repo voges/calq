@@ -1,7 +1,3 @@
-/**
- * @file uniform-min-max-quantizer.h
- */
-
 #ifndef CALQ_UNIFORM_MIN_MAX_QUANTIZER_H_
 #define CALQ_UNIFORM_MIN_MAX_QUANTIZER_H_
 

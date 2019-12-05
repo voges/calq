@@ -1,7 +1,3 @@
-/**
- * @file quantizer.h
- */
-
 #ifndef CALQ_QUANTIZER_H_
 #define CALQ_QUANTIZER_H_
 

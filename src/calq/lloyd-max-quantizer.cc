@@ -1,7 +1,3 @@
-/**
- * @file lloyd-max-quantizer.cc
- */
-
 #include "lloyd-max-quantizer.h"
 #include <algorithm>
 #include <utility>

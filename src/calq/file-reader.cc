@@ -1,7 +1,3 @@
-/**
- * @file file-reader.cc
- */
-
 #include "file-reader.h"
 
 namespace calq {

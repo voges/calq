@@ -1,7 +1,3 @@
-/**
- * @file min-sam-record.h
- */
-
 #ifndef CALQ_MIN_SAM_RECORD_H_
 #define CALQ_MIN_SAM_RECORD_H_
 

@@ -1,7 +1,3 @@
-/**
- * @file fasta-record.h
- */
-
 #ifndef CALQ_FASTA_RECORD_H_
 #define CALQ_FASTA_RECORD_H_
 

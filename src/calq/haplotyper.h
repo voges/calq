@@ -1,7 +1,3 @@
-/**
- * @file haplotyper.h
- */
-
 #ifndef CALQ_HAPLOTYPER_H_
 #define CALQ_HAPLOTYPER_H_
 

@@ -1,7 +1,3 @@
-/**
- * @file uniform-min-max-quantizer.cc
- */
-
 #include "uniform-min-max-quantizer.h"
 
 namespace calq {

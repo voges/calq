@@ -1,7 +1,3 @@
-/**
- * @file sam-pileup.h
- */
-
 #ifndef CALQ_SAM_PILEUP_H_
 #define CALQ_SAM_PILEUP_H_
 

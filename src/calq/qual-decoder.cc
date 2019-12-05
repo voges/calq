@@ -1,7 +1,3 @@
-/**
- * @file qual-decoder.cc
- */
-
 #include "qual-decoder.h"
 #include "exceptions.h"
 

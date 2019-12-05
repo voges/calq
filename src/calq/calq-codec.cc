@@ -1,7 +1,3 @@
-/**
- * @file calq-codec.cc
- */
-
 #include <iostream>
 #include <sstream>
 #include <vector>

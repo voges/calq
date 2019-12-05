@@ -1,7 +1,3 @@
-/**
- * @file fasta-file-reader.cc
- */
-
 #include "fasta-file-reader.h"
 #include <cassert>
 #include <string>

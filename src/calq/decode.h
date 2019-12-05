@@ -1,7 +1,3 @@
-/**
- * @file decode.h
- */
-
 #ifndef CALQ_DECODE_H_
 #define CALQ_DECODE_H_
 

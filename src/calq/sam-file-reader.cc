@@ -1,7 +1,3 @@
-/**
- * @file sam-file-reader.cc
- */
-
 #include "sam-file-reader.h"
 #include <cassert>
 #include <string>

@@ -1,7 +1,3 @@
-/**
- * @file probability-distribution.h
- */
-
 #ifndef CALQ_PROBABILITY_DISTRIBUTION_H_
 #define CALQ_PROBABILITY_DISTRIBUTION_H_
 

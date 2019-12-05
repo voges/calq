@@ -1,7 +1,3 @@
-/**
- * @file file-writer.cc
- */
-
 #include "file-writer.h"
 
 namespace calq {

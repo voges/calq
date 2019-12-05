@@ -1,7 +1,3 @@
-/**
- * @file encode.cc
- */
-
 #include "encode.h"
 #include <chrono>
 #include <iostream>

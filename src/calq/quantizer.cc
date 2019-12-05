@@ -1,7 +1,3 @@
-/**
- * @file quantizer.cc
- */
-
 #include "quantizer.h"
 #include <utility>
 

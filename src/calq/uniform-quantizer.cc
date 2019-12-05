@@ -1,7 +1,3 @@
-/**
- * @file uniform-quantizer.cc
- */
-
 #include "uniform-quantizer.h"
 #include <cassert>
 #include <cmath>
