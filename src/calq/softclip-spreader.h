@@ -64,7 +64,7 @@ class SoftclipSpreader {
      * Squashes activity score between 0 and 1 using the un-squashed activity score and an "anti score" measuring
      * probability of no variant occurring
      */
-    double squash(double activity, double antiActivity) const;
+    static double squash(double activity, double antiActivity) ;
 };
 
 }  // namespace calq

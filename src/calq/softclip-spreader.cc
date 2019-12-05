@@ -45,7 +45,7 @@ double SoftclipSpreader::push(const double score, const size_t softclips) {
 
 size_t SoftclipSpreader::getOffset() const { return MAX_PROPAGATION; }
 
-double SoftclipSpreader::squash(const double activity, const double antiActivity) const {
+double SoftclipSpreader::squash(const double activity, const double antiActivity) {
     return activity / (activity + antiActivity);
 }
 
