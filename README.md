@@ -4,7 +4,6 @@ Coverage-adaptive lossy quality value compression
 
 [![build](https://travis-ci.com/voges/calq.svg?branch=master)](https://travis-ci.com/voges/calq)
 [![codecov](https://codecov.io/gh/voges/calq/branch/master/graph/badge.svg)](https://codecov.io/gh/voges/calq)
-[![doc](https://img.shields.io/badge/doc-online-blue)](https://voges.github.io/calq)
 
 ---
 
@@ -44,8 +43,6 @@ To perform the decompression of the file ``file.sam.cq`` the CALQ decoder requir
     calq-codec -d -s file.sam file.sam.cq
 
 The reconstructed quality values are written to the file ``file.sam.cq.qual``.
-
-Finally, a SAM file containing the reconstructed quality values can be produced with the Python script ``replace_qual_sam.py`` which is located in the ``util`` folder.
 
 ## Who do I talk to?
 
