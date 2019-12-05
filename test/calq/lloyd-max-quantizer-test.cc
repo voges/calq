@@ -24,7 +24,6 @@ TEST(LloydMaxQuantizer, NonUniformDistribution) {  // NOLINT(cert-err58-cpp)
     for (int i = 1; i <= 100; ++i) {
         pdf.add(static_cast<size_t>(i), static_cast<size_t>(pow(abs(i - 50), 4)));
     }
-
     q.build(pdf);
 
     EXPECT_EQ(q.valueToIndex(100), 9);

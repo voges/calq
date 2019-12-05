@@ -4,26 +4,12 @@
 namespace calq {
 
 struct EncodingBlock {
-    /**
-     * Sequences of quality values for each mapped read
-     */
     std::vector<std::string> qualityValues;
 };
 
 struct DecodingBlock {
-    /**
-     *  Quantizer selection
-     */
     std::vector<uint8_t> quantizerIndexes;
-
-    /**
-     *  Step selection for each quantizer
-     */
     std::vector<std::vector<uint8_t>> quantizerStepIndexes;
-
-    /**
-     *  Quantizer representative values
-     */
     std::vector<std::vector<uint8_t>> codebooks;
 };
 
@@ -70,29 +56,10 @@ struct EncodingOptions {
      */
     FilterType filterType = FilterType::GAUSS;
 
-    /**
-     * Lowest quantization step number
-     */
     uint8_t minNumQuantSteps = 2;
-
-    /**
-     * Highest quantization step number
-     */
     uint8_t maxNumQuantSteps = 8;
-
-    /**
-     * Polyploidy of biological data source
-     */
     uint8_t polyploidy = 2;
-
-    /**
-     * Quality value offset for the used format
-     */
     uint8_t qualityValueOffset = 33;
-
-    /***
-     * CALQ version used
-     */
     Version version = Version::V1;
 };
 
