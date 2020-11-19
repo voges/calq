@@ -10,7 +10,7 @@ Coverage-adaptive lossy quality value compression
 
 The CALQ technology is described in:
 
-Jan Voges, Jörn Ostermann, Mikel Hernaez, CALQ: compression of quality values of aligned sequencing data, Bioinformatics, Volume 34, Issue 10, 15 May 2018, Pages 1650–1658, https://doi.org/10.1093/bioinformatics/btx737
+J. Voges, J. Ostermann, M. Hernaez, "CALQ: compression of quality values of aligned sequencing data", Bioinformatics, Volume 34, Issue 10, Pages 1650-1658, 2018, DOI: [10.1093/bioinformatics/btx737](https://doi.org/10.1093/bioinformatics/btx737).
 
 ## Contact
 
