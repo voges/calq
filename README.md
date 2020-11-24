@@ -1,6 +1,6 @@
 # CALQ
 
-Coverage-adaptive lossy quality value compression
+Coverage-Adaptive Lossy Quality Score Compressor
 
 ---
 
